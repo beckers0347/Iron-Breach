@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "DamageableInterface.h"
+#include "../Combat/DamageableInterface.h"
 #include "InputActionValue.h"
 #include "IBCharacter_Infantry.generated.h"
 

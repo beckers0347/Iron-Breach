@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Combat/DamageableInterface.h"
+#include "../Combat/DamageableInterface.h"
 #include "IBCharacter_Mech.generated.h"
 
 class UHealthComponent;

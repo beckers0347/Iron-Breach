@@ -1,5 +1,5 @@
-#include "Mech/IBCharacter_Mech.h"
-#include "Combat/HealthComponent.h"
+#include "IBCharacter_Mech.h"
+#include "../Combat/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 AIBCharacter_Mech::AIBCharacter_Mech()
@@ -8,7 +8,7 @@ AIBCharacter_Mech::AIBCharacter_Mech()
 
 	// Attach Modular Health
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-	HealthComponent->MaxHealth = 5000.0f; // Mechs are inherently tankier
+	HealthComponent->SetMaxHealth(5000.0f); // Mechs are inherently tankier
 
 	// Make the movement heavy and deliberate
 	if (GetCharacterMovement())

@@ -3,8 +3,8 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "HealthComponent.h"
-#include "WeaponDataAsset.h"
+#include "../Combat/HealthComponent.h"
+#include "../Combat/WeaponDataAsset.h"
 #include "Kismet/GameplayStatics.h"
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()

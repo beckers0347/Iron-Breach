@@ -37,4 +37,11 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Health")
 	float GetHealthPercent() const { return (MaxHealth > 0.0f) ? (CurrentHealth / MaxHealth) : 0.0f; }
+
+	// Allows owning actors to set their base health safely
+	void SetMaxHealth(float NewMaxHealth)
+	{
+		MaxHealth = NewMaxHealth;
+		Health = MaxHealth; // Ensures current health scales up too!
+	}
 };
