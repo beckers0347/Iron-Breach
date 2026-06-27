@@ -42,6 +42,5 @@ public:
 	void SetMaxHealth(float NewMaxHealth)
 	{
 		MaxHealth = NewMaxHealth;
-		Health = MaxHealth; // Ensures current health scales up too!
 	}
 };
