@@ -1,0 +1,89 @@
+Log started at 06/27/2026 05:33:25 (2026-06-27T12:33:25Z)
+Resolved project argument D:/Documents/Unreal Projects/IronBreach/IronBreach.uproject to D:\Documents\Unreal Projects\IronBreach\IronBreach.uproject
+No config file at C:\ProgramData\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+No config file at C:\Users\Shane Becker\AppData\Local\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+No config file at D:\Documents\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Configuration will be read from:
+  C:\Users\Shane Becker\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from: C:\Users\Shane Becker\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from: D:\Documents\Unreal Projects\IronBreach\Saved\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from: C:\Users\Shane Becker\AppData\Local\UnrealEngine\Intermediate\Build\UnrealBuildTool.Env.BuildConfiguration.xml
+Log file: D:\Documents\Unreal Projects\IronBreach\Saved\Logs\UnrealVersionSelector-2026.06.27-05.33.24.log
+
+Setting temp directory to 'C:\Users\Shane Becker\AppData\Local\Temp\UnrealBuildTool\d4b612ca'
+    Registering build platform: UnrealBuildTool.AndroidPlatformFactory
+    Registering build platform: UnrealBuildTool.IOSPlatformFactory
+    Registering build platform: UnrealBuildTool.LinuxPlatformFactory
+    Registering build platform: UnrealBuildTool.MacPlatformFactory
+    Registering build platform: UnrealBuildTool.TVOSPlatformFactory
+    Registering build platform: UnrealBuildTool.WindowsPlatformFactory
+Unable to find valid SDK(s) for Win64:
+  Found Sdk Version, MinRequired=10.0.19041.0, MaxRequired=10.9.99999.0.
+  Found AutoSdk Version, Required=10.0.22621.0.
+        Registering build platform: Win64 - buildable: False
+    Registering build platform: UnrealBuildTool.VisionOSPlatformFactory
+Resolved project argument D:/Documents/Unreal Projects/IronBreach/IronBreach.uproject to D:\Documents\Unreal Projects\IronBreach\IronBreach.uproject
+Reading configuration file from cache (D:\Documents\Unreal Projects\IronBreach\Intermediate\Build\XmlConfigCache.bin): C:\Users\Shane Becker\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (D:\Documents\Unreal Projects\IronBreach\Intermediate\Build\XmlConfigCache.bin): D:\Documents\Unreal Projects\IronBreach\Saved\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (D:\Documents\Unreal Projects\IronBreach\Intermediate\Build\XmlConfigCache.bin): C:\Users\Shane Becker\AppData\Local\UnrealEngine\Intermediate\Build\UnrealBuildTool.Env.BuildConfiguration.xml
+Registering project generator UnrealBuildTool.AndroidProjectGenerator for Android
+Skipping project file generator registration for Android due to no valid BuildPlatform.
+Registering project generator UnrealBuildTool.IOSProjectGenerator for IOS
+Skipping project file generator registration for IOS due to no valid BuildPlatform.
+Registering project generator UnrealBuildTool.LinuxProjectGenerator for Linux
+Skipping project file generator registration for Linux due to no valid BuildPlatform.
+Registering project generator UnrealBuildTool.LinuxProjectGenerator for LinuxArm64
+Skipping project file generator registration for LinuxArm64 due to no valid BuildPlatform.
+Registering project generator UnrealBuildTool.MacProjectGenerator for Mac
+Skipping project file generator registration for Mac due to no valid BuildPlatform.
+Registering project generator UnrealBuildTool.TVOSProjectGenerator for TVOS
+Skipping project file generator registration for TVOS due to no valid BuildPlatform.
+Registering project generator UnrealBuildTool.WindowsProjectGenerator for Win64
+Registering project generator UnrealBuildTool.VisionOSProjectGenerator for VisionOS
+Skipping project file generator registration for VisionOS due to no valid BuildPlatform.
+
+---   SDK INFO START   ---
+
+Some Platforms were skipped due to invalid SDK setup: Win64.
+See the log file for detailed information
+
+---   SDK INFO END   ---
+
+
+Generating VisualStudio project files:
+Discovering modules, targets and source code for project...
+Unable to enumerate Visual Studio installations
+Detected supported platforms: Win64
+Writing automation project files took 0.21s
+Unexpected ProjectFileFormat 'Default'
+BuildException: Unexpected ProjectFileFormat 'Default'
+   at UnrealBuildTool.ProjectFiles.VisualStudio.VisualStudioSolutionBuilder`1.BuildSolution(VCProjectFileFormat format, Boolean forSlnx)
+   at UnrealBuildTool.VCProjectFileGenerator.GenerateAutomationProjectFiles(List`1 AllGameProjects, PlatformProjectGeneratorCollection PlatformProjectGenerators, ILogger Logger)
+   at UnrealBuildTool.ProjectFileGenerator.GenerateProjectFiles(PlatformProjectGeneratorCollection PlatformProjectGenerators, String[] Arguments, ILogger Logger)
+   at UnrealBuildTool.GenerateProjectFilesMode.ExecuteAsync(CommandLineArguments Arguments, ILogger Logger)
+   at UnrealBuildTool.UnrealBuildTool.Main(String[] ArgumentsArray)
+WriteFileIfChanged() wrote 0 changed files of 2 requested writes.
+
+Timeline:
+[  0.000]  +0.703 Main
+   0.063          [  0.063]  +0.321 Apply XmlConfig
+   0.419          [  0.418]  +0.095 AddTelemetry
+   0.571          [  0.571]  +0.131 RegisterPlatforms
+[  0.704]  +1.494 <unknown>
+[  2.198] +14.312 Generating VisualStudio project files
+   2.198          [  0.000]  +0.871 <unknown>
+   3.070          [  0.871] +13.226 Adding Automation Projects
+   3.070             0.871          [  0.000]  +0.632 <unknown>
+   3.703             1.504          [  0.632] +10.626 VisionOS.Automation.csproj
+  14.329            12.130          [ 11.259]  +0.336 <unknown>
+  14.666            12.467          [ 11.595]  +0.439 UnrealBuildTool.csproj
+  15.111            12.912          [ 12.040]  +0.291 EpicGames.BuildGraph.Tests.csproj
+  15.414            13.216          [ 12.344]  +0.400 EpicGames.Serialization.csproj
+  15.838            13.640          [ 12.768]  +0.230 EpicGames.IoHash.Tests.csproj
+  16.082            13.884          [ 13.012]  +0.205 EpicGames.Perforce.Fixture.csproj
+  16.297          [ 14.098]  +0.213 Writing automation project files
+[ 16.524]  +0.004 TelemetryService.FlushEvents
+[ 16.530]
+
+Result: Failed (OtherCompilationError)
+Total execution time: 16.53 seconds
