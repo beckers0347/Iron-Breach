@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "../Combat/DamageableInterface.h"
+#include "Combat/DamageableInterface.h"
 #include "InputActionValue.h"
 #include "IBCharacter_Infantry.generated.h"
 
@@ -10,6 +10,8 @@ class UInputMappingContext;
 class UInputAction;
 class UHealthComponent;
 class UWeaponDataAsset;
+class USpringArmComponent;
+class UCameraComponent;
 
 UCLASS()
 class IRONBREACH_API AIBCharacter_Infantry : public ACharacter, public IDamageableInterface
@@ -25,30 +27,30 @@ protected:
 
 	// Core Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UHealthComponent* HealthComponent;
+	TObjectPtr<UHealthComponent> HealthComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	class USpringArmComponent* CameraBoom;
+	TObjectPtr<USpringArmComponent> CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	class UCameraComponent* FollowCamera;
+	TObjectPtr<UCameraComponent> FollowCamera;
 
 	// Enhanced Input Data
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	UInputMappingContext* DefaultMappingContext;
+	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	UInputAction* MoveAction;
+	TObjectPtr<UInputAction> MoveAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	UInputAction* LookAction;
+	TObjectPtr<UInputAction> LookAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	UInputAction* FireAction;
+	TObjectPtr<UInputAction> FireAction;
 
 	// Current Weapon Context
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	UWeaponDataAsset* CurrentWeaponData;
+	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
 
 	// Input Actions
 	void Move(const FInputActionValue& Value);
