@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "../Combat/DamageableInterface.h"
+#include "Combat/DamageableInterface.h"
 #include "IBCharacter_Mech.generated.h"
 
 class UHealthComponent;
@@ -20,13 +20,13 @@ protected:
 
 	// Core Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UHealthComponent* HealthComponent;
+	TObjectPtr<UHealthComponent> HealthComponent;
 
 	// Sync Meter System Placeholder
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sync")
 	float CurrentSyncLevel;
 
-public:	
+public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Implementation of IDamageableInterface

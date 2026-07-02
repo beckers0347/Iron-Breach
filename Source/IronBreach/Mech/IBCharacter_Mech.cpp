@@ -1,5 +1,5 @@
 #include "IBCharacter_Mech.h"
-#include "../Combat/HealthComponent.h"
+#include "Combat/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 AIBCharacter_Mech::AIBCharacter_Mech()
