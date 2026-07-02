@@ -117,8 +117,8 @@ void AIBCharacter_Infantry::Fire()
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this); // Don't shoot yourself
 
-	// Perform Line Trace (ECC_GameTraceChannel1 should ideally be your custom Bullet channel)
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
+	// ECC_Pawn: pawn capsules ignore ECC_Visibility, so hitscan must trace a channel pawns block
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Pawn, QueryParams);
 
 	if (bHit && HitResult.GetActor())
 	{
@@ -126,6 +126,11 @@ void AIBCharacter_Infantry::Fire()
 		if (HitResult.GetActor()->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()))
 		{
 			IDamageableInterface::Execute_HandleTakeDamage(HitResult.GetActor(), CurrentWeaponData->BaseDamage, HitResult, GetController(), this);
+		}
+		else
+		{
+			// Fallback: generic engine damage for actors without the interface
+			UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeaponData->BaseDamage, GetController(), this, nullptr);
 		}
 	}
 }
