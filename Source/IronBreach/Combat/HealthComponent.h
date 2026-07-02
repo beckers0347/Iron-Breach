@@ -6,6 +6,7 @@
 #include "HealthComponent.generated.h"
 
 class AController;
+class UDamageType;
 
 // Delegates for Event-Driven UI and Game Logic
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHealthChangedSignature, float, CurrentHealth, float, MaxHealth, const FHitResult&, HitResult);
@@ -27,6 +28,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth;
+
+	/** Prototype convenience: reload the current level when this component's owner dies (enable on the player). */
+	UPROPERTY(EditAnywhere, Category = "Health")
+	bool bRestartLevelOnDeath = false;
+
+	/** Bridges Unreal's generic damage pipeline (UGameplayStatics::ApplyDamage / TakeDamage) into this component. */
+	UFUNCTION()
+	void HandleAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Health|Events")
