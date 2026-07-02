@@ -2,7 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/HitResult.h" // Explicit include: FHitResult is used by value in the dynamic delegate payload
 #include "HealthComponent.generated.h"
+
+class AController;
 
 // Delegates for Event-Driven UI and Game Logic
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHealthChangedSignature, float, CurrentHealth, float, MaxHealth, const FHitResult&, HitResult);
@@ -13,7 +16,7 @@ class IRONBREACH_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	UHealthComponent();
 
 protected:
@@ -25,7 +28,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth;
 
-public:	
+public:
 	UPROPERTY(BlueprintAssignable, Category = "Health|Events")
 	FOnHealthChangedSignature OnHealthChanged;
 

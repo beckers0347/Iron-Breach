@@ -4,11 +4,14 @@
 #include "Engine/DataAsset.h"
 #include "WeaponDataAsset.generated.h"
 
+class UNiagaraSystem;
+class USoundBase;
+
 UCLASS(BlueprintType)
 class IRONBREACH_API UWeaponDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Stats")
 	FName WeaponName;
@@ -19,12 +22,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Stats")
 	float MaxRange = 5000.0f; // 50 meters
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Stats")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Stats", meta = (ClampMin = "0.01"))
 	float FireRate = 0.15f; // Time between shots
 
+	// TObjectPtr: Epic-standard for UPROPERTY object references (UE5+, required direction for UE6)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
-	class UNiagaraSystem* MFXTracer;
+	TObjectPtr<UNiagaraSystem> MFXTracer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
-	USoundBase* FireSound;
+	TObjectPtr<USoundBase> FireSound;
 };

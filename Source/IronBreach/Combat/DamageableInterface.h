@@ -2,7 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Engine/HitResult.h" // Explicit include: FHitResult is not guaranteed transitively under IWYU
 #include "DamageableInterface.generated.h"
+
+class AController;
 
 UINTERFACE(MinimalAPI, Blueprintable)
 class UDamageableInterface : public UInterface
