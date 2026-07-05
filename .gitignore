@@ -1,24 +1,7 @@
-# Unreal Engine generated / local
-/Binaries/
-/Intermediate/
-/Saved/
-/DerivedDataCache/
-/Build/
-
-# Visual Studio / Rider / VS Code
-.vs/
-**/.vs/
-.idea/
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
 .vscode/
+.vs/
 *.sln
-*.slnx
-*.suo
-*.opensdf
-*.sdf
-*.VC.db
-*.VC.opendb
-.vsconfig
-
-# OS
-.DS_Store
-Thumbs.db
