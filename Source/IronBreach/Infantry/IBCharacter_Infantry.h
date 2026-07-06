@@ -9,6 +9,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UHealthComponent;
+class UHitscanWeaponComponent;
 class UWeaponDataAsset;
 class USpringArmComponent;
 class UCameraComponent;
@@ -28,6 +29,11 @@ protected:
 	// Core Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHealthComponent> HealthComponent;
+
+	/** Single damage path for the project: all player firing goes through this component
+	 *  (cosmetic-first + Server_Fire). Uses CurrentWeaponData, forwarded in BeginPlay. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UHitscanWeaponComponent> WeaponComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> CameraBoom;

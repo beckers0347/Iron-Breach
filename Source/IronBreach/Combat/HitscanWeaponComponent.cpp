@@ -13,12 +13,17 @@
 UHitscanWeaponComponent::UHitscanWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true); // Required so Server_Fire routes through the owner's channel
 }
 
 void UHitscanWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	TryBindInput();
+
+	if (bAutoBindLegacyInput)
+	{
+		TryBindInput();
+	}
 }
 
 void UHitscanWeaponComponent::TryBindInput()
@@ -38,38 +43,80 @@ void UHitscanWeaponComponent::TryBindInput()
 	}
 }
 
+bool UHitscanWeaponComponent::GetOwnerViewPoint(FVector& OutLocation, FRotator& OutRotation) const
+{
+	APawn* Pawn = Cast<APawn>(GetOwner());
+	if (!Pawn) return false;
+
+	if (AController* Controller = Pawn->GetController())
+	{
+		Controller->GetPlayerViewPoint(OutLocation, OutRotation);
+	}
+	else
+	{
+		Pawn->GetActorEyesViewPoint(OutLocation, OutRotation);
+	}
+	return true;
+}
+
 void UHitscanWeaponComponent::Fire()
 {
 	APawn* Pawn = Cast<APawn>(GetOwner());
 	UWorld* World = GetWorld();
 	if (!Pawn || !World) return;
 
-	const float UseDamage = WeaponData ? WeaponData->BaseDamage : Damage;
-	const float UseRange = WeaponData ? WeaponData->MaxRange : Range;
+	// Client-side spam guard (UX only — the server enforces the real cooldown).
 	const float UseInterval = WeaponData ? WeaponData->FireRate : FireInterval;
-
 	const float Now = World->GetTimeSeconds();
 	if (Now - LastFireTime < FMath::Max(UseInterval, 0.05f)) return;
 	LastFireTime = Now;
 
-	if (WeaponData && WeaponData->FireSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, WeaponData->FireSound, Pawn->GetActorLocation());
-	}
+	// The shooter hears/sees their shot immediately, no round-trip (cosmetic-first).
+	PlayFireCosmetics();
 
-	// Aim from the player camera
+	// Aim from the local viewpoint — the client's camera is the truth about intent.
 	FVector ViewLocation;
 	FRotator ViewRotation;
-	if (AController* Controller = Pawn->GetController())
+	if (!GetOwnerViewPoint(ViewLocation, ViewRotation)) return;
+
+	if (Pawn->HasAuthority())
 	{
-		Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+		// Listen host or standalone: we ARE the server.
+		PerformFire(ViewLocation, ViewRotation.Vector());
 	}
 	else
 	{
-		Pawn->GetActorEyesViewPoint(ViewLocation, ViewRotation);
+		Server_Fire(ViewLocation, ViewRotation.Vector());
 	}
+}
 
-	const FVector TraceEnd = ViewLocation + ViewRotation.Vector() * UseRange;
+bool UHitscanWeaponComponent::Server_Fire_Validate(FVector_NetQuantize ViewLocation, FVector_NetQuantizeNormal ViewDirection)
+{
+	// Reject garbage; fine-grained cheat checks (view-location sanity vs pawn) come later.
+	return !ViewLocation.ContainsNaN() && !ViewDirection.ContainsNaN() && !ViewDirection.IsNearlyZero();
+}
+
+void UHitscanWeaponComponent::Server_Fire_Implementation(FVector_NetQuantize ViewLocation, FVector_NetQuantizeNormal ViewDirection)
+{
+	PerformFire(ViewLocation, ViewDirection);
+}
+
+void UHitscanWeaponComponent::PerformFire(const FVector& ViewLocation, const FVector& ViewDirection)
+{
+	APawn* Pawn = Cast<APawn>(GetOwner());
+	UWorld* World = GetWorld();
+	if (!Pawn || !World) return;
+
+	// Authoritative cooldown — a hacked client spamming Server_Fire gains nothing.
+	const float UseInterval = WeaponData ? WeaponData->FireRate : FireInterval;
+	const float Now = World->GetTimeSeconds();
+	if (Now - LastServerFireTime < FMath::Max(UseInterval, 0.05f)) return;
+	LastServerFireTime = Now;
+
+	const float UseDamage = WeaponData ? WeaponData->BaseDamage : Damage;
+	const float UseRange = WeaponData ? WeaponData->MaxRange : Range;
+
+	const FVector TraceEnd = ViewLocation + ViewDirection.GetSafeNormal() * UseRange;
 
 	FHitResult HitResult;
 	FCollisionQueryParams QueryParams;
@@ -78,7 +125,7 @@ void UHitscanWeaponComponent::Fire()
 	// ECC_Pawn: pawn capsules ignore ECC_Visibility (see enemy FireAt)
 	const bool bHit = World->LineTraceSingleByChannel(HitResult, ViewLocation, TraceEnd, ECC_Pawn, QueryParams);
 
-	UE_LOG(LogIronBreach, Verbose, TEXT("%s player fired (hit: %s)"), *GetNameSafe(Pawn), bHit ? *GetNameSafe(HitResult.GetActor()) : TEXT("none"));
+	UE_LOG(LogIronBreach, Verbose, TEXT("%s fired [auth] (hit: %s)"), *GetNameSafe(Pawn), bHit ? *GetNameSafe(HitResult.GetActor()) : TEXT("none"));
 
 	if (bHit && HitResult.GetActor())
 	{
@@ -91,4 +138,17 @@ void UHitscanWeaponComponent::Fire()
 			UGameplayStatics::ApplyDamage(HitResult.GetActor(), UseDamage, Pawn->GetController(), Pawn, nullptr);
 		}
 	}
+}
+
+void UHitscanWeaponComponent::PlayFireCosmetics() const
+{
+	if (WeaponData && WeaponData->FireSound)
+	{
+		if (AActor* Owner = GetOwner())
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, WeaponData->FireSound, Owner->GetActorLocation());
+		}
+	}
+	// TODO(u2-03): MFXTracer Niagara spawn here + a NetMulticast cosmetic so OTHER clients
+	// see/hear remote shots. Kept out of this pass to stay minimal.
 }

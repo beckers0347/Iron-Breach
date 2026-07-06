@@ -8,6 +8,7 @@
 #include "Engine/LocalPlayer.h" // Explicit include: required for ULocalPlayer::GetSubsystem under IWYU
 #include "Engine/World.h"       // Explicit include: required for LineTraceSingleByChannel under IWYU
 #include "Combat/HealthComponent.h"
+#include "Combat/HitscanWeaponComponent.h"
 #include "Combat/WeaponDataAsset.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -27,11 +28,21 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 
 	// Attach Modular Health
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+	// Single project-wide fire path (consolidates the old inline Fire() trace)
+	WeaponComponent = CreateDefaultSubobject<UHitscanWeaponComponent>(TEXT("WeaponComponent"));
+	WeaponComponent->bAutoBindLegacyInput = false; // We fire via Enhanced Input; auto-bind would double-fire LMB
 }
 
 void AIBCharacter_Infantry::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// The loadout property stays the designer-facing knob; the component does the firing.
+	if (WeaponComponent && CurrentWeaponData)
+	{
+		WeaponComponent->SetWeaponData(CurrentWeaponData);
+	}
 
 	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -97,41 +108,11 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 
 void AIBCharacter_Infantry::Fire()
 {
-	if (!CurrentWeaponData) return;
-
-	// Audio Visuals (SFX)
-	if (CurrentWeaponData->FireSound)
+	// Consolidated: cosmetics + Server_Fire routing + authoritative trace all live in the
+	// weapon component now (ADR-002 pattern-setter). One fire path for the whole project.
+	if (WeaponComponent)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, CurrentWeaponData->FireSound, GetActorLocation());
-	}
-
-	// Calculate Trace Vectors from Camera Screen Space Center
-	FVector CameraLocation;
-	FRotator CameraRotation;
-	GetActorEyesViewPoint(CameraLocation, CameraRotation);
-
-	FVector TraceStart = CameraLocation;
-	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * CurrentWeaponData->MaxRange);
-
-	FHitResult HitResult;
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this); // Don't shoot yourself
-
-	// ECC_Pawn: pawn capsules ignore ECC_Visibility, so hitscan must trace a channel pawns block
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Pawn, QueryParams);
-
-	if (bHit && HitResult.GetActor())
-	{
-		// Native Interface Check: Decoupled check to see if the target can take damage
-		if (HitResult.GetActor()->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()))
-		{
-			IDamageableInterface::Execute_HandleTakeDamage(HitResult.GetActor(), CurrentWeaponData->BaseDamage, HitResult, GetController(), this);
-		}
-		else
-		{
-			// Fallback: generic engine damage for actors without the interface
-			UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeaponData->BaseDamage, GetController(), this, nullptr);
-		}
+		WeaponComponent->Fire();
 	}
 }
 

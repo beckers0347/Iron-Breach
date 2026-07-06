@@ -10,16 +10,20 @@ public class IronBreach : ModuleRules
 		PublicIncludePaths.Add(ModuleDirectory);
 
 		// Core Engine Modules + Enhanced Input + Niagara (for MFX)
-		PublicDependencyModuleNames.AddRange(new string[] { 
-			"Core", 
-			"CoreUObject", 
-			"Engine", 
-			"InputCore", 
+		PublicDependencyModuleNames.AddRange(new string[] {
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"InputCore",
 			"EnhancedInput",
 			"Niagara",
 			"AIModule",
 			"NavigationSystem",
-			"GameplayTasks"
+			"GameplayTasks",
+			// Netcode (ADR-002): session interfaces + helpers. The Steam module itself is a
+			// plugin loaded at runtime; only these two are compile-time dependencies.
+			"OnlineSubsystem",
+			"OnlineSubsystemUtils"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

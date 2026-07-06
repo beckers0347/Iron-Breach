@@ -1,7 +1,35 @@
-Binaries/
-DerivedDataCache/
-Intermediate/
-Saved/
-.vscode/
+# Unreal Engine generated / local
+/Binaries/
+/Intermediate/
+/Saved/
+/DerivedDataCache/
+/Build/
+
+# Visual Studio / Rider / VS Code
 .vs/
+**/.vs/
+.idea/
+.vscode/
 *.sln
+*.slnx
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+.vsconfig
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large re-downloadable marketplace assets (kept out to stay under GitHub free LFS 1GB).
+# Re-import from Fab / Quixel if setting up on a new machine.
+/Content/Fab/
+/Content/Megaplant_Library/
+
+# Local-only: engine upgrade leftovers + git setup logs
+/Backup/
+UpgradeLog*
+git_setup_log.txt
+git_phase_*.bat

@@ -46,8 +46,9 @@ void AIBEnemyAIController::OnPossess(APawn* InPawn)
 
 void AIBEnemyAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	// Only the player is a valid target for now
-	if (Actor != UGameplayStatics::GetPlayerPawn(this, 0)) return;
+	// Any player-controlled pawn is a valid target (co-op aware)
+	const APawn* AsPawn = Cast<APawn>(Actor);
+	if (!AsPawn || !AsPawn->IsPlayerControlled()) return;
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
@@ -68,7 +69,7 @@ void AIBEnemyAIController::NotifyDamagedBy(AController* InstigatedBy, AActor* Da
 	{
 		Attacker = Cast<APawn>(DamageCauser);
 	}
-	if (Attacker && Attacker == UGameplayStatics::GetPlayerPawn(this, 0))
+	if (Attacker && Attacker->IsPlayerControlled())
 	{
 		TargetActor = Attacker;
 		LastSeenTime = GetWorld()->GetTimeSeconds();
@@ -87,16 +88,12 @@ void AIBEnemyAIController::Tick(float DeltaTime)
 	// events (belt and suspenders) — perception can silently fail to register listeners.
 	if (!TargetActor)
 	{
-		if (APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0))
+		const float SightRange = SightConfig ? SightConfig->SightRadius : 3000.0f;
+		if (AActor* Spotted = FindNearestVisiblePlayerPawn(SightRange))
 		{
-			const float DistToPlayer = FVector::Dist(EnemyPawn->GetActorLocation(), PlayerPawn->GetActorLocation());
-			const float SightRange = SightConfig ? SightConfig->SightRadius : 3000.0f;
-			if (DistToPlayer <= SightRange && LineOfSightTo(PlayerPawn))
-			{
-				TargetActor = PlayerPawn;
-				LastSeenTime = Now;
-				UE_LOG(LogIronBreach, Log, TEXT("%s spotted the player (dist %.0f)"), *GetNameSafe(EnemyPawn), DistToPlayer);
-			}
+			TargetActor = Spotted;
+			LastSeenTime = Now;
+			UE_LOG(LogIronBreach, Log, TEXT("%s spotted %s"), *GetNameSafe(EnemyPawn), *GetNameSafe(Spotted));
 		}
 	}
 
@@ -158,6 +155,31 @@ void AIBEnemyAIController::SetMaxWalkSpeed(float Speed)
 	{
 		EnemyPawn->GetCharacterMovement()->MaxWalkSpeed = Speed;
 	}
+}
+
+AActor* AIBEnemyAIController::FindNearestVisiblePlayerPawn(float MaxRange) const
+{
+	if (!EnemyPawn) return nullptr;
+
+	const FVector From = EnemyPawn->GetActorLocation();
+	AActor* Best = nullptr;
+	float BestDist = MaxRange;
+
+	// AI runs server-side only, where every player's controller exists.
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		const APlayerController* PC = It->Get();
+		APawn* Candidate = PC ? PC->GetPawn() : nullptr;
+		if (!Candidate) continue;
+
+		const float Dist = FVector::Dist(From, Candidate->GetActorLocation());
+		if (Dist <= BestDist && LineOfSightTo(Candidate))
+		{
+			Best = Candidate;
+			BestDist = Dist;
+		}
+	}
+	return Best;
 }
 
 void AIBEnemyAIController::StartNewPatrolMove()

@@ -2,14 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/NetSerialization.h" // Explicit include: FVector_NetQuantize used in the Server RPC signature
 #include "HitscanWeaponComponent.generated.h"
 
 class UWeaponDataAsset;
 
 /**
- * Drop-in hitscan gun for any pawn (used to arm the template first-person character
- * without Blueprint graph work). Binds left mouse on possession and fires using the
- * project's damage pipeline: DamageableInterface first, generic engine damage otherwise.
+ * Drop-in hitscan gun for any pawn. Fire() may be called from anywhere (Enhanced Input,
+ * legacy BindKey, Blueprints); it plays cosmetics immediately on the firing client and
+ * routes the authoritative trace + damage to the server (ADR-002: cosmetic-first firing).
+ * On a listen host / standalone, Fire() traces directly.
  */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class IRONBREACH_API UHitscanWeaponComponent : public UActorComponent
@@ -21,6 +23,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Fire();
+
+	/** Lets owning characters forward their equipped weapon data (e.g. infantry loadout). */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SetWeaponData(UWeaponDataAsset* NewWeaponData) { WeaponData = NewWeaponData; }
+
+	/** Auto-bind left mouse via the legacy input path (used by the template character,
+	 *  which has no Enhanced Input graph). Owners that call Fire() themselves must
+	 *  disable this or one click fires twice. */
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	bool bAutoBindLegacyInput = true;
 
 protected:
 	virtual void BeginPlay() override;
@@ -38,9 +50,22 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Weapon", meta = (ClampMin = "0.05"))
 	float FireInterval = 0.2f;
 
+	/** Authoritative trace + damage. Runs only where GetOwner()->HasAuthority(). */
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Fire(FVector_NetQuantize ViewLocation, FVector_NetQuantizeNormal ViewDirection);
+
 private:
 	void TryBindInput();
 
-	float LastFireTime = -1000.0f;
+	/** Shared authoritative fire path (server + standalone). */
+	void PerformFire(const FVector& ViewLocation, const FVector& ViewDirection);
+
+	/** Local cosmetics on the machine that pulled the trigger (sound now; tracer later). */
+	void PlayFireCosmetics() const;
+
+	bool GetOwnerViewPoint(FVector& OutLocation, FRotator& OutRotation) const;
+
+	float LastFireTime = -1000.0f;       // Client-side UX cooldown (spam guard)
+	float LastServerFireTime = -1000.0f; // Authoritative cooldown (the law)
 	FTimerHandle BindRetryHandle;
 };

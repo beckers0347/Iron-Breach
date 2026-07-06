@@ -72,6 +72,10 @@ private:
 	void SetMaxWalkSpeed(float Speed);
 	void StartNewPatrolMove();
 
+	/** Co-op aware targeting: nearest player-controlled pawn in range with line of sight.
+	 *  Replaces the old GetPlayerPawn(0) assumption — index 0 is meaningless on a server. */
+	AActor* FindNearestVisiblePlayerPawn(float MaxRange) const;
+
 	UPROPERTY()
 	TObjectPtr<AIBCharacter_Enemy> EnemyPawn;
 
