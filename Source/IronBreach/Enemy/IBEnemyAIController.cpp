@@ -103,6 +103,16 @@ void AIBEnemyAIController::Tick(float DeltaTime)
 		TargetActor = nullptr;
 	}
 
+	// Drop dead targets immediately: a respawn-pending corpse detaches from its
+	// controller, so it stops being player-controlled the moment it dies.
+	if (const APawn* TargetPawn = Cast<APawn>(TargetActor.Get()))
+	{
+		if (!TargetPawn->IsPlayerControlled())
+		{
+			TargetActor = nullptr;
+		}
+	}
+
 	const EEnemyAIState PreviousState = CurrentState;
 
 	if (TargetActor)

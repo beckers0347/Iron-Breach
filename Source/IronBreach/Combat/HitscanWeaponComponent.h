@@ -54,14 +54,19 @@ protected:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_Fire(FVector_NetQuantize ViewLocation, FVector_NetQuantizeNormal ViewDirection);
 
+	/** Cosmetic broadcast so OTHER machines see/hear this shot. Unreliable by design —
+	 *  a dropped tracer is invisible; a delayed reliable one is worse. */
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_FireFX(FVector_NetQuantize TraceStart, FVector_NetQuantize TraceEnd);
+
 private:
 	void TryBindInput();
 
 	/** Shared authoritative fire path (server + standalone). */
 	void PerformFire(const FVector& ViewLocation, const FVector& ViewDirection);
 
-	/** Local cosmetics on the machine that pulled the trigger (sound now; tracer later). */
-	void PlayFireCosmetics() const;
+	/** Fire cosmetics (sound + optional Niagara tracer from WeaponData). */
+	void PlayFireCosmeticsAt(const FVector& TraceStart, const FVector& TraceEnd) const;
 
 	bool GetOwnerViewPoint(FVector& OutLocation, FRotator& OutRotation) const;
 

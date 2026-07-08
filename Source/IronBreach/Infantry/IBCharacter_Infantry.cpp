@@ -11,6 +11,10 @@
 #include "Combat/HitscanWeaponComponent.h"
 #include "Combat/WeaponDataAsset.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/GameModeBase.h"
+#include "TimerManager.h"
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()
 {
@@ -42,6 +46,12 @@ void AIBCharacter_Infantry::BeginPlay()
 	if (WeaponComponent && CurrentWeaponData)
 	{
 		WeaponComponent->SetWeaponData(CurrentWeaponData);
+	}
+
+	// Death handling: cosmetic ragdoll everywhere, server-driven respawn (u1-08).
+	if (HealthComponent)
+	{
+		HealthComponent->OnDeath.AddDynamic(this, &AIBCharacter_Infantry::HandleDeath);
 	}
 
 	// Add Input Mapping Context
@@ -122,5 +132,51 @@ void AIBCharacter_Infantry::HandleTakeDamage_Implementation(float DamageAmount, 
 	if (HealthComponent)
 	{
 		HealthComponent->ApplyDamage(DamageAmount, HitResult, InstigatedBy, DamageCauser);
+	}
+}
+
+void AIBCharacter_Infantry::HandleDeath(AActor* Killer)
+{
+	if (bDead) return;
+	bDead = true;
+
+	// --- Cosmetics: every machine ragdolls the corpse (same recipe as the enemy) ---
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->DisableMovement();
+	}
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		MeshComp->SetCollisionProfileName(TEXT("Ragdoll"));
+		MeshComp->SetSimulatePhysics(true);
+	}
+
+	BP_OnDied(Killer);
+
+	// --- Authority: schedule the comeback ---
+	// RestartPlayer spawns a fresh pawn from the CURRENT GameMode's pawn class at a
+	// PlayerStart, so this works untouched under BP GameModes. Detaching first also
+	// makes the corpse stop counting as player-controlled, which drops AI aggro.
+	if (HasAuthority())
+	{
+		TWeakObjectPtr<AController> DeadController = GetController();
+		DetachFromControllerPendingDestroy();
+		SetLifeSpan(RespawnDelay + 4.0f); // corpse outlives the respawn, then cleans up
+
+		GetWorldTimerManager().SetTimer(RespawnTimerHandle, FTimerDelegate::CreateWeakLambda(this,
+			[this, DeadController]()
+			{
+				AGameModeBase* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode() : nullptr;
+				if (GameMode && DeadController.IsValid())
+				{
+					UE_LOG(LogIronBreach, Log, TEXT("Respawning %s"), *GetNameSafe(DeadController.Get()));
+					GameMode->RestartPlayer(DeadController.Get());
+				}
+			}), RespawnDelay, false);
 	}
 }

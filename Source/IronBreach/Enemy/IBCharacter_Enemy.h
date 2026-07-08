@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Combat/DamageableInterface.h"
+#include "Engine/NetSerialization.h" // Explicit include: FVector_NetQuantize in the multicast signature
 #include "IBCharacter_Enemy.generated.h"
 
 class UHealthComponent;
@@ -20,8 +21,12 @@ class IRONBREACH_API AIBCharacter_Enemy : public ACharacter, public IDamageableI
 public:
 	AIBCharacter_Enemy();
 
-	/** Fires at the target if the fire-rate cooldown allows it. Called by the AI controller. */
+	/** Fires at the target if the fire-rate cooldown allows it. Called by the AI controller (server-only). */
 	void FireAt(AActor* Target);
+
+	/** Cosmetic broadcast: clients hear/see enemy shots (AI runs server-side only). */
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_FireFX(FVector_NetQuantize TraceEnd);
 
 	UFUNCTION(BlueprintPure, Category = "Enemy")
 	bool IsDead() const { return bDead; }

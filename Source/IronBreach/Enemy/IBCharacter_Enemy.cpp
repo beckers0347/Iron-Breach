@@ -54,11 +54,6 @@ void AIBCharacter_Enemy::FireAt(AActor* Target)
 
 	UE_LOG(LogIronBreach, Verbose, TEXT("%s fires at %s"), *GetName(), *GetNameSafe(Target));
 
-	if (CurrentWeaponData->FireSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, CurrentWeaponData->FireSound, GetActorLocation());
-	}
-
 	// Aim from our eyes at the target's center, with a bit of spread
 	FVector EyeLocation;
 	FRotator EyeRotation;
@@ -67,6 +62,10 @@ void AIBCharacter_Enemy::FireAt(AActor* Target)
 	const FVector TargetPoint = Target->GetActorLocation();
 	const FVector AimDir = FMath::VRandCone((TargetPoint - EyeLocation).GetSafeNormal(), FMath::DegreesToRadians(AimSpreadDegrees));
 	const FVector TraceEnd = EyeLocation + AimDir * CurrentWeaponData->MaxRange;
+
+	// FireAt only runs on the server (AI controllers don't exist on clients) — the
+	// multicast makes the shot audible/visible on every machine, including this one.
+	Multicast_FireFX(TraceEnd);
 
 	FHitResult HitResult;
 	FCollisionQueryParams QueryParams;
@@ -87,6 +86,17 @@ void AIBCharacter_Enemy::FireAt(AActor* Target)
 			UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeaponData->BaseDamage, GetController(), this, nullptr);
 		}
 	}
+}
+
+void AIBCharacter_Enemy::Multicast_FireFX_Implementation(FVector_NetQuantize TraceEnd)
+{
+	if (!CurrentWeaponData) return;
+
+	if (CurrentWeaponData->FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, CurrentWeaponData->FireSound, GetActorLocation());
+	}
+	// Tracer hookup mirrors the player weapon: add MFXTracer to DA_EnemyRifle and it just works.
 }
 
 void AIBCharacter_Enemy::HandleTakeDamage_Implementation(float DamageAmount, const FHitResult& HitResult, AController* InstigatedBy, AActor* DamageCauser)

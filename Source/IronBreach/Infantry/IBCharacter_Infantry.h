@@ -58,6 +58,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
 
+	/** Seconds between death and the server respawning this player (networked play, u1-08).
+	 *  A player-facing wait, not hidden timer logic. */
+	UPROPERTY(EditAnywhere, Category = "Health", meta = (ClampMin = "0.5"))
+	float RespawnDelay = 5.0f;
+
+	/** Blueprint hook for death FX/UI (mirrors the enemy's BP_OnDied). */
+	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
+	void BP_OnDied(AActor* Killer);
+
+	UFUNCTION()
+	void HandleDeath(AActor* Killer);
+
 	// Input Actions
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -66,4 +78,8 @@ protected:
 public:
 	// Implementation of IDamageableInterface
 	virtual void HandleTakeDamage_Implementation(float DamageAmount, const FHitResult& HitResult, AController* InstigatedBy, AActor* DamageCauser) override;
+
+private:
+	FTimerHandle RespawnTimerHandle;
+	bool bDead = false;
 };

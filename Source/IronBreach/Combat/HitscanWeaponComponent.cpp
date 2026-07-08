@@ -9,6 +9,9 @@
 #include "Engine/World.h"
 #include "Engine/HitResult.h"
 #include "TimerManager.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 
 UHitscanWeaponComponent::UHitscanWeaponComponent()
 {
@@ -71,13 +74,15 @@ void UHitscanWeaponComponent::Fire()
 	if (Now - LastFireTime < FMath::Max(UseInterval, 0.05f)) return;
 	LastFireTime = Now;
 
-	// The shooter hears/sees their shot immediately, no round-trip (cosmetic-first).
-	PlayFireCosmetics();
-
 	// Aim from the local viewpoint — the client's camera is the truth about intent.
 	FVector ViewLocation;
 	FRotator ViewRotation;
 	if (!GetOwnerViewPoint(ViewLocation, ViewRotation)) return;
+
+	// The shooter hears/sees their shot immediately, no round-trip (cosmetic-first).
+	// Predicted end point; the server's Multicast_FireFX covers everyone else.
+	const float CosmeticRange = WeaponData ? WeaponData->MaxRange : Range;
+	PlayFireCosmeticsAt(ViewLocation, ViewLocation + ViewRotation.Vector() * CosmeticRange);
 
 	if (Pawn->HasAuthority())
 	{
@@ -127,6 +132,9 @@ void UHitscanWeaponComponent::PerformFire(const FVector& ViewLocation, const FVe
 
 	UE_LOG(LogIronBreach, Verbose, TEXT("%s fired [auth] (hit: %s)"), *GetNameSafe(Pawn), bHit ? *GetNameSafe(HitResult.GetActor()) : TEXT("none"));
 
+	// Everyone else gets the show (the shooter is skipped inside the multicast).
+	Multicast_FireFX(ViewLocation, bHit ? FVector(HitResult.ImpactPoint) : TraceEnd);
+
 	if (bHit && HitResult.GetActor())
 	{
 		if (HitResult.GetActor()->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()))
@@ -140,15 +148,33 @@ void UHitscanWeaponComponent::PerformFire(const FVector& ViewLocation, const FVe
 	}
 }
 
-void UHitscanWeaponComponent::PlayFireCosmetics() const
+void UHitscanWeaponComponent::Multicast_FireFX_Implementation(FVector_NetQuantize TraceStart, FVector_NetQuantize TraceEnd)
 {
-	if (WeaponData && WeaponData->FireSound)
+	// The shooter already played these cosmetics locally in Fire() — don't double up.
+	const APawn* Pawn = Cast<APawn>(GetOwner());
+	if (Pawn && Pawn->IsLocallyControlled()) return;
+
+	PlayFireCosmeticsAt(TraceStart, TraceEnd);
+}
+
+void UHitscanWeaponComponent::PlayFireCosmeticsAt(const FVector& TraceStart, const FVector& TraceEnd) const
+{
+	if (!WeaponData) return;
+
+	if (WeaponData->FireSound)
 	{
-		if (AActor* Owner = GetOwner())
+		UGameplayStatics::PlaySoundAtLocation(this, WeaponData->FireSound, TraceStart);
+	}
+
+	if (WeaponData->MFXTracer)
+	{
+		UNiagaraComponent* Tracer = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this, WeaponData->MFXTracer, TraceStart, (TraceEnd - TraceStart).Rotation());
+		if (Tracer)
 		{
-			UGameplayStatics::PlaySoundAtLocation(this, WeaponData->FireSound, Owner->GetActorLocation());
+			// Harmless no-op if the Niagara system has no such user parameter.
+			Tracer->SetVectorParameter(TEXT("BeamEnd"), TraceEnd);
 		}
 	}
-	// TODO(u2-03): MFXTracer Niagara spawn here + a NetMulticast cosmetic so OTHER clients
-	// see/hear remote shots. Kept out of this pass to stay minimal.
+	// TODO: impact FX at TraceEnd once an asset exists in WeaponData.
 }
