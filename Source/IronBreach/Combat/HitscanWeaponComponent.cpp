@@ -12,6 +12,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "DrawDebugHelpers.h" // Prototype tracer fallback when no MFXTracer asset is set
 
 UHitscanWeaponComponent::UHitscanWeaponComponent()
 {
@@ -175,6 +176,12 @@ void UHitscanWeaponComponent::PlayFireCosmeticsAt(const FVector& TraceStart, con
 			// Harmless no-op if the Niagara system has no such user parameter.
 			Tracer->SetVectorParameter(TEXT("BeamEnd"), TraceEnd);
 		}
+	}
+	else if (UWorld* World = GetWorld())
+	{
+		// No Niagara asset assigned yet: draw a prototype tracer (Development builds).
+		// Assigning WeaponData->MFXTracer later takes over automatically.
+		DrawDebugLine(World, TraceStart, TraceEnd, FColor(120, 200, 255), false, 0.06f, 0, 1.0f);
 	}
 	// TODO: impact FX at TraceEnd once an asset exists in WeaponData.
 }

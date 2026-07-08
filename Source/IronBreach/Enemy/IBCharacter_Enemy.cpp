@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "Engine/HitResult.h"
+#include "DrawDebugHelpers.h" // Prototype tracer via DrawDebugLine (dev builds)
 
 AIBCharacter_Enemy::AIBCharacter_Enemy()
 {
@@ -96,7 +97,18 @@ void AIBCharacter_Enemy::Multicast_FireFX_Implementation(FVector_NetQuantize Tra
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, CurrentWeaponData->FireSound, GetActorLocation());
 	}
-	// Tracer hookup mirrors the player weapon: add MFXTracer to DA_EnemyRifle and it just works.
+
+	// Visible tracer. Start = this enemy's muzzle/eye (pawn position replicates, so this is
+	// accurate on every client). Prototype line for now; swap to a Niagara beam later by
+	// spawning CurrentWeaponData->MFXTracer here instead. DrawDebugLine renders in
+	// Development builds (compiled out of Shipping — fine for playtesting).
+	if (UWorld* World = GetWorld())
+	{
+		FVector EyeLocation;
+		FRotator EyeRotation;
+		GetActorEyesViewPoint(EyeLocation, EyeRotation);
+		DrawDebugLine(World, EyeLocation, TraceEnd, FColor(255, 150, 40), false, 0.08f, 0, 1.5f);
+	}
 }
 
 void AIBCharacter_Enemy::HandleTakeDamage_Implementation(float DamageAmount, const FHitResult& HitResult, AController* InstigatedBy, AActor* DamageCauser)
