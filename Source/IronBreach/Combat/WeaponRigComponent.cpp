@@ -120,7 +120,9 @@ void UWeaponRigComponent::UpdateWeaponPose()
 	Sway = FMath::VInterpTo(Sway, SwayTarget, GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.016f, SwayResponse);
 
 	WeaponMesh->SetRelativeLocation(Pos + Sway);
-	WeaponMesh->SetRelativeRotation(Rot);
+	// Apply the mount correction first (in mesh-local space) so the barrel faces +X,
+	// then the pose rotation. Without this the template rifle points sideways.
+	WeaponMesh->SetRelativeRotation(Rot * WeaponMountRotation.Quaternion());
 }
 
 void UWeaponRigComponent::UpdateScope()

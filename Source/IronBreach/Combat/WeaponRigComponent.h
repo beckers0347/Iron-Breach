@@ -98,6 +98,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Sockets")
 	FName AimSocket = TEXT("Aim");
 
+	/** Corrects the weapon mesh's authored facing so the barrel points forward (+X).
+	 *  The template rifle is modelled facing sideways, so we yaw it -90. Adjust here
+	 *  (usually a 90 or 180 yaw) if a different weapon points the wrong way. */
+	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Sockets")
+	FRotator WeaponMountRotation = FRotator(0.0f, -90.0f, 0.0f);
+
 	// ---- Look sway ----
 	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Sway", meta = (ClampMin = "0.0"))
 	float SwayAmount = 0.35f; // cm per unit look delta
