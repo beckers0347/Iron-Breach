@@ -16,6 +16,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameModeBase.h"
 #include "TimerManager.h"
+#include "UObject/ConstructorHelpers.h" // Auto-assign the default rifle viewmodel
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()
 {
@@ -35,6 +36,16 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMesh->bCastDynamicShadow = false;
 	WeaponMesh->CastShadow = false;
+
+	// Auto-assign the rifle so the viewmodel shows without per-BP setup. A BP can override.
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> RifleMeshFinder(TEXT("/Game/Weapons/Rifle/Meshes/SM_Rifle.SM_Rifle"));
+	if (RifleMeshFinder.Succeeded())
+	{
+		WeaponMesh->SetStaticMesh(RifleMeshFinder.Object);
+	}
+	// The template rifle is authored at full world scale; shrink it so the viewmodel
+	// reads as "held" rather than filling the screen. Tune alongside the hip anchor.
+	WeaponMesh->SetRelativeScale3D(FVector(0.5f));
 
 	// The third-person body should NOT render for the owning player (they see the viewmodel instead).
 	GetMesh()->SetOwnerNoSee(true);
@@ -116,6 +127,14 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopAiming);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &AIBCharacter_Infantry::StopAiming);
 		}
+	}
+
+	// Fallback so aim-down-sights works out of the box on RIGHT MOUSE without any
+	// content setup. If an AimAction asset is assigned, that takes over and this is skipped.
+	if (!AimAction && PlayerInputComponent)
+	{
+		PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &AIBCharacter_Infantry::StartAiming);
+		PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Released, this, &AIBCharacter_Infantry::StopAiming);
 	}
 	else
 	{

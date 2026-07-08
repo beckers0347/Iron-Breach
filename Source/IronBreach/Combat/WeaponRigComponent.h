@@ -82,9 +82,10 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	/** Camera-relative hip pose the Grip socket snaps to. Default is a converted Unity FP hip pose (cm). */
+	/** Camera-relative hip pose the Grip socket snaps to. Lower-right of centre so the
+	 *  rifle reads as held without blocking the view (X fwd, Y right, Z up). Tune to taste. */
 	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Hip")
-	FVector HipAnchorLocation = FVector(38.0f, 18.0f, -16.0f);
+	FVector HipAnchorLocation = FVector(30.0f, 12.0f, -20.0f);
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Hip")
 	FRotator HipAnchorRotation = FRotator(0.0f, -3.0f, 0.0f);
