@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Combat/AdsSettings.h"
 #include "WeaponDataAsset.generated.h"
 
 class UNiagaraSystem;
@@ -31,4 +32,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	TObjectPtr<USoundBase> FireSound;
+
+	/** Aim-down-sights tuning (zoom, sight alignment, spread, handling). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ADS")
+	FIBAdsSettings Ads;
 };

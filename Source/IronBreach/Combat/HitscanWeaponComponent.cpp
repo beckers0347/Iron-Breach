@@ -13,6 +13,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 #include "DrawDebugHelpers.h" // Prototype tracer fallback when no MFXTracer asset is set
+#include "Combat/WeaponRigComponent.h"
 
 UHitscanWeaponComponent::UHitscanWeaponComponent()
 {
@@ -122,7 +123,22 @@ void UHitscanWeaponComponent::PerformFire(const FVector& ViewLocation, const FVe
 	const float UseDamage = WeaponData ? WeaponData->BaseDamage : Damage;
 	const float UseRange = WeaponData ? WeaponData->MaxRange : Range;
 
-	const FVector TraceEnd = ViewLocation + ViewDirection.GetSafeNormal() * UseRange;
+	// Apply the owner's current spread cone (hip = loose, ADS = tight). Read from
+	// the weapon rig if present; no rig -> pinpoint (preserves prior behavior).
+	FVector FireDir = ViewDirection.GetSafeNormal();
+	if (AActor* Owner = GetOwner())
+	{
+		if (const UWeaponRigComponent* Rig = Owner->FindComponentByClass<UWeaponRigComponent>())
+		{
+			const float HalfAngle = Rig->GetCurrentSpreadDegrees();
+			if (HalfAngle > KINDA_SMALL_NUMBER)
+			{
+				FireDir = FMath::VRandCone(FireDir, FMath::DegreesToRadians(HalfAngle));
+			}
+		}
+	}
+
+	const FVector TraceEnd = ViewLocation + FireDir * UseRange;
 
 	FHitResult HitResult;
 	FCollisionQueryParams QueryParams;

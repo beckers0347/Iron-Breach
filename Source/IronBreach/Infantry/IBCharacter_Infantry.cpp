@@ -1,14 +1,15 @@
 #include "IBCharacter_Infantry.h"
 #include "IronBreach.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h" // Explicit include: required for ULocalPlayer::GetSubsystem under IWYU
 #include "Engine/World.h"       // Explicit include: required for LineTraceSingleByChannel under IWYU
 #include "Combat/HealthComponent.h"
 #include "Combat/HitscanWeaponComponent.h"
+#include "Combat/WeaponRigComponent.h"
 #include "Combat/WeaponDataAsset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
@@ -18,17 +19,25 @@
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true; // Rig feed + ADS move-speed each frame
 
-	// Camera setup for tracking fast gameplay
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f;
-	CameraBoom->bUsePawnControlRotation = true;
+	// First-person camera at roughly eye height, driven by the controller.
+	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCamera->SetRelativeLocation(FVector(0.0f, 0.0f, 64.0f)); // eye height
+	FirstPersonCamera->bUsePawnControlRotation = true;
 
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+	// First-person viewmodel weapon, posed by the rig. Attached to the camera so
+	// it rides the view. Owner-only see: remote players never see your viewmodel.
+	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
+	WeaponMesh->SetupAttachment(FirstPersonCamera);
+	WeaponMesh->SetOnlyOwnerSee(true);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponMesh->bCastDynamicShadow = false;
+	WeaponMesh->CastShadow = false;
+
+	// The third-person body should NOT render for the owning player (they see the viewmodel instead).
+	GetMesh()->SetOwnerNoSee(true);
 
 	// Attach Modular Health
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
@@ -36,6 +45,9 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	// Single project-wide fire path (consolidates the old inline Fire() trace)
 	WeaponComponent = CreateDefaultSubobject<UHitscanWeaponComponent>(TEXT("WeaponComponent"));
 	WeaponComponent->bAutoBindLegacyInput = false; // We fire via Enhanced Input; auto-bind would double-fire LMB
+
+	// First-person weapon rig (viewmodel posing + ADS blend).
+	WeaponRig = CreateDefaultSubobject<UWeaponRigComponent>(TEXT("WeaponRig"));
 }
 
 void AIBCharacter_Infantry::BeginPlay()
@@ -46,6 +58,22 @@ void AIBCharacter_Infantry::BeginPlay()
 	if (WeaponComponent && CurrentWeaponData)
 	{
 		WeaponComponent->SetWeaponData(CurrentWeaponData);
+	}
+
+	// Wire the first-person weapon rig: camera + viewmodel mesh + this weapon's ADS tuning.
+	if (WeaponRig)
+	{
+		WeaponRig->SetReferences(FirstPersonCamera, WeaponMesh);
+		if (CurrentWeaponData)
+		{
+			WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
+		}
+	}
+
+	// Capture base walk speed so the ADS multiplier has something to scale from.
+	if (UCharacterMovementComponent* Move = GetCharacterMovement())
+	{
+		BaseWalkSpeed = (BaseWalkSpeed > 0.0f) ? BaseWalkSpeed : Move->MaxWalkSpeed;
 	}
 
 	// Death handling: cosmetic ragdoll everywhere, server-driven respawn (u1-08).
@@ -81,6 +109,13 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		if (MoveAction) { EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AIBCharacter_Infantry::Move); }
 		if (LookAction) { EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AIBCharacter_Infantry::Look); }
 		if (FireAction) { EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::Fire); }
+		if (AimAction)
+		{
+			// Hold to aim: press raises the sights, release lowers them.
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::StartAiming);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopAiming);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &AIBCharacter_Infantry::StopAiming);
+		}
 	}
 	else
 	{
@@ -111,8 +146,41 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		// Damp look sensitivity while zoomed so ADS aim isn't twitchy (tracks FOV ratio).
+		const float Sens = WeaponRig ? WeaponRig->GetLookSensitivityMultiplier() : 1.0f;
+		AddControllerYawInput(LookAxisVector.X * Sens);
+		AddControllerPitchInput(LookAxisVector.Y * Sens);
+
+		// Feed the raw delta to the rig for weapon sway.
+		if (WeaponRig)
+		{
+			WeaponRig->SetLookDelta(LookAxisVector);
+		}
+	}
+}
+
+void AIBCharacter_Infantry::StartAiming()
+{
+	if (WeaponRig) WeaponRig->SetAiming(true);
+}
+
+void AIBCharacter_Infantry::StopAiming()
+{
+	if (WeaponRig) WeaponRig->SetAiming(false);
+}
+
+void AIBCharacter_Infantry::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// Apply the ADS move-speed multiplier (slower while aiming). Cheap, and keeps
+	// the movement authority-agnostic — MaxWalkSpeed already replicates via CMC.
+	if (WeaponRig && BaseWalkSpeed > 0.0f)
+	{
+		if (UCharacterMovementComponent* Move = GetCharacterMovement())
+		{
+			Move->MaxWalkSpeed = BaseWalkSpeed * WeaponRig->GetMoveSpeedMultiplier();
+		}
 	}
 }
 

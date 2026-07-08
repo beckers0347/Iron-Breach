@@ -10,9 +10,10 @@ class UInputMappingContext;
 class UInputAction;
 class UHealthComponent;
 class UHitscanWeaponComponent;
+class UWeaponRigComponent;
 class UWeaponDataAsset;
-class USpringArmComponent;
 class UCameraComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class IRONBREACH_API AIBCharacter_Infantry : public ACharacter, public IDamageableInterface
@@ -22,8 +23,12 @@ class IRONBREACH_API AIBCharacter_Infantry : public ACharacter, public IDamageab
 public:
 	AIBCharacter_Infantry();
 
+	/** Exposed so UHitscanWeaponComponent can read the current spread when firing. */
+	UWeaponRigComponent* GetWeaponRig() const { return WeaponRig; }
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Core Components
@@ -35,11 +40,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHitscanWeaponComponent> WeaponComponent;
 
+	/** First-person camera at eye height. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<USpringArmComponent> CameraBoom;
+	TObjectPtr<UCameraComponent> FirstPersonCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	TObjectPtr<UCameraComponent> FollowCamera;
+	/** First-person viewmodel weapon mesh, posed by the rig. Owner-only visible. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UStaticMeshComponent> WeaponMesh;
+
+	/** Poses the viewmodel and drives ADS (zoom, spread, move speed). */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UWeaponRigComponent> WeaponRig;
 
 	// Enhanced Input Data
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
@@ -54,9 +65,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> FireAction;
 
+	/** Aim-down-sights: bind as Started (press) + Completed (release), or a Hold trigger. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> AimAction;
+
 	// Current Weapon Context
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
+
+	/** Base walk speed the ADS move-speed multiplier scales from. Captured at BeginPlay. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	float BaseWalkSpeed = 0.0f;
 
 	/** Seconds between death and the server respawning this player (networked play, u1-08).
 	 *  A player-facing wait, not hidden timer logic. */
@@ -74,6 +93,8 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Fire();
+	void StartAiming();
+	void StopAiming();
 
 public:
 	// Implementation of IDamageableInterface
