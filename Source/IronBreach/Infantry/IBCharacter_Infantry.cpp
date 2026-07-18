@@ -37,12 +37,6 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	WeaponMesh->bCastDynamicShadow = false;
 	WeaponMesh->CastShadow = false;
 
-	// Auto-assign the rifle so the viewmodel shows without per-BP setup. A BP can override.
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> RifleMeshFinder(TEXT("/Game/Weapons/Rifle/Meshes/SM_Rifle.SM_Rifle"));
-	if (RifleMeshFinder.Succeeded())
-	{
-		WeaponMesh->SetStaticMesh(RifleMeshFinder.Object);
-	}
 	// The template rifle is authored at full world scale; shrink it so the viewmodel
 	// reads as "held" rather than filling the screen. Tune alongside the hip anchor.
 	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
@@ -59,17 +53,16 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 
 	// First-person weapon rig (viewmodel posing + ADS blend).
 	WeaponRig = CreateDefaultSubobject<UWeaponRigComponent>(TEXT("WeaponRig"));
+
+	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
+	WeaponMesh->SetupAttachment(FirstPersonCamera);
+
+
 }
 
 void AIBCharacter_Infantry::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (WeaponRig && CurrentWeaponData)
-	{
-		// Pass the struct stored inside your Data Asset to the rig
-		WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
-	}
 
 	// The loadout property stays the designer-facing knob; the component does the firing.
 	if (WeaponComponent && CurrentWeaponData)
@@ -78,12 +71,20 @@ void AIBCharacter_Infantry::BeginPlay()
 	}
 
 	// Wire the first-person weapon rig: camera + viewmodel mesh + this weapon's ADS tuning.
+	// SetReferences must run before SetAdsSettings so socket offsets (Grip/Aim) are cached
+	// against the mesh that's actually attached before any pose math reads them.
 	if (WeaponRig)
 	{
 		WeaponRig->SetReferences(FirstPersonCamera, WeaponMesh);
+
 		if (CurrentWeaponData)
 		{
 			WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
+			UE_LOG(LogIronBreach, Log, TEXT("%s: ADS settings applied from %s"), *GetName(), *CurrentWeaponData->GetName());
+		}
+		else
+		{
+			UE_LOG(LogIronBreach, Error, TEXT("%s: CurrentWeaponData is NULL! Check Blueprint Class Defaults."), *GetName());
 		}
 	}
 
@@ -115,27 +116,14 @@ void AIBCharacter_Infantry::BeginPlay()
 		}
 	}
 
-	if (CurrentWeaponData)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CurrentWeaponData loaded: %s"), *CurrentWeaponData->GetName());
-
-		if (WeaponRig)
-		{
-			WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
-			UE_LOG(LogTemp, Warning, TEXT("AdsSettings passed to rig."));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("CurrentWeaponData is NULL! Check Blueprint Class Defaults."));
-	}
 }
 
 void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	if (EnhancedInputComponent)
 	{
 		// Guarded: BindAction on an unassigned UInputAction asserts in newer engine versions
 		if (MoveAction) { EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AIBCharacter_Infantry::Move); }
@@ -149,17 +137,17 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &AIBCharacter_Infantry::StopAiming);
 		}
 	}
+	else
+	{
+		UE_LOG(LogIronBreach, Error, TEXT("%s: Expected an EnhancedInputComponent. Check DefaultInputComponentClass in DefaultInput.ini"), *GetName());
+	}
 
 	// Fallback so aim-down-sights works out of the box on RIGHT MOUSE without any
-	// content setup. If an AimAction asset is assigned, that takes over and this is skipped.
+	// content setup. If an AimAction asset is assigned and bound above, this is skipped.
 	if (!AimAction && PlayerInputComponent)
 	{
 		PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &AIBCharacter_Infantry::StartAiming);
 		PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Released, this, &AIBCharacter_Infantry::StopAiming);
-	}
-	else
-	{
-		UE_LOG(LogIronBreach, Error, TEXT("%s: Expected an EnhancedInputComponent. Check DefaultInputComponentClass in DefaultInput.ini"), *GetName());
 	}
 }
 

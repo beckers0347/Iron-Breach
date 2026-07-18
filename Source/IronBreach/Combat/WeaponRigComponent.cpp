@@ -91,8 +91,7 @@ void UWeaponRigComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UWeaponRigComponent::UpdateFov()
 {
-	// Add this log
-	UE_LOG(LogTemp, Warning, TEXT("Ads Blend: %f | FOV: %f"), Blend, ViewCamera->FieldOfView);
+	UE_LOG(LogIronBreach, VeryVerbose, TEXT("[WeaponRig] Blend: %f | FOV: %f"), Blend, ViewCamera->FieldOfView);
 
 	if (BaseFov <= 0.0f) BaseFov = ViewCamera->FieldOfView;
 	const float Zoom = FMath::Max(Settings.ZoomMultiplier, 1.0f);
@@ -101,22 +100,19 @@ void UWeaponRigComponent::UpdateFov()
 
 void UWeaponRigComponent::UpdateWeaponPose()
 {
-
-	// If Settings are default-initialized, this will be at 0,0,0
-	FVector AdsLocation = Settings.ADSTransform.GetLocation();
-
-	// Log the calculated position to the Output Log to see if it is 0,0,0
-	UE_LOG(LogTemp, Warning, TEXT("Rig Target Location: %s"), *AdsLocation.ToString());
-	// Hip pose calculation
+	// Hip pose: solve for the mesh origin such that the Grip socket lands on HipAnchor.
 	const FQuat HipRot = HipAnchorRotation.Quaternion();
 	const FVector HipPos = HipAnchorLocation - HipRot.RotateVector(GripLocal);
 
-	// FIX: ADS pose - use the Transform location as the target position directly 
-	// without subtracting AimLocal, as the rig already handles local socket alignment
-	const FVector AdsPos = Settings.ADSTransform.GetLocation();
+	// ADS pose: same pattern, but solve for the mesh origin such that the Aim socket
+	// lands on the authored ADS target. This is what actually makes sights line up —
+	// without subtracting AimLocal here, the mesh ROOT (not the sight) sits at the
+	// target, so the Aim socket is off by however far it sits from the mesh origin.
+	const FQuat AdsRot = Settings.ADSTransform.GetRotation();
+	const FVector AdsPos = Settings.ADSTransform.GetLocation() - AdsRot.RotateVector(AimLocal);
 
-	FVector Pos = FMath::Lerp(HipPos, AdsPos, Blend);
-	const FQuat Rot = FQuat::Slerp(HipRot, Settings.ADSTransform.GetRotation(), Blend); // Added Rotation blend
+	const FVector Pos = FMath::Lerp(HipPos, AdsPos, Blend);
+	const FQuat Rot = FQuat::Slerp(HipRot, AdsRot, Blend);
 
 	WeaponMesh->SetRelativeLocation(Pos + Sway);
 	WeaponMesh->SetRelativeRotation(Rot * WeaponMountRotation.Quaternion());
@@ -125,10 +121,18 @@ void UWeaponRigComponent::UpdateWeaponPose()
 void UWeaponRigComponent::UpdateScope()
 {
 	const bool bWantScope = Settings.bUseScopeOverlay && Blend >= ScopeBlendThreshold;
-
-	// Add this to your Output Log to see if the visibility is being toggled off[cite: 2]
-	UE_LOG(LogTemp, Warning, TEXT("Is Scope Visible: %s"), bWantScope ? TEXT("True") : TEXT("False"));
-
 	if (bWantScope == bScopeVisible) return;
-	// ... rest of function[cite: 2]
+
+	bScopeVisible = bWantScope;
+
+	// UI (BP or a scope-overlay widget) binds this to show/hide the full-screen scope texture.
+	OnScopeOverlayChanged.Broadcast(bScopeVisible);
+
+	// Snipers typically hide the viewmodel once the scope overlay is up.
+	if (Settings.bHideWeaponInScope && WeaponMesh)
+	{
+		WeaponMesh->SetVisibility(!bScopeVisible, /*bPropagateToChildren=*/true);
+	}
+
+	UE_LOG(LogIronBreach, Verbose, TEXT("[WeaponRig] scope overlay -> %s"), bScopeVisible ? TEXT("visible") : TEXT("hidden"));
 }
