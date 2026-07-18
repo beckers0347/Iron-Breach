@@ -45,7 +45,7 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	}
 	// The template rifle is authored at full world scale; shrink it so the viewmodel
 	// reads as "held" rather than filling the screen. Tune alongside the hip anchor.
-	WeaponMesh->SetRelativeScale3D(FVector(0.5f));
+	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
 
 	// The third-person body should NOT render for the owning player (they see the viewmodel instead).
 	GetMesh()->SetOwnerNoSee(true);
@@ -64,6 +64,12 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 void AIBCharacter_Infantry::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (WeaponRig && CurrentWeaponData)
+	{
+		// Pass the struct stored inside your Data Asset to the rig
+		WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
+	}
 
 	// The loadout property stays the designer-facing knob; the component does the firing.
 	if (WeaponComponent && CurrentWeaponData)
@@ -107,6 +113,21 @@ void AIBCharacter_Infantry::BeginPlay()
 				UE_LOG(LogIronBreach, Warning, TEXT("%s: DefaultMappingContext not assigned"), *GetName());
 			}
 		}
+	}
+
+	if (CurrentWeaponData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CurrentWeaponData loaded: %s"), *CurrentWeaponData->GetName());
+
+		if (WeaponRig)
+		{
+			WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
+			UE_LOG(LogTemp, Warning, TEXT("AdsSettings passed to rig."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("CurrentWeaponData is NULL! Check Blueprint Class Defaults."));
 	}
 }
 

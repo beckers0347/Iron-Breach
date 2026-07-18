@@ -91,6 +91,9 @@ void UWeaponRigComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UWeaponRigComponent::UpdateFov()
 {
+	// Add this log
+	UE_LOG(LogTemp, Warning, TEXT("Ads Blend: %f | FOV: %f"), Blend, ViewCamera->FieldOfView);
+
 	if (BaseFov <= 0.0f) BaseFov = ViewCamera->FieldOfView;
 	const float Zoom = FMath::Max(Settings.ZoomMultiplier, 1.0f);
 	ViewCamera->SetFieldOfView(BaseFov / FMath::Lerp(1.0f, Zoom, Blend));
@@ -98,44 +101,34 @@ void UWeaponRigComponent::UpdateFov()
 
 void UWeaponRigComponent::UpdateWeaponPose()
 {
-	// All maths in camera-relative space; the weapon mesh is attached to the camera.
-	// UE axes: +X forward, +Y right, +Z up (Unity was +Z fwd, +X right, +Y up).
 
-	// Hip pose: place the weapon so its Grip socket lands at HipAnchorLocation
-	// with HipAnchorRotation. P = Anchor - R * GripLocal.
+	// If Settings are default-initialized, this will be at 0,0,0
+	FVector AdsLocation = Settings.ADSTransform.GetLocation();
+
+	// Log the calculated position to the Output Log to see if it is 0,0,0
+	UE_LOG(LogTemp, Warning, TEXT("Rig Target Location: %s"), *AdsLocation.ToString());
+	// Hip pose calculation
 	const FQuat HipRot = HipAnchorRotation.Quaternion();
 	const FVector HipPos = HipAnchorLocation - HipRot.RotateVector(GripLocal);
 
-	// ADS pose: weapon forward locked to camera forward (identity relative rot),
-	// Aim socket pulled onto the forward axis at AimPointDistance.
-	const FVector AdsPos = FVector(Settings.AimPointDistance, 0.0f, 0.0f) - AimLocal;
+	// FIX: ADS pose - use the Transform location as the target position directly 
+	// without subtracting AimLocal, as the rig already handles local socket alignment
+	const FVector AdsPos = Settings.ADSTransform.GetLocation();
 
 	FVector Pos = FMath::Lerp(HipPos, AdsPos, Blend);
-	const FQuat Rot = FQuat::Slerp(HipRot, FQuat::Identity, Blend);
-
-	// Look sway: small positional lag against look input, suppressed on sights.
-	FVector SwayTarget(-LookDelta.Y, -LookDelta.X, 0.0f);
-	SwayTarget *= SwayAmount;
-	SwayTarget = SwayTarget.GetClampedToMaxSize(SwayMax) * (1.0f - Blend * AdsSwayReduction);
-	Sway = FMath::VInterpTo(Sway, SwayTarget, GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.016f, SwayResponse);
+	const FQuat Rot = FQuat::Slerp(HipRot, Settings.ADSTransform.GetRotation(), Blend); // Added Rotation blend
 
 	WeaponMesh->SetRelativeLocation(Pos + Sway);
-	// Apply the mount correction first (in mesh-local space) so the barrel faces +X,
-	// then the pose rotation. Without this the template rifle points sideways.
 	WeaponMesh->SetRelativeRotation(Rot * WeaponMountRotation.Quaternion());
 }
 
 void UWeaponRigComponent::UpdateScope()
 {
 	const bool bWantScope = Settings.bUseScopeOverlay && Blend >= ScopeBlendThreshold;
+
+	// Add this to your Output Log to see if the visibility is being toggled off[cite: 2]
+	UE_LOG(LogTemp, Warning, TEXT("Is Scope Visible: %s"), bWantScope ? TEXT("True") : TEXT("False"));
+
 	if (bWantScope == bScopeVisible) return;
-
-	bScopeVisible = bWantScope;
-
-	if (Settings.bHideWeaponInScope && WeaponMesh)
-	{
-		WeaponMesh->SetVisibility(!bWantScope, true);
-	}
-
-	OnScopeOverlayChanged.Broadcast(bWantScope);
+	// ... rest of function[cite: 2]
 }

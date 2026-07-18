@@ -29,8 +29,9 @@ struct FIBAdsSettings
 
 	// ---- Sight alignment ----
 	/** How far in front of the camera the weapon's Aim socket sits at full ADS, in CM (Unity 0.22m -> 22cm). */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ADS|Sight", meta = (ClampMin = "5.0", ClampMax = "60.0"))
-	float AimPointDistance = 22.0f;
+	/** The exact location, rotation, and scale the weapon snaps to when aiming. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ads")
+	FTransform ADSTransform;
 
 	// ---- Accuracy ----
 	/** Spread cone half-angle in degrees when hip firing. */
