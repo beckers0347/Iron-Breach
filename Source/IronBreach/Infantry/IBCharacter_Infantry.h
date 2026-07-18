@@ -26,6 +26,10 @@ public:
 	/** Exposed so UHitscanWeaponComponent can read the current spread when firing. */
 	UWeaponRigComponent* GetWeaponRig() const { return WeaponRig; }
 
+	// Tracks if the character is currently holding a weapon
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat State")
+	bool bIsArmed = false;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
