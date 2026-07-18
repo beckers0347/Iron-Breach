@@ -54,10 +54,6 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	// First-person weapon rig (viewmodel posing + ADS blend).
 	WeaponRig = CreateDefaultSubobject<UWeaponRigComponent>(TEXT("WeaponRig"));
 
-	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->SetupAttachment(FirstPersonCamera);
-
-
 }
 
 void AIBCharacter_Infantry::BeginPlay()

@@ -89,6 +89,9 @@ protected:
 	UFUNCTION()
 	void HandleDeath(AActor* Killer);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	bool bIsArmed = false;
+
 	// Input Actions
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

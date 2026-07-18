@@ -14,6 +14,7 @@ UWeaponRigComponent::UWeaponRigComponent()
 void UWeaponRigComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	UE_LOG(LogIronBreach, Log, TEXT("[WeaponRig] AdsTime is: %f"), Settings.AdsTime);
 	if (ViewCamera)
 	{
 		BaseFov = ViewCamera->FieldOfView;
@@ -87,6 +88,8 @@ void UWeaponRigComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	}
 
 	LookDelta = FVector2D::ZeroVector; // consumed this frame
+	UE_LOG(LogIronBreach, Log, TEXT("[WeaponRig] Tick is running. Blend: %f | WantAds: %s"), Blend, bWantAds ? TEXT("True") : TEXT("False"));
+
 }
 
 void UWeaponRigComponent::UpdateFov()
@@ -113,6 +116,10 @@ void UWeaponRigComponent::UpdateWeaponPose()
 
 	const FVector Pos = FMath::Lerp(HipPos, AdsPos, Blend);
 	const FQuat Rot = FQuat::Slerp(HipRot, AdsRot, Blend);
+
+	// --- ADD THIS LINE HERE ---
+	UE_LOG(LogIronBreach, Log, TEXT("Weapon Mesh Location: %s"), *Pos.ToString());
+	// --------------------------
 
 	WeaponMesh->SetRelativeLocation(Pos + Sway);
 	WeaponMesh->SetRelativeRotation(Rot * WeaponMountRotation.Quaternion());
