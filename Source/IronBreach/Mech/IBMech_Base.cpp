@@ -11,6 +11,9 @@ AIBMech_Base::AIBMech_Base()
 	RightSeatController = nullptr;
 	CurrentDriver = nullptr;
 	CurrentGunner = nullptr;
+
+	// Create the weapon rig component in C++ so it's always attached
+	WeaponRigComponent = CreateDefaultSubobject<UWeaponRigComponent>(TEXT("WeaponRigComponent"));
 }
 
 void AIBMech_Base::BeginPlay()
@@ -142,30 +145,84 @@ void AIBMech_Base::RequestRoleSwap(AController* Requester)
 
 void AIBMech_Base::RouteLookInput(AController* Requester, const FVector2D& InputValue)
 {
-	// Gatekeeper: Only the designated driver can turn the chassis
 	if (Requester != CurrentDriver) return;
 
+	// Only rotate the mech chassis horizontally (Yaw)
 	if (InputValue.X != 0.0f)
 	{
 		AddControllerYawInput(InputValue.X);
-	}
-
-	if (InputValue.Y != 0.0f)
-	{
-		AddControllerPitchInput(InputValue.Y);
 	}
 }
 
 void AIBMech_Base::FireWeapon(AController* Requester)
 {
-	// Gatekeeper: Only the designated driver can pull the trigger
 	if (Requester != CurrentDriver) return;
+	if (!CurrentWeaponData) return;
 
-	// Temporary debug message to verify input flow
+	// Perform the hit scan trace
+	PerformWeaponTrace();
+
+	// Debug message
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("Cannon Fired!"));
+		FString Msg = FString::Printf(TEXT("Firing %s! Damage: %.1f"), *CurrentWeaponData->WeaponName.ToString(), CurrentWeaponData->BaseDamage);
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, Msg);
 	}
+}
 
-	// Later: Spawn projectile or line-trace from the muzzle socket here!
+// Example: When equipping your weapon asset
+void AIBMech_Base::EquipWeapon(UWeaponDataAsset* NewWeaponData)
+{
+	if (!NewWeaponData) return;
+
+	// Cache or apply stats from your weapon asset
+	CurrentWeaponData = NewWeaponData;
+
+	// Pass the ADS configuration directly to your existing WeaponRigComponent!
+	if (WeaponRigComponent)
+	{
+		WeaponRigComponent->SetAdsSettings(NewWeaponData->Ads);
+	}
+}
+
+void AIBMech_Base::PerformWeaponTrace()
+{
+	if (!Controller) return;
+
+	// Get the player's camera view point (origin and direction)
+	FVector CamLoc;
+	FRotator CamRot;
+	Controller->GetPlayerViewPoint(CamLoc, CamRot);
+
+	// Calculate trace start and end using the weapon data's MaxRange
+	const float Range = CurrentWeaponData ? CurrentWeaponData->MaxRange : 5000.0f;
+	FVector StartTrace = CamLoc;
+	FVector EndTrace = StartTrace + (CamRot.Vector() * Range);
+
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this); // Don't shoot ourselves
+
+	// Execute line trace against the world
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartTrace,
+		EndTrace,
+		ECC_Visibility,
+		QueryParams
+	);
+
+	if (bHit)
+	{
+		// Draw a temporary debug line and point to verify hits in editor
+		DrawDebugLine(GetWorld(), StartTrace, HitResult.Location, FColor::Cyan, false, 1.0f, 0, 1.5f);
+		DrawDebugPoint(GetWorld(), HitResult.Location, 10.0f, FColor::Red, false, 1.0f);
+
+		// If we hit an actor, apply damage using your weapon data base damage
+		if (AActor* HitActor = HitResult.GetActor())
+		{
+			// Example: Apply standard engine damage
+			// UGameplayStatics::ApplyDamage(HitActor, CurrentWeaponData->BaseDamage, Controller, this, UDamageType::StaticClass());
+		}
+	}
 }

@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
+#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponRigComponent.h"
 #include "IBMech_Base.generated.h"
 
 
@@ -19,6 +21,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void PerformWeaponTrace();
 
 public:
 	// --- SEAT ASSIGNMENTS ---
@@ -64,9 +67,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Mech|Combat")
 	void FireWeapon(AController* Requester);
 
+	// Weapon Rig component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech|Combat")
+	TObjectPtr<UWeaponRigComponent> WeaponRigComponent;
+
+	// Active weapon data reference
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mech|Combat")
+	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
+
+	// Weapon equip function
+	UFUNCTION(BlueprintCallable, Category = "Mech|Combat")
+	void EquipWeapon(UWeaponDataAsset* NewWeaponData);
+
 	// --- ROUTED INPUT ACTIONS ---
 	// These replace the standard Enhanced Input bindings
 	void RouteMoveInput(const FInputActionValue& Value, AController* RequestingController);
 	void RouteLookInput(const FInputActionValue& Value, AController* RequestingController);
 	void RouteFireInput(AController* RequestingController);
+
 };

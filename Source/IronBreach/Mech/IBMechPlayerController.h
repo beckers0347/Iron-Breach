@@ -33,7 +33,10 @@ public:
 	UInputAction* SwapAction;
 
 	UPROPERTY(EditAnywhere, Category = "Mech Input")
-	UInputAction* LookAction; // <--- Add this line
+	UInputAction* LookAction;
+
+	UPROPERTY(EditAnywhere, Category = "Mech Input")
+	UInputAction* ADSAction;
 
 private:
 	// --- INTERCEPT FUNCTIONS ---
@@ -41,4 +44,6 @@ private:
 	void HandleMove(const FInputActionValue& Value);
 	void HandleFire(const FInputActionValue& Value);
 	void HandleLook(const FInputActionValue& Value);
+	void HandleADS(const FInputActionValue& Value);
+
 };

@@ -56,6 +56,11 @@ void AIBMechPlayerController::SetupInputComponent()
 		{
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AIBMechPlayerController::HandleFire);
 		}
+		if (ADSAction)
+		{
+			EnhancedInputComponent->BindAction(ADSAction, ETriggerEvent::Started, this, &AIBMechPlayerController::HandleADS);
+			EnhancedInputComponent->BindAction(ADSAction, ETriggerEvent::Completed, this, &AIBMechPlayerController::HandleADS);
+		}
 	}
 }
 
@@ -83,11 +88,21 @@ void AIBMechPlayerController::HandleSwap(const FInputActionValue& Value)
 
 void AIBMechPlayerController::HandleLook(const FInputActionValue& Value)
 {
-	FVector2D LookVector = Value.Get<FVector2D>();
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (AIBMech_Base* Mech = Cast<AIBMech_Base>(GetPawn()))
+	// 1. Handle Vertical Look (Pitch) locally on the controller/camera
+	if (LookAxisVector.Y != 0.0f)
 	{
-		Mech->RouteLookInput(this, LookVector);
+		AddPitchInput(LookAxisVector.Y);
+	}
+
+	// 2. Route Horizontal Look (Yaw) to the possessed Mech pawn
+	if (LookAxisVector.X != 0.0f)
+	{
+		if (AIBMech_Base* Mech = Cast<AIBMech_Base>(GetPawn()))
+		{
+			Mech->RouteLookInput(this, FVector2D(LookAxisVector.X, 0.0f));
+		}
 	}
 }
 
@@ -96,5 +111,18 @@ void AIBMechPlayerController::HandleFire(const FInputActionValue& Value)
 	if (AIBMech_Base* Mech = Cast<AIBMech_Base>(GetPawn()))
 	{
 		Mech->FireWeapon(this);
+	}
+}
+
+void AIBMechPlayerController::HandleADS(const FInputActionValue& Value)
+{
+	bool bNewAimState = Value.Get<bool>();
+
+	if (AIBMech_Base* Mech = Cast<AIBMech_Base>(GetPawn()))
+	{
+		if (UWeaponRigComponent* Rig = Mech->FindComponentByClass<UWeaponRigComponent>())
+		{
+			Rig->SetAiming(bNewAimState); // Calls the smooth ADS blend on your rig[cite: 3]
+		}
 	}
 }
