@@ -32,6 +32,8 @@ void AIBMechPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+
+
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		if (MoveAction)
@@ -45,6 +47,14 @@ void AIBMechPlayerController::SetupInputComponent()
 		if (SwapAction)
 		{
 			EnhancedInputComponent->BindAction(SwapAction, ETriggerEvent::Started, this, &AIBMechPlayerController::HandleSwap);
+		}
+		if (LookAction)
+		{
+			EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AIBMechPlayerController::HandleLook);
+		}
+		if (FireAction)
+		{
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AIBMechPlayerController::HandleFire);
 		}
 	}
 }
@@ -60,15 +70,6 @@ void AIBMechPlayerController::HandleMove(const FInputActionValue& Value)
 	}
 }
 
-void AIBMechPlayerController::HandleFire(const FInputActionValue& Value)
-{
-	UE_LOG(LogTemp, Display, TEXT("PlayerController: Mouse clicked, routing to Mech..."));
-
-	if (AIBMech_Base* Mech = Cast<AIBMech_Base>(GetPawn()))
-	{
-		Mech->RouteFireInput(this);
-	}
-}
 
 void AIBMechPlayerController::HandleSwap(const FInputActionValue& Value)
 {
@@ -77,5 +78,23 @@ void AIBMechPlayerController::HandleSwap(const FInputActionValue& Value)
 	if (AIBMech_Base* Mech = Cast<AIBMech_Base>(GetPawn()))
 	{
 		Mech->RequestRoleSwap(this);
+	}
+}
+
+void AIBMechPlayerController::HandleLook(const FInputActionValue& Value)
+{
+	FVector2D LookVector = Value.Get<FVector2D>();
+
+	if (AIBMech_Base* Mech = Cast<AIBMech_Base>(GetPawn()))
+	{
+		Mech->RouteLookInput(this, LookVector);
+	}
+}
+
+void AIBMechPlayerController::HandleFire(const FInputActionValue& Value)
+{
+	if (AIBMech_Base* Mech = Cast<AIBMech_Base>(GetPawn()))
+	{
+		Mech->FireWeapon(this);
 	}
 }

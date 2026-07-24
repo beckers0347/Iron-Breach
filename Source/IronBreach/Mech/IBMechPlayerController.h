@@ -32,9 +32,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Mech Input")
 	UInputAction* SwapAction;
 
+	UPROPERTY(EditAnywhere, Category = "Mech Input")
+	UInputAction* LookAction; // <--- Add this line
+
 private:
 	// --- INTERCEPT FUNCTIONS ---
 	void HandleSwap(const FInputActionValue& Value);
 	void HandleMove(const FInputActionValue& Value);
 	void HandleFire(const FInputActionValue& Value);
+	void HandleLook(const FInputActionValue& Value);
 };

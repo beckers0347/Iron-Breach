@@ -1,14 +1,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
 #include "InputActionValue.h"
+#include "GameFramework/Character.h"
 #include "IBMech_Base.generated.h"
+
 
 class AController;
 
 UCLASS()
-class IRONBREACH_API AIBMech_Base : public APawn
+class IRONBREACH_API AIBMech_Base : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -54,6 +55,14 @@ public:
 	// Takes the movement signal and checks for driver privileges
 	UFUNCTION(BlueprintCallable, Category = "Mech|System")
 	void RouteMoveInput(AController* Requester, const FVector2D& InputValue);
+
+	// Takes the mouse movement and checks for driver privileges
+	UFUNCTION(BlueprintCallable, Category = "Mech|System")
+	void RouteLookInput(AController* Requester, const FVector2D& InputValue);
+
+	// Handles weapon firing triggers
+	UFUNCTION(BlueprintCallable, Category = "Mech|Combat")
+	void FireWeapon(AController* Requester);
 
 	// --- ROUTED INPUT ACTIONS ---
 	// These replace the standard Enhanced Input bindings

@@ -139,3 +139,33 @@ void AIBMech_Base::RequestRoleSwap(AController* Requester)
 		PerformRoleSwap();
 	}
 }
+
+void AIBMech_Base::RouteLookInput(AController* Requester, const FVector2D& InputValue)
+{
+	// Gatekeeper: Only the designated driver can turn the chassis
+	if (Requester != CurrentDriver) return;
+
+	if (InputValue.X != 0.0f)
+	{
+		AddControllerYawInput(InputValue.X);
+	}
+
+	if (InputValue.Y != 0.0f)
+	{
+		AddControllerPitchInput(InputValue.Y);
+	}
+}
+
+void AIBMech_Base::FireWeapon(AController* Requester)
+{
+	// Gatekeeper: Only the designated driver can pull the trigger
+	if (Requester != CurrentDriver) return;
+
+	// Temporary debug message to verify input flow
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("Cannon Fired!"));
+	}
+
+	// Later: Spawn projectile or line-trace from the muzzle socket here!
+}
