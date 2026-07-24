@@ -72,6 +72,7 @@ void AIBCharacter_Infantry::BeginPlay()
 	if (WeaponRig)
 	{
 		WeaponRig->SetReferences(FirstPersonCamera, WeaponMesh);
+		UE_LOG(LogIronBreach, Log, TEXT("[Character] WeaponRig found and valid!"));
 
 		if (CurrentWeaponData)
 		{
@@ -82,6 +83,11 @@ void AIBCharacter_Infantry::BeginPlay()
 		{
 			UE_LOG(LogIronBreach, Error, TEXT("%s: CurrentWeaponData is NULL! Check Blueprint Class Defaults."), *GetName());
 		}
+	}
+
+	else
+	{
+		UE_LOG(LogIronBreach, Error, TEXT("[Character] WeaponRig is NULL! Check constructor."));
 	}
 
 	// Capture base walk speed so the ADS multiplier has something to scale from.
@@ -185,6 +191,7 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 
 void AIBCharacter_Infantry::StartAiming()
 {
+	UE_LOG(LogIronBreach, Log, TEXT("[Input] StartAiming called. WeaponRig valid: %s"), WeaponRig ? TEXT("Yes") : TEXT("No"));
 	if (WeaponRig) WeaponRig->SetAiming(true);
 }
 
