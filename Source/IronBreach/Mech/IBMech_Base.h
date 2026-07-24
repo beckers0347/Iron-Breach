@@ -47,6 +47,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Mech|System")
 	void PerformRoleSwap();
 
+	// Allows a seated controller to request a role hot-swap
+	UFUNCTION(BlueprintCallable, Category = "Mech|System")
+	void RequestRoleSwap(AController* Requester);
+
+	// Takes the movement signal and checks for driver privileges
+	UFUNCTION(BlueprintCallable, Category = "Mech|System")
+	void RouteMoveInput(AController* Requester, const FVector2D& InputValue);
+
 	// --- ROUTED INPUT ACTIONS ---
 	// These replace the standard Enhanced Input bindings
 	void RouteMoveInput(const FInputActionValue& Value, AController* RequestingController);

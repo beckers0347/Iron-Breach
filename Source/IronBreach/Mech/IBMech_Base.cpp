@@ -1,6 +1,7 @@
 #include "IBMech_Base.h"
 #include "GameFramework/Controller.h"
 #include "Engine/LocalPlayer.h"
+#include "IBMechAIController.h"
 
 AIBMech_Base::AIBMech_Base()
 {
@@ -15,6 +16,23 @@ AIBMech_Base::AIBMech_Base()
 void AIBMech_Base::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Spawn the AI Co-Pilot
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	// Create the AI brain in the world
+	AIBMechAIController* CoPilot = GetWorld()->SpawnActor<AIBMechAIController>(AIBMechAIController::StaticClass(), GetActorLocation(), GetActorRotation(), SpawnParams);
+
+	if (CoPilot)
+	{
+		// Force the AI into the Right Seat pointer manually
+		// DO NOT call CoPilot->Possess(this) or it will kick the human out!
+		AssignToRightSeat(CoPilot);
+
+		UE_LOG(LogTemp, Display, TEXT("[Mech] AI successfully loaded into the Right Seat."));
+	}
+
 }
 
 void AIBMech_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -32,12 +50,11 @@ void AIBMech_Base::AssignToLeftSeat(AController* NewController)
 	if (!NewController) return;
 	LeftSeatController = NewController;
 
-	// If no driver is assigned yet, default the left seat to driving
 	if (!CurrentDriver)
 	{
 		CurrentDriver = LeftSeatController;
 	}
-	else if (!CurrentGunner)
+	else if (!CurrentGunner) // <--- PUT THE 'ELSE' BACK!
 	{
 		CurrentGunner = LeftSeatController;
 	}
@@ -48,12 +65,11 @@ void AIBMech_Base::AssignToRightSeat(AController* NewController)
 	if (!NewController) return;
 	RightSeatController = NewController;
 
-	// Fill whatever role is empty
 	if (!CurrentDriver)
 	{
 		CurrentDriver = RightSeatController;
 	}
-	else if (!CurrentGunner)
+	else if (!CurrentGunner) // <--- PUT THE 'ELSE' BACK!
 	{
 		CurrentGunner = RightSeatController;
 	}
@@ -72,17 +88,21 @@ void AIBMech_Base::PerformRoleSwap()
 
 // --- INPUT ROUTING (THE GATEKEEPER) ---
 
-void AIBMech_Base::RouteMoveInput(const FInputActionValue& Value, AController* RequestingController)
+void AIBMech_Base::RouteMoveInput(AController* Requester, const FVector2D& InputValue)
 {
-	// STRICT FILTER: Only the current driver can move the chassis
-	if (RequestingController != CurrentDriver)
+	// Gatekeeper: Only the designated driver is allowed to steer the chassis
+	if (Requester != CurrentDriver) return;
+
+	// X is Forward/Backward (W/S), Y is Left/Right (A/D) based on standard 2D Axis setup
+	if (InputValue.Y != 0.0f)
 	{
-		return; // Ignore input from the Gunner
+		AddMovementInput(GetActorForwardVector(), InputValue.Y);
 	}
 
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	// Add your standard movement logic here (AddMovementInput, etc.)
+	if (InputValue.X != 0.0f)
+	{
+		AddMovementInput(GetActorRightVector(), InputValue.X);
+	}
 }
 
 void AIBMech_Base::RouteFireInput(AController* RequestingController)
@@ -101,5 +121,21 @@ void AIBMech_Base::RouteFireInput(AController* RequestingController)
 	else if (RequestingController == RightSeatController)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Firing RIGHT side weapon systems! Building Right Heat."));
+	}
+}
+
+void AIBMech_Base::RequestRoleSwap(AController* Requester)
+{
+	// Check if the requester is actually sitting in the mech
+	if (Requester != LeftSeatController && Requester != RightSeatController) return;
+
+	AController* CoPilot = (Requester == LeftSeatController) ? RightSeatController : LeftSeatController;
+
+	// If the co-pilot is an AI, they auto-accept the swap. 
+	// (Later, we will add human-to-human pending logic here)
+	if (Cast<AAIController>(CoPilot))
+	{
+		UE_LOG(LogTemp, Display, TEXT("[Mech] Swap requested by Human. AI Co-pilot auto-accepting."));
+		PerformRoleSwap();
 	}
 }
