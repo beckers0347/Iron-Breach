@@ -12,6 +12,7 @@ class AController;
 class USpringArmComponent;
 class UCameraComponent;
 class UWeaponRigComponent;
+class AIBMechAIController;
 
 UCLASS()
 class IRONBREACH_API AIBMech_Base : public ACharacter
@@ -115,6 +116,50 @@ public:
 	// This tells C++ to send a signal to the Blueprint. We don't write a body for it in .cpp!
 	UFUNCTION(BlueprintImplementableEvent, Category = "Mech State")
 	void OnRoleSwapped(bool bIsNowGunner);
+
+	// --- HUD & STATS DATA ---
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mech Stats")
+	float MaxHealth = 100.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech Stats")
+	float CurrentHealth = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mech Stats")
+	int32 MaxAmmo = 50;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech Stats")
+	int32 CurrentAmmo = 50;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech Stats")
+	float WeaponCooldownRemaining = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech Stats")
+	FString PartnerName = "Partner";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech Stats")
+	float PartnerCooldownRemaining = 0.0f;
+
+	// Broadcast event for when your partner presses the swap button
+	UFUNCTION(BlueprintImplementableEvent, Category = "Mech State")
+	void OnPartnerSwapNotified();
+
+	// Specific seat assignment functions
+	UFUNCTION(BlueprintCallable, Category = "Mech|System")
+	bool TryEnterSeat(AController* InputController, bool bTargetLeftSeat);
+
+	UFUNCTION(BlueprintCallable, Category = "Mech|System")
+	void ChooseSeat(AController* SelectingController, bool bWantLeftSeat);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mech|UI")
+	TSubclassOf<class UUserWidget> SeatSelectWidgetClass;
+
+	// IBMech_Base.h — add
+	UPROPERTY()
+	TObjectPtr<AIBMechAIController> CoPilotController;
+
+	// IBMech_Base.h
+	UFUNCTION(BlueprintCallable, Category = "Mech|Views")
+	void ApplyLocalViewForRole(AController* SelectingController);
 
 	// --- ROUTED INPUT ACTIONS ---
 	// These replace the standard Enhanced Input bindings

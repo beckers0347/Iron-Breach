@@ -12,6 +12,8 @@
 
 AIBMech_Base::AIBMech_Base()
 {
+	AIControllerClass = AIBMechAIController::StaticClass();
+
 	PrimaryActorTick.bCanEverTick = true;
 	
 	LeftSeatController = nullptr;
@@ -55,39 +57,26 @@ void AIBMech_Base::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Initially ensure Driver Camera is active.
-	if (DriverCamera_3PV)
-	{
-		DriverCamera_3PV->Activate();
-	}
-	if (GunnerCamera_FPV)
-	{
-		GunnerCamera_FPV->Deactivate();
-	}
+	if (DriverCamera_3PV) DriverCamera_3PV->Activate();
+	if (GunnerCamera_FPV) GunnerCamera_FPV->Deactivate();
 
-	// Link the Weapon Rig (cite: 3) to the GUNNER camera.
-	// This is crucial because the gunner poses the weapon model relative to the FPV view.
 	if (WeaponRigComponent)
 	{
-		WeaponRigComponent->SetReferences(GunnerCamera_FPV, MechMesh); // [cite: 4]
+		WeaponRigComponent->SetReferences(GunnerCamera_FPV, MechMesh);
 	}
 
-	// Spawn the AI Co-Pilot
 	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	CoPilotController = GetWorld()->SpawnActor<AIBMechAIController>(
+		AIBMechAIController::StaticClass(), GetActorLocation(), GetActorRotation(), SpawnParams);
 
-	// Create the AI brain in the world
-	AIBMechAIController* CoPilot = GetWorld()->SpawnActor<AIBMechAIController>(AIBMechAIController::StaticClass(), GetActorLocation(), GetActorRotation(), SpawnParams);
-
-	if (CoPilot)
+	if (CoPilotController)
 	{
-		// Force the AI into the Right Seat pointer manually
-		// DO NOT call CoPilot->Possess(this) or it will kick the human out!
-		AssignToRightSeat(CoPilot);
-
-		UE_LOG(LogTemp, Display, TEXT("[Mech] AI successfully loaded into the Right Seat."));
+		UE_LOG(LogTemp, Display, TEXT("[Mech] AI CoPilot spawned, waiting for seat assignment."));
 	}
-
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Mech] CoPilot failed to spawn."));
+	}
 }
 
 void AIBMech_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -119,6 +108,8 @@ void AIBMech_Base::AssignToRightSeat(AController* NewController)
 {
 	if (!NewController) return;
 	RightSeatController = NewController;
+	CurrentGunner = NewController;
+	bIsGunner = true;
 
 	if (!CurrentDriver)
 	{
@@ -284,10 +275,11 @@ void AIBMech_Base::RouteLookInput(AController* Requester, const FVector2D& Input
 
 void AIBMech_Base::FireWeapon(AController* Requester)
 {
-	if (Requester != CurrentDriver) return;
+	// Only the Gunner can fire the main weapon systems!
+	if (Requester != CurrentGunner) return;
 	if (!CurrentWeaponData) return;
 
-	// Perform the hit scan trace
+	// Perform the hit scan trace from the gunner's perspective
 	PerformWeaponTrace();
 
 	// Debug message
@@ -317,21 +309,28 @@ void AIBMech_Base::PerformWeaponTrace()
 {
 	if (!Controller) return;
 
-	// Get the player's camera view point (origin and direction)
 	FVector CamLoc;
 	FRotator CamRot;
-	Controller->GetPlayerViewPoint(CamLoc, CamRot);
 
-	// Calculate trace start and end using the weapon data's MaxRange
+	// Use Gunner FPV camera view if active, otherwise fallback to standard view
+	if (bIsGunner && GunnerCamera_FPV)
+	{
+		CamLoc = GunnerCamera_FPV->GetComponentLocation();
+		CamRot = GunnerCamera_FPV->GetComponentRotation();
+	}
+	else
+	{
+		Controller->GetPlayerViewPoint(CamLoc, CamRot);
+	}
+
 	const float Range = CurrentWeaponData ? CurrentWeaponData->MaxRange : 5000.0f;
 	FVector StartTrace = CamLoc;
 	FVector EndTrace = StartTrace + (CamRot.Vector() * Range);
 
 	FHitResult HitResult;
 	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this); // Don't shoot ourselves
+	QueryParams.AddIgnoredActor(this);
 
-	// Execute line trace against the world
 	bool bHit = GetWorld()->LineTraceSingleByChannel(
 		HitResult,
 		StartTrace,
@@ -342,59 +341,90 @@ void AIBMech_Base::PerformWeaponTrace()
 
 	if (bHit)
 	{
-		// Draw a temporary debug line and point to verify hits in editor
-		DrawDebugLine(GetWorld(), StartTrace, HitResult.Location, FColor::Cyan, false, 1.0f, 0, 1.5f);
+		DrawDebugLine(GetWorld(), StartTrace, HitResult.Location, FColor::Cyan, false, 1.0f, 0, .3f);
 		DrawDebugPoint(GetWorld(), HitResult.Location, 10.0f, FColor::Red, false, 1.0f);
-
-		// If we hit an actor, apply damage using your weapon data base damage
-		if (AActor* HitActor = HitResult.GetActor())
-		{
-			// Example: Apply standard engine damage
-			// UGameplayStatics::ApplyDamage(HitActor, CurrentWeaponData->BaseDamage, Controller, this, UDamageType::StaticClass());
-		}
 	}
 }
 
-void AIBMech_Base::ToggleViewMode()
+
+bool AIBMech_Base::TryEnterSeat(AController* InputController, bool bTargetLeftSeat)
 {
-	bIsDriverActive = !bIsDriverActive;
+	if (!InputController) return false;
 
-	if (!DriverCamera_3PV || !GunnerCamera_FPV) return;
-
-	if (bIsDriverActive)
+	if (bTargetLeftSeat)
 	{
-		// Activate Driver 3PV
-		DriverCamera_3PV->Activate();
-		GunnerCamera_FPV->Deactivate();
-
-		// Hide Gunner minimalist crosshair
-		if (CockpitCrosshairInstance)
+		if (LeftSeatController == nullptr || LeftSeatController == InputController)
 		{
-			CockpitCrosshairInstance->SetVisibility(ESlateVisibility::Hidden);
+			LeftSeatController = InputController;
+			if (!CurrentDriver) CurrentDriver = InputController;
+			return true;
 		}
 	}
 	else
 	{
-		// Activate Gunner FPV
-		GunnerCamera_FPV->Activate();
-		DriverCamera_3PV->Deactivate();
-
-		// Ensure the Gunner minimalist UI overlay is visible.
-		if (CockpitCrosshairClass)
+		if (RightSeatController == nullptr || RightSeatController == InputController)
 		{
-			if (!CockpitCrosshairInstance)
-			{
-				if (APlayerController* PC = Cast<APlayerController>(GetController()))
-				{
-					CockpitCrosshairInstance = CreateWidget<UUserWidget>(PC, CockpitCrosshairClass);
-					CockpitCrosshairInstance->AddToViewport(10); // High Z-Order for HUD.
-				}
-			}
-
-			if (CockpitCrosshairInstance)
-			{
-				CockpitCrosshairInstance->SetVisibility(ESlateVisibility::Visible);
-			}
+			RightSeatController = InputController;
+			if (!CurrentGunner) CurrentGunner = InputController;
+			return true;
 		}
 	}
+	return false; // Seat is already taken by someone else!
+}
+
+// ChooseSeat() — seat the human, then drop the AI into whatever's left
+void AIBMech_Base::ChooseSeat(AController* SelectingController, bool bWantLeftSeat)
+{
+	if (!SelectingController) return;
+
+	if (bWantLeftSeat)
+	{
+		if (!LeftSeatController || LeftSeatController == SelectingController)
+		{
+			AssignToLeftSeat(SelectingController);
+		}
+	}
+	else
+	{
+		if (!RightSeatController || RightSeatController == SelectingController)
+		{
+			AssignToRightSeat(SelectingController);
+		}
+	}
+
+	// Now backfill the AI into whichever seat is still open
+	if (CoPilotController)
+	{
+		if (!LeftSeatController)      AssignToLeftSeat(CoPilotController);
+		else if (!RightSeatController) AssignToRightSeat(CoPilotController);
+	}
+
+	ApplyLocalViewForRole(SelectingController);
+}
+
+// IBMech_Base.cpp
+void AIBMech_Base::ApplyLocalViewForRole(AController* SelectingController)
+{
+	bool bNowGunner = (SelectingController == CurrentGunner);
+	bIsGunner = bNowGunner;
+	bIsDriverActive = !bNowGunner;
+
+	UCharacterMovementComponent* MechMovement = GetCharacterMovement();
+
+	if (bNowGunner)
+	{
+		if (MechMovement) MechMovement->bUseControllerDesiredRotation = false;
+		DriverCamera_3PV->Deactivate();
+		GunnerCamera_FPV->Activate();
+
+	}
+	else
+	{
+		if (MechMovement) MechMovement->bUseControllerDesiredRotation = true;
+		GunnerCamera_FPV->Deactivate();
+		DriverCamera_3PV->Activate();
+
+	}
+
+	OnRoleSwapped(bIsGunner);
 }

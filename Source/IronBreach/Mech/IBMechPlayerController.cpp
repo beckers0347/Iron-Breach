@@ -2,6 +2,8 @@
 #include "IBMech_Base.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blueprint/UserWidget.h"
+#include "UObject/ConstructorHelpers.h"
 
 void AIBMechPlayerController::BeginPlay()
 {
@@ -28,10 +30,18 @@ void AIBMechPlayerController::OnPossess(APawn* aPawn)
 {
 	Super::OnPossess(aPawn);
 
-	// Automatically assign this human player to the Left Seat upon possession
 	if (AIBMech_Base* Mech = Cast<AIBMech_Base>(aPawn))
 	{
-		Mech->AssignToLeftSeat(this);
+		if (Mech->SeatSelectWidgetClass)
+		{
+			UUserWidget* SeatWidget = CreateWidget<UUserWidget>(this, Mech->SeatSelectWidgetClass);
+			if (SeatWidget)
+			{
+				SeatWidget->AddToViewport();
+				bShowMouseCursor = true;
+				SetInputMode(FInputModeUIOnly());
+			}
+		}
 	}
 }
 
