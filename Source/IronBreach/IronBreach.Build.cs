@@ -23,7 +23,8 @@ public class IronBreach : ModuleRules
 			// Netcode (ADR-002): session interfaces + helpers. The Steam module itself is a
 			// plugin loaded at runtime; only these two are compile-time dependencies.
 			"OnlineSubsystem",
-			"OnlineSubsystemUtils"
+			"OnlineSubsystemUtils",
+			"UMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

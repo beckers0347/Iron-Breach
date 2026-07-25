@@ -9,6 +9,9 @@
 
 
 class AController;
+class USpringArmComponent;
+class UCameraComponent;
+class UWeaponRigComponent;
 
 UCLASS()
 class IRONBREACH_API AIBMech_Base : public ACharacter
@@ -22,6 +25,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void PerformWeaponTrace();
+
 
 public:
 	// --- SEAT ASSIGNMENTS ---
@@ -67,10 +71,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Mech|Combat")
 	void FireWeapon(AController* Requester);
 
-	// Weapon Rig component
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech|Combat")
-	TObjectPtr<UWeaponRigComponent> WeaponRigComponent;
-
 	// Active weapon data reference
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mech|Combat")
 	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
@@ -79,10 +79,53 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Mech|Combat")
 	void EquipWeapon(UWeaponDataAsset* NewWeaponData);
 
+	// The massive mech chassis and head mesh.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech|Components")
+	TObjectPtr<USkeletalMeshComponent> MechMesh;
+
+	// Driver's 3rd Person camera setup.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech|Components")
+	TObjectPtr<USpringArmComponent> DriverSpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech|Components")
+	TObjectPtr<UCameraComponent> DriverCamera_3PV;
+
+	// Gunner's 1st Person cockpit camera setup.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech|Components")
+	TObjectPtr<UCameraComponent> GunnerCamera_FPV;
+
+	// Weapon Rig, essential for FPV posing and FPV view integration[cite: 4].
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech|Combat")
+	TObjectPtr<UWeaponRigComponent> WeaponRigComponent;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Mech|Views")
+	bool bIsDriverActive = true;
+
+	// Function to toggle between views.
+	UFUNCTION(BlueprintCallable, Category = "Mech|Views")
+	void ToggleViewMode();
+
+	// Reference to the Gunner's minimalist cockpit UI crosshair (e.g., from your image).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mech|UI")
+	TSubclassOf<UUserWidget> CockpitCrosshairClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech State")
+	bool bIsGunner;
+
+	// This tells C++ to send a signal to the Blueprint. We don't write a body for it in .cpp!
+	UFUNCTION(BlueprintImplementableEvent, Category = "Mech State")
+	void OnRoleSwapped(bool bIsNowGunner);
+
 	// --- ROUTED INPUT ACTIONS ---
 	// These replace the standard Enhanced Input bindings
 	void RouteMoveInput(const FInputActionValue& Value, AController* RequestingController);
 	void RouteLookInput(const FInputActionValue& Value, AController* RequestingController);
 	void RouteFireInput(AController* RequestingController);
+
+private:
+	// Cache the widget instance for performance.
+	TObjectPtr<UUserWidget> CockpitCrosshairInstance;
+
+
 
 };

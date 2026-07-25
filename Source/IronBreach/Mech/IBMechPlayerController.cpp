@@ -15,6 +15,13 @@ void AIBMechPlayerController::BeginPlay()
 			Subsystem->AddMappingContext(MechMappingContext, 0);
 		}
 	}
+
+	// IBMechPlayerController.cpp — in BeginPlay(), or the constructor if you add one
+	PlayerCameraManager->ViewPitchMin = -90.0f;
+	PlayerCameraManager->ViewPitchMax = 90.0f;
+	// IBMechPlayerController.cpp — in BeginPlay(), or the constructor if you add one
+	PlayerCameraManager->ViewPitchMin = -90.0f;
+	PlayerCameraManager->ViewPitchMax = 90.0f;
 }
 
 void AIBMechPlayerController::OnPossess(APawn* aPawn)

@@ -2,6 +2,13 @@
 #include "GameFramework/Controller.h"
 #include "Engine/LocalPlayer.h"
 #include "IBMechAIController.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Combat/WeaponRigComponent.h"
+#include "Blueprint/UserWidget.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AIBMech_Base::AIBMech_Base()
 {
@@ -11,14 +18,59 @@ AIBMech_Base::AIBMech_Base()
 	RightSeatController = nullptr;
 	CurrentDriver = nullptr;
 	CurrentGunner = nullptr;
+	bIsGunner = false; // We start as the Driver by default
+
+	// Mech mesh must be initialized first.
+	MechMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MechMesh"));
+	MechMesh->SetupAttachment(GetCapsuleComponent());
 
 	// Create the weapon rig component in C++ so it's always attached
 	WeaponRigComponent = CreateDefaultSubobject<UWeaponRigComponent>(TEXT("WeaponRigComponent"));
+
+	// --- Initialize Driver Views (3PV) ---
+
+	DriverSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("DriverSpringArm"));
+	DriverSpringArm->SetupAttachment(GetCapsuleComponent());
+	DriverSpringArm->TargetArmLength = 400.0f; // Adjust to your preferred distance
+	DriverSpringArm->bUsePawnControlRotation = true; // We want it locked to the chassis
+	DriverSpringArm->bInheritYaw = true;
+	DriverSpringArm->bInheritPitch = true;
+	DriverSpringArm->bInheritRoll = false;
+
+	DriverCamera_3PV = CreateDefaultSubobject<UCameraComponent>(TEXT("DriverCamera_3PV"));
+	DriverCamera_3PV->SetupAttachment(DriverSpringArm, USpringArmComponent::SocketName);
+	DriverCamera_3PV->bUsePawnControlRotation = false;
+
+	// --- Initialize Gunner Views (FPV Cockpit) ---
+
+	GunnerCamera_FPV = CreateDefaultSubobject<UCameraComponent>(TEXT("GunnerCamera_FPV"));
+	GunnerCamera_FPV->SetupAttachment(MechMesh); // Attach directly to the head/body.
+
+	// Position precisely: For example, +150 forward, +80 up relative to MechRoot.
+	GunnerCamera_FPV->SetRelativeLocation(FVector(150.f, 0.f, 80.f));
+	GunnerCamera_FPV->bUsePawnControlRotation = false; // Gunner will point the weapons[cite: 4], not the view.
 }
 
 void AIBMech_Base::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Initially ensure Driver Camera is active.
+	if (DriverCamera_3PV)
+	{
+		DriverCamera_3PV->Activate();
+	}
+	if (GunnerCamera_FPV)
+	{
+		GunnerCamera_FPV->Deactivate();
+	}
+
+	// Link the Weapon Rig (cite: 3) to the GUNNER camera.
+	// This is crucial because the gunner poses the weapon model relative to the FPV view.
+	if (WeaponRigComponent)
+	{
+		WeaponRigComponent->SetReferences(GunnerCamera_FPV, MechMesh); // [cite: 4]
+	}
 
 	// Spawn the AI Co-Pilot
 	FActorSpawnParameters SpawnParams;
@@ -87,16 +139,60 @@ void AIBMech_Base::PerformRoleSwap()
 
 	UE_LOG(LogTemp, Log, TEXT("[Mech] Roles Swapped! Driver is now: %s"), 
 		CurrentDriver ? *CurrentDriver->GetName() : TEXT("None"));
+
+	bIsGunner = !bIsGunner;
+
+	// Grab the character movement component safely
+	UCharacterMovementComponent* MechMovement = GetCharacterMovement();
+
+	// If we just swapped to the Gunner role:
+	if (bIsGunner)
+	{
+
+		if (MechMovement)
+		{
+			MechMovement->bUseControllerDesiredRotation = false;
+		}
+
+		DriverCamera_3PV->Deactivate();
+		GunnerCamera_FPV->Activate();
+	}
+	// If we just swapped back to the Driver role:
+	else
+	{
+
+		if (MechMovement)
+		{
+			MechMovement->bUseControllerDesiredRotation = true;
+		}
+
+		GunnerCamera_FPV->SetActive(false);
+		DriverCamera_3PV->SetActive(true);
+	}
+
+	if (APlayerController* PC = Cast<APlayerController>(CurrentGunner))
+	{
+		FRotator ResetRot = GetActorRotation();
+		PC->SetControlRotation(ResetRot);
+	}
+
+	// ... (your existing camera swap code) ...
+
+	// Tell the Blueprint that the swap just happened!
+	OnRoleSwapped(bIsGunner);
 }
 
 // --- INPUT ROUTING (THE GATEKEEPER) ---
 
 void AIBMech_Base::RouteMoveInput(AController* Requester, const FVector2D& InputValue)
 {
-	// Gatekeeper: Only the designated driver is allowed to steer the chassis
 	if (Requester != CurrentDriver) return;
 
-	// X is Forward/Backward (W/S), Y is Left/Right (A/D) based on standard 2D Axis setup
+	// If we are in the gunner seat, movement keys shouldn't drive the chassis 
+	// (or you can allow them if you want a pilot/gunner hybrid setup). 
+	// Assuming only the Driver moves the mech:
+	if (bIsGunner) return;
+
 	if (InputValue.Y != 0.0f)
 	{
 		AddMovementInput(GetActorForwardVector(), InputValue.Y);
@@ -145,12 +241,44 @@ void AIBMech_Base::RequestRoleSwap(AController* Requester)
 
 void AIBMech_Base::RouteLookInput(AController* Requester, const FVector2D& InputValue)
 {
-	if (Requester != CurrentDriver) return;
+	if (Requester != CurrentDriver && Requester != CurrentGunner) return;
 
-	// Only rotate the mech chassis horizontally (Yaw)
-	if (InputValue.X != 0.0f)
+	if (bIsGunner)
 	{
-		AddControllerYawInput(InputValue.X);
+		APlayerController* PC = Cast<APlayerController>(Requester);
+		if (!PC) return;
+
+		if (InputValue.X != 0.0f)
+		{
+			FRotator CurrentControlRot = PC->GetControlRotation();
+			float MechYaw = GetActorRotation().Yaw;
+
+			// How far the view currently is from the mech's forward, normalized to -180..180
+			float CurrentDeltaYaw = FMath::UnwindDegrees(CurrentControlRot.Yaw - MechYaw);
+
+			// Apply the input, then clamp the result to +/-90 from center
+			float NewDeltaYaw = FMath::Clamp(CurrentDeltaYaw + InputValue.X, -90.0f, 90.0f);
+
+			CurrentControlRot.Yaw = MechYaw + NewDeltaYaw;
+			PC->SetControlRotation(CurrentControlRot);
+		}
+
+		if (InputValue.Y != 0.0f)
+		{
+			AddControllerPitchInput(InputValue.Y);
+		}
+	}
+	else
+	{
+		// DRIVER MODE — unchanged, free look
+		if (InputValue.X != 0.0f)
+		{
+			AddControllerYawInput(InputValue.X);
+		}
+		if (InputValue.Y != 0.0f)
+		{
+			AddControllerPitchInput(InputValue.Y);
+		}
 	}
 }
 
@@ -223,6 +351,50 @@ void AIBMech_Base::PerformWeaponTrace()
 		{
 			// Example: Apply standard engine damage
 			// UGameplayStatics::ApplyDamage(HitActor, CurrentWeaponData->BaseDamage, Controller, this, UDamageType::StaticClass());
+		}
+	}
+}
+
+void AIBMech_Base::ToggleViewMode()
+{
+	bIsDriverActive = !bIsDriverActive;
+
+	if (!DriverCamera_3PV || !GunnerCamera_FPV) return;
+
+	if (bIsDriverActive)
+	{
+		// Activate Driver 3PV
+		DriverCamera_3PV->Activate();
+		GunnerCamera_FPV->Deactivate();
+
+		// Hide Gunner minimalist crosshair
+		if (CockpitCrosshairInstance)
+		{
+			CockpitCrosshairInstance->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+	else
+	{
+		// Activate Gunner FPV
+		GunnerCamera_FPV->Activate();
+		DriverCamera_3PV->Deactivate();
+
+		// Ensure the Gunner minimalist UI overlay is visible.
+		if (CockpitCrosshairClass)
+		{
+			if (!CockpitCrosshairInstance)
+			{
+				if (APlayerController* PC = Cast<APlayerController>(GetController()))
+				{
+					CockpitCrosshairInstance = CreateWidget<UUserWidget>(PC, CockpitCrosshairClass);
+					CockpitCrosshairInstance->AddToViewport(10); // High Z-Order for HUD.
+				}
+			}
+
+			if (CockpitCrosshairInstance)
+			{
+				CockpitCrosshairInstance->SetVisibility(ESlateVisibility::Visible);
+			}
 		}
 	}
 }
