@@ -21,10 +21,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScopeOverlayChangedSignature, boo
  * socket on the mesh, never by touching rig code:
  *
  *  - Hip pose:  the Grip socket is aligned to the authored HipAnchor offset.
- *  - ADS pose:  the Aim socket is pulled onto the camera's forward axis at
- *               Ads.AimPointDistance, weapon forward locked to camera forward.
- *               Sight alignment is therefore exact for every weapon with zero
- *               per-weapon rig tuning.
+ *  - ADS pose:  TWO MODES, chosen per weapon in FIBAdsSettings:
+ *      socket-driven (default) — the Aim socket is pulled onto the camera's
+ *        forward axis at Ads.AimPointDistance; exact sights for any weapon
+ *        with an authored Aim socket, zero tuning.
+ *      authored (Ads.bUseAuthoredAdsTransform) — the mesh is posed at
+ *        Ads.ADSTransform VERBATIM (no socket solve, no mount rotation
+ *        stacked). WYSIWYG with the F8-eject authoring recipe.
  *
  * ADS is a smoothed 0..1 blend, not a bool — pose, FOV, spread and move speed
  * all read the blend, so partial-raise firing works and nothing snaps.
@@ -100,7 +103,8 @@ protected:
 
 	/** Corrects the weapon mesh's authored facing so the barrel points forward (+X).
 	 *  The template rifle is modelled facing sideways, so we yaw it -90. Adjust here
-	 *  (usually a 90 or 180 yaw) if a different weapon points the wrong way. */
+	 *  (usually a 90 or 180 yaw) if a different weapon points the wrong way.
+	 *  NOT applied in authored-ADS mode — that pose is verbatim. */
 	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Sockets")
 	FRotator WeaponMountRotation = FRotator(0.0f, -90.0f, 0.0f);
 

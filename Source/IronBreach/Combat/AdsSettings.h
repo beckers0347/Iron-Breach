@@ -12,6 +12,22 @@
  *
  * UNITS: Unreal is centimetres (Unity was metres). Distance defaults below
  * are the Unity values * 100. Degrees and multipliers are unchanged.
+ *
+ * TWO ADS MODES (reconciles the Jul-18 authored-transform redesign with the
+ * original socket solve — both survive, per weapon):
+ *
+ *  1. SOCKET-DRIVEN (default, bUseAuthoredAdsTransform = false)
+ *     The rig pulls the weapon's Aim socket onto the camera's forward axis at
+ *     AimPointDistance. Sights centre exactly for any weapon with an authored
+ *     Aim socket — zero per-weapon tuning. Use this unless you have a reason
+ *     not to.
+ *
+ *  2. AUTHORED (bUseAuthoredAdsTransform = true)
+ *     The rig poses the weapon mesh at ADSTransform VERBATIM — no socket
+ *     solve, no mount rotation stacked on top. WYSIWYG: pose the WeaponMesh
+ *     component in the details panel during PIE (F8 to eject while aiming),
+ *     copy the exact Location/Rotation values into the DA. What you copied is
+ *     what gets applied.
  */
 USTRUCT(BlueprintType)
 struct FIBAdsSettings
@@ -28,9 +44,22 @@ struct FIBAdsSettings
 	float AdsTime = 0.22f;
 
 	// ---- Sight alignment ----
-	/** How far in front of the camera the weapon's Aim socket sits at full ADS, in CM (Unity 0.22m -> 22cm). */
-	/** The exact location, rotation, and scale the weapon snaps to when aiming. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ads")
+	/** How far in front of the camera the weapon's Aim socket sits at full ADS, in CM
+	 *  (Unity 0.22m -> 22cm). Socket-driven mode only. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ADS|Sight",
+		meta = (ClampMin = "5.0", ClampMax = "200.0", EditCondition = "!bUseAuthoredAdsTransform"))
+	float AimPointDistance = 22.0f;
+
+	/** Opt in to the hand-authored ADS pose below instead of the socket solve. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ADS|Sight")
+	bool bUseAuthoredAdsTransform = false;
+
+	/** Authored camera-relative pose the weapon MESH snaps to at full ADS, applied verbatim
+	 *  (no socket solve, no mount rotation added). Author via the F8-eject recipe in
+	 *  Docs/ADS_WEAPON_HANDLING_WIRING.md. Identity means "mesh at the camera origin" — do
+	 *  not enable the flag without authoring this. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ADS|Sight",
+		meta = (EditCondition = "bUseAuthoredAdsTransform"))
 	FTransform ADSTransform;
 
 	// ---- Accuracy ----

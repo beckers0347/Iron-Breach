@@ -14,7 +14,6 @@ UWeaponRigComponent::UWeaponRigComponent()
 void UWeaponRigComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogIronBreach, Log, TEXT("[WeaponRig] AdsTime is: %f"), Settings.AdsTime);
 	if (ViewCamera)
 	{
 		BaseFov = ViewCamera->FieldOfView;
@@ -88,14 +87,10 @@ void UWeaponRigComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	}
 
 	LookDelta = FVector2D::ZeroVector; // consumed this frame
-	UE_LOG(LogIronBreach, Log, TEXT("[WeaponRig] Tick is running. Blend: %f | WantAds: %s"), Blend, bWantAds ? TEXT("True") : TEXT("False"));
-
 }
 
 void UWeaponRigComponent::UpdateFov()
 {
-	UE_LOG(LogIronBreach, VeryVerbose, TEXT("[WeaponRig] Blend: %f | FOV: %f"), Blend, ViewCamera->FieldOfView);
-
 	if (BaseFov <= 0.0f) BaseFov = ViewCamera->FieldOfView;
 	const float Zoom = FMath::Max(Settings.ZoomMultiplier, 1.0f);
 	ViewCamera->SetFieldOfView(BaseFov / FMath::Lerp(1.0f, Zoom, Blend));
@@ -103,26 +98,45 @@ void UWeaponRigComponent::UpdateFov()
 
 void UWeaponRigComponent::UpdateWeaponPose()
 {
+	const FQuat MountQuat = WeaponMountRotation.Quaternion();
+
 	// Hip pose: solve for the mesh origin such that the Grip socket lands on HipAnchor.
-	const FQuat HipRot = HipAnchorRotation.Quaternion();
+	// The mount correction is part of the final rotation, so it must be folded in BEFORE
+	// rotating socket offsets — otherwise a weapon with authored sockets gets its grip
+	// offset rotated in the wrong frame and the pose drifts sideways.
+	const FQuat HipRot = HipAnchorRotation.Quaternion() * MountQuat;
 	const FVector HipPos = HipAnchorLocation - HipRot.RotateVector(GripLocal);
 
-	// ADS pose: same pattern, but solve for the mesh origin such that the Aim socket
-	// lands on the authored ADS target. This is what actually makes sights line up —
-	// without subtracting AimLocal here, the mesh ROOT (not the sight) sits at the
-	// target, so the Aim socket is off by however far it sits from the mesh origin.
-	const FQuat AdsRot = Settings.ADSTransform.GetRotation();
-	const FVector AdsPos = Settings.ADSTransform.GetLocation() - AdsRot.RotateVector(AimLocal);
+	FQuat AdsRot;
+	FVector AdsPos;
+	if (Settings.bUseAuthoredAdsTransform)
+	{
+		// Authored mode: VERBATIM. The value copied from the details panel is the value
+		// applied — no socket solve, no mount stacking. If it looked right in the
+		// viewport, it looks right in game.
+		AdsRot = Settings.ADSTransform.GetRotation();
+		AdsPos = Settings.ADSTransform.GetLocation();
+	}
+	else
+	{
+		// Socket mode (default): solve for the mesh origin such that the Aim socket sits
+		// AimPointDistance straight ahead of the camera, sights level. Self-solving for
+		// any weapon with an authored Aim socket; a socketless mesh aligns by its root.
+		AdsRot = MountQuat;
+		AdsPos = FVector(Settings.AimPointDistance, 0.0f, 0.0f) - AdsRot.RotateVector(AimLocal);
+	}
 
 	const FVector Pos = FMath::Lerp(HipPos, AdsPos, Blend);
 	const FQuat Rot = FQuat::Slerp(HipRot, AdsRot, Blend);
 
-	// --- ADD THIS LINE HERE ---
-	UE_LOG(LogIronBreach, Log, TEXT("Weapon Mesh Location: %s"), *Pos.ToString());
-	// --------------------------
+	// Look sway: small positional lag against look input, suppressed on sights.
+	FVector SwayTarget(-LookDelta.Y, -LookDelta.X, 0.0f);
+	SwayTarget *= SwayAmount;
+	SwayTarget = SwayTarget.GetClampedToMaxSize(SwayMax) * (1.0f - Blend * AdsSwayReduction);
+	Sway = FMath::VInterpTo(Sway, SwayTarget, GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.016f, SwayResponse);
 
 	WeaponMesh->SetRelativeLocation(Pos + Sway);
-	WeaponMesh->SetRelativeRotation(Rot * WeaponMountRotation.Quaternion());
+	WeaponMesh->SetRelativeRotation(Rot);
 }
 
 void UWeaponRigComponent::UpdateScope()
@@ -140,6 +154,4 @@ void UWeaponRigComponent::UpdateScope()
 	{
 		WeaponMesh->SetVisibility(!bScopeVisible, /*bPropagateToChildren=*/true);
 	}
-
-	UE_LOG(LogIronBreach, Verbose, TEXT("[WeaponRig] scope overlay -> %s"), bScopeVisible ? TEXT("visible") : TEXT("hidden"));
 }
