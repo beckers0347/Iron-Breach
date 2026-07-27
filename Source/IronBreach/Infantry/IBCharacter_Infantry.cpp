@@ -7,10 +7,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h" // Explicit include: required for ULocalPlayer::GetSubsystem under IWYU
 #include "Engine/World.h"       // Explicit include: required for LineTraceSingleByChannel under IWYU
+#include "Engine/OverlapResult.h"
 #include "Combat/HealthComponent.h"
 #include "Combat/HitscanWeaponComponent.h"
 #include "Combat/WeaponRigComponent.h"
 #include "Combat/WeaponDataAsset.h"
+#include "Mech/IBMech_Base.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -72,19 +74,16 @@ void AIBCharacter_Infantry::BeginPlay()
 	if (WeaponRig)
 	{
 		WeaponRig->SetReferences(FirstPersonCamera, WeaponMesh);
-		UE_LOG(LogIronBreach, Log, TEXT("[Character] WeaponRig found and valid!"));
 
 		if (CurrentWeaponData)
 		{
 			WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
-			UE_LOG(LogIronBreach, Log, TEXT("%s: ADS settings applied from %s"), *GetName(), *CurrentWeaponData->GetName());
 		}
 		else
 		{
 			UE_LOG(LogIronBreach, Error, TEXT("%s: CurrentWeaponData is NULL! Check Blueprint Class Defaults."), *GetName());
 		}
 	}
-
 	else
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("[Character] WeaponRig is NULL! Check constructor."));
@@ -138,18 +137,26 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopAiming);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &AIBCharacter_Infantry::StopAiming);
 		}
+		if (InteractAction)
+		{
+			EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::TryBoardMech);
+		}
 	}
 	else
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("%s: Expected an EnhancedInputComponent. Check DefaultInputComponentClass in DefaultInput.ini"), *GetName());
 	}
 
-	// Fallback so aim-down-sights works out of the box on RIGHT MOUSE without any
-	// content setup. If an AimAction asset is assigned and bound above, this is skipped.
+	// Fallbacks so ADS and boarding work out of the box without any content setup.
+	// If the action assets are assigned and bound above, these are skipped.
 	if (!AimAction && PlayerInputComponent)
 	{
 		PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &AIBCharacter_Infantry::StartAiming);
 		PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Released, this, &AIBCharacter_Infantry::StopAiming);
+	}
+	if (!InteractAction && PlayerInputComponent)
+	{
+		PlayerInputComponent->BindKey(EKeys::E, IE_Pressed, this, &AIBCharacter_Infantry::TryBoardMech);
 	}
 }
 
@@ -191,7 +198,6 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 
 void AIBCharacter_Infantry::StartAiming()
 {
-	UE_LOG(LogIronBreach, Log, TEXT("[Input] StartAiming called. WeaponRig valid: %s"), WeaponRig ? TEXT("Yes") : TEXT("No"));
 	if (WeaponRig) WeaponRig->SetAiming(true);
 }
 
@@ -222,6 +228,95 @@ void AIBCharacter_Infantry::Fire()
 	if (WeaponComponent)
 	{
 		WeaponComponent->Fire();
+	}
+}
+
+// --- CARYATID BOARDING (u3-07) ---
+
+AIBMech_Base* AIBCharacter_Infantry::FindBoardableMech() const
+{
+	UWorld* World = GetWorld();
+	if (!World) return nullptr;
+
+	FVector ViewLoc;
+	FRotator ViewRot;
+	if (Controller)
+	{
+		Controller->GetPlayerViewPoint(ViewLoc, ViewRot);
+	}
+	else
+	{
+		GetActorEyesViewPoint(ViewLoc, ViewRot);
+	}
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	// A forward sweep first — "the mech I'm looking at".
+	FHitResult Hit;
+	if (World->SweepSingleByChannel(Hit, ViewLoc, ViewLoc + ViewRot.Vector() * BoardReach,
+		FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(100.0f), Params))
+	{
+		if (AIBMech_Base* Mech = Cast<AIBMech_Base>(Hit.GetActor()))
+		{
+			return Mech;
+		}
+	}
+
+	// Fallback: any mech we're standing next to. A 60m machine fills the screen — the
+	// player is often too close for the aim sweep to make sense.
+	TArray<FOverlapResult> Overlaps;
+	if (World->OverlapMultiByChannel(Overlaps, GetActorLocation(), FQuat::Identity, ECC_Pawn,
+		FCollisionShape::MakeSphere(BoardReach), Params))
+	{
+		for (const FOverlapResult& Overlap : Overlaps)
+		{
+			if (AIBMech_Base* Mech = Cast<AIBMech_Base>(Overlap.GetActor()))
+			{
+				return Mech;
+			}
+		}
+	}
+	return nullptr;
+}
+
+void AIBCharacter_Infantry::TryBoardMech()
+{
+	AIBMech_Base* Mech = FindBoardableMech();
+	if (!Mech)
+	{
+		return;
+	}
+
+	// Give UI a chance to offer the seat choice...
+	BP_OnMechInteract(Mech);
+
+	// ...and/or board the helm directly (default) so the loop works with zero content.
+	if (bAutoBoardOnInteract)
+	{
+		RequestBoard(Mech, /*bWantLeftSeat=*/true);
+	}
+}
+
+void AIBCharacter_Infantry::RequestBoard(AIBMech_Base* Mech, bool bWantLeftSeat)
+{
+	if (!Mech) return;
+
+	if (HasAuthority())
+	{
+		Mech->ServerBoard(GetController(), this, bWantLeftSeat);
+	}
+	else
+	{
+		Server_RequestBoard(Mech, bWantLeftSeat);
+	}
+}
+
+void AIBCharacter_Infantry::Server_RequestBoard_Implementation(AIBMech_Base* Mech, bool bWantLeftSeat)
+{
+	if (Mech)
+	{
+		Mech->ServerBoard(GetController(), this, bWantLeftSeat);
 	}
 }
 
