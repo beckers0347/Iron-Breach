@@ -261,7 +261,7 @@ void AIBMech_Base::RouteLookInput(AController* Requester, const FVector2D& Input
 	}
 	else
 	{
-		// DRIVER MODE — unchanged, free look
+		// DRIVER MODE ï¿½ unchanged, free look
 		if (InputValue.X != 0.0f)
 		{
 			AddControllerYawInput(InputValue.X);
@@ -372,7 +372,7 @@ bool AIBMech_Base::TryEnterSeat(AController* InputController, bool bTargetLeftSe
 	return false; // Seat is already taken by someone else!
 }
 
-// ChooseSeat() — seat the human, then drop the AI into whatever's left
+// ChooseSeat() ï¿½ seat the human, then drop the AI into whatever's left
 void AIBMech_Base::ChooseSeat(AController* SelectingController, bool bWantLeftSeat)
 {
 	if (!SelectingController) return;
@@ -400,6 +400,27 @@ void AIBMech_Base::ChooseSeat(AController* SelectingController, bool bWantLeftSe
 	}
 
 	ApplyLocalViewForRole(SelectingController);
+}
+
+// View-only toggle between the Driver 3PV and Gunner FPV cameras.
+// (Declared BlueprintCallable in the header; without this body the module fails to
+// link â€” UHT's execToggleViewMode thunk references it even if nothing calls it yet.)
+void AIBMech_Base::ToggleViewMode()
+{
+	bIsDriverActive = !bIsDriverActive;
+
+	if (bIsDriverActive)
+	{
+		if (GunnerCamera_FPV) GunnerCamera_FPV->Deactivate();
+		if (DriverCamera_3PV) DriverCamera_3PV->Activate();
+	}
+	else
+	{
+		if (DriverCamera_3PV) DriverCamera_3PV->Deactivate();
+		if (GunnerCamera_FPV) GunnerCamera_FPV->Activate();
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("[Mech] View mode -> %s"), bIsDriverActive ? TEXT("Driver 3PV") : TEXT("Gunner FPV"));
 }
 
 // IBMech_Base.cpp
