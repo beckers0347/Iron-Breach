@@ -395,8 +395,20 @@ bool AIBMech_Base::ServerBoard(AController* BoardingController, AIBCharacter_Inf
 	const bool bHullHeldByHuman = (CurrentDriverPC != nullptr && CurrentDriverPC != PC);
 	const bool bSeatHeldByHuman = (CurrentGunnerPC != nullptr && CurrentGunnerPC != PC);
 
-	// A pilot boarding an empty mech always drives, whatever they asked for.
-	bool bTakeHull = bWantLeftSeat || !bHullHeldByHuman;
+	// Honour the station the pilot actually asked for. The seat-select UI is a promise:
+	// pressing GUNNER must put you behind the guns, not silently at the helm. The AI
+	// co-pilot covers whichever station is left (BackfillSeatWithAI), so a solo human
+	// gunner still gets a mech that can walk.
+	const bool bSeatUsable = (GunnerSeat != nullptr) && !bSeatHeldByHuman;
+
+	bool bTakeHull = bWantLeftSeat;
+	if (!bTakeHull && !bSeatUsable)
+	{
+		// Asked for the guns, but the seat is crewed or missing — fall back to the helm.
+		UE_LOG(LogIronBreach, Display, TEXT("[Mech] %s wanted the gunner seat but it is unavailable — seating them at the helm."),
+			*DescribeCrewName(PC));
+		bTakeHull = true;
+	}
 	if (bTakeHull && bHullHeldByHuman)
 	{
 		bTakeHull = false; // asked for the hull, it's taken — offer the seat
@@ -453,17 +465,33 @@ bool AIBMech_Base::ServerBoard(AController* BoardingController, AIBCharacter_Inf
 
 void AIBMech_Base::BackfillSeatWithAI()
 {
-	if (!HasAuthority() || !GunnerSeat || !CoPilotController) return;
+	if (!HasAuthority() || !CoPilotController) return;
 
 	const bool bHullHasPlayer = Cast<APlayerController>(GetController()) != nullptr;
-	if (bHullHasPlayer && GunnerSeat->GetController() == nullptr)
+	const bool bSeatHasPlayer = GunnerSeat && (Cast<APlayerController>(GunnerSeat->GetController()) != nullptr);
+
+	// VIRGIL fills whichever station the human left empty — parity in both directions (u3-05).
+	if (bHullHasPlayer && GunnerSeat && GunnerSeat->GetController() == nullptr)
 	{
+		// Human drives -> AI takes the guns.
 		AssignToRightSeat(CoPilotController);
 		CoPilotController->Possess(GunnerSeat);
-		if (PartnerName.IsEmpty() || PartnerName == TEXT("Partner") || PartnerName == TEXT("Empty"))
-		{
-			PartnerName = DescribeCrewName(CoPilotController);
-		}
+	}
+	else if (bSeatHasPlayer && GetController() == nullptr)
+	{
+		// Human gunning -> AI takes the helm, otherwise the mech cannot walk.
+		// Seat BEFORE possess so PossessedBy doesn't wipe the crew.
+		AssignToLeftSeat(CoPilotController);
+		CoPilotController->Possess(this);
+	}
+	else
+	{
+		return; // nothing to backfill
+	}
+
+	if (PartnerName.IsEmpty() || PartnerName == TEXT("Partner") || PartnerName == TEXT("Empty"))
+	{
+		PartnerName = DescribeCrewName(CoPilotController);
 	}
 }
 
