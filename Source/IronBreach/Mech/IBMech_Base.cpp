@@ -124,8 +124,11 @@ void AIBMech_Base::BeginPlay()
 	{
 		SpawnGunnerSeat();
 
+		// NOTE: do NOT set SpawnParams.Owner = this. Possession makes the controller the
+		// owner of the pawn, so a mech-owned controller that later possesses the hull forms
+		// a circular ownership ("Owner loop"). Unreal refuses the SetOwner, possession
+		// half-completes and the mech goes unresponsive. Controllers are ownerless.
 		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 		CoPilotController = GetWorld()->SpawnActor<AIBMechAIController>(
