@@ -396,7 +396,19 @@ bool AIBMech_Base::ServerBoard(AController* BoardingController, AIBCharacter_Inf
 	const bool bSeatHeldByHuman = (CurrentGunnerPC != nullptr && CurrentGunnerPC != PC);
 
 	// A pilot boarding an empty mech always drives, whatever they asked for.
-	bool bTakeHull = bWantLeftSeat || !bHullHeldByHuman;
+	bool bTakeHull = bWantLeftSeat;
+
+	// If they want the Gunner seat, but a human is already in it, force them to the Hull (Driver) if it's empty.
+	if (!bTakeHull && bSeatHeldByHuman && !bHullHeldByHuman)
+	{
+		bTakeHull = true;
+	}
+	// If they want the Hull, but a human is already in it, force them to the Gunner seat if it's empty.
+	else if (bTakeHull && bHullHeldByHuman && !bSeatHeldByHuman)
+	{
+		bTakeHull = false;
+	}
+
 	if (bTakeHull && bHullHeldByHuman)
 	{
 		bTakeHull = false; // asked for the hull, it's taken — offer the seat
