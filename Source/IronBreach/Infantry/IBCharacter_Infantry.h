@@ -14,7 +14,6 @@ class UWeaponRigComponent;
 class UWeaponDataAsset;
 class UCameraComponent;
 class UStaticMeshComponent;
-class AIBMech_Base;
 
 UCLASS()
 class IRONBREACH_API AIBCharacter_Infantry : public ACharacter, public IDamageableInterface
@@ -27,44 +26,10 @@ public:
 	/** Exposed so UHitscanWeaponComponent can read the current spread when firing. */
 	UWeaponRigComponent* GetWeaponRig() const { return WeaponRig; }
 
-	// --- CARYATID BOARDING (u3-07: interact -> Server_Board possession swap) ---
-
-	/** Interact input: find a boardable mech in front of us and start boarding. Fires
-	 *  BP_OnMechInteract for a seat-select UI; when bAutoBoardOnInteract is set (default)
-	 *  it also boards the navigator station directly so the flow works with zero UI. */
-	UFUNCTION(BlueprintCallable, Category = "Boarding")
-	void TryBoardMech();
-
-	/** Board a specific mech/station. Call this from seat-select widget buttons
-	 *  (LEFT = navigator/hull, RIGHT = gunner seat). Routes to the server automatically. */
-	UFUNCTION(BlueprintCallable, Category = "Boarding")
-	void RequestBoard(AIBMech_Base* Mech, bool bWantLeftSeat);
-
-	/** UI hook: a boardable mech was found by TryBoardMech. Show your seat-select here
-	 *  and call RequestBoard from its buttons. */
-	UFUNCTION(BlueprintImplementableEvent, Category = "Boarding")
-	void BP_OnMechInteract(AIBMech_Base* Mech);
-
-	/** Skip the UI and take the helm directly on interact. Turn off once the seat-select
-	 *  widget flow drives RequestBoard itself. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boarding")
-	bool bAutoBoardOnInteract = true;
-
-	/** How far ahead (cm) the interact sweep looks for a mech. Mechs are big — generous. */
-	UPROPERTY(EditAnywhere, Category = "Boarding", meta = (ClampMin = "100.0"))
-	float BoardReach = 600.0f;
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	/** Boarding is server-arbitrated (ADR-002: the server owns the truth about seats). */
-	UFUNCTION(Server, Reliable)
-	void Server_RequestBoard(AIBMech_Base* Mech, bool bWantLeftSeat);
-
-	/** Find the mech this pawn could board right now (sweep, then proximity fallback). */
-	AIBMech_Base* FindBoardableMech() const;
 
 	// Core Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -103,11 +68,6 @@ protected:
 	/** Aim-down-sights: bind as Started (press) + Completed (release), or a Hold trigger. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> AimAction;
-
-	/** Board a mech (IA_Interact). Unassigned -> falls back to the E key so boarding
-	 *  works before any content wiring. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> InteractAction;
 
 	// Current Weapon Context
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
