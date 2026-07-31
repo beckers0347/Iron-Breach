@@ -68,7 +68,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals")
 	TSubclassOf<UAnimInstance> AnimClass;
 
-	/** World-scale multiplier assuming a ~1.8m tall base skeleton. */
+	/** Height of the source mesh as authored, in metres. Manny/Quinn = 1.8.
+	 *  Custom creature meshes are usually authored at their real size — set this
+	 *  to whatever the mesh actually measures so HeightMeters means what it says. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals", meta = (ClampMin = "0.1"))
+	float AuthoredHeightMeters = 2.0f;
+
 	UFUNCTION(BlueprintPure, Category = "Kaiju")
-	float GetScaleFactor() const { return HeightMeters / 1.8f; }
+	float GetScaleFactor() const { return HeightMeters / FMath::Max(AuthoredHeightMeters, 0.1f); }
 };
