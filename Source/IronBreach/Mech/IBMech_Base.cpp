@@ -20,6 +20,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 
 AIBMech_Base::AIBMech_Base()
 {
@@ -787,6 +788,19 @@ void AIBMech_Base::PerformWeaponTrace()
 		DrawDebugLine(World, StartTrace, HitResult.Location, FColor::Cyan, false, 1.0f, 0, 0.3f);
 		DrawDebugPoint(World, HitResult.Location, 10.0f, FColor::Red, false, 1.0f);
 #endif
+
+		// --- NEW DAMAGE LOGIC ---
+		AActor* HitActor = HitResult.GetActor();
+		if (HitActor && CurrentWeaponData)
+		{
+			UGameplayStatics::ApplyDamage(
+				HitActor,
+				CurrentWeaponData->BaseDamage,
+				CurrentGunner,
+				this,
+				UDamageType::StaticClass()
+			);
+		}
 	}
 }
 

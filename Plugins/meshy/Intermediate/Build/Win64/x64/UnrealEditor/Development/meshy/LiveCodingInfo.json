@@ -1,0 +1,14 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.meshy.cpp.obj": [
+			"meshy.init.gen.cpp.obj",
+			"MeshyBridge.gen.cpp.obj",
+			"PerModuleInline.gen.cpp.obj",
+			"meshy.cpp.obj",
+			"MeshyBridge.cpp.obj",
+			"meshyCommands.cpp.obj",
+			"meshyStyle.cpp.obj"
+		]
+	}
+}

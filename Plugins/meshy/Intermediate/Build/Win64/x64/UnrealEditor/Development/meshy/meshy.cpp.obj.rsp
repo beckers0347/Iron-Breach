@@ -1,0 +1,14 @@
+"C:/IronBreach/Plugins/meshy/Source/meshy/Private/meshy.cpp"
+@"C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/meshy.Shared.rsp"
+/FI"C:/IronBreach/Intermediate/Build/Win64/x64/IronBreachEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h"
+/FI"C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/Definitions.meshy.h"
+/Yu"C:/IronBreach/Intermediate/Build/Win64/x64/IronBreachEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h"
+/Fp"C:/IronBreach/Intermediate/Build/Win64/x64/IronBreachEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.pch"
+/Fo"C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/meshy.cpp.obj"
+/experimental:log "C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/meshy.cpp.sarif"
+/sourceDependencies "C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/meshy.cpp.dep.json"
+/nologo
+/TP
+/GR-
+/std:c++20
+/wd5054

@@ -1,0 +1,26 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\ironbreach\\plugins\\meshy\\source\\meshy\\private\\meshystyle.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\ironbreach\\intermediate\\build\\win64\\x64\\ironbreacheditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.h.pch",
+        "Includes": [
+            "c:\\ironbreach\\plugins\\meshy\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\meshy\\definitions.meshy.h",
+            "c:\\ironbreach\\plugins\\meshy\\source\\meshy\\public\\meshystyle.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\slatecore\\public\\styling\\slatestyleregistry.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\engine\\public\\slate\\slategameresources.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\projects\\public\\interfaces\\ipluginmanager.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\projects\\public\\plugindescriptor.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\projects\\public\\custombuildsteps.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\projects\\public\\localizationdescriptor.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\projects\\public\\moduledescriptor.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\projects\\public\\plugindisalloweddescriptor.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\projects\\public\\pluginreferencedescriptor.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\projects\\public\\versescope.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\slatecore\\public\\styling\\slatestylemacros.h",
+            "c:\\ue_5.8\\engine\\source\\runtime\\core\\public\\misc\\engineversioncomparison.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
