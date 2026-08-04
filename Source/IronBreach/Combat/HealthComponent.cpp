@@ -48,6 +48,14 @@ void UHealthComponent::ApplyDamage(float Amount, const FHitResult& HitResult, AC
 	if (GetOwnerRole() != ROLE_Authority) return;
 	if (CurrentHealth <= 0.0f || Amount <= 0.0f) return;
 
+	// Every accepted hit tags its instigator (once). Both damage entry points
+	// funnel through here — hitscan directly, the generic engine pipeline via
+	// HandleAnyDamage — so this is THE place participation is knowable.
+	if (InstigatedBy)
+	{
+		DamageContributors.AddUnique(InstigatedBy);
+	}
+
 	CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.0f, MaxHealth);
 
 	// Broadcast to listeners (UI, Post-processing, etc.) on the server/host.

@@ -1,0 +1,61 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/PlayerController.h"
+#include "IBPlayerController.generated.h"
+
+class UInputMappingContext;
+class UInputAction;
+
+/**
+ * Project player controller. Its first job: menu input.
+ *
+ * Menu keys live HERE, not on any pawn, because the controller is the one
+ * player-side object that never churns — it survives death (menus must open
+ * while you wait out the respawn timer), and it survives the infantry<->mech
+ * possession swap (a Caryatid gunner still needs the map). A pawn-bound
+ * binding dies with the pawn; this one doesn't.
+ *
+ * MenuMappingContext is added at priority 1 — above the pawn contexts at 0 —
+ * so menu keys win regardless of which pawn's IMC is active. The actions only
+ * OPEN screens; once a menu is up the game runs UI-only input (controller
+ * input goes quiet) and closing/cycling belongs to the screen widgets.
+ *
+ * Shane: reparent a BP to this, assign the IMC + four actions, set it as the
+ * GameMode's Player Controller Class (MENUS_UI_WIRING.md §3). Front-end/HUD
+ * logic you'd normally put on a controller BP goes in the child as usual.
+ */
+UCLASS()
+class IRONBREACH_API AIBPlayerController : public APlayerController
+{
+	GENERATED_BODY()
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
+
+	/** Added at priority 1 (pawn contexts sit at 0) for every local player. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Menus")
+	TObjectPtr<UInputMappingContext> MenuMappingContext;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Menus")
+	TObjectPtr<UInputAction> OpenInventoryAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Menus")
+	TObjectPtr<UInputAction> OpenMapAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Menus")
+	TObjectPtr<UInputAction> OpenLedgerAction;
+
+	/** Escape / Start: the pause-menu-that-isn't (co-op never pauses). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Menus")
+	TObjectPtr<UInputAction> OpenSystemAction;
+
+	void OpenInventoryMenu();
+	void OpenMapMenu();
+	void OpenLedgerMenu();
+	void OpenSystemMenu();
+
+private:
+	void ToggleMenuScreen(FName ScreenId) const;
+};

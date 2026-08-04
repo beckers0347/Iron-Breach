@@ -24,7 +24,12 @@ public class IronBreach : ModuleRules
 			// plugin loaded at runtime; only these two are compile-time dependencies.
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
-			"UMG"
+			"UMG",
+			// Menus/UI + inventory (MENUS_UI_WIRING.md):
+			"Slate",              // FReply / widget key & mouse handling in the menu screens
+			"SlateCore",          // FGeometry, FKey, brush types
+			"DeveloperSettings",  // UIBUISettings (Project Settings > Iron Breach UI)
+			"NetCore"             // FFastArraySerializer — inventory delta replication
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

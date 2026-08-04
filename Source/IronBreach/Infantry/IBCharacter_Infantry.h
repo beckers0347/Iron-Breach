@@ -4,10 +4,12 @@
 #include "GameFramework/Character.h"
 #include "Combat/DamageableInterface.h"
 #include "InputActionValue.h"
+#include "Items/IBItemTypes.h" // EIBEquipSlot / FIBItemInstance in the equipment handler signature
 #include "IBCharacter_Infantry.generated.h"
 
 class UInputMappingContext;
 class UInputAction;
+class UIBInventoryComponent;
 class UHealthComponent;
 class UHitscanWeaponComponent;
 class UWeaponRigComponent;
@@ -99,11 +101,30 @@ protected:
 	void StartAiming();
 	void StopAiming();
 
+	/** Inventory lives on AIBPlayerState (it must survive pawn churn — death,
+	 *  respawn, infantry<->mech swap). The pawn is a subscriber: whenever the
+	 *  PlayerState arrives/changes, rebind and pull the equipped weapon. This
+	 *  fires on every machine (PS replicates), so remote players' pawns pick
+	 *  up loadout changes too. */
+	virtual void OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState) override;
+
+	/** Loot -> gun seam: an equipped WeaponPrimary with WeaponData is forwarded
+	 *  to the weapon component + ADS rig; anything else leaves the designer
+	 *  default (CurrentWeaponData) in place. */
+	UFUNCTION()
+	void HandleEquipmentChanged(EIBEquipSlot Slot, const FIBItemInstance& Item);
+
 public:
 	// Implementation of IDamageableInterface
 	virtual void HandleTakeDamage_Implementation(float DamageAmount, const FHitResult& HitResult, AController* InstigatedBy, AActor* DamageCauser) override;
 
 private:
+	void ApplyWeaponData(UWeaponDataAsset* WeaponData);
+
 	FTimerHandle RespawnTimerHandle;
 	bool bDead = false;
+
+	/** Weak: the PlayerState (and its inventory) outlives this pawn, not the
+	 *  other way round — never keep it alive from a corpse. */
+	TWeakObjectPtr<UIBInventoryComponent> BoundInventory;
 };
