@@ -67,6 +67,9 @@ protected:
 	UFUNCTION()
 	void HandleDeath(AActor* Killer);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kaiju", meta = (ClampMin = "0.0"))
+	float CorpseLifetime = 8.0f;
+
 private:
 	void ApplySpecies();
 

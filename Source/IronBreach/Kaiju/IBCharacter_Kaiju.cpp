@@ -143,11 +143,28 @@ void AIBCharacter_Kaiju::HandleDeath(AActor* Killer)
 {
 	UE_LOG(LogIronBreach, Log, TEXT("Kaiju %s has fallen"), *GetName());
 
+	// Cosmetic, runs on every machine.
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->DisableMovement();
 	}
 
+	// The corpse stops eating bullets and stops blocking the player.
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
 	BP_OnDied(Killer);
+
+	// Authority schedules removal; actor destruction replicates to clients on its own.
+	if (HasAuthority())
+	{
+		SetLifeSpan(FMath::Max(CorpseLifetime, 0.1f));
+	}
 }
