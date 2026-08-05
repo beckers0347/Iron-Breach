@@ -17,6 +17,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h" // Auto-assign the default rifle viewmodel
+#include "Items/IBInventoryComponent.h"
+#include "Items/IBItemDefinition.h"
+#include "Items/IBPlayerState.h"
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()
 {
@@ -138,6 +141,8 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopAiming);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &AIBCharacter_Infantry::StopAiming);
 		}
+		// Menu keys deliberately NOT bound here: they live on AIBPlayerController
+		// so they survive death and the infantry<->mech swap.
 	}
 	else
 	{
@@ -223,6 +228,69 @@ void AIBCharacter_Infantry::Fire()
 	{
 		WeaponComponent->Fire();
 	}
+}
+
+// ---- Inventory -> weapon (loot-to-gun seam) ----
+
+void AIBCharacter_Infantry::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState)
+{
+	Super::OnPlayerStateChanged(NewPlayerState, OldPlayerState);
+
+	// Rebind, don't accumulate: this pawn may be the Nth body this PlayerState
+	// has driven (respawns), and on clients the PS can arrive after possession.
+	if (BoundInventory.IsValid())
+	{
+		BoundInventory->OnEquipmentChanged.RemoveDynamic(this, &AIBCharacter_Infantry::HandleEquipmentChanged);
+		BoundInventory = nullptr;
+	}
+
+	const AIBPlayerState* IBPS = Cast<AIBPlayerState>(NewPlayerState);
+	UIBInventoryComponent* Inventory = IBPS ? IBPS->GetInventory() : nullptr;
+	if (!Inventory) { return; } // not an IBPlayerState (e.g. Shane's default GM) — designer default stays
+
+	Inventory->OnEquipmentChanged.AddDynamic(this, &AIBCharacter_Infantry::HandleEquipmentChanged);
+	BoundInventory = Inventory;
+
+	// Pull, don't just subscribe: the equip likely happened before this pawn
+	// existed (menu equip -> death -> respawn). This is what makes loadouts
+	// survive the corpse.
+	FIBItemInstance Equipped;
+	if (Inventory->GetEquippedItem(EIBEquipSlot::WeaponPrimary, Equipped))
+	{
+		HandleEquipmentChanged(EIBEquipSlot::WeaponPrimary, Equipped);
+	}
+}
+
+void AIBCharacter_Infantry::HandleEquipmentChanged(EIBEquipSlot Slot, const FIBItemInstance& Item)
+{
+	if (Slot != EIBEquipSlot::WeaponPrimary)
+	{
+		return; // armor/gear slots are stat/cosmetic concerns — nothing to wire on the pawn yet
+	}
+
+	UWeaponDataAsset* NewData = (Item.Definition && Item.Definition->WeaponData)
+		? Item.Definition->WeaponData.Get()
+		: CurrentWeaponData.Get(); // slot emptied -> fall back to the designer default (never unarmed)
+
+	ApplyWeaponData(NewData);
+}
+
+void AIBCharacter_Infantry::ApplyWeaponData(UWeaponDataAsset* WeaponData)
+{
+	if (!WeaponData) { return; }
+
+	// Same two forwards BeginPlay does for the default loadout — one weapon
+	// truth for firing (component) and one for feel (rig ADS settings).
+	if (WeaponComponent)
+	{
+		WeaponComponent->SetWeaponData(WeaponData);
+	}
+	if (WeaponRig)
+	{
+		WeaponRig->SetAdsSettings(WeaponData->Ads);
+	}
+
+	UE_LOG(LogIronBreach, Log, TEXT("%s: weapon set from equipment -> %s"), *GetName(), *WeaponData->GetName());
 }
 
 // Interface Implementation handling incoming damage

@@ -31,9 +31,21 @@ public:
 	UFUNCTION(BlueprintCallable, Exec, Category = "IronBreach|Online")
 	void IBJoin();
 
+	/** Leave the current session and return to the main menu. Destroys the
+	 *  local session entry (host OR client — DestroySession is how a client
+	 *  cleanly unregisters too), then client-travels to LeaveTravelURL once
+	 *  teardown completes. Safe to call solo: just travels. On a listen
+	 *  server the host leaving ends the session for everyone (ADR-002). */
+	UFUNCTION(BlueprintCallable, Exec, Category = "IronBreach|Online")
+	void IBLeave();
+
 	/** Map travelled to on successful host. Exposed so a future front-end can pick zones. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
 	FString HostTravelURL = TEXT("/Game/Lvl_Plains?listen");
+
+	/** Where IBLeave lands. Matches DefaultEngine.ini's GameDefaultMap. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
+	FString LeaveTravelURL = TEXT("/Game/FirstPerson/Lvl_MainMenu");
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
 	int32 MaxPlayers = 4;
@@ -42,6 +54,10 @@ private:
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+	void OnLeaveDestroyComplete(FName SessionName, bool bWasSuccessful);
+
+	/** The IBLeave landing: travel the first local player to LeaveTravelURL. */
+	void TravelToMainMenu();
 
 	IOnlineSessionPtr GetSessionInterface() const;
 	bool IsLANFallback() const;
@@ -51,4 +67,5 @@ private:
 	FDelegateHandle CreateCompleteHandle;
 	FDelegateHandle FindCompleteHandle;
 	FDelegateHandle JoinCompleteHandle;
+	FDelegateHandle LeaveDestroyHandle;
 };

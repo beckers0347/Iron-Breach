@@ -67,6 +67,24 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Health")
 	bool IsDepleted() const { return CurrentHealth <= 0.0f; }
 
+	/** Server-only: every controller that put damage into this component this
+	 *  life, in first-hit order. Not replicated — same rule as the OnDeath
+	 *  killer ("killer identity is server knowledge"). First consumer is
+	 *  per-player loot eligibility (IBLootDropComponent); assists, aggro
+	 *  tables, and scoreboards get it for free later. Weak refs compact on
+	 *  read, so mid-fight disconnects can't hand back dead controllers. */
+	void GetDamageContributors(TArray<AController*>& OutContributors) const
+	{
+		OutContributors.Reset();
+		for (const TWeakObjectPtr<AController>& Contributor : DamageContributors)
+		{
+			if (AController* Valid = Contributor.Get())
+			{
+				OutContributors.Add(Valid);
+			}
+		}
+	}
+
 	// Allows owning actors to set their base health safely (server-authoritative; call before/at BeginPlay)
 	void SetMaxHealth(float NewMaxHealth)
 	{
@@ -76,4 +94,7 @@ public:
 private:
 	/** Guards double death broadcasts on a single machine (server broadcast vs OnRep). */
 	bool bDeathHandled = false;
+
+	/** See GetDamageContributors. Weak: controllers can leave mid-fight. */
+	TArray<TWeakObjectPtr<AController>> DamageContributors;
 };

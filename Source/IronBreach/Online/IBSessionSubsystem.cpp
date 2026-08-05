@@ -169,3 +169,57 @@ void UIBSessionSubsystem::OnJoinSessionComplete(FName SessionName, EOnJoinSessio
 		PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
 	}
 }
+
+void UIBSessionSubsystem::IBLeave()
+{
+	IOnlineSessionPtr Sessions = GetSessionInterface();
+
+	// No interface or no live session (solo PIE, or already torn down):
+	// nothing to unregister — just go home.
+	if (!Sessions.IsValid() || !Sessions->GetNamedSession(IBSessionName))
+	{
+		UE_LOG(LogIronBreach, Log, TEXT("IBLeave: no active session — travelling to menu"));
+		TravelToMainMenu();
+		return;
+	}
+
+	// DestroySession is the correct verb on BOTH ends: the host tears the
+	// session down, a client unregisters its local entry so the next IBJoin
+	// starts clean. Travel waits for the callback — travelling mid-teardown
+	// leaves Steam thinking you're still in a lobby.
+	LeaveDestroyHandle = Sessions->AddOnDestroySessionCompleteDelegate_Handle(
+		FOnDestroySessionCompleteDelegate::CreateUObject(this, &UIBSessionSubsystem::OnLeaveDestroyComplete));
+
+	UE_LOG(LogIronBreach, Log, TEXT("IBLeave: destroying session..."));
+
+	if (!Sessions->DestroySession(IBSessionName))
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("IBLeave: DestroySession call failed immediately — travelling anyway"));
+		Sessions->ClearOnDestroySessionCompleteDelegate_Handle(LeaveDestroyHandle);
+		TravelToMainMenu();
+	}
+}
+
+void UIBSessionSubsystem::OnLeaveDestroyComplete(FName /*SessionName*/, bool bWasSuccessful)
+{
+	if (IOnlineSessionPtr Sessions = GetSessionInterface())
+	{
+		Sessions->ClearOnDestroySessionCompleteDelegate_Handle(LeaveDestroyHandle);
+	}
+
+	// Success or not, the player asked to leave — don't trap them in-world
+	// because the online backend hiccuped.
+	UE_LOG(LogIronBreach, Log, TEXT("IBLeave: session destroy %s — travelling to menu"),
+		bWasSuccessful ? TEXT("succeeded") : TEXT("FAILED (leaving anyway)"));
+	TravelToMainMenu();
+}
+
+void UIBSessionSubsystem::TravelToMainMenu()
+{
+	if (APlayerController* PC = GetGameInstance() ? GetGameInstance()->GetFirstLocalPlayerController() : nullptr)
+	{
+		// Absolute client travel: works identically for host, client, and
+		// solo — everyone just loads the menu map locally.
+		PC->ClientTravel(LeaveTravelURL, ETravelType::TRAVEL_Absolute);
+	}
+}
