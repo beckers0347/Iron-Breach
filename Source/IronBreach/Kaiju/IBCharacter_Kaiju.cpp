@@ -6,6 +6,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h" // Explicit include: DOREPLIFETIME macros
+#include "Engine/GameInstance.h"
+#include "Progression/IBXPSubsystem.h"
 
 AIBCharacter_Kaiju::AIBCharacter_Kaiju()
 {
@@ -101,11 +103,23 @@ void AIBCharacter_Kaiju::HandleTakeDamage_Implementation(float DamageAmount, con
 	// Authority rule (ADR-002): only the server mutates armor/health.
 	if (!HasAuthority()) return;
 
-	// Phase 1 (ArmorBreak): armor soaks all damage until it shatters
+	// Phase 1 (ArmorBreak): armor soaks all damage until it shatters. This bypasses
+	// UHealthComponent entirely, so it needs its own XP report -- HealthComponent::
+	// ApplyDamage only ever sees post-armor (health-phase) damage on a kaiju.
 	if (CurrentArmor > 0.0f)
 	{
 		CurrentArmor = FMath::Max(CurrentArmor - DamageAmount, 0.0f);
-		if (CurrentArmor <= 0.0f && !bArmorBreakAnnounced)
+		const bool bJustBroke = (CurrentArmor <= 0.0f && !bArmorBreakAnnounced);
+
+		if (UGameInstance* GI = GetGameInstance())
+		{
+			if (UIBXPSubsystem* XP = GI->GetSubsystem<UIBXPSubsystem>())
+			{
+				XP->ReportKaijuArmorDamage(DamageAmount, InstigatedBy, DamageCauser, bJustBroke);
+			}
+		}
+
+		if (bJustBroke)
 		{
 			bArmorBreakAnnounced = true;
 			UE_LOG(LogIronBreach, Log, TEXT("%s armor BROKEN"), *GetName());

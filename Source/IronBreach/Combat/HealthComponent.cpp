@@ -3,6 +3,9 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h" // Explicit include: DOREPLIFETIME macros
+#include "Engine/GameInstance.h"
+#include "Engine/World.h"
+#include "Progression/IBXPSubsystem.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -53,6 +56,18 @@ void UHealthComponent::ApplyDamage(float Amount, const FHitResult& HitResult, AC
 	// Broadcast to listeners (UI, Post-processing, etc.) on the server/host.
 	// Remote clients get the equivalent broadcast from OnRep_CurrentHealth.
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth, HitResult);
+
+	// XP attribution (Progression/IBXPSubsystem): who dealt it, with what, was it lethal.
+	// Server-only by construction -- this function already returned above off authority.
+	// Kaiju armor-phase damage bypasses this component entirely (soaked before health takes
+	// over); AIBCharacter_Kaiju reports that separately via ReportKaijuArmorDamage.
+	if (UGameInstance* GI = GetWorld() ? GetWorld()->GetGameInstance() : nullptr)
+	{
+		if (UIBXPSubsystem* XP = GI->GetSubsystem<UIBXPSubsystem>())
+		{
+			XP->ReportDamage(Amount, InstigatedBy, DamageCauser, CurrentHealth <= 0.0f);
+		}
+	}
 
 	if (CurrentHealth <= 0.0f && !bDeathHandled)
 	{
