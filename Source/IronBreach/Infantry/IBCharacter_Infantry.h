@@ -216,6 +216,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Scope")
 	void SetScopePipEnabled(bool bEnabled);
 
+	/** Rescale the first-person viewmodel mesh. Normally driven by CurrentWeaponData's
+	 *  ViewmodelScale (BeginPlay/ApplyWeaponData), but exposed for runtime tuning, a
+	 *  debug console command, etc. Re-caches the rig's Grip/Aim socket offsets so ADS
+	 *  alignment stays correct at the new scale instead of drifting off the anchor. */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SetWeaponMeshScale(FVector NewScale);
+
 private:
 	void ApplyWeaponData(UWeaponDataAsset* WeaponData);
 

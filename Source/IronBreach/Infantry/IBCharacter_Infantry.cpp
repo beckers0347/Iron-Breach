@@ -45,8 +45,10 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	WeaponMesh->bCastDynamicShadow = false;
 	WeaponMesh->CastShadow = false;
 
-	// The template rifle is authored at full world scale; shrink it so the viewmodel
-	// reads as "held" rather than filling the screen. Tune alongside the hip anchor.
+	// The template rifle is authored at full world scale. This is just the pre-data
+	// default: BeginPlay/ApplyWeaponData overwrite it with CurrentWeaponData's
+	// ViewmodelScale so scale is a per-weapon, designer-facing knob (tune alongside
+	// the rig's hip anchor — a smaller weapon sits closer to camera).
 	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
 
 	// ---- PIP scope ----
@@ -105,6 +107,14 @@ void AIBCharacter_Infantry::BeginPlay()
 	if (WeaponComponent && CurrentWeaponData)
 	{
 		WeaponComponent->SetWeaponData(CurrentWeaponData);
+	}
+
+	// Scale the viewmodel before the rig caches socket offsets below — GripLocal/AimLocal
+	// are captured at whatever scale WeaponMesh has *right now*, so this must run first
+	// or ADS alignment solves against the old (default) scale.
+	if (WeaponMesh && CurrentWeaponData)
+	{
+		WeaponMesh->SetRelativeScale3D(CurrentWeaponData->ViewmodelScale);
 	}
 
 	// Wire the first-person weapon rig: camera + viewmodel mesh + this weapon's ADS tuning.
@@ -307,6 +317,25 @@ void AIBCharacter_Infantry::SetScopePipEnabled(bool bEnabled)
 	}
 }
 
+void AIBCharacter_Infantry::SetWeaponMeshScale(FVector NewScale)
+{
+	if (!WeaponMesh)
+	{
+		UE_LOG(LogIronBreach, Error, TEXT("%s: SetWeaponMeshScale called with no WeaponMesh."), *GetName());
+		return;
+	}
+
+	WeaponMesh->SetRelativeScale3D(NewScale);
+
+	// The rig caches Grip/Aim socket offsets in SetReferences() and does not track
+	// scale changes on its own — re-cache now so hip/ADS pose keeps landing on the
+	// authored anchor instead of drifting off it at the new size.
+	if (WeaponRig)
+	{
+		WeaponRig->SetReferences(FirstPersonCamera, WeaponMesh);
+	}
+}
+
 void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -473,6 +502,11 @@ void AIBCharacter_Infantry::ApplyWeaponData(UWeaponDataAsset* WeaponData)
 	{
 		WeaponRig->SetAdsSettings(WeaponData->Ads);
 	}
+
+	// Apply this weapon's viewmodel scale (also re-caches the rig's Grip/Aim socket
+	// offsets — see SetWeaponMeshScale) before re-snapping the optic below, so the
+	// scope mounts against the mesh at its final size, not the previous weapon's.
+	SetWeaponMeshScale(WeaponData->ViewmodelScale);
 
 	// A new weapon means a new mesh and a new scope socket — re-snap the optic,
 	// or it keeps hanging off wherever the last gun's socket happened to be.

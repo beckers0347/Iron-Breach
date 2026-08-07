@@ -36,4 +36,12 @@ public:
 	/** Aim-down-sights tuning (zoom, sight alignment, spread, handling). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ADS")
 	FIBAdsSettings Ads;
+
+	/** Scale applied to the first-person viewmodel mesh when this weapon is equipped.
+	 *  The template rifle is authored at full world scale, so most weapons will want
+	 *  something in the 0.4-1.0 range to read as "held" rather than filling the screen.
+	 *  Applied by AIBCharacter_Infantry::SetWeaponMeshScale() in BeginPlay/ApplyWeaponData —
+	 *  tune alongside the rig's Hip Anchor since a smaller weapon sits closer to camera. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Viewmodel", meta = (ClampMin = "0.01"))
+	FVector ViewmodelScale = FVector(1.0f);
 };

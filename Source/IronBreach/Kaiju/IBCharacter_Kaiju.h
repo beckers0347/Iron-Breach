@@ -65,14 +65,14 @@ public:
 	/** Called by organ OnReps so clients mirror the destroyed beat; server calls it directly. */
 	void NotifyOrganDestroyedLocal(UIBKaijuOrganComponent* Organ);
 
-protected:
-	virtual void BeginPlay() override;
-
 	/** Which species this instance is. Assign a DA_Kaiju_* asset.
-	 *  Replicated (initial-only) so runtime-spawned kaiju scale correctly on clients
-	 *  and join-in-progress players never meet a 1.8m Palawan. */
+ *  Replicated (initial-only) so runtime-spawned kaiju scale correctly on clients
+ *  and join-in-progress players never meet a 1.8m Palawan. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_Species, Category = "Kaiju")
 	TObjectPtr<UKaijuSpeciesData> Species;
+
+protected:
+	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHealthComponent> HealthComponent;
