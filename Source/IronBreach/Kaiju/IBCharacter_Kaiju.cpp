@@ -182,13 +182,9 @@ void AIBCharacter_Kaiju::HandleTakeDamage_Implementation(float DamageAmount, con
 	if (!HasAuthority()) return;
 	if (FightPhase == EKaijuFightPhase::Dead) return;
 
-<<<<<<< HEAD
-	// Phase 1 (ArmorBreak): armor soaks all damage until it shatters. This bypasses
+	// Phase 1 (Armored): the plating soaks all damage until it shatters. This bypasses
 	// UHealthComponent entirely, so it needs its own XP report -- HealthComponent::
 	// ApplyDamage only ever sees post-armor (health-phase) damage on a kaiju.
-=======
-	// Phase 1 (Armored): the plating soaks all damage until it shatters.
->>>>>>> 1366f091f619628a6c9aab431cf2f5272edbafae
 	if (CurrentArmor > 0.0f)
 	{
 		CurrentArmor = FMath::Max(CurrentArmor - DamageAmount, 0.0f);

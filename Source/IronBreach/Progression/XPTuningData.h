@@ -35,11 +35,12 @@ public:
 	float ArmorPhaseDamageWeight = 0.25f;
 
 	// ---- Earn rates: kills ----
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Earn Rates|Kills", meta = (ClampMin = "0"))
-	int32 PilotXPPerKill = 50;
+		// Calculates a kill bonus proportional to the victim's total durability (MaxHealth + MaxArmor).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Earn Rates|Kills", meta = (ClampMin = "0.0"))
+	float PilotKillBonusMultiplier = 0.1f; // 10% of total HP+Armor awarded on kill
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Earn Rates|Kills", meta = (ClampMin = "0"))
-	int32 CrewXPPerKill = 50;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Earn Rates|Kills", meta = (ClampMin = "0.0"))
+	float CrewKillBonusMultiplier = 0.15f;
 
 	/** One-time milestone bonus for the hit that breaks a kaiju's armor. Crew track only --
 	 *  breaking armor is squarely a mech job. An infantry chip-shot that happens to land the

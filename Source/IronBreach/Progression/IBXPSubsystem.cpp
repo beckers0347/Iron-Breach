@@ -146,7 +146,7 @@ void UIBXPSubsystem::GrantXP(EXPTrack Track, const FString& Key, int32 Amount)
 	}
 }
 
-void UIBXPSubsystem::ReportDamage(float DamageAmount, AController* InstigatedBy, AActor* DamageCauser, bool bWasKillingBlow)
+void UIBXPSubsystem::ReportDamage(float DamageAmount, AController* InstigatedBy, AActor* DamageCauser, bool bWasKillingBlow, float VictimMaxHealth, float VictimMaxArmor)
 {
 	if (!HasServerAuthority() || !SaveData || DamageAmount <= 0.0f) return;
 
@@ -156,10 +156,16 @@ void UIBXPSubsystem::ReportDamage(float DamageAmount, AController* InstigatedBy,
 	if (Key.IsEmpty()) return;
 
 	const float DamageRate = Tuning ? ((Track == EXPTrack::Pilot) ? Tuning->PilotXPPerDamage : Tuning->CrewXPPerDamage) : 0.0f;
-	const int32 KillBonus = Tuning ? ((Track == EXPTrack::Pilot) ? Tuning->PilotXPPerKill : Tuning->CrewXPPerKill) : 0;
+
+	int32 KillXP = 0;
+	if (bWasKillingBlow && Tuning)
+	{
+		// Scale the kill reward by the sheer size of the enemy's total pool
+		const float KillMultiplier = (Track == EXPTrack::Pilot) ? Tuning->PilotKillBonusMultiplier : Tuning->CrewKillBonusMultiplier;
+		KillXP = FMath::RoundToInt((VictimMaxHealth + VictimMaxArmor) * KillMultiplier);
+	}
 
 	const int32 DamageXP = FMath::RoundToInt(DamageAmount * DamageRate);
-	const int32 KillXP = bWasKillingBlow ? KillBonus : 0;
 
 	GrantXP(Track, Key, DamageXP + KillXP);
 }

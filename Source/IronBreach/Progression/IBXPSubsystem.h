@@ -65,11 +65,11 @@ public:
 	void SetTuning(UXPTuningData* InTuning) { Tuning = InTuning; }
 
 	/** Central damage/kill hook for the normal (non-armor) damage pipeline. InstigatedBy +
-	 *  DamageCauser come straight from IDamageableInterface / HealthComponent::ApplyDamage.
-	 *  Resolves track (pilot vs crew) and the record key from DamageCauser automatically.
-	 *  Server-only; silently no-ops everywhere else (see class comment on authority). */
+		 *  DamageCauser come straight from IDamageableInterface / HealthComponent::ApplyDamage.
+		 *  Resolves track (pilot vs crew) and the record key from DamageCauser automatically.
+		 *  Server-only; silently no-ops everywhere else (see class comment on authority). */
 	UFUNCTION(BlueprintCallable, Category = "XP")
-	void ReportDamage(float DamageAmount, AController* InstigatedBy, AActor* DamageCauser, bool bWasKillingBlow);
+	void ReportDamage(float DamageAmount, AController* InstigatedBy, AActor* DamageCauser, bool bWasKillingBlow, float VictimMaxHealth, float VictimMaxArmor = 0.0f);
 
 	/** Kaiju armor-phase damage hook. Separate from ReportDamage because armor soak happens
 	 *  in AIBCharacter_Kaiju::HandleTakeDamage_Implementation BEFORE UHealthComponent ever

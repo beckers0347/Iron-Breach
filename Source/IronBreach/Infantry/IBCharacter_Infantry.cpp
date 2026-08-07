@@ -3,6 +3,11 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SceneCaptureComponent2D.h" // PIP optic capture
+#include "Engine/TextureRenderTarget2D.h"       // PIP optic render target
+#include "Kismet/KismetRenderingLibrary.h"      // Runtime render target creation
+#include "Materials/MaterialInterface.h"        // PIP screen material
+#include "Materials/MaterialInstanceDynamic.h"  // Optional runtime RT binding
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h" // Explicit include: required for ULocalPlayer::GetSubsystem under IWYU
@@ -44,6 +49,40 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	// reads as "held" rather than filling the screen. Tune alongside the hip anchor.
 	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
 
+	// ---- PIP scope ----
+	// Both halves hang off WeaponMesh, so the rig's per-frame viewmodel posing
+	// carries them without any Tick work here. The real socket snap happens in
+	// SetupScopePip(); the constructor only establishes the parent and the
+	// defaults that must exist before the first frame renders.
+	ScopeScreen = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ScopeScreen"));
+	ScopeScreen->SetupAttachment(WeaponMesh);
+	ScopeScreen->SetOnlyOwnerSee(true); // viewmodel-only, same as the weapon
+	ScopeScreen->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ScopeScreen->bCastDynamicShadow = false;
+	ScopeScreen->CastShadow = false;
+	// The BP version's actual bug: bHiddenInGame defaulted true, and SetVisibility()
+	// does not clear it — IsVisible() returned false forever. Set both, explicitly.
+	ScopeScreen->SetHiddenInGame(false);
+	ScopeScreen->SetVisibility(true);
+
+	// Default to the engine plane so the component is never meshless (a null mesh
+	// reports IsVisible() == true and draws nothing, which reads exactly like a
+	// transform bug and is not one). Override the mesh in the BP if you want a
+	// curved lens or a bezel.
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaneMesh(TEXT("/Engine/BasicShapes/Plane.Plane"));
+	if (PlaneMesh.Succeeded())
+	{
+		ScopeScreen->SetStaticMesh(PlaneMesh.Object);
+	}
+
+	ScopeCamera = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("ScopeCamera"));
+	ScopeCamera->SetupAttachment(WeaponMesh);
+	ScopeCamera->bCaptureEveryFrame = true;
+	ScopeCamera->bCaptureOnMovement = false; // every-frame already covers it; both is wasted work
+	ScopeCamera->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	ScopeCamera->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_RenderScenePrimitives;
+	ScopeCamera->FOVAngle = 20.0f; // overwritten from ScopeFOV in SetupScopePip
+
 	// The third-person body should NOT render for the owning player (they see the viewmodel instead).
 	GetMesh()->SetOwnerNoSee(true);
 
@@ -56,7 +95,6 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 
 	// First-person weapon rig (viewmodel posing + ADS blend).
 	WeaponRig = CreateDefaultSubobject<UWeaponRigComponent>(TEXT("WeaponRig"));
-
 }
 
 void AIBCharacter_Infantry::BeginPlay()
@@ -93,6 +131,9 @@ void AIBCharacter_Infantry::BeginPlay()
 		UE_LOG(LogIronBreach, Error, TEXT("[Character] WeaponRig is NULL! Check constructor."));
 	}
 
+	// Mount the optic once the viewmodel mesh is settled.
+	SetupScopePip();
+
 	// Capture base walk speed so the ADS multiplier has something to scale from.
 	if (UCharacterMovementComponent* Move = GetCharacterMovement())
 	{
@@ -120,7 +161,150 @@ void AIBCharacter_Infantry::BeginPlay()
 			}
 		}
 	}
+}
 
+// ---- PIP scope ----
+
+void AIBCharacter_Infantry::SetupScopePip()
+{
+	if (!ScopeScreen || !ScopeCamera || !WeaponMesh)
+	{
+		UE_LOG(LogIronBreach, Error, TEXT("%s: [Scope] components missing — check the constructor."), *GetName());
+		return;
+	}
+
+	if (!bEnableScopePip)
+	{
+		SetScopePipEnabled(false);
+		UE_LOG(LogIronBreach, Verbose, TEXT("%s: [Scope] disabled by bEnableScopePip."), *GetName());
+		return;
+	}
+
+	// The optic is a local viewmodel prop. Remote clients and the dedicated server
+	// gain nothing from a scene capture running every frame for a gun they can't see.
+	if (!IsLocallyControlled())
+	{
+		SetScopePipEnabled(false);
+		return;
+	}
+
+	// Snap to the socket, then correct in code. Snapping alone inherits whatever the
+	// artist authored — including a socket whose +X points at the sky, which poses a
+	// plane flat and invisible. The offsets below are the correction, in one readable place.
+	const bool bSocketExists = WeaponMesh->DoesSocketExist(ScopeSocketName);
+	const FName AttachSocket = bSocketExists ? ScopeSocketName : NAME_None;
+
+	if (!bSocketExists)
+	{
+		UE_LOG(LogIronBreach, Warning,
+			TEXT("%s: [Scope] weapon mesh '%s' has no socket '%s' — mounting to the mesh root. Add the socket or clear bEnableScopePip."),
+			*GetName(), *GetNameSafe(WeaponMesh->GetStaticMesh()), *ScopeSocketName.ToString());
+	}
+
+	const FAttachmentTransformRules Rules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
+	ScopeScreen->AttachToComponent(WeaponMesh, Rules, AttachSocket);
+	ScopeCamera->AttachToComponent(WeaponMesh, Rules, AttachSocket);
+
+	// Screen: stand it up, face it at the eye, push it clear of the sight's baked glass.
+	ScopeScreen->SetRelativeLocation(ScopeScreenOffset);
+	ScopeScreen->SetRelativeRotation(ScopeScreenRotation);
+	ScopeScreen->SetRelativeScale3D(ScopeScreenScale);
+	ScopeScreen->SetHiddenInGame(false);
+	ScopeScreen->SetVisibility(true);
+
+	// The render target must exist BEFORE the material is bound: the parameterised
+	// path below needs something to push into the texture parameter, and a null RT
+	// silently demotes it to the plain-material path (which renders the engine's
+	// default bubble texture and looks exactly like a broken capture).
+	if (!ScopeRenderTarget)
+	{
+		const int32 Res = FMath::Clamp(ScopeRenderTargetResolution, 128, 2048);
+		ScopeRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, Res, Res, RTF_RGBA8);
+
+		UE_LOG(LogIronBreach, Verbose,
+			TEXT("%s: [Scope] created a %dx%d transient render target."), *GetName(), Res, Res);
+	}
+
+	if (!ScopeRenderTarget)
+	{
+		UE_LOG(LogIronBreach, Error,
+			TEXT("%s: [Scope] render target creation failed — the capture has nowhere to write."), *GetName());
+	}
+
+	if (ScopeScreenMaterial)
+	{
+		if (ScopeTextureParameterName != NAME_None && ScopeRenderTarget)
+		{
+			// Parameterised path: one material serves every optic, each with its own RT.
+			if (UMaterialInstanceDynamic* MID = ScopeScreen->CreateDynamicMaterialInstance(0, ScopeScreenMaterial))
+			{
+				MID->SetTextureParameterValue(ScopeTextureParameterName, ScopeRenderTarget);
+
+				UE_LOG(LogIronBreach, Verbose,
+					TEXT("%s: [Scope] bound '%s' -> parameter '%s'."),
+					*GetName(), *GetNameSafe(ScopeRenderTarget), *ScopeTextureParameterName.ToString());
+			}
+		}
+		else
+		{
+			// Hardwired path: the material samples its RT directly, no parameter.
+			ScopeScreen->SetMaterial(0, ScopeScreenMaterial);
+
+			UE_LOG(LogIronBreach, Warning,
+				TEXT("%s: [Scope] no texture parameter bound (ScopeTextureParameterName='%s'). If the optic shows the engine's default texture, set this to the TextureSampleParameter2D's name on the material."),
+				*GetName(), *ScopeTextureParameterName.ToString());
+		}
+	}
+	else
+	{
+		UE_LOG(LogIronBreach, Warning,
+			TEXT("%s: [Scope] no ScopeScreenMaterial assigned — the plane will render with the default material, not the optic feed."),
+			*GetName());
+	}
+
+	// Capture: sits ahead of the screen looking downrange.
+	ScopeCamera->SetRelativeLocation(ScopeCameraOffset);
+	ScopeCamera->SetRelativeRotation(ScopeCameraRotation);
+	ScopeCamera->FOVAngle = ScopeFOV;
+	ScopeCamera->TextureTarget = ScopeRenderTarget;
+	ScopeCamera->bCaptureEveryFrame = true;
+
+	// Never let the capture see its own output: screen -> RT -> screen is a feedback
+	// tunnel, and it costs a frame of latency even when it doesn't visibly recurse.
+	ScopeCamera->HiddenComponents.Reset();
+	ScopeCamera->HiddenComponents.Add(ScopeScreen);
+
+	// The optic looks out at the world, not at the barrel two centimetres in front of it.
+	if (bHideWeaponFromScopeCapture)
+	{
+		ScopeCamera->HiddenComponents.Add(WeaponMesh);
+	}
+
+	UE_LOG(LogIronBreach, Verbose,
+		TEXT("%s: [Scope] mounted on '%s' | screen loc=%s rot=%s scale=%s | capture loc=%s fov=%.1f | RT=%s"),
+		*GetName(),
+		bSocketExists ? *ScopeSocketName.ToString() : TEXT("<mesh root>"),
+		*ScopeScreen->GetRelativeLocation().ToString(),
+		*ScopeScreen->GetRelativeRotation().ToString(),
+		*ScopeScreen->GetRelativeScale3D().ToString(),
+		*ScopeCamera->GetRelativeLocation().ToString(),
+		ScopeFOV,
+		*GetNameSafe(ScopeRenderTarget));
+}
+
+void AIBCharacter_Infantry::SetScopePipEnabled(bool bEnabled)
+{
+	if (ScopeScreen)
+	{
+		ScopeScreen->SetHiddenInGame(!bEnabled);
+		ScopeScreen->SetVisibility(bEnabled);
+	}
+	if (ScopeCamera)
+	{
+		// Stopping the capture is the part that actually costs anything.
+		ScopeCamera->bCaptureEveryFrame = bEnabled;
+		ScopeCamera->SetComponentTickEnabled(bEnabled);
+	}
 }
 
 void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -290,6 +474,10 @@ void AIBCharacter_Infantry::ApplyWeaponData(UWeaponDataAsset* WeaponData)
 		WeaponRig->SetAdsSettings(WeaponData->Ads);
 	}
 
+	// A new weapon means a new mesh and a new scope socket — re-snap the optic,
+	// or it keeps hanging off wherever the last gun's socket happened to be.
+	SetupScopePip();
+
 	UE_LOG(LogIronBreach, Log, TEXT("%s: weapon set from equipment -> %s"), *GetName(), *WeaponData->GetName());
 }
 
@@ -306,6 +494,10 @@ void AIBCharacter_Infantry::HandleDeath(AActor* Killer)
 {
 	if (bDead) return;
 	bDead = true;
+
+	// Kill the capture before the corpse: a scene capture rendering every frame
+	// from a ragdolling gun is pure cost with nothing looking at it.
+	SetScopePipEnabled(false);
 
 	// --- Cosmetics: every machine ragdolls the corpse (same recipe as the enemy) ---
 	if (GetCapsuleComponent())

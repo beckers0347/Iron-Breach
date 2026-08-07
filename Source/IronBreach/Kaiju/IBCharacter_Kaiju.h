@@ -33,6 +33,8 @@ class IRONBREACH_API AIBCharacter_Kaiju : public ACharacter, public IDamageableI
 	GENERATED_BODY()
 
 public:
+	class UKaijuSpeciesData* GetSpecies() const { return Species; }
+
 	AIBCharacter_Kaiju();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
