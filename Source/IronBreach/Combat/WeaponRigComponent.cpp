@@ -47,8 +47,13 @@ FVector UWeaponRigComponent::SocketLocalOffset(FName Socket) const
 {
 	if (WeaponMesh && Socket != NAME_None && WeaponMesh->DoesSocketExist(Socket))
 	{
-		// Socket transform relative to the mesh component origin == offset in weapon-root space.
-		return WeaponMesh->GetSocketTransform(Socket, RTS_Component).GetLocation();
+		// RTS_Component returns the socket's transform as authored on the mesh asset —
+		// it does NOT scale with WeaponMesh's current RelativeScale3D. UpdateWeaponPose()
+		// rotates this offset and uses it directly as a translation, so it must represent
+		// the socket's ACTUAL offset from the mesh origin at the mesh's current size, or a
+		// scaled weapon (see UWeaponDataAsset::ViewmodelScale) grips/aims off-anchor.
+		const FVector RawLocal = WeaponMesh->GetSocketTransform(Socket, RTS_Component).GetLocation();
+		return RawLocal * WeaponMesh->GetRelativeScale3D();
 	}
 	return FVector::ZeroVector;
 }

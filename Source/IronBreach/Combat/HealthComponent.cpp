@@ -3,6 +3,11 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h" // Explicit include: DOREPLIFETIME macros
+#include "Engine/GameInstance.h"
+#include "Engine/World.h"
+#include "Progression/IBXPSubsystem.h"
+#include "Kaiju/IBCharacter_Kaiju.h"
+#include "Kaiju/KaijuSpeciesData.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -61,6 +66,34 @@ void UHealthComponent::ApplyDamage(float Amount, const FHitResult& HitResult, AC
 	// Broadcast to listeners (UI, Post-processing, etc.) on the server/host.
 	// Remote clients get the equivalent broadcast from OnRep_CurrentHealth.
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth, HitResult);
+
+	// XP attribution (Progression/IBXPSubsystem): who dealt it, with what, was it lethal.
+	// Server-only by construction -- this function already returned above off authority.
+	// Kaiju armor-phase damage bypasses this component entirely (soaked before health takes
+	// over); AIBCharacter_Kaiju reports that separately via ReportKaijuArmorDamage.
+// XP attribution (Progression/IBXPSubsystem): who dealt it, with what, was it lethal.
+	// Server-only by construction -- this function already returned above off authority.
+	// Kaiju armor-phase damage bypasses this component entirely (soaked before health takes
+	// over); AIBCharacter_Kaiju reports that separately via ReportKaijuArmorDamage.
+
+	float VictimMaxArmor = 0.0f;
+	if (AIBCharacter_Kaiju* Kaiju = Cast<AIBCharacter_Kaiju>(GetOwner()))
+	{
+		// Use the new public getter instead of accessing the private variable directly
+		if (UKaijuSpeciesData* KaijuSpecies = Kaiju->GetSpecies())
+		{
+			VictimMaxArmor = KaijuSpecies->ArmorHealth;
+		}
+	}
+
+	if (UGameInstance* GI = GetWorld() ? GetWorld()->GetGameInstance() : nullptr)
+	{
+		if (UIBXPSubsystem* XP = GI->GetSubsystem<UIBXPSubsystem>())
+		{
+			// Passes MaxHealth and VictimMaxArmor so the subsystem can dynamically calculate the kill payout
+			XP->ReportDamage(Amount, InstigatedBy, DamageCauser, CurrentHealth <= 0.0f, MaxHealth, VictimMaxArmor);
+		}
+	}
 
 	if (CurrentHealth <= 0.0f && !bDeathHandled)
 	{

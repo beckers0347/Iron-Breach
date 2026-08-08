@@ -16,6 +16,9 @@ class UWeaponRigComponent;
 class UWeaponDataAsset;
 class UCameraComponent;
 class UStaticMeshComponent;
+class USceneCaptureComponent2D;
+class UTextureRenderTarget2D;
+class UMaterialInterface;
 
 UCLASS()
 class IRONBREACH_API AIBCharacter_Infantry : public ACharacter, public IDamageableInterface
@@ -53,6 +56,92 @@ protected:
 	/** Poses the viewmodel and drives ADS (zoom, spread, move speed). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UWeaponRigComponent> WeaponRig;
+
+	// ---------------------------------------------------------------------
+	// Picture-in-picture scope (render-target optic)
+	//
+	// Replaces the old Event Graph attach sequence. Everything the BP version
+	// did by hand — attach to socket, correct the socket's authored rotation,
+	// push the screen clear of the baked sight geometry, force visibility —
+	// happens in SetupScopePip() where the values are readable and diffable.
+	//
+	// The screen and camera both hang off WeaponMesh's scope socket, so the
+	// rig's per-frame viewmodel posing carries them along for free.
+	// ---------------------------------------------------------------------
+
+	/** Zoomed capture that feeds ScopeRenderTarget. Sits just ahead of the screen. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Scope")
+	TObjectPtr<USceneCaptureComponent2D> ScopeCamera;
+
+	/** Flat plane displaying the render target inside the optic. Owner-only visible. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Scope")
+	TObjectPtr<UStaticMeshComponent> ScopeScreen;
+
+	/** Master switch. Off = no capture cost, no screen, weapon renders untouched. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	bool bEnableScopePip = true;
+
+	/** Socket on WeaponMesh the optic mounts to. Missing socket -> falls back to
+	 *  the mesh root and logs a warning rather than silently posing at the origin. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	FName ScopeSocketName = TEXT("ScopeSocket");
+
+	/** Render target the capture writes and the screen material reads. OPTIONAL:
+	 *  leave it empty and one is created at runtime at ScopeRenderTargetResolution.
+	 *  Only assign an asset if something outside this pawn needs to sample the feed. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	TObjectPtr<UTextureRenderTarget2D> ScopeRenderTarget;
+
+	/** Square resolution for the auto-created render target. 512 is plenty for an
+	 *  optic a few centimetres across; 1024 costs real memory for no visible gain. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope", meta = (ClampMin = "128", ClampMax = "2048"))
+	int32 ScopeRenderTargetResolution = 512;
+
+	/** Unlit material sampling the render target into Emissive. Assign M_ScopeScreen.
+	 *  IMPORTANT: enable Two Sided on it, or a half-turn of yaw culls the whole plane. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	TObjectPtr<UMaterialInterface> ScopeScreenMaterial;
+
+	/** Optional texture parameter name on the screen material. When set, the render
+	 *  target is pushed into a dynamic instance at runtime instead of being hardwired
+	 *  in the material — lets several weapons share one material with distinct RTs. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	FName ScopeTextureParameterName = NAME_None;
+
+	/** Screen offset from the socket, socket-local. Push along +X until the plane
+	 *  clears the sight's baked glass geometry. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	FVector ScopeScreenOffset = FVector(1.0f, 0.0f, 0.0f);
+
+	/** Screen rotation relative to the socket. A UE Plane's face normal is +Z, so it
+	 *  needs pitch to stand upright — yaw alone leaves it lying flat. If the plane
+	 *  vanishes at a correct transform, flip this yaw by 180: you're looking at the
+	 *  culled back face. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	FRotator ScopeScreenRotation = FRotator(90.0f, 180.0f, 0.0f);
+
+	/** Screen scale. The engine Plane is 100cm square — reflex-sight size is ~0.03-0.05. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	FVector ScopeScreenScale = FVector(0.04f);
+
+	/** Capture offset from the socket, socket-local. Keep it ahead of the screen so
+	 *  the screen never lands inside the capture's near plane. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	FVector ScopeCameraOffset = FVector(5.0f, 0.0f, 0.0f);
+
+	/** Capture rotation relative to the socket. Identity assumes the socket's +X
+	 *  points downrange; correct here rather than re-authoring the socket. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	FRotator ScopeCameraRotation = FRotator::ZeroRotator;
+
+	/** Capture FOV. Lower = more magnification. ~20 reads as a 4x optic against a 90 FOV view. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope", meta = (ClampMin = "5.0", ClampMax = "170.0"))
+	float ScopeFOV = 20.0f;
+
+	/** Hide the viewmodel from the scope's own capture. Off means the gun body fills
+	 *  the optic; there is rarely a reason to want that. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
+	bool bHideWeaponFromScopeCapture = true;
 
 	// Enhanced Input Data
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
@@ -117,6 +206,22 @@ protected:
 public:
 	// Implementation of IDamageableInterface
 	virtual void HandleTakeDamage_Implementation(float DamageAmount, const FHitResult& HitResult, AController* InstigatedBy, AActor* DamageCauser) override;
+
+	/** Re-run the PIP mount. Call after swapping the weapon mesh so the optic
+	 *  re-snaps to the new mesh's socket instead of dangling off the old one. */
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Scope")
+	void SetupScopePip();
+
+	/** Runtime toggle for both halves of the optic (screen + capture cost). */
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Scope")
+	void SetScopePipEnabled(bool bEnabled);
+
+	/** Rescale the first-person viewmodel mesh. Normally driven by CurrentWeaponData's
+	 *  ViewmodelScale (BeginPlay/ApplyWeaponData), but exposed for runtime tuning, a
+	 *  debug console command, etc. Re-caches the rig's Grip/Aim socket offsets so ADS
+	 *  alignment stays correct at the new scale instead of drifting off the anchor. */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SetWeaponMeshScale(FVector NewScale);
 
 private:
 	void ApplyWeaponData(UWeaponDataAsset* WeaponData);

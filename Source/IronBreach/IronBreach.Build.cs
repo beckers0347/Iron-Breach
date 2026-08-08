@@ -24,6 +24,12 @@ public class IronBreach : ModuleRules
 			// plugin loaded at runtime; only these two are compile-time dependencies.
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
+			// FUniqueNetIdRepl/FUniqueNetIdWrapper live here as of UE5 (split out of
+			// OnlineSubsystem). Needed by Progression/IBXPSubsystem.cpp for cross-session
+			// pilot identity (MakePlayerKey) -- OnlineSubsystem/Utils use these types too but
+			// don't re-export the symbols, so linking without this gives an unresolved
+			// external on FUniqueNetIdWrapper::ToString.
+			"CoreOnline",
 			"UMG",
 			// Menus/UI + inventory (MENUS_UI_WIRING.md):
 			"Slate",              // FReply / widget key & mouse handling in the menu screens

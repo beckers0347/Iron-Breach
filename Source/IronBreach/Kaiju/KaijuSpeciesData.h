@@ -30,6 +30,7 @@ class IRONBREACH_API UKaijuSpeciesData : public UPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Identity")
 	FName SpeciesName;
 
