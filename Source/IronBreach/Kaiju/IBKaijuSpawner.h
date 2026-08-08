@@ -6,6 +6,7 @@
 #include "IBKaijuSpawner.generated.h"
 
 class AIBCharacter_Kaiju;
+class USphereComponent;
 
 UCLASS()
 class IRONBREACH_API AIBKaijuSpawner : public AActor
@@ -34,4 +35,9 @@ public:
     // Maximum power level allowed to spawn here
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	EKaijuClass MaxClass;
+
+	// Visual representation of the spawn zone
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning")
+	TObjectPtr<USphereComponent> SpawnZone;
+
 };
