@@ -7,6 +7,25 @@
 
 class FOnlineSessionSearch;
 
+/** Every beat of the host/join flow, for front-end feedback. A silent menu
+ *  reads as a broken menu — the demo build cannot afford that. */
+UENUM(BlueprintType)
+enum class EIBSessionStatus : uint8
+{
+	Idle,
+	Hosting,     // CreateSession in flight
+	HostLive,    // Session up, server travel imminent
+	Searching,   // FindSessions in flight
+	NoneFound,   // Search returned empty — terminal, re-enable the UI
+	Joining,     // Result picked, JoinSession/travel in flight
+	Joined,      // Connect string resolved, client travel imminent
+	JoinFailed,  // Terminal, re-enable the UI
+	Leaving,
+	Failed       // Any hard failure (no OSS, immediate call rejection, create failed)
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIBSessionStatusChanged, EIBSessionStatus, Status, const FText&, Message);
+
 /**
  * Minimal session layer for the M2 spike (ADR-002: listen server, Steam-first).
  *
@@ -39,9 +58,11 @@ public:
 	UFUNCTION(BlueprintCallable, Exec, Category = "IronBreach|Online")
 	void IBLeave();
 
-	/** Map travelled to on successful host. Exposed so a future front-end can pick zones. */
+	/** Map travelled to on successful host. Exposed so a future front-end can pick zones.
+	 *  Points at the same mission map Solo uses — host and solo must land in the same
+	 *  world for the demo (Lvl_Plains was the pre-FirstPerson spike map). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
-	FString HostTravelURL = TEXT("/Game/Lvl_Plains?listen");
+	FString HostTravelURL = TEXT("/Game/FirstPerson/Lvl_FirstPerson?listen");
 
 	/** Where IBLeave lands. Matches DefaultEngine.ini's GameDefaultMap. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
@@ -50,7 +71,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
 	int32 MaxPlayers = 4;
 
+	/** Front-end feedback channel (IBMainMenuWidget listens; BPs can too). */
+	UPROPERTY(BlueprintAssignable, Category = "IronBreach|Online")
+	FOnIBSessionStatusChanged OnSessionStatusChanged;
+
 private:
+	/** Log + broadcast in one move so the two can never drift apart. */
+	void ReportStatus(EIBSessionStatus Status, const FString& Message);
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);

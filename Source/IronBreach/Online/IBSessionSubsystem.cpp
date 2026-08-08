@@ -12,6 +12,12 @@ namespace
 	const FName IBSessionName(NAME_GameSession);
 }
 
+void UIBSessionSubsystem::ReportStatus(EIBSessionStatus Status, const FString& Message)
+{
+	UE_LOG(LogIronBreach, Log, TEXT("Session status: %s"), *Message);
+	OnSessionStatusChanged.Broadcast(Status, FText::FromString(Message));
+}
+
 IOnlineSessionPtr UIBSessionSubsystem::GetSessionInterface() const
 {
 	if (IOnlineSubsystem* OSS = Online::GetSubsystem(GetWorld()))
@@ -34,6 +40,7 @@ void UIBSessionSubsystem::IBHost()
 	if (!Sessions.IsValid())
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("IBHost: no session interface (Online Subsystem missing?)"));
+		ReportStatus(EIBSessionStatus::Failed, TEXT("ONLINE SERVICE UNAVAILABLE"));
 		return;
 	}
 
@@ -57,11 +64,13 @@ void UIBSessionSubsystem::IBHost()
 
 	UE_LOG(LogIronBreach, Log, TEXT("IBHost: creating session (%s, %d slots)"),
 		Settings.bIsLANMatch ? TEXT("LAN/NULL") : TEXT("online"), Settings.NumPublicConnections);
+	ReportStatus(EIBSessionStatus::Hosting, TEXT("STANDING UP SERVER..."));
 
 	if (!Sessions->CreateSession(0 /*hosting local player*/, IBSessionName, Settings))
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("IBHost: CreateSession call failed immediately"));
 		Sessions->ClearOnCreateSessionCompleteDelegate_Handle(CreateCompleteHandle);
+		ReportStatus(EIBSessionStatus::Failed, TEXT("COULD NOT CREATE SESSION"));
 	}
 }
 
@@ -75,10 +84,12 @@ void UIBSessionSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSu
 	if (!bWasSuccessful)
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("IBHost: session creation failed"));
+		ReportStatus(EIBSessionStatus::Failed, TEXT("SESSION CREATION FAILED"));
 		return;
 	}
 
 	UE_LOG(LogIronBreach, Log, TEXT("IBHost: session live - listen-hosting %s"), *HostTravelURL);
+	ReportStatus(EIBSessionStatus::HostLive, TEXT("SERVER LIVE - DEPLOYING..."));
 
 	if (UWorld* World = GetWorld())
 	{
@@ -92,6 +103,7 @@ void UIBSessionSubsystem::IBJoin()
 	if (!Sessions.IsValid())
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("IBJoin: no session interface (Online Subsystem missing?)"));
+		ReportStatus(EIBSessionStatus::Failed, TEXT("ONLINE SERVICE UNAVAILABLE"));
 		return;
 	}
 
@@ -107,11 +119,13 @@ void UIBSessionSubsystem::IBJoin()
 		FOnFindSessionsCompleteDelegate::CreateUObject(this, &UIBSessionSubsystem::OnFindSessionsComplete));
 
 	UE_LOG(LogIronBreach, Log, TEXT("IBJoin: searching (%s)..."), SessionSearch->bIsLanQuery ? TEXT("LAN/NULL") : TEXT("online"));
+	ReportStatus(EIBSessionStatus::Searching, TEXT("SCANNING FOR SQUADS..."));
 
 	if (!Sessions->FindSessions(0, SessionSearch.ToSharedRef()))
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("IBJoin: FindSessions call failed immediately"));
 		Sessions->ClearOnFindSessionsCompleteDelegate_Handle(FindCompleteHandle);
+		ReportStatus(EIBSessionStatus::Failed, TEXT("SEARCH COULD NOT START"));
 	}
 }
 
@@ -126,10 +140,12 @@ void UIBSessionSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	if (!bWasSuccessful || !Sessions.IsValid() || !SessionSearch.IsValid() || SessionSearch->SearchResults.Num() == 0)
 	{
 		UE_LOG(LogIronBreach, Warning, TEXT("IBJoin: no sessions found"));
+		ReportStatus(EIBSessionStatus::NoneFound, TEXT("NO SQUADS ON THE NET - HOST ONE?"));
 		return;
 	}
 
 	UE_LOG(LogIronBreach, Log, TEXT("IBJoin: %d session(s) found - joining the first"), SessionSearch->SearchResults.Num());
+	ReportStatus(EIBSessionStatus::Joining, TEXT("SQUAD FOUND - LINKING..."));
 
 	JoinCompleteHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 		FOnJoinSessionCompleteDelegate::CreateUObject(this, &UIBSessionSubsystem::OnJoinSessionComplete));
@@ -138,6 +154,7 @@ void UIBSessionSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("IBJoin: JoinSession call failed immediately"));
 		Sessions->ClearOnJoinSessionCompleteDelegate_Handle(JoinCompleteHandle);
+		ReportStatus(EIBSessionStatus::JoinFailed, TEXT("LINK REFUSED"));
 	}
 }
 
@@ -152,6 +169,7 @@ void UIBSessionSubsystem::OnJoinSessionComplete(FName SessionName, EOnJoinSessio
 	if (Result != EOnJoinSessionCompleteResult::Success || !Sessions.IsValid())
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("IBJoin: join failed (%d)"), static_cast<int32>(Result));
+		ReportStatus(EIBSessionStatus::JoinFailed, TEXT("COULD NOT JOIN SQUAD"));
 		return;
 	}
 
@@ -159,10 +177,12 @@ void UIBSessionSubsystem::OnJoinSessionComplete(FName SessionName, EOnJoinSessio
 	if (!Sessions->GetResolvedConnectString(SessionName, ConnectString))
 	{
 		UE_LOG(LogIronBreach, Error, TEXT("IBJoin: could not resolve connect string"));
+		ReportStatus(EIBSessionStatus::JoinFailed, TEXT("HOST UNREACHABLE"));
 		return;
 	}
 
 	UE_LOG(LogIronBreach, Log, TEXT("IBJoin: travelling to host at %s"), *ConnectString);
+	ReportStatus(EIBSessionStatus::Joined, TEXT("LINKED - DEPLOYING..."));
 
 	if (APlayerController* PC = GetGameInstance()->GetFirstLocalPlayerController())
 	{
@@ -191,6 +211,7 @@ void UIBSessionSubsystem::IBLeave()
 		FOnDestroySessionCompleteDelegate::CreateUObject(this, &UIBSessionSubsystem::OnLeaveDestroyComplete));
 
 	UE_LOG(LogIronBreach, Log, TEXT("IBLeave: destroying session..."));
+	ReportStatus(EIBSessionStatus::Leaving, TEXT("RETURNING TO BASE..."));
 
 	if (!Sessions->DestroySession(IBSessionName))
 	{
