@@ -3,20 +3,28 @@
 #include "Engine/World.h"
 #include "Math/UnrealMathUtility.h"
 #include "Components/SphereComponent.h"
-#include "NavigationSystem.h" // Required for NavMesh queries
+#include "Components/SceneComponent.h"
+#include "NavigationSystem.h"
+#include "TimerManager.h"
+#include "GameFramework/PlayerController.h"
 
 AIBKaijuSpawner::AIBKaijuSpawner()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = false;
 
-	// Create the Sphere Component to define the zone
-	SpawnZone = CreateDefaultSubobject<USphereComponent>(TEXT("SpawnZone"));
-	RootComponent = SpawnZone;
+	SpawnerRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnerRoot"));
+	RootComponent = SpawnerRoot;
 
-	// Default to a 50m radius zone (5000 units). You can scale this in the editor.
-	SpawnZone->InitSphereRadius(5000.0f);
-	SpawnZone->SetCollisionEnabled(ECollisionEnabled::NoCollision); // It's just for math/visuals
+	SpawnZone = CreateDefaultSubobject<USphereComponent>(TEXT("SpawnZone"));
+	SpawnZone->SetupAttachment(RootComponent);
+	SpawnZone->InitSphereRadius(3000.0f); // 30 meters
+	SpawnZone->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	ProximityZone = CreateDefaultSubobject<USphereComponent>(TEXT("ProximityZone"));
+	ProximityZone->SetupAttachment(RootComponent);
+	ProximityZone->InitSphereRadius(10000.0f); // 100 meters
+	ProximityZone->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AIBKaijuSpawner::BeginPlay()
@@ -25,13 +33,44 @@ void AIBKaijuSpawner::BeginPlay()
 
 	if (!HasAuthority()) return;
 
-	if (!KaijuClassToSpawn || PossibleSpecies.IsEmpty())
+	// Start the looping check every 'SpawnInterval' seconds
+	GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &AIBKaijuSpawner::ProcessSpawning, SpawnInterval, true);
+}
+
+void AIBKaijuSpawner::ProcessSpawning()
+{
+	// 1. Clean up array in case a Kaiju was destroyed without triggering the delegate
+	ActiveKaijus.RemoveAll([](AIBCharacter_Kaiju* K) { return K == nullptr || K->IsActorBeingDestroyed(); });
+
+	// 2. Are we at the max limit?
+	if (ActiveKaijus.Num() >= MaxConcurrentKaijus) return;
+
+	// 3. Is a player inside the ProximityZone?
+	bool bPlayerInRange = false;
+	float ProxRadiusSq = FMath::Square(ProximityZone->GetScaledSphereRadius());
+	FVector SpawnerLoc = GetActorLocation();
+
+	// Loop through all connected players (works perfectly for your listen server)
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("KaijuSpawner %s is missing its Class or Species array."), *GetName());
-		return;
+		if (APlayerController* PC = It->Get())
+		{
+			if (APawn* PlayerPawn = PC->GetPawn())
+			{
+				if (FVector::DistSquared(SpawnerLoc, PlayerPawn->GetActorLocation()) <= ProxRadiusSq)
+				{
+					bPlayerInRange = true;
+					break; // Found one, no need to check others
+				}
+			}
+		}
 	}
 
-	// 1. Filter the possible species by the defined power range
+	if (!bPlayerInRange) return; // Nobody is close enough
+
+	// 4. Player is near, and we have room! Run the spawn logic.
+	if (!KaijuClassToSpawn || PossibleSpecies.IsEmpty()) return;
+
 	TArray<UKaijuSpeciesData*> FilteredSpecies;
 	for (UKaijuSpeciesData* SpeciesDA : PossibleSpecies)
 	{
@@ -43,25 +82,20 @@ void AIBKaijuSpawner::BeginPlay()
 
 	if (FilteredSpecies.IsEmpty()) return;
 
-	// 2. Pick a random DA from the valid pool
 	const int32 RandomIndex = FMath::RandRange(0, FilteredSpecies.Num() - 1);
 	UKaijuSpeciesData* ChosenSpecies = FilteredSpecies[RandomIndex];
 
-	// 3. Find a random valid point on the NavMesh inside the sphere
-	FVector SpawnLocation = GetActorLocation(); // Fallback to center
+	FVector SpawnLocation = GetActorLocation();
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
-
 	if (NavSys)
 	{
 		FNavLocation RandomNavLoc;
-		// Ask the NavMesh for a safe spot within the sphere's radius
 		if (NavSys->GetRandomReachablePointInRadius(GetActorLocation(), SpawnZone->GetScaledSphereRadius(), RandomNavLoc))
 		{
 			SpawnLocation = RandomNavLoc.Location;
 		}
 	}
 
-	// 4. Deferred Spawn
 	FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
 	AIBCharacter_Kaiju* SpawnedKaiju = GetWorld()->SpawnActorDeferred<AIBCharacter_Kaiju>(
 		KaijuClassToSpawn,
@@ -75,5 +109,18 @@ void AIBKaijuSpawner::BeginPlay()
 	{
 		SpawnedKaiju->Species = ChosenSpecies;
 		SpawnedKaiju->FinishSpawning(SpawnTransform);
+
+		// 5. Track the newly spawned Kaiju and listen for its death
+		ActiveKaijus.Add(SpawnedKaiju);
+		SpawnedKaiju->OnDestroyed.AddDynamic(this, &AIBKaijuSpawner::HandleKaijuDestroyed);
+	}
+}
+
+void AIBKaijuSpawner::HandleKaijuDestroyed(AActor* DestroyedActor)
+{
+	AIBCharacter_Kaiju* DeadKaiju = Cast<AIBCharacter_Kaiju>(DestroyedActor);
+	if (DeadKaiju)
+	{
+		ActiveKaijus.Remove(DeadKaiju);
 	}
 }
