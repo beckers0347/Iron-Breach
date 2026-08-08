@@ -42,7 +42,7 @@
 /wd4267
 /wd4100
 /I "."
-/I "C:/IronBreach/Plugins/meshy/Source/meshy/Private"
+/I "X:/IronBreach/Plugins/meshy/Source/meshy/Private"
 /I "../Intermediate/Build/Win64/UnrealEditor/Inc/CoreUObject/UHT"
 /I "../Intermediate/Build/Win64/UnrealEditor/Inc/CoreUObject/VerseVMBytecode"
 /I "Runtime/CoreUObject/Public"
@@ -334,10 +334,10 @@
 /I "../Intermediate/Build/Win64/UnrealEditor/Inc/EditorInteractiveToolsFramework/UHT"
 /I "Editor/Experimental/EditorInteractiveToolsFramework/Public"
 /I "Editor/EditorStyle/Public"
-/I "C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/UnrealEditor/Inc/meshy/UHT"
-/I "C:/IronBreach/Plugins/meshy/Source"
-/I "C:/IronBreach/Plugins/meshy/Source/meshy/Public"
-/I "C:/IronBreach/Intermediate/Build/Win64/x64/IronBreachEditor/Development/UnrealEd"
+/I "X:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/UnrealEditor/Inc/meshy/UHT"
+/I "X:/IronBreach/Plugins/meshy/Source"
+/I "X:/IronBreach/Plugins/meshy/Source/meshy/Public"
+/I "X:/IronBreach/Intermediate/Build/Win64/x64/IronBreachEditor/Development/UnrealEd"
 /external:W0
 /external:I "ThirdParty/GuidelinesSupportLibrary/GSL-1144/include"
 /external:I "ThirdParty/AtomicQueue"

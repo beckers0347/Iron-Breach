@@ -2,3 +2,7 @@
 #include "C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/UnrealEditor/Inc/meshy/UHT/meshy.init.gen.cpp"
 #include "C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/UnrealEditor/Inc/meshy/UHT/MeshyBridge.gen.cpp"
 #include "C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/PerModuleInline.gen.cpp"
+#include "C:/IronBreach/Plugins/meshy/Source/meshy/Private/meshy.cpp"
+#include "C:/IronBreach/Plugins/meshy/Source/meshy/Private/MeshyBridge.cpp"
+#include "C:/IronBreach/Plugins/meshy/Source/meshy/Private/meshyCommands.cpp"
+#include "C:/IronBreach/Plugins/meshy/Source/meshy/Private/meshyStyle.cpp"

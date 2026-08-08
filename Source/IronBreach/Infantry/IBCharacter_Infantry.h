@@ -183,6 +183,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	bool bIsArmed = false;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* SprintAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float NormalWalkSpeed = 500.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float SprintSpeed = 900.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Movement")
+	bool bIsSprinting = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon")
+	bool bIsAiming = false;
+
+	void StartSprint();
+	void StopSprint();
+
 	// Input Actions
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

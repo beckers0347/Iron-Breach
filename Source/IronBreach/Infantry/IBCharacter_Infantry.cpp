@@ -369,6 +369,12 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &AIBCharacter_Infantry::StartAiming);
 		PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Released, this, &AIBCharacter_Infantry::StopAiming);
 	}
+
+	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EIC->BindAction(SprintAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::StartSprint);
+		EIC->BindAction(SprintAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopSprint);
+	}
 }
 
 void AIBCharacter_Infantry::Move(const FInputActionValue& Value)
@@ -409,6 +415,13 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 
 void AIBCharacter_Infantry::StartAiming()
 {
+	if (bIsSprinting)
+	{
+		return; // can't start aiming while sprinting
+	}
+
+	bIsAiming = true;
+
 	UE_LOG(LogIronBreach, Log, TEXT("[Input] StartAiming called. WeaponRig valid: %s"), WeaponRig ? TEXT("Yes") : TEXT("No"));
 	if (WeaponRig) WeaponRig->SetAiming(true);
 }
@@ -435,6 +448,10 @@ void AIBCharacter_Infantry::Tick(float DeltaSeconds)
 
 void AIBCharacter_Infantry::Fire()
 {
+	if (bIsSprinting)
+	{
+		return;
+	}
 	// Consolidated: cosmetics + Server_Fire routing + authoritative trace all live in the
 	// weapon component now (ADR-002 pattern-setter). One fire path for the whole project.
 	if (WeaponComponent)
@@ -571,5 +588,30 @@ void AIBCharacter_Infantry::HandleDeath(AActor* Killer)
 					GameMode->RestartPlayer(DeadController.Get());
 				}
 			}), RespawnDelay, false);
+	}
+}
+
+void AIBCharacter_Infantry::StartSprint()
+{
+	if (bIsAiming)
+	{
+		return; // can't sprint while aiming
+	}
+
+	bIsSprinting = true;
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	}
+}
+
+void AIBCharacter_Infantry::StopSprint()
+{
+	bIsSprinting = false;
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = NormalWalkSpeed;
 	}
 }
