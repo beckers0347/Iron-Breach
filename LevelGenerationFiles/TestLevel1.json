@@ -1,0 +1,218 @@
+{
+  "_comment": "Iron Breach mountain-valley level for UnrealLevelBuilder.py. Terrain dressing pulled from Content/Landscaping (Iceland mountain static meshes, Black Alder + Hornbeam trees, wind shrubs). NOTE: there is no spawnable Landscape asset in this project's Content/Landscaping folder -- M_AutoLandscape / MI_Landscape_Arctic etc. are materials for a hand-sculpted Landscape actor, not something load_asset() can spawn. This layout uses SM_Plane as a flat placeholder floor; you'll want to sculpt a real Landscape and apply MI_Landscape_Arctic to it separately in-editor. Units are cm.",
+
+  "actors": [
+
+    { "_comment": "--- PLACEHOLDER GROUND (swap for a real sculpted Landscape later) ---" },
+    {
+      "asset_path": "/Game/LevelPrototyping/Meshes/SM_Plane.SM_Plane",
+      "location": [0.0, 0.0, 0.0],
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [60.0, 60.0, 1.0],
+      "label": "Floor_Valley_Placeholder"
+    },
+
+    { "_comment": "--- MOUNTAIN RING (perimeter, Iceland kit) ---" },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_01.SM_Mountain_01",
+      "location": [5000.0, 0.0, 0.0],
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [3.0, 3.0, 3.0],
+      "label": "Mountain_East"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_02.SM_Mountain_02",
+      "location": [3535.0, 3535.0, 0.0],
+      "rotation": [0.0, 45.0, 0.0],
+      "scale": [3.0, 3.0, 3.0],
+      "label": "Mountain_NorthEast"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_03.SM_Mountain_03",
+      "location": [0.0, 5000.0, 0.0],
+      "rotation": [0.0, 90.0, 0.0],
+      "scale": [3.0, 3.0, 3.0],
+      "label": "Mountain_North"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_04.SM_Mountain_04",
+      "location": [-3535.0, 3535.0, 0.0],
+      "rotation": [0.0, 135.0, 0.0],
+      "scale": [3.0, 3.0, 3.0],
+      "label": "Mountain_NorthWest"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_05.SM_Mountain_05",
+      "location": [-5000.0, 0.0, 0.0],
+      "rotation": [0.0, 180.0, 0.0],
+      "scale": [3.0, 3.0, 3.0],
+      "label": "Mountain_West"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_06.SM_Mountain_06",
+      "location": [-3535.0, -3535.0, 0.0],
+      "rotation": [0.0, 225.0, 0.0],
+      "scale": [3.0, 3.0, 3.0],
+      "label": "Mountain_SouthWest"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_07.SM_Mountain_07",
+      "location": [0.0, -5000.0, 0.0],
+      "rotation": [0.0, 270.0, 0.0],
+      "scale": [3.0, 3.0, 3.0],
+      "label": "Mountain_South"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_08.SM_Mountain_08",
+      "location": [3535.0, -3535.0, 0.0],
+      "rotation": [0.0, 315.0, 0.0],
+      "scale": [3.0, 3.0, 3.0],
+      "label": "Mountain_SouthEast"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Iceland_Crest.SM_Iceland_Crest",
+      "location": [0.0, 0.0, -200.0],
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [4.0, 4.0, 2.0],
+      "label": "Crest_Backdrop_North"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Iceland_Eroded_Mountain.SM_Iceland_Eroded_Mountain",
+      "location": [6500.0, 2000.0, 0.0],
+      "rotation": [0.0, 20.0, 0.0],
+      "scale": [2.0, 2.0, 2.0],
+      "label": "Eroded_Mountain_FarEast"
+    },
+    {
+      "asset_path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Iceland_Plateus_01.SM_Iceland_Plateus_01",
+      "location": [-6500.0, -2000.0, 0.0],
+      "rotation": [0.0, -20.0, 0.0],
+      "scale": [2.0, 2.0, 2.0],
+      "label": "Plateau_FarWest"
+    },
+
+    { "_comment": "--- FOREST BAND (mixed Alder + Hornbeam, ringing the inner valley) ---" },
+    {
+      "asset_path": "/Game/Landscaping/Tree_Black_Alder/Tree_Black_Alder_01/Tree_Black_Alder_01_A.Tree_Black_Alder_01_A",
+      "location": [1800.0, 900.0, 0.0],
+      "rotation": [0.0, 10.0, 0.0],
+      "scale": [1.2, 1.2, 1.2],
+      "label": "Alder_01"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Tree_Black_Alder/Tree_Black_Alder_01/Tree_Black_Alder_01_B.Tree_Black_Alder_01_B",
+      "location": [1600.0, -1100.0, 0.0],
+      "rotation": [0.0, 140.0, 0.0],
+      "scale": [1.1, 1.1, 1.1],
+      "label": "Alder_02"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Tree_Black_Alder/Tree_Black_Alder_01/Tree_Black_Alder_01_C.Tree_Black_Alder_01_C",
+      "location": [-1700.0, 1200.0, 0.0],
+      "rotation": [0.0, 260.0, 0.0],
+      "scale": [1.3, 1.3, 1.3],
+      "label": "Alder_03"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Tree_Black_Alder/Tree_Black_Alder_01/Tree_Black_Alder_01_D.Tree_Black_Alder_01_D",
+      "location": [-1500.0, -900.0, 0.0],
+      "rotation": [0.0, 60.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "label": "Alder_04"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Tree_Hornbeam/Tree_Hornbeam_01/Tree_Hornbeam_01_A.Tree_Hornbeam_01_A",
+      "location": [2200.0, -200.0, 0.0],
+      "rotation": [0.0, 300.0, 0.0],
+      "scale": [1.2, 1.2, 1.2],
+      "label": "Hornbeam_01"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Tree_Hornbeam/Tree_Hornbeam_01/Tree_Hornbeam_01_B.Tree_Hornbeam_01_B",
+      "location": [-2100.0, 300.0, 0.0],
+      "rotation": [0.0, 170.0, 0.0],
+      "scale": [1.1, 1.1, 1.1],
+      "label": "Hornbeam_02"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Tree_Hornbeam/Tree_Hornbeam_01/Tree_Hornbeam_01_C.Tree_Hornbeam_01_C",
+      "location": [400.0, 2200.0, 0.0],
+      "rotation": [0.0, 80.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "label": "Hornbeam_03"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Tree_Hornbeam/Tree_Hornbeam_01/Tree_Hornbeam_01_D.Tree_Hornbeam_01_D",
+      "location": [-400.0, -2200.0, 0.0],
+      "rotation": [0.0, 200.0, 0.0],
+      "scale": [1.3, 1.3, 1.3],
+      "label": "Hornbeam_04"
+    },
+
+    { "_comment": "--- UNDERBRUSH (wind shrubs, scattered near tree line) ---" },
+    {
+      "asset_path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_A/GV_Vol7_Shrub_A_full_type1.GV_Vol7_Shrub_A_full_type1",
+      "location": [1900.0, 500.0, 0.0],
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.5, 1.5, 1.5],
+      "label": "Shrub_01"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_C/GV_Vol7_Shrub_C_full_type1.GV_Vol7_Shrub_C_full_type1",
+      "location": [-1900.0, 700.0, 0.0],
+      "rotation": [0.0, 90.0, 0.0],
+      "scale": [1.5, 1.5, 1.5],
+      "label": "Shrub_02"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_D/GV_Vol7_Shrub_D_full_type1.GV_Vol7_Shrub_D_full_type1",
+      "location": [700.0, 1900.0, 0.0],
+      "rotation": [0.0, 180.0, 0.0],
+      "scale": [1.5, 1.5, 1.5],
+      "label": "Shrub_03"
+    },
+    {
+      "asset_path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_I/GV_Vol7_Shrub_I_full_type1.GV_Vol7_Shrub_I_full_type1",
+      "location": [-700.0, -1900.0, 0.0],
+      "rotation": [0.0, 270.0, 0.0],
+      "scale": [1.5, 1.5, 1.5],
+      "label": "Shrub_04"
+    },
+
+    { "_comment": "--- ENCOUNTER: KAIJU (center-north clearing) ---" },
+    {
+      "asset_path": "/Game/Characters/Kaiju/BP_KaijuSpawner.BP_KaijuSpawner",
+      "location": [0.0, 1500.0, 0.0],
+      "rotation": [0.0, 180.0, 0.0],
+      "label": "KaijuSpawner_North"
+    },
+    {
+      "asset_path": "/Game/Characters/Kaiju/Blueprints/BP_Kaiju.BP_Kaiju",
+      "location": [0.0, 1300.0, 0.0],
+      "rotation": [0.0, -90.0, 0.0],
+      "label": "Kaiju_Encounter_01"
+    },
+
+    { "_comment": "--- ENCOUNTER: MECH DROP (center-west clearing) ---" },
+    {
+      "asset_path": "/Game/Characters/Mech/Blueprints/Class/BP_Mech.BP_Mech",
+      "location": [-1200.0, 0.0, 0.0],
+      "rotation": [0.0, 90.0, 0.0],
+      "label": "Mech_Drop_01"
+    },
+
+    { "_comment": "--- ENCOUNTER: INFANTRY SPAWNS (center-south clearing) ---" },
+    {
+      "asset_path": "/Game/Sandbox/BP_IBCharacter_Infantry.BP_IBCharacter_Infantry",
+      "location": [-300.0, -1300.0, 0.0],
+      "rotation": [0.0, 90.0, 0.0],
+      "label": "Infantry_Spawn_01"
+    },
+    {
+      "asset_path": "/Game/Sandbox/BP_IBCharacter_Infantry.BP_IBCharacter_Infantry",
+      "location": [300.0, -1300.0, 0.0],
+      "rotation": [0.0, 90.0, 0.0],
+      "label": "Infantry_Spawn_02"
+    }
+  ]
+}
