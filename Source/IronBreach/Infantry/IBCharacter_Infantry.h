@@ -186,6 +186,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* SprintAction;
 
+	/** Assign an IA_Crouch asset here and map it to whatever key you want; bound as
+	 *  Started (press) + Completed (release), same hold pattern as Sprint/Aim. */
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> CrouchAction;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float NormalWalkSpeed = 500.f;
 
@@ -200,6 +205,8 @@ protected:
 
 	void StartSprint();
 	void StopSprint();
+	void StartCrouch();
+	void StopCrouch();
 
 	// Input Actions
 	void Move(const FInputActionValue& Value);
