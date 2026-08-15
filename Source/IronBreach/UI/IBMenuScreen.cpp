@@ -84,6 +84,21 @@ void UIBMenuScreen::RefreshTabBanner()
 	}
 }
 
+void UIBMenuScreen::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	// Focus is the menu's oxygen: every in-menu key (close, cycle, hotkeys)
+	// routes through this widget, and a stray click on a non-focusable child
+	// (the dim border, the map canvas) silently drops keyboard focus to the
+	// viewport — where UI-only mode eats it. Reassert every frame while open;
+	// it's a cheap check and it makes Escape unkillable.
+	if (OwnerSubsystem && IsVisible() && !HasKeyboardFocus() && !HasFocusedDescendants())
+	{
+		SetKeyboardFocus();
+	}
+}
+
 void UIBMenuScreen::NotifyScreenOpened(UIBMenuSubsystem* InOwner, FName InScreenId)
 {
 	OwnerSubsystem = InOwner;

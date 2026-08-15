@@ -39,6 +39,7 @@ public:
 
 protected:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 	/** Subclass refresh hook — rebuild grids/markers here, not in Construct
