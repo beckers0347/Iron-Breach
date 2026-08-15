@@ -6,6 +6,7 @@
 #include "IBInventoryComponent.generated.h"
 
 class UIBItemDefinition;
+class AIBWeaponRack;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemGranted, const FIBItemInstance&, Item);
@@ -65,6 +66,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void RequestUnequip(EIBEquipSlot Slot);
 
+	/** Take slot Index off Rack and grant it to this inventory. Client-safe;
+	 *  routes to the server, which re-validates Index against the rack's own
+	 *  replicated stock — never trusts an index/definition the client claims. */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void RequestTakeFromRack(AIBWeaponRack* Rack, int32 Index);
+
 	// ---- Queries (safe everywhere; read replicated state) ----
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
@@ -96,6 +103,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_Unequip(EIBEquipSlot Slot);
 
+	UFUNCTION(Server, Reliable)
+	void Server_TakeFromRack(AIBWeaponRack* Rack, int32 Index);
+
 	UFUNCTION()
 	void OnRep_Equipment(const TArray<FIBEquipmentEntry>& OldEquipment);
 
@@ -109,6 +119,7 @@ private:
 	// Server-side implementations behind the request seam.
 	void Equip_OnServer(FGuid InstanceId);
 	void Unequip_OnServer(EIBEquipSlot Slot);
+	void TakeFromRack_OnServer(AIBWeaponRack* Rack, int32 Index);
 	void SetEquipmentSlot(EIBEquipSlot Slot, const FIBItemInstance& Item);
 
 	bool HasAuth() const;

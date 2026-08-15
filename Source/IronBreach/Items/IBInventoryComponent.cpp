@@ -2,6 +2,7 @@
 #include "IronBreach.h"
 #include "Items/IBItemDefinition.h"
 #include "Items/IBLedgerSubsystem.h"
+#include "Items/IBWeaponRack.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
@@ -164,6 +165,30 @@ void UIBInventoryComponent::RequestUnequip(EIBEquipSlot Slot)
 
 void UIBInventoryComponent::Server_Equip_Implementation(FGuid InstanceId)   { Equip_OnServer(InstanceId); }
 void UIBInventoryComponent::Server_Unequip_Implementation(EIBEquipSlot Slot) { Unequip_OnServer(Slot); }
+
+void UIBInventoryComponent::RequestTakeFromRack(AIBWeaponRack* Rack, int32 Index)
+{
+	if (HasAuth()) { TakeFromRack_OnServer(Rack, Index); }
+	else           { Server_TakeFromRack(Rack, Index); }
+}
+
+void UIBInventoryComponent::Server_TakeFromRack_Implementation(AIBWeaponRack* Rack, int32 Index)
+{
+	TakeFromRack_OnServer(Rack, Index);
+}
+
+void UIBInventoryComponent::TakeFromRack_OnServer(AIBWeaponRack* Rack, int32 Index)
+{
+	if (!Rack) { return; }
+
+	// Server_TakeAt is the single source of truth: it re-validates Index against
+	// the rack's own replicated stock and (unless bInfiniteStock) removes it, so
+	// two players can't both claim the last copy of something in the same frame.
+	if (const UIBItemDefinition* Definition = Rack->Server_TakeAt(Index))
+	{
+		GrantItem(Definition, 1);
+	}
+}
 
 void UIBInventoryComponent::Equip_OnServer(FGuid InstanceId)
 {

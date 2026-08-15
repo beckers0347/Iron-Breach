@@ -3,6 +3,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h" // Explicit include: ViewmodelMesh.LoadSynchronous() needs the complete UStaticMesh type
 #include "Components/SceneCaptureComponent2D.h" // PIP optic capture
 #include "Engine/TextureRenderTarget2D.h"       // PIP optic render target
 #include "Kismet/KismetRenderingLibrary.h"      // Runtime render target creation
@@ -124,6 +125,14 @@ void AIBCharacter_Infantry::BeginPlay()
 	if (WeaponComponent && CurrentWeaponData)
 	{
 		WeaponComponent->SetWeaponData(CurrentWeaponData);
+	}
+
+	// Swap in this weapon's viewmodel mesh before anything below reads socket
+	// offsets off WeaponMesh -- scale and rig wiring both solve against whatever
+	// mesh is currently attached.
+	if (CurrentWeaponData)
+	{
+		ApplyWeaponMesh(CurrentWeaponData);
 	}
 
 	// Scale the viewmodel before the rig caches socket offsets below — GripLocal/AimLocal
@@ -268,8 +277,30 @@ void AIBCharacter_Infantry::SetupScopePip()
 				MID->SetTextureParameterValue(ScopeTextureParameterName, ScopeRenderTarget);
 
 				UE_LOG(LogIronBreach, Verbose,
-					TEXT("%s: [Scope] bound '%s' -> parameter '%s'."),
-					*GetName(), *GetNameSafe(ScopeRenderTarget), *ScopeTextureParameterName.ToString());
+					TEXT("%s: [Scope] bound '%s' -> parameter '%s' on MID '%s' (base material '%s')."),
+					*GetName(), *GetNameSafe(ScopeRenderTarget), *ScopeTextureParameterName.ToString(),
+					*GetNameSafe(MID), *GetNameSafe(ScopeScreenMaterial));
+
+				// If ScopeTextureParameterName doesn't actually exist as a Texture Sample
+				// Parameter on the material, SetTextureParameterValue() silently no-ops —
+				// there's no error for a bad parameter name. Read it back to catch that.
+				UTexture* Readback = nullptr;
+				if (MID->GetTextureParameterValue(ScopeTextureParameterName, Readback))
+				{
+					UE_LOG(LogIronBreach, Verbose, TEXT("%s: [Scope] parameter readback = '%s'."),
+						*GetName(), *GetNameSafe(Readback));
+				}
+				else
+				{
+					UE_LOG(LogIronBreach, Error,
+						TEXT("%s: [Scope] parameter '%s' does not exist on material '%s' — check the exact name of the Texture Sample Parameter node in the material graph (case-sensitive)."),
+						*GetName(), *ScopeTextureParameterName.ToString(), *GetNameSafe(ScopeScreenMaterial));
+				}
+			}
+			else
+			{
+				UE_LOG(LogIronBreach, Error,
+					TEXT("%s: [Scope] CreateDynamicMaterialInstance failed on slot 0 of ScopeScreen."), *GetName());
 			}
 		}
 		else
@@ -296,6 +327,9 @@ void AIBCharacter_Infantry::SetupScopePip()
 	ScopeCamera->TextureTarget = ScopeRenderTarget;
 	ScopeCamera->bCaptureEveryFrame = true;
 
+	UE_LOG(LogIronBreach, Verbose, TEXT("%s: [Scope] ScopeCamera->TextureTarget = %s"),
+		*GetName(), *GetNameSafe(ScopeCamera->TextureTarget));
+
 	// Scene captures pick up whatever PostProcessVolume covers their world position —
 	// including a level's Manual-exposure volume tuned for the main camera's framing.
 	// That is a different scene (a tight zoomed box a few cm from the muzzle) and Manual
@@ -306,7 +340,9 @@ void AIBCharacter_Infantry::SetupScopePip()
 	ScopeCamera->PostProcessSettings.bOverride_AutoExposureMethod = true;
 	ScopeCamera->PostProcessSettings.AutoExposureMethod = AEM_Histogram;
 	ScopeCamera->PostProcessSettings.bOverride_AutoExposureBias = true;
-	ScopeCamera->PostProcessSettings.AutoExposureBias = 1.0f;
+	ScopeCamera->PostProcessSettings.AutoExposureBias = ScopeExposureBias;
+
+	UE_LOG(LogIronBreach, Verbose, TEXT("%s: [Scope] AutoExposureBias applied = %.2f"), *GetName(), ScopeCamera->PostProcessSettings.AutoExposureBias);
 
 	// Never let the capture see its own output: screen -> RT -> screen is a feedback
 	// tunnel, and it costs a frame of latency even when it doesn't visibly recurse.
@@ -656,6 +692,11 @@ void AIBCharacter_Infantry::ApplyWeaponData(UWeaponDataAsset* WeaponData)
 		WeaponRig->SetAdsSettings(WeaponData->Ads);
 	}
 
+	// New weapon, new mesh — swap it in before scale/rig/scope below all re-solve
+	// against whatever's attached. No-ops (keeps the current mesh) if this weapon
+	// has no ViewmodelMesh assigned yet.
+	ApplyWeaponMesh(WeaponData);
+
 	// Apply this weapon's viewmodel scale (also re-caches the rig's Grip/Aim socket
 	// offsets — see SetWeaponMeshScale) before re-snapping the optic below, so the
 	// scope mounts against the mesh at its final size, not the previous weapon's.
@@ -666,6 +707,31 @@ void AIBCharacter_Infantry::ApplyWeaponData(UWeaponDataAsset* WeaponData)
 	SetupScopePip();
 
 	UE_LOG(LogIronBreach, Log, TEXT("%s: weapon set from equipment -> %s"), *GetName(), *WeaponData->GetName());
+}
+
+void AIBCharacter_Infantry::ApplyWeaponMesh(UWeaponDataAsset* WeaponData)
+{
+	if (!WeaponMesh || !WeaponData)
+	{
+		return;
+	}
+
+	if (WeaponData->ViewmodelMesh.IsNull())
+	{
+		// No mesh authored for this weapon yet (e.g. freshly generated, no art
+		// assigned) -- keep whatever's currently shown rather than going blank.
+		return;
+	}
+
+	if (UStaticMesh* NewMesh = WeaponData->ViewmodelMesh.LoadSynchronous())
+	{
+		WeaponMesh->SetStaticMesh(NewMesh);
+	}
+	else
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("%s: ViewmodelMesh on %s failed to load -- keeping previous mesh."),
+			*GetName(), *WeaponData->GetName());
+	}
 }
 
 // Interface Implementation handling incoming damage

@@ -7,6 +7,7 @@
 
 class UNiagaraSystem;
 class USoundBase;
+class UStaticMesh;
 
 UCLASS(BlueprintType)
 class IRONBREACH_API UWeaponDataAsset : public UPrimaryDataAsset
@@ -44,4 +45,17 @@ public:
 	 *  tune alongside the rig's Hip Anchor since a smaller weapon sits closer to camera. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Viewmodel", meta = (ClampMin = "0.01"))
 	FVector ViewmodelScale = FVector(1.0f);
+
+	/** The first-person viewmodel mesh swapped in when this weapon becomes the
+	 *  active slot (AIBCharacter_Infantry::ApplyWeaponData). Soft reference —
+	 *  loaded synchronously only at the moment a weapon is actually equipped, same
+	 *  "small, load-on-demand" reasoning as UIBItemDefinition::Icon.
+	 *
+	 *  Must carry the same named sockets WeaponRigComponent expects (Grip / Aim,
+	 *  see WeaponRigComponent.h's class comment) or the viewmodel will pose at the
+	 *  mesh origin instead of a held-looking position. Left unset = the character
+	 *  keeps whatever mesh it already had rather than going blank, so it's safe to
+	 *  generate/stock weapons before art exists — assign this once a mesh is ready. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Viewmodel")
+	TSoftObjectPtr<UStaticMesh> ViewmodelMesh;
 };
