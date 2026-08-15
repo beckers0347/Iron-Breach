@@ -65,6 +65,11 @@ void UWeaponRigComponent::SetAiming(bool bNewAiming)
 	OnAimChanged.Broadcast(bNewAiming);
 }
 
+void UWeaponRigComponent::SetSprinting(bool bNewSprinting)
+{
+	bWantSprint = bNewSprinting;
+}
+
 float UWeaponRigComponent::GetLookSensitivityMultiplier() const
 {
 	if (!ViewCamera || BaseFov <= 0.0f) return 1.0f;
@@ -82,6 +87,16 @@ void UWeaponRigComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	const float Target = bWantAds ? 1.0f : 0.0f;
 	const float InterpSpeed = 1.0f / FMath::Max(Settings.AdsTime, 0.05f) * 2.5f;
 	Blend = FMath::FInterpTo(Blend, Target, DeltaTime, InterpSpeed);
+
+	// Same smoothed approach as the ADS blend above, independent axis -- character-side
+	// mutual exclusion (can't sprint while aiming/crouched) means these two blends never
+	// need to fight over the same frame, but they're tracked separately regardless so
+	// UpdateWeaponPose() can layer sprint on top of whatever hip/ADS pose is current.
+	// bDebugForceSprintPose ORs in on top of the real input so the pose can be tuned by
+	// eye in the Details panel without needing to hold Shift the whole time.
+	const float SprintTarget = (bWantSprint || bDebugForceSprintPose) ? 1.0f : 0.0f;
+	const float SprintInterpSpeed = 1.0f / FMath::Max(SprintTransitionTime, 0.05f) * 2.5f;
+	SprintBlend = FMath::FInterpTo(SprintBlend, SprintTarget, DeltaTime, SprintInterpSpeed);
 
 	UpdateFov();
 
@@ -131,13 +146,26 @@ void UWeaponRigComponent::UpdateWeaponPose()
 		AdsPos = FVector(Settings.AimPointDistance, 0.0f, 0.0f) - AdsRot.RotateVector(AimLocal);
 	}
 
-	const FVector Pos = FMath::Lerp(HipPos, AdsPos, Blend);
-	const FQuat Rot = FQuat::Slerp(HipRot, AdsRot, Blend);
+	const FVector BasePos = FMath::Lerp(HipPos, AdsPos, Blend);
+	const FQuat BaseRot = FQuat::Slerp(HipRot, AdsRot, Blend);
 
-	// Look sway: small positional lag against look input, suppressed on sights.
+	// Sprint tuck: same solve as hip/ADS (grip socket pinned to an authored anchor),
+	// then layered on top of the hip/ADS result via SprintBlend so the weapon eases
+	// from whatever pose it was already in into "tucked against the chest".
+	const FQuat SprintRot = SprintAnchorRotation.Quaternion() * MountQuat;
+	const FVector SprintPos = SprintAnchorLocation - SprintRot.RotateVector(GripLocal);
+
+	const FVector Pos = FMath::Lerp(BasePos, SprintPos, SprintBlend);
+	const FQuat Rot = FQuat::Slerp(BaseRot, SprintRot, SprintBlend);
+
+	// Look sway: small positional lag against look input, suppressed on sights and
+	// further suppressed while sprinting (a tucked weapon shouldn't track look input
+	// as tightly as a hip/aimed one).
 	FVector SwayTarget(-LookDelta.Y, -LookDelta.X, 0.0f);
 	SwayTarget *= SwayAmount;
-	SwayTarget = SwayTarget.GetClampedToMaxSize(SwayMax) * (1.0f - Blend * AdsSwayReduction);
+	SwayTarget = SwayTarget.GetClampedToMaxSize(SwayMax)
+		* (1.0f - Blend * AdsSwayReduction)
+		* (1.0f - SprintBlend * SprintSwayReduction);
 	Sway = FMath::VInterpTo(Sway, SwayTarget, GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.016f, SwayResponse);
 
 	WeaponMesh->SetRelativeLocation(Pos + Sway);

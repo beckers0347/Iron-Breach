@@ -5,11 +5,39 @@ IRON BREACH / Unreal Engine 5.8
 
 WHAT THIS IS
 ------------
-Pilot for replacing placeholder prop boxes with real Meshy-generated 3D
-models. First (only, for now) entry: the Vehicle Bay cargo truck, generated
-via Meshy's Model -> Text to 3D tab and downloaded as an FBX with Resize ON,
-Height=280cm, Origin=Bottom (so the mesh's local origin sits at its base --
-it drops straight onto a pad's top surface with no extra Z offset needed).
+Replaces placeholder prop boxes with real Meshy-generated 3D models. Each
+entry is generated via Meshy's Model -> Text to 3D tab and downloaded as an
+FBX with Resize ON, Origin=Bottom (so the mesh's local origin sits at its
+base -- it drops straight onto a pad's top surface with no extra Z offset
+needed):
+  - SM_Truck_Cargo.fbx: Vehicle Bay cargo truck, Height=280cm.
+  - SM_Ship_Hull.fbx: Docks/Harbor ship (hull+deckhouse+mast combined into
+    one mesh, replacing the old two-box hull+deckhouse placeholder),
+    Height=900cm (keel to mast top).
+  - SM_Dock_Crane.fbx: Docks/Harbor crane (wheeled base+mast+jib combined
+    into one mesh, replacing the old two-box mast+jib placeholder per
+    crane), Height=1000cm. Both Docks_Crane_01/02 reuse this one mesh, same
+    as the three Vehicle Bay trucks.
+  - SM_Locker.fbx: interior furniture pilot -- the most-repeated single
+    furniture type (8 lockers across Barracks + Armory), Height=200cm.
+  - SM_Bunk.fbx: two-tier bunk bed (frame+ladder+mattress+pillow, taller
+    than the original single-cot placeholder assumed), Height=160cm. All 4
+    Barracks bunks reuse this one mesh.
+  - SM_WeaponRack.fbx: wall rack holding 5 rifles, Height=200cm. All 3
+    Armory weapon racks reuse this one mesh.
+  - SM_MessTable.fbx: came back as a full picnic-table unit with benches
+    already attached on both sides -- replaces the old Table+BenchA+BenchB
+    trio per group with one mesh, Height=75cm. All 3 Mess Hall table groups
+    reuse this one mesh.
+  - SM_Desk.fbx: office desk with drawer unit + paper stacks, Height=90cm.
+    All 4 Command & Comms desks reuse this one mesh.
+  - SM_Chair.fbx: office swivel chair with wheels, Height=90cm. Both the
+    Watch Tower and Sensor Array chairs reuse this one mesh.
+  - SM_VendingMachine.fbx: Mess Hall snack machine, glass front with rows
+    of snacks + coin slot, Height=190cm. One-off, appears once.
+  - SM_CommsConsole.fbx: Command & Comms operator station, multiple
+    screens/dials/switches, came with its own chair built in, Height=130cm.
+    One-off, appears once.
 
 The download is untextured (grey clay mesh) -- rather than spend a second
 Meshy credit pass on model texturing, this script applies the SAME
@@ -58,6 +86,16 @@ DEST_PATH = "/Game/LevelPrototyping/AIModels"
 # (source filename, destination asset name, material asset path to apply, or None)
 MODELS = [
     ("SM_Truck_Cargo.fbx", "SM_Truck_Cargo", "/Game/LevelPrototyping/AITextures/M_AI_Vehicle.M_AI_Vehicle"),
+    ("SM_Ship_Hull.fbx", "SM_Ship_Hull", "/Game/LevelPrototyping/AITextures/M_AI_Ship.M_AI_Ship"),
+    ("SM_Dock_Crane.fbx", "SM_Dock_Crane", "/Game/LevelPrototyping/AITextures/M_AI_Crane.M_AI_Crane"),
+    ("SM_Locker.fbx", "SM_Locker", "/Game/LevelPrototyping/AITextures/M_AI_Furniture.M_AI_Furniture"),
+    ("SM_Bunk.fbx", "SM_Bunk", "/Game/LevelPrototyping/AITextures/M_AI_Furniture.M_AI_Furniture"),
+    ("SM_WeaponRack.fbx", "SM_WeaponRack", "/Game/LevelPrototyping/AITextures/M_AI_Furniture.M_AI_Furniture"),
+    ("SM_MessTable.fbx", "SM_MessTable", "/Game/LevelPrototyping/AITextures/M_AI_Furniture.M_AI_Furniture"),
+    ("SM_Desk.fbx", "SM_Desk", "/Game/LevelPrototyping/AITextures/M_AI_Furniture.M_AI_Furniture"),
+    ("SM_Chair.fbx", "SM_Chair", "/Game/LevelPrototyping/AITextures/M_AI_Furniture.M_AI_Furniture"),
+    ("SM_VendingMachine.fbx", "SM_VendingMachine", "/Game/LevelPrototyping/AITextures/M_AI_Furniture.M_AI_Furniture"),
+    ("SM_CommsConsole.fbx", "SM_CommsConsole", "/Game/LevelPrototyping/AITextures/M_AI_Furniture.M_AI_Furniture"),
 ]
 
 asset_tools = unreal.AssetToolsHelpers.get_asset_tools()

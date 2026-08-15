@@ -737,11 +737,21 @@ void AIBCharacter_Infantry::StartSprint()
 	bIsSprinting = true;
 	// MaxWalkSpeed is now driven exclusively by Tick() (base * ADS multiplier *
 	// sprint multiplier) so nothing overwrites it a frame later — see Tick().
+
+	if (WeaponRig)
+	{
+		WeaponRig->SetSprinting(true); // blends the viewmodel to the tucked-in sprint pose
+	}
 }
 
 void AIBCharacter_Infantry::StopSprint()
 {
 	bIsSprinting = false;
+
+	if (WeaponRig)
+	{
+		WeaponRig->SetSprinting(false); // blends back out of the sprint pose
+	}
 }
 
 void AIBCharacter_Infantry::StartCrouch()

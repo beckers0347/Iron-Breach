@@ -59,6 +59,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapon Rig")
 	bool IsAiming() const { return bWantAds; }
 
+	/** Tuck the weapon in against the chest while sprinting (blended, same smoothing
+	 *  pattern as SetAiming). Character-side sprint/aim/crouch are already mutually
+	 *  exclusive (see AIBCharacter_Infantry::StartSprint), so this only ever needs to
+	 *  blend from whatever the hip/ADS pose currently is toward SprintAnchor — it
+	 *  doesn't need to know or care which of those it's coming from. */
+	UFUNCTION(BlueprintCallable, Category = "Weapon Rig")
+	void SetSprinting(bool bNewSprinting);
+
+	UFUNCTION(BlueprintPure, Category = "Weapon Rig")
+	bool IsSprinting() const { return bWantSprint; }
+
 	/** Smoothed 0..1 ADS blend. 0 = hip, 1 = fully on sights. */
 	UFUNCTION(BlueprintPure, Category = "Weapon Rig")
 	float GetAdsBlend() const { return Blend; }
@@ -92,6 +103,39 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Hip")
 	FRotator HipAnchorRotation = FRotator(0.0f, -3.0f, 0.0f);
+
+	/** Camera-relative pose the Grip socket snaps to while sprinting -- pulled in close
+	 *  and near-centred (small Y) so the weapon sits against the chest rather than out
+	 *  to the side. Same space/solve as HipAnchorLocation; tune to taste per weapon
+	 *  silhouette. Defaults assume the same X-forward/Y-right/Z-up convention as hip. */
+	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Sprint")
+	FVector SprintAnchorLocation = FVector(14.0f, 2.0f, -16.0f);
+
+	/** Sprint pose rotation. The previous version leaned mostly on Pitch, which angled
+	 *  the muzzle up/down -- reads as the weapon standing on end (vertical). Swapped the
+	 *  weight onto Yaw (swings the barrel across the body) and Roll (cants the weapon
+	 *  onto its side), which is what actually lays it flat across the chest horizontally. */
+	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Sprint")
+	FRotator SprintAnchorRotation = FRotator(8.0f, -75.0f, 65.0f);
+
+	/** Seconds for the hip<->sprint blend to settle, same SmoothDamp-style approach used
+	 *  for ADS (see Settings.AdsTime) rather than a separate literal interp speed. */
+	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Sprint", meta = (ClampMin = "0.05"))
+	float SprintTransitionTime = 0.2f;
+
+	/** How much sprint suppresses look-sway, on top of whatever ADS is already applying.
+	 *  A tucked weapon shouldn't track the camera as tightly as a hip/aimed one. */
+	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Sprint", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float SprintSwayReduction = 0.9f;
+
+	/** Check this to force the sprint pose on regardless of actual input -- lets you
+	 *  tune SprintAnchorLocation/Rotation above by eye without holding Shift the whole
+	 *  time. Tick it during Play In Editor (select this component under the character
+	 *  in the World Outliner/Details panel while PIE is running), nudge the two anchor
+	 *  values above, and the viewmodel updates live since UpdateWeaponPose() re-reads
+	 *  them every frame -- no need to stop and restart PIE between tweaks. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Rig|Sprint")
+	bool bDebugForceSprintPose = false;
 
 	/** Socket on the weapon mesh where the primary hand grips. Snapped to HipAnchor at hip. */
 	UPROPERTY(EditAnywhere, Category = "Weapon Rig|Sockets")
@@ -148,8 +192,10 @@ private:
 	FVector AimLocal = FVector::ZeroVector;  // Aim socket offset in weapon-root space
 
 	float Blend = 0.0f;
+	float SprintBlend = 0.0f;
 	float BaseFov = 0.0f;
 	bool bWantAds = false;
+	bool bWantSprint = false;
 	bool bScopeVisible = false;
 
 	FVector Sway = FVector::ZeroVector;
