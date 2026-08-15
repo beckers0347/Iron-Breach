@@ -89,6 +89,10 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	// The third-person body should NOT render for the owning player (they see the viewmodel instead).
 	GetMesh()->SetOwnerNoSee(true);
 
+	// Crouch is off by default on UCharacterMovementComponent -- ACharacter::Crouch()
+	// silently no-ops without this flag, which reads exactly like a missing binding.
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+
 	// Attach Modular Health
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
@@ -103,6 +107,18 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 void AIBCharacter_Infantry::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Re-assert here, not just in the constructor: BP_IBCharacter_Infantry's Character
+	// Movement Component carries its own serialized override on top of this native class's
+	// CDO (confirmed by CanEverCrouch() logging false at runtime despite the constructor
+	// setting bCanCrouch = true). BeginPlay runs after the Blueprint's stored defaults have
+	// already been applied to this instance, so setting it here wins regardless of what's
+	// baked into the BP's component template. If someone later wants crouch fully disabled
+	// again, this line -- not the constructor -- is the one to change.
+	if (UCharacterMovementComponent* Move = GetCharacterMovement())
+	{
+		Move->NavAgentProps.bCanCrouch = true;
+	}
 
 	// The loadout property stays the designer-facing knob; the component does the firing.
 	if (WeaponComponent && CurrentWeaponData)
@@ -280,6 +296,18 @@ void AIBCharacter_Infantry::SetupScopePip()
 	ScopeCamera->TextureTarget = ScopeRenderTarget;
 	ScopeCamera->bCaptureEveryFrame = true;
 
+	// Scene captures pick up whatever PostProcessVolume covers their world position —
+	// including a level's Manual-exposure volume tuned for the main camera's framing.
+	// That is a different scene (a tight zoomed box a few cm from the muzzle) and Manual
+	// mode with no Aperture/Shutter/ISO calibration for THIS framing reads as solid black.
+	// Force the capture onto its own Auto exposure so the optic looks correct regardless
+	// of what post-processing the level around it happens to use.
+	ScopeCamera->PostProcessBlendWeight = 1.0f;
+	ScopeCamera->PostProcessSettings.bOverride_AutoExposureMethod = true;
+	ScopeCamera->PostProcessSettings.AutoExposureMethod = AEM_Histogram;
+	ScopeCamera->PostProcessSettings.bOverride_AutoExposureBias = true;
+	ScopeCamera->PostProcessSettings.AutoExposureBias = 1.0f;
+
 	// Never let the capture see its own output: screen -> RT -> screen is a feedback
 	// tunnel, and it costs a frame of latency even when it doesn't visibly recurse.
 	ScopeCamera->HiddenComponents.Reset();
@@ -355,6 +383,18 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopAiming);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &AIBCharacter_Infantry::StopAiming);
 		}
+		if (CrouchAction)
+		{
+			// Hold to crouch, same Started/Completed pattern as Sprint/Aim. Swap to a
+			// single Triggered bind that flips bIsCrouched if you'd rather have toggle-crouch.
+			EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::StartCrouch);
+			EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopCrouch);
+			EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Canceled, this, &AIBCharacter_Infantry::StopCrouch);
+		}
+		else
+		{
+			UE_LOG(LogIronBreach, Error, TEXT("%s: CrouchAction not assigned -- Crouch will do nothing. Set it in Class Defaults > Input > Crouch Action."), *GetName());
+		}
 		// Menu keys deliberately NOT bound here: they live on AIBPlayerController
 		// so they survive death and the infantry<->mech swap.
 	}
@@ -373,11 +413,17 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		// Guarded like the rest — unassigned actions assert on bind.
+		// Guarded like every other action above: binding a null UInputAction here
+		// used to fail with no log line, so "hold shift does nothing" gave zero
+		// clue whether SprintAction was actually unassigned. Now it says so.
 		if (SprintAction)
 		{
 			EIC->BindAction(SprintAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::StartSprint);
 			EIC->BindAction(SprintAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopSprint);
+		}
+		else
+		{
+			UE_LOG(LogIronBreach, Error, TEXT("%s: SprintAction not assigned -- Shift/Sprint will do nothing. Set it in Class Defaults > Input > Sprint Action."), *GetName());
 		}
 	}
 
@@ -507,6 +553,10 @@ void AIBCharacter_Infantry::StartAiming()
 
 void AIBCharacter_Infantry::StopAiming()
 {
+	// bIsAiming was never cleared here, so it stuck true forever after the first ADS,
+	// permanently blocking StartSprint()'s "can't sprint while aiming" guard.
+	bIsAiming = false;
+
 	if (WeaponRig) WeaponRig->SetAiming(false);
 }
 
@@ -514,13 +564,20 @@ void AIBCharacter_Infantry::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Apply the ADS move-speed multiplier (slower while aiming). Cheap, and keeps
-	// the movement authority-agnostic — MaxWalkSpeed already replicates via CMC.
-	if (WeaponRig && BaseWalkSpeed > 0.0f)
+	// Single source of truth for MaxWalkSpeed: base walk speed run through the ADS
+	// multiplier (slower while aiming) and the sprint multiplier (faster while
+	// sprinting). This used to be split between here (ADS, every tick) and
+	// StartSprint/StopSprint (a one-time direct set) — Tick ran the frame right
+	// after Start/StopSprint and silently overwrote the sprint speed back to walk
+	// speed, since the ADS multiplier is 1.0 while not aiming. bIsSprinting still
+	// flipped correctly (gating Fire/Aim), the character just never sped up.
+	if (BaseWalkSpeed > 0.0f)
 	{
 		if (UCharacterMovementComponent* Move = GetCharacterMovement())
 		{
-			Move->MaxWalkSpeed = BaseWalkSpeed * WeaponRig->GetMoveSpeedMultiplier();
+			const float AdsMultiplier = WeaponRig ? WeaponRig->GetMoveSpeedMultiplier() : 1.0f;
+			const float SprintMultiplier = (bIsSprinting && NormalWalkSpeed > 0.0f) ? (SprintSpeed / NormalWalkSpeed) : 1.0f;
+			Move->MaxWalkSpeed = BaseWalkSpeed * AdsMultiplier * SprintMultiplier;
 		}
 	}
 }
@@ -672,25 +729,32 @@ void AIBCharacter_Infantry::HandleDeath(AActor* Killer)
 
 void AIBCharacter_Infantry::StartSprint()
 {
-	if (bIsAiming)
+	if (bIsAiming || bIsCrouched)
 	{
-		return; // can't sprint while aiming
+		return; // can't sprint while aiming or crouched
 	}
 
 	bIsSprinting = true;
-
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-	}
+	// MaxWalkSpeed is now driven exclusively by Tick() (base * ADS multiplier *
+	// sprint multiplier) so nothing overwrites it a frame later — see Tick().
 }
 
 void AIBCharacter_Infantry::StopSprint()
 {
 	bIsSprinting = false;
+}
 
-	if (GetCharacterMovement())
+void AIBCharacter_Infantry::StartCrouch()
+{
+	if (bIsSprinting)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = NormalWalkSpeed;
+		StopSprint(); // dropping into crouch cancels an active sprint, same as ADS does
 	}
+
+	Crouch(); // ACharacter builtin: handles capsule half-height + bIsCrouched (replicated)
+}
+
+void AIBCharacter_Infantry::StopCrouch()
+{
+	UnCrouch();
 }
