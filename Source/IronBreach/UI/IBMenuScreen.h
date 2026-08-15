@@ -52,6 +52,19 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Menu", meta = (DisplayName = "On Screen Closed"))
 	void BP_OnScreenClosed();
 
+	// --- Tab banner (which screen am I on) ---
+	// Built from the settings registry in cycle order; the active tab renders
+	// amber, the rest service-gray. Optional bind: place a HorizontalBox named
+	// TabBannerBox in the WBP to control placement; with a bare widget whose
+	// root is an Overlay (all the C++ fallback layouts), one is injected
+	// top-center automatically.
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Menu")
+	TObjectPtr<class UHorizontalBox> TabBannerBox;
+
+	void EnsureTabBanner();
+	void RefreshTabBanner();
+
 	UPROPERTY(EditDefaultsOnly, Category = "Menu|Keys")
 	TArray<FKey> CloseKeys;
 
@@ -66,4 +79,10 @@ private:
 	TObjectPtr<UIBMenuSubsystem> OwnerSubsystem;
 
 	FName ScreenId;
+
+	/** Banner labels in registry order, paired with their screen ids. */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<class UTextBlock>> TabLabels;
+
+	TArray<FName> TabIds;
 };

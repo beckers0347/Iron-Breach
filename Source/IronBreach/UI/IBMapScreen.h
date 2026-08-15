@@ -45,6 +45,7 @@ public:
 	UIBMapPOIComponent* GetSelectedPOI() const;
 
 protected:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeScreenOpened() override;
 	virtual void NativeScreenClosed() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;

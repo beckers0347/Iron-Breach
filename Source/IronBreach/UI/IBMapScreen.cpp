@@ -7,10 +7,67 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
+#include "Components/Border.h"
+#include "Blueprint/WidgetTree.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+
+void UIBMapScreen::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	// Bare WBP: no pan/zoom canvas to build blind — give M a dressed holding
+	// screen (dim + title + status) instead of a void, until Shane authors the
+	// real map layout per MENUS_UI_WIRING §5 and a zone capture exists (§7).
+	if (!MapCanvas && !MapImage && WidgetTree)
+	{
+		UOverlay* Root = Cast<UOverlay>(WidgetTree->RootWidget);
+		if (!WidgetTree->RootWidget)
+		{
+			Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
+			WidgetTree->RootWidget = Root;
+		}
+		if (!Root) { return; }
+
+		UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+		Dim->SetBrushColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.78f));
+		if (UOverlaySlot* DimSlot = Root->AddChildToOverlay(Dim))
+		{
+			DimSlot->SetHorizontalAlignment(HAlign_Fill);
+			DimSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		UTextBlock* Zone = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+		Zone->SetText(NSLOCTEXT("IBMap", "NoUplink", "ZONE UPLINK PENDING"));
+		FSlateFontInfo ZoneFont = Zone->GetFont();
+		ZoneFont.Size = 24;
+		Zone->SetFont(ZoneFont);
+		Zone->SetColorAndOpacity(FSlateColor(FLinearColor(0.6f, 0.68f, 0.8f)));
+		if (UOverlaySlot* ZoneSlot = Root->AddChildToOverlay(Zone))
+		{
+			ZoneSlot->SetHorizontalAlignment(HAlign_Center);
+			ZoneSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		ZoneNameText = Zone; // real zone data overwrites this line when it lands
+
+		UTextBlock* Hint = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+		Hint->SetText(NSLOCTEXT("IBMap", "NoUplinkHint", "No cartography for this area yet. Place an IBMapZoneInfo + DA_Map asset to bring the uplink online."));
+		FSlateFontInfo HintFont = Hint->GetFont();
+		HintFont.Size = 11;
+		Hint->SetFont(HintFont);
+		Hint->SetColorAndOpacity(FSlateColor(FLinearColor(0.4f, 0.45f, 0.55f)));
+		if (UOverlaySlot* HintSlot = Root->AddChildToOverlay(Hint))
+		{
+			HintSlot->SetHorizontalAlignment(HAlign_Center);
+			HintSlot->SetVerticalAlignment(VAlign_Center);
+			HintSlot->SetPadding(FMargin(0.f, 70.f, 0.f, 0.f));
+		}
+	}
+}
 
 void UIBMapScreen::NativeScreenOpened()
 {
