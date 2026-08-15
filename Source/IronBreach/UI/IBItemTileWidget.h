@@ -59,6 +59,7 @@ public:
 	EIBEquipSlot GetRepresentedSlot() const { return RepresentedSlot; }
 
 protected:
+	virtual void NativeOnInitialized() override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
@@ -74,6 +75,11 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Tile")
 	TObjectPtr<UBorder> RarityBorder;
+
+	/** Optional: shown when an item has no icon yet (early content) — the tile
+	 *  reads as a labeled rarity chip instead of a mystery square. */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Tile")
+	TObjectPtr<UTextBlock> NameText;
 
 	/** Undiscovered-entry tint (ledger silhouettes). */
 	UPROPERTY(EditDefaultsOnly, Category = "Tile")

@@ -1,6 +1,9 @@
 #include "Player/IBPlayerController.h"
 #include "IronBreach.h"
 #include "UI/IBMenuSubsystem.h"
+#include "UI/IBObjectiveWidget.h"
+#include "UI/IBLootToastWidget.h"
+#include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h" // Explicit include: ULocalPlayer::GetSubsystem under IWYU
@@ -28,6 +31,18 @@ void AIBPlayerController::BeginPlay()
 				TEXT("%s: MenuMappingContext not assigned — menus won't open from input (MENUS_UI_WIRING.md §6)."),
 				*GetName());
 		}
+	}
+
+	// HUD layer: objective banner + loot toasts. C++ classes as the floor so
+	// they exist in every build; assign WBP children in the BP to reskin.
+	{
+		UClass* ObjectiveClass = ObjectiveWidgetClass ? *ObjectiveWidgetClass : UIBObjectiveWidget::StaticClass();
+		ObjectiveWidget = CreateWidget<UIBObjectiveWidget>(this, ObjectiveClass);
+		if (ObjectiveWidget) { ObjectiveWidget->AddToViewport(5); }
+
+		UClass* ToastClass = LootToastWidgetClass ? *LootToastWidgetClass : UIBLootToastWidget::StaticClass();
+		LootToastWidget = CreateWidget<UIBLootToastWidget>(this, ToastClass);
+		if (LootToastWidget) { LootToastWidget->AddToViewport(6); }
 	}
 }
 

@@ -17,6 +17,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Combat/WeaponRigComponent.h"
 #include "Combat/HitscanWeaponComponent.h"
+#include "Combat/DamageableInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -230,8 +231,28 @@ void AIBMech_Base::PawnClientRestart()
 void AIBMech_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	// Two controllers feed this pawn, so we don't bind here the way infantry does.
+	// Two controllers feed this pawn, so movement/fire don't bind here —
 	// AIBMechPlayerController reads Enhanced Input and calls RouteMoveInput()/FireWeapon().
+	// Exit-seat is the exception: a raw key bind so dismounting works even with
+	// zero IMC wiring (packaged build one had no way out of the hull).
+	PlayerInputComponent->BindKey(EKeys::E, IE_Pressed, this, &AIBMech_Base::RequestExit);
+}
+
+void AIBMech_Base::RequestExit()
+{
+	if (HasAuthority())
+	{
+		ServerDisembark(GetController());
+	}
+	else
+	{
+		Server_RequestExit();
+	}
+}
+
+void AIBMech_Base::Server_RequestExit_Implementation()
+{
+	ServerDisembark(GetController());
 }
 
 // --- SEAT & ROLE MANAGEMENT ---
@@ -789,17 +810,30 @@ void AIBMech_Base::PerformWeaponTrace()
 		DrawDebugPoint(World, HitResult.Location, 10.0f, FColor::Red, false, 1.0f);
 #endif
 
-		// --- NEW DAMAGE LOGIC ---
+		// --- DAMAGE ---
+		// Prefer the project damage seam: IDamageableInterface carries the FHitResult,
+		// which is how the kaiju routes armor plates vs organ weak points. The generic
+		// ApplyDamage path lands in HealthComponent's AnyDamage bridge and SKIPS both —
+		// a mech cannon that ignores the boss fight's phases defeats the whole design.
+		// Non-damageable actors still get the generic path as a fallback.
 		AActor* HitActor = HitResult.GetActor();
 		if (HitActor && CurrentWeaponData)
 		{
-			UGameplayStatics::ApplyDamage(
-				HitActor,
-				CurrentWeaponData->BaseDamage,
-				CurrentGunner,
-				this,
-				UDamageType::StaticClass()
-			);
+			if (HitActor->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()))
+			{
+				IDamageableInterface::Execute_HandleTakeDamage(
+					HitActor, CurrentWeaponData->BaseDamage, HitResult, CurrentGunner, this);
+			}
+			else
+			{
+				UGameplayStatics::ApplyDamage(
+					HitActor,
+					CurrentWeaponData->BaseDamage,
+					CurrentGunner,
+					this,
+					UDamageType::StaticClass()
+				);
+			}
 		}
 	}
 }

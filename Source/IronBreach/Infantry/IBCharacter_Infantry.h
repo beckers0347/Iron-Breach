@@ -215,11 +215,42 @@ protected:
 	 *  up loadout changes too. */
 	virtual void OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState) override;
 
-	/** Loot -> gun seam: an equipped WeaponPrimary with WeaponData is forwarded
+	/** Loot -> gun seam: an equipped weapon in the ACTIVE slot is forwarded
 	 *  to the weapon component + ADS rig; anything else leaves the designer
 	 *  default (CurrentWeaponData) in place. */
 	UFUNCTION()
 	void HandleEquipmentChanged(EIBEquipSlot Slot, const FIBItemInstance& Item);
+
+public:
+	// --- Weapon slot switching (1/2/3 = Primary/Special/Heavy; MENUS §11.1) ---
+
+	/** Which equipment well is in-hand. Server-authoritative: firing reads the
+	 *  weapon component's data on the server, so the swap must be too. */
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Slots")
+	void SetActiveWeaponSlot(EIBEquipSlot NewSlot);
+
+	UFUNCTION(BlueprintPure, Category = "Weapon|Slots")
+	EIBEquipSlot GetActiveWeaponSlot() const { return ActiveWeaponSlot; }
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+protected:
+	UPROPERTY(ReplicatedUsing = OnRep_ActiveWeaponSlot, VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Slots")
+	EIBEquipSlot ActiveWeaponSlot = EIBEquipSlot::WeaponPrimary;
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetActiveWeaponSlot(EIBEquipSlot NewSlot);
+
+	UFUNCTION()
+	void OnRep_ActiveWeaponSlot();
+
+	/** Resolve the active slot's item -> weapon data -> ApplyWeaponData. */
+	void ApplyActiveSlot();
+
+	// Raw 1/2/3 input thunks (BindKey — no IA assets required).
+	void SelectPrimarySlot()  { SetActiveWeaponSlot(EIBEquipSlot::WeaponPrimary); }
+	void SelectSpecialSlot()  { SetActiveWeaponSlot(EIBEquipSlot::WeaponSpecial); }
+	void SelectHeavySlot()    { SetActiveWeaponSlot(EIBEquipSlot::WeaponHeavy); }
 
 public:
 	// Implementation of IDamageableInterface

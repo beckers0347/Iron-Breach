@@ -5,7 +5,72 @@
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
+#include "Components/VerticalBoxSlot.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
+#include "Components/Border.h"
+#include "Blueprint/WidgetTree.h"
 #include "Engine/GameInstance.h"
+
+void UIBLedgerScreen::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	if (!GridTileClass) { GridTileClass = UIBItemTileWidget::StaticClass(); }
+
+	// Bare WBP: dim sheet, title, progress line, catalog grid — the chase board.
+	if (!ItemGrid && WidgetTree)
+	{
+		UOverlay* Root = Cast<UOverlay>(WidgetTree->RootWidget);
+		if (!WidgetTree->RootWidget)
+		{
+			Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
+			WidgetTree->RootWidget = Root;
+		}
+		if (!Root) { return; }
+
+		UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+		Dim->SetBrushColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.78f));
+		if (UOverlaySlot* DimSlot = Root->AddChildToOverlay(Dim))
+		{
+			DimSlot->SetHorizontalAlignment(HAlign_Fill);
+			DimSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+
+		UTextBlock* Title = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+		Title->SetText(NSLOCTEXT("IBLedger", "Title", "THE LEDGER"));
+		FSlateFontInfo TitleFont = Title->GetFont();
+		TitleFont.Size = 26;
+		Title->SetFont(TitleFont);
+		Title->SetColorAndOpacity(FSlateColor(FLinearColor(0.85f, 0.9f, 1.f)));
+		Column->AddChildToVerticalBox(Title);
+
+		UTextBlock* Progress = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+		FSlateFontInfo ProgFont = Progress->GetFont();
+		ProgFont.Size = 13;
+		Progress->SetFont(ProgFont);
+		Progress->SetColorAndOpacity(FSlateColor(FLinearColor(0.6f, 0.68f, 0.8f)));
+		if (UVerticalBoxSlot* ProgSlot = Column->AddChildToVerticalBox(Progress))
+		{
+			ProgSlot->SetPadding(FMargin(0.f, 4.f, 0.f, 14.f));
+		}
+		ProgressText = Progress;
+
+		UUniformGridPanel* Grid = WidgetTree->ConstructWidget<UUniformGridPanel>(UUniformGridPanel::StaticClass());
+		Grid->SetSlotPadding(FMargin(4.f));
+		Column->AddChildToVerticalBox(Grid);
+		ItemGrid = Grid;
+
+		if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(Column))
+		{
+			ColumnSlot->SetHorizontalAlignment(HAlign_Center);
+			ColumnSlot->SetVerticalAlignment(VAlign_Center);
+		}
+	}
+}
 
 UIBLedgerSubsystem* UIBLedgerScreen::GetLedger() const
 {

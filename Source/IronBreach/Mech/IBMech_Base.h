@@ -124,6 +124,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Mech|Boarding")
 	void ServerDisembark(AController* LeavingController);
 
+	/** ANY MACHINE. The driver's exit-seat request (mirrors the gunner seat's).
+	 *  Bound to E in SetupPlayerInputComponent so leaving the mech needs zero
+	 *  content wiring — packaged build one shipped with no way out of the hull. */
+	UFUNCTION(BlueprintCallable, Category = "Mech|Boarding")
+	void RequestExit();
+
+	UFUNCTION(Server, Reliable)
+	void Server_RequestExit();
+
 	/** SERVER ONLY. Seat swap: human+AI uses the legacy role swap; human+human arms a
 	 *  confirm handshake — when the partner also presses swap within the window, the two
 	 *  pilots exchange pawns (hull <-> seat). */

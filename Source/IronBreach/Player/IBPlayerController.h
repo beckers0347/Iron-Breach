@@ -51,6 +51,23 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Menus")
 	TObjectPtr<UInputAction> OpenSystemAction;
 
+	// --- HUD layer (objective banner + loot toasts) ---
+	// Spawned here because the controller survives death and the mech swap;
+	// the C++ widget classes self-build, so these work with zero content.
+	// Point them at WBP children later to reskin.
+
+	UPROPERTY(EditDefaultsOnly, Category = "HUD")
+	TSubclassOf<class UIBObjectiveWidget> ObjectiveWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HUD")
+	TSubclassOf<class UIBLootToastWidget> LootToastWidgetClass;
+
+	UPROPERTY(Transient)
+	TObjectPtr<class UIBObjectiveWidget> ObjectiveWidget;
+
+	UPROPERTY(Transient)
+	TObjectPtr<class UIBLootToastWidget> LootToastWidget;
+
 	void OpenInventoryMenu();
 	void OpenMapMenu();
 	void OpenLedgerMenu();

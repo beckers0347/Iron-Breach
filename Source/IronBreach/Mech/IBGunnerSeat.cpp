@@ -120,6 +120,9 @@ void AIBGunnerSeat::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	// Raw exit key, matching the hull's: dismounting must never depend on content wiring.
+	PlayerInputComponent->BindKey(EKeys::E, IE_Pressed, this, &AIBGunnerSeat::RequestExit);
+
 	// Optional own bindings (IMC_Gunner path). Guarded — unassigned actions are fine
 	// because AIBMechPlayerController routes its bindings here anyway.
 	if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))

@@ -42,6 +42,7 @@ public:
 	UIBInventoryComponent* GetInventory() const;
 
 protected:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeScreenOpened() override;
 	virtual void NativeScreenClosed() override;
 
@@ -73,6 +74,14 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Inventory")
 	TObjectPtr<UTextBlock> ClearanceText;
+
+	// Details pane (optional binds; the fallback layout builds both). Fed
+	// natively from tile hover — BP_OnItemFocused still fires for Shane's pane.
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Inventory")
+	TObjectPtr<UTextBlock> Txt_DetailName;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Inventory")
+	TObjectPtr<UTextBlock> Txt_DetailInfo;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Inventory")
 	TObjectPtr<UIBItemTileWidget> Tile_WeaponPrimary;
@@ -106,6 +115,12 @@ protected:
 	int32 GridColumns = 6;
 
 private:
+	/** Bare-WBP fallback: the full Destiny layout in code — weapon wells left,
+	 *  armor right, clearance top-right, backpack grid bottom, details pane. */
+	void BuildFallbackLayout();
+	UIBItemTileWidget* MakeWell(class UVerticalBox* Column, EIBEquipSlot ForSlot);
+	void SetDetails(const class UIBItemTileWidget* Tile);
+
 	void RebuildAll();
 	void RebuildGrid();
 	void RefreshEquipmentWells();
@@ -116,6 +131,10 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UIBInventoryComponent> BoundInventory;
+
+	/** Fallback details card container (so hover can show/hide it cleanly). */
+	UPROPERTY(Transient)
+	TObjectPtr<class USizeBox> DetailPanel;
 
 	EIBItemCategory CategoryFilter = EIBItemCategory::Weapon;
 };

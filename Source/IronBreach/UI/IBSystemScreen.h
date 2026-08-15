@@ -4,6 +4,9 @@
 #include "UI/IBMenuScreen.h"
 #include "IBSystemScreen.generated.h"
 
+class UButton;
+class UTextBlock;
+
 /**
  * Escape's screen: the pause-menu-that-isn't (a co-op world never pauses;
  * this is just a menu like the others). The C++ is intentionally thin — three
@@ -14,7 +17,11 @@
  * settings exist?) before it's a code one, so this screen ships without it
  * and gains a sub-panel later without any C++ churn.
  *
- * No BindWidget names on this one — nothing for C++ to drive.
+ * Optional binds: name buttons Btn_Resume / Btn_Leave / Btn_Quit and C++
+ * wires the clicks (and labels them via Txt_* if present). If the WBP has
+ * NO Btn_ binds at all, C++ constructs a minimal centered three-button
+ * column at runtime — the packaged game must never lack an exit path just
+ * because the widget is still bare (learned from build one: no way to quit).
  */
 UCLASS(Abstract)
 class IRONBREACH_API UIBSystemScreen : public UIBMenuScreen
@@ -40,4 +47,38 @@ public:
 	 *  to (or hosting) a networked session, false in solo/standalone. */
 	UFUNCTION(BlueprintPure, Category = "System")
 	bool IsInNetworkedSession() const;
+
+protected:
+	virtual void NativeOnInitialized() override;
+
+	// ---- Optional-bind layout hooks (names matter; all optional) ----
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
+	TObjectPtr<UButton> Btn_Resume;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
+	TObjectPtr<UButton> Btn_Leave;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
+	TObjectPtr<UButton> Btn_Quit;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
+	TObjectPtr<UTextBlock> Txt_Resume;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
+	TObjectPtr<UTextBlock> Txt_Leave;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
+	TObjectPtr<UTextBlock> Txt_Quit;
+
+	UFUNCTION() void HandleResumeClicked();
+	UFUNCTION() void HandleLeaveClicked();
+	UFUNCTION() void HandleQuitClicked();
+
+private:
+	/** Bare-WBP fallback: build a centered Resume/Leave/Quit column in code. */
+	void ConstructFallbackLayout();
+
+	/** Make a fallback button+label pair and register it in the given box. */
+	UButton* MakeFallbackButton(class UVerticalBox* Box, const FText& Label);
 };

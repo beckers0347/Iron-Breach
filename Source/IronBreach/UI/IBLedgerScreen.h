@@ -34,6 +34,7 @@ public:
 	EIBItemCategory GetCategoryFilter() const { return CategoryFilter; }
 
 protected:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeScreenOpened() override;
 
 	/** Shane's detail pane. Undiscovered entries pass bDiscovered=false — show

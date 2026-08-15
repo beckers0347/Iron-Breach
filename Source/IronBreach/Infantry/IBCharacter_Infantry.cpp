@@ -25,6 +25,7 @@
 #include "Items/IBInventoryComponent.h"
 #include "Items/IBItemDefinition.h"
 #include "Items/IBPlayerState.h"
+#include "Net/UnrealNetwork.h" // DOREPLIFETIME (ActiveWeaponSlot)
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()
 {
@@ -372,9 +373,87 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EIC->BindAction(SprintAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::StartSprint);
-		EIC->BindAction(SprintAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopSprint);
+		// Guarded like the rest — unassigned actions assert on bind.
+		if (SprintAction)
+		{
+			EIC->BindAction(SprintAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::StartSprint);
+			EIC->BindAction(SprintAction, ETriggerEvent::Completed, this, &AIBCharacter_Infantry::StopSprint);
+		}
 	}
+
+	// Weapon wells on 1/2/3 (Primary/Special/Heavy). Raw keys on purpose: the
+	// slot grammar should work the moment the build boots, no IA assets needed.
+	if (PlayerInputComponent)
+	{
+		PlayerInputComponent->BindKey(EKeys::One,   IE_Pressed, this, &AIBCharacter_Infantry::SelectPrimarySlot);
+		PlayerInputComponent->BindKey(EKeys::Two,   IE_Pressed, this, &AIBCharacter_Infantry::SelectSpecialSlot);
+		PlayerInputComponent->BindKey(EKeys::Three, IE_Pressed, this, &AIBCharacter_Infantry::SelectHeavySlot);
+	}
+}
+
+void AIBCharacter_Infantry::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AIBCharacter_Infantry, ActiveWeaponSlot);
+}
+
+void AIBCharacter_Infantry::SetActiveWeaponSlot(EIBEquipSlot NewSlot)
+{
+	if (NewSlot == ActiveWeaponSlot) { return; }
+	if (NewSlot != EIBEquipSlot::WeaponPrimary &&
+	    NewSlot != EIBEquipSlot::WeaponSpecial &&
+	    NewSlot != EIBEquipSlot::WeaponHeavy)
+	{
+		return; // wells only
+	}
+
+	if (HasAuthority())
+	{
+		Server_SetActiveWeaponSlot_Implementation(NewSlot);
+	}
+	else
+	{
+		Server_SetActiveWeaponSlot(NewSlot);
+	}
+}
+
+void AIBCharacter_Infantry::Server_SetActiveWeaponSlot_Implementation(EIBEquipSlot NewSlot)
+{
+	// An empty non-primary well is not a weapon: refuse the switch instead of
+	// handing the player the designer-default rifle labeled "Heavy".
+	if (NewSlot != EIBEquipSlot::WeaponPrimary)
+	{
+		FIBItemInstance Equipped;
+		if (!BoundInventory.IsValid() || !BoundInventory->GetEquippedItem(NewSlot, Equipped) || !Equipped.Definition)
+		{
+			UE_LOG(LogIronBreach, Verbose, TEXT("%s: slot switch refused — nothing equipped in that well"), *GetName());
+			return;
+		}
+	}
+
+	ActiveWeaponSlot = NewSlot;
+	ApplyActiveSlot();          // server truth for damage
+	OnRep_ActiveWeaponSlot();   // listen-server host mirrors the cosmetic side
+}
+
+void AIBCharacter_Infantry::OnRep_ActiveWeaponSlot()
+{
+	ApplyActiveSlot();
+}
+
+void AIBCharacter_Infantry::ApplyActiveSlot()
+{
+	UWeaponDataAsset* NewData = CurrentWeaponData.Get(); // designer default floor
+	if (BoundInventory.IsValid())
+	{
+		FIBItemInstance Equipped;
+		if (BoundInventory->GetEquippedItem(ActiveWeaponSlot, Equipped) &&
+		    Equipped.Definition && Equipped.Definition->WeaponData)
+		{
+			NewData = Equipped.Definition->WeaponData.Get();
+		}
+	}
+	ApplyWeaponData(NewData);
 }
 
 void AIBCharacter_Infantry::Move(const FInputActionValue& Value)
@@ -485,17 +564,17 @@ void AIBCharacter_Infantry::OnPlayerStateChanged(APlayerState* NewPlayerState, A
 	// existed (menu equip -> death -> respawn). This is what makes loadouts
 	// survive the corpse.
 	FIBItemInstance Equipped;
-	if (Inventory->GetEquippedItem(EIBEquipSlot::WeaponPrimary, Equipped))
+	if (Inventory->GetEquippedItem(ActiveWeaponSlot, Equipped))
 	{
-		HandleEquipmentChanged(EIBEquipSlot::WeaponPrimary, Equipped);
+		HandleEquipmentChanged(ActiveWeaponSlot, Equipped);
 	}
 }
 
 void AIBCharacter_Infantry::HandleEquipmentChanged(EIBEquipSlot Slot, const FIBItemInstance& Item)
 {
-	if (Slot != EIBEquipSlot::WeaponPrimary)
+	if (Slot != ActiveWeaponSlot)
 	{
-		return; // armor/gear slots are stat/cosmetic concerns — nothing to wire on the pawn yet
+		return; // armor/gear/off-hand wells are stat/cosmetic concerns until they're the active slot
 	}
 
 	UWeaponDataAsset* NewData = (Item.Definition && Item.Definition->WeaponData)

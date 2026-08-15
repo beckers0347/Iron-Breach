@@ -37,6 +37,10 @@
 		{
 			"Name": "ProceduralVegetationEditor",
 			"Enabled": true
+		},
+		{
+			"Name": "PythonScriptPlugin",
+			"Enabled": true
 		}
 	]
 }
