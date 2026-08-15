@@ -47,7 +47,11 @@ public class IronBreach : ModuleRules
 		{
 			PrivateDependencyModuleNames.AddRange(new string[] {
 				"EditorScriptingUtilities", // UEditorAssetLibrary (asset duplicate/save)
-				"Blutility"                 // UAssetActionUtility, UEditorUtilityWidget
+				"Blutility",                // UAssetActionUtility, UEditorUtilityWidget
+				"ToolMenus",                // Native Content Browser right-click entries (WeaponContextMenuExtensions) --
+				                            // registered in C++, no Editor Utility Blueprint/Class Picker involved
+				"ContentBrowser",           // UContentBrowserAssetContextMenuContext
+				"UnrealEd"                  // GEditor / editor world context (ItemIconCaptureLibrary's lightbox capture)
 			});
 		}
 	}

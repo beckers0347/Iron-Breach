@@ -52,6 +52,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon Rig")
 	void SetAdsSettings(const FIBAdsSettings& InSettings) { Settings = InSettings; }
 
+	/** Per-weapon fine-alignment nudge, layered on top of WeaponMountRotation
+	 *  below (see UWeaponDataAsset::ViewmodelLocationOffset/RotationOffset for the
+	 *  designer-facing side of this). Call whenever the equipped weapon changes,
+	 *  same as SetAdsSettings -- safe to call in any order relative to
+	 *  SetReferences, since this re-runs that same socket cache internally so the
+	 *  two never end up disagreeing about the current offset. */
+	UFUNCTION(BlueprintCallable, Category = "Weapon Rig")
+	void SetWeaponAlignmentOffset(FVector LocationOffset, FRotator RotationOffset);
+
 	/** Raise/lower the sights. Blend is smoothed internally. */
 	UFUNCTION(BlueprintCallable, Category = "Weapon Rig")
 	void SetAiming(bool bNewAiming);
@@ -190,6 +199,13 @@ private:
 
 	FVector GripLocal = FVector::ZeroVector; // Grip socket offset in weapon-root space
 	FVector AimLocal = FVector::ZeroVector;  // Aim socket offset in weapon-root space
+
+	// Persistent per-weapon alignment (SetWeaponAlignmentOffset), zero by default.
+	// SetReferences() folds PerWeaponLocationOffset into GripLocal/AimLocal every
+	// time it runs (including from SetWeaponMeshScale's re-cache on scale change),
+	// so this stays correct regardless of call order.
+	FVector PerWeaponLocationOffset = FVector::ZeroVector;
+	FRotator PerWeaponMountOffset = FRotator::ZeroRotator;
 
 	float Blend = 0.0f;
 	float SprintBlend = 0.0f;

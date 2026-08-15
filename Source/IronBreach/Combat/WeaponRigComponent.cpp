@@ -30,10 +30,13 @@ void UWeaponRigComponent::SetReferences(UCameraComponent* InCamera, UMeshCompone
 		BaseFov = ViewCamera->FieldOfView;
 	}
 
-	// Cache socket offsets in weapon-root space. If the mesh lacks the sockets
-	// we fall back to zero (weapon root aligns to the anchor) and warn once.
-	GripLocal = SocketLocalOffset(GripSocket);
-	AimLocal = SocketLocalOffset(AimSocket);
+	// Cache socket offsets in weapon-root space, folding in whatever per-weapon
+	// alignment offset is currently set (zero by default -- see
+	// SetWeaponAlignmentOffset, which re-runs this same cache so the two never
+	// disagree regardless of call order). If the mesh lacks the sockets we fall
+	// back to zero (weapon root aligns to the anchor) and warn once.
+	GripLocal = SocketLocalOffset(GripSocket) + PerWeaponLocationOffset;
+	AimLocal = SocketLocalOffset(AimSocket) + PerWeaponLocationOffset;
 
 	if (WeaponMesh && (!WeaponMesh->DoesSocketExist(GripSocket) || !WeaponMesh->DoesSocketExist(AimSocket)))
 	{
@@ -41,6 +44,19 @@ void UWeaponRigComponent::SetReferences(UCameraComponent* InCamera, UMeshCompone
 			TEXT("[WeaponRig] weapon mesh '%s' missing Grip/Aim socket — using root alignment. Add sockets named '%s'/'%s'."),
 			*GetNameSafe(WeaponMesh), *GripSocket.ToString(), *AimSocket.ToString());
 	}
+}
+
+void UWeaponRigComponent::SetWeaponAlignmentOffset(FVector LocationOffset, FRotator RotationOffset)
+{
+	PerWeaponLocationOffset = LocationOffset;
+	PerWeaponMountOffset = RotationOffset;
+
+	// Re-derive the cached socket offsets against the new alignment immediately,
+	// rather than waiting for the next SetReferences() call -- SetWeaponMeshScale
+	// re-triggers SetReferences on every scale change, which would otherwise
+	// silently reset this back to a zero offset if this were the only place
+	// folding PerWeaponLocationOffset in.
+	SetReferences(ViewCamera, WeaponMesh);
 }
 
 FVector UWeaponRigComponent::SocketLocalOffset(FName Socket) const
@@ -118,7 +134,10 @@ void UWeaponRigComponent::UpdateFov()
 
 void UWeaponRigComponent::UpdateWeaponPose()
 {
-	const FQuat MountQuat = WeaponMountRotation.Quaternion();
+	// Per-weapon offset (PerWeaponMountOffset, zero by default) is applied FIRST,
+	// in the mesh's own local space, then the rig-wide WeaponMountRotation on top
+	// -- a weapon with no offset behaves exactly as before this existed.
+	const FQuat MountQuat = WeaponMountRotation.Quaternion() * PerWeaponMountOffset.Quaternion();
 
 	// Hip pose: solve for the mesh origin such that the Grip socket lands on HipAnchor.
 	// The mount correction is part of the final rotation, so it must be folded in BEFORE

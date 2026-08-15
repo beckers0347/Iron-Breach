@@ -3,9 +3,11 @@
 
 #if WITH_EDITOR
 #include "EditorTools/SWeaponGeneratorWidget.h"
+#include "EditorTools/WeaponContextMenuExtensions.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Framework/Docking/TabManager.h"
 #include "Framework/Application/SlateApplication.h"
+#include "ToolMenus.h"
 #endif
 
 DEFINE_LOG_CATEGORY(LogIronBreach);
@@ -23,6 +25,12 @@ void FIronBreachModule::StartupModule()
 		.SetTooltipText(NSLOCTEXT("IronBreach", "WeaponGeneratorTabTooltip",
 			"Generate weapon data asset variants for testing (e.g. stocking the Weapon Rack)."))
 		.SetMenuType(ETabSpawnerMenuType::Enabled);
+
+	// UToolMenus may not be ready this early in module load order -- defer actual
+	// registration to its own startup callback (standard pattern for extending
+	// built-in menus from a module's StartupModule).
+	UToolMenus::RegisterStartupCallback(
+		FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FIronBreachModule::RegisterWeaponContextMenus));
 #endif
 }
 
@@ -36,6 +44,8 @@ void FIronBreachModule::ShutdownModule()
 	{
 		FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(WeaponGeneratorTabName);
 	}
+
+	WeaponContextMenuExtensions::UnregisterWeaponContextMenus();
 #endif
 }
 
@@ -47,6 +57,11 @@ TSharedRef<SDockTab> FIronBreachModule::SpawnWeaponGeneratorTab(const FSpawnTabA
 		[
 			SNew(SWeaponGeneratorWidget)
 		];
+}
+
+void FIronBreachModule::RegisterWeaponContextMenus()
+{
+	WeaponContextMenuExtensions::RegisterWeaponContextMenus();
 }
 #endif
 

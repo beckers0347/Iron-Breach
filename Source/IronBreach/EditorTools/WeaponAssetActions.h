@@ -1,10 +1,14 @@
 // WeaponAssetActions.h
 //
-// Adds a "Generate Weapon Variant" entry to the right-click menu for
-// UWeaponDataAsset assets in the Content Browser. To activate: create an
-// Editor Utility Blueprint (Content Browser -> Add -> Editor Utilities ->
-// Editor Utility Blueprint) that subclasses UWeaponAssetActions, THEN open its
-// Class Defaults and add UWeaponDataAsset to the "Supported Classes" array.
+// Adds right-click Content Browser actions for weapon-related assets:
+//  - "Generate Weapon Variant" on UWeaponDataAsset
+//  - "Capture Icon From Mesh" on UIBItemDefinition
+// To activate: create an Editor Utility Blueprint (Content Browser -> Add ->
+// Editor Utilities -> Editor Utility Blueprint) that subclasses
+// UWeaponAssetActions, THEN open its Class Defaults and add BOTH
+// UWeaponDataAsset and UIBItemDefinition to the "Supported Classes" array.
+// Multi-select works natively -- select several DA_Item_* assets at once and
+// "Capture Icon From Mesh" runs once per selected asset.
 //
 // UAssetActionUtility::GetSupportedClass() -- the C++-overridable filter hook
 // from older engine versions -- is deprecated as of UE5.8: it's now a
@@ -24,6 +28,7 @@
 #include "WeaponAssetActions.generated.h"
 
 class UWeaponDataAsset;
+class UIBItemDefinition;
 
 UCLASS()
 class IRONBREACH_API UWeaponAssetActions : public UAssetActionUtility
@@ -35,6 +40,12 @@ public:
 	// carrying over its current stats as the starting point.
 	UFUNCTION(CallInEditor, Category = "Weapon System")
 	void GenerateWeaponVariant(UWeaponDataAsset* SourceWeapon);
+
+	// Renders the item's linked weapon mesh in an isolated lightbox and assigns
+	// the resulting icon to Item->Icon. See ItemIconCaptureLibrary.h for the
+	// tunable defaults (lighting, exposure, capture angle) if a result looks off.
+	UFUNCTION(CallInEditor, Category = "Weapon System")
+	void CaptureIconFromMesh(UIBItemDefinition* Item);
 };
 
 #endif // WITH_EDITOR

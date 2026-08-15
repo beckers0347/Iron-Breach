@@ -4,7 +4,9 @@
 #if WITH_EDITOR
 
 #include "EditorTools/WeaponGeneratorLibrary.h"
+#include "EditorTools/ItemIconCaptureLibrary.h"
 #include "Combat/WeaponDataAsset.h"
+#include "Items/IBItemDefinition.h"
 #include "Misc/PackageName.h"
 
 void UWeaponAssetActions::GenerateWeaponVariant(UWeaponDataAsset* SourceWeapon)
@@ -32,6 +34,16 @@ void UWeaponAssetActions::GenerateWeaponVariant(UWeaponDataAsset* SourceWeapon)
 	Params.MaxRange = SourceWeapon->MaxRange;
 
 	UWeaponGeneratorLibrary::GenerateWeaponAsset(Params);
+}
+
+void UWeaponAssetActions::CaptureIconFromMesh(UIBItemDefinition* Item)
+{
+	if (!Item)
+	{
+		return;
+	}
+
+	UItemIconCaptureLibrary::CaptureItemIcon(Item);
 }
 
 #endif // WITH_EDITOR

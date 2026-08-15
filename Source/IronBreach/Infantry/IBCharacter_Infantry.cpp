@@ -154,6 +154,7 @@ void AIBCharacter_Infantry::BeginPlay()
 		if (CurrentWeaponData)
 		{
 			WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
+			WeaponRig->SetWeaponAlignmentOffset(CurrentWeaponData->ViewmodelLocationOffset, CurrentWeaponData->ViewmodelRotationOffset);
 			UE_LOG(LogIronBreach, Log, TEXT("%s: ADS settings applied from %s"), *GetName(), *CurrentWeaponData->GetName());
 		}
 		else
@@ -690,6 +691,7 @@ void AIBCharacter_Infantry::ApplyWeaponData(UWeaponDataAsset* WeaponData)
 	if (WeaponRig)
 	{
 		WeaponRig->SetAdsSettings(WeaponData->Ads);
+		WeaponRig->SetWeaponAlignmentOffset(WeaponData->ViewmodelLocationOffset, WeaponData->ViewmodelRotationOffset);
 	}
 
 	// New weapon, new mesh — swap it in before scale/rig/scope below all re-solve

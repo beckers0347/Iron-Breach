@@ -27,5 +27,10 @@ public:
 private:
 #if WITH_EDITOR
 	TSharedRef<class SDockTab> SpawnWeaponGeneratorTab(const class FSpawnTabArgs& Args);
+
+	/** Deferred past StartupModule -- UToolMenus isn't guaranteed ready this early,
+	 *  and ExtendMenu on an unready UToolMenus silently no-ops rather than erroring,
+	 *  so registering too soon would just produce a menu with nothing added. */
+	void RegisterWeaponContextMenus();
 #endif
 };
