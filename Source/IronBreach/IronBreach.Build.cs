@@ -39,5 +39,20 @@ public class IronBreach : ModuleRules
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		// Editor-only weapon generator tool (Source/IronBreach/EditorTools): duplicates
+		// UWeaponDataAsset instances from the Content Browser / a Slate panel. Kept out of
+		// packaged Game builds since this module doubles as both the Game and Editor target.
+		if (Target.Type == TargetType.Editor)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[] {
+				"EditorScriptingUtilities", // UEditorAssetLibrary (asset duplicate/save)
+				"Blutility",                // UAssetActionUtility, UEditorUtilityWidget
+				"ToolMenus",                // Native Content Browser right-click entries (WeaponContextMenuExtensions) --
+				                            // registered in C++, no Editor Utility Blueprint/Class Picker involved
+				"ContentBrowser",           // UContentBrowserAssetContextMenuContext
+				"UnrealEd"                  // GEditor / editor world context (ItemIconCaptureLibrary's lightbox capture)
+			});
+		}
 	}
 }

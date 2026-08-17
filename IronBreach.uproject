@@ -45,6 +45,13 @@
 		{
 			"Name": "EditorScriptingUtilities",
 			"Enabled": true
+		},
+		{
+			"Name": "Blutility",
+			"Enabled": false,
+			"TargetAllowList": [
+				"Editor"
+			]
 		}
 	]
 }

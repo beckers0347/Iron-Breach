@@ -143,6 +143,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
 	bool bHideWeaponFromScopeCapture = true;
 
+	/** EV stops added on top of the capture's forced Auto (Histogram) exposure —
+	 *  see the comment in SetupScopePip(). Turns out NOT to be why the optic reads
+	 *  dim: the capture's own exposure was already correct, but the RESULT still
+	 *  passes through the main FirstPersonCamera's own auto-exposure/tonemapping
+	 *  (ScopeScreen is Unlit, which skips lighting, not tonemapping), which
+	 *  compresses it back down to match the bright outdoor scene. If you need the
+	 *  optic brighter, boost the Emissive multiplier on M_ScopeScreen instead —
+	 *  that's what actually survives the outer exposure pass. Left as a knob here
+	 *  in case a future scene genuinely needs it. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope", meta = (ClampMin = "-4.0", ClampMax = "6.0"))
+	float ScopeExposureBias = 1.0f;
+
 	// Enhanced Input Data
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
@@ -281,6 +293,12 @@ public:
 
 private:
 	void ApplyWeaponData(UWeaponDataAsset* WeaponData);
+
+	/** Swaps WeaponMesh's static mesh to WeaponData->ViewmodelMesh (sync-loading the
+	 *  soft reference). Split out of ApplyWeaponData because BeginPlay needs the same
+	 *  swap for the starting loadout, before ApplyWeaponData's rig/scope wiring runs.
+	 *  No-op (keeps current mesh) if ViewmodelMesh is unset -- see its header comment. */
+	void ApplyWeaponMesh(UWeaponDataAsset* WeaponData);
 
 	FTimerHandle RespawnTimerHandle;
 	bool bDead = false;

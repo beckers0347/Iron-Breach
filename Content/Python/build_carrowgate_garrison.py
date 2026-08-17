@@ -75,6 +75,7 @@ checkout yet), the optional last section will place a distant, non-combat
 silhouette of it for atmosphere; otherwise it logs a warning and skips.
 """
 
+import math
 import unreal
 
 # ---------------------------------------------------------------------------
@@ -158,6 +159,8 @@ MAT_SHIP = load_mat_with_fallback(
     "/Game/LevelPrototyping/AITextures/M_AI_Ship.M_AI_Ship", None, "M_AI_Ship") or MAT_FURNITURE
 MAT_CRANE = load_mat_with_fallback(
     "/Game/LevelPrototyping/AITextures/M_AI_Crane.M_AI_Crane", None, "M_AI_Crane") or MAT_FURNITURE
+MAT_GLASS = load_mat_with_fallback(
+    "/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass", None, "M_AI_Glass") or MAT_FLATCOL_BASE
 
 # Real door prop. Doorway gaps used to be bare cutouts in the walls -- this is
 # an existing, unused Blueprint in the project (frame + door leaf) placed at
@@ -268,28 +271,121 @@ def spawn_mesh_actor(label, folder, asset_path, loc_m, rotation_deg=(0.0, 0.0, 0
     return actor
 
 
-def spawn_door_frame(label, folder, loc_m, yaw_deg):
+def _static_mesh_world_bounds(actor):
+    """World-space AABB (min, max) combining only this actor's StaticMeshComponents --
+    deliberately ignores any non-mesh collision/trigger volumes (BoxComponent etc.),
+    which is exactly what threw off the first version of this fix: BP_DoorFrame's
+    interaction trigger is apparently much bigger than its visible frame mesh, so
+    measuring the whole actor's bounds (get_actor_bounds()) measured the trigger, not
+    the door -- scaling to fit THAT shrank the actual visible mesh down to nearly
+    nothing. Uses each mesh's own asset-space get_bounding_box() (unaffected by scene
+    component registration timing) transformed by the component's world transform.
+    Returns (None, None) if the actor has no StaticMeshComponents with a mesh set."""
+    min_pt = max_pt = None
+    for comp in actor.get_components_by_class(unreal.StaticMeshComponent):
+        mesh = comp.static_mesh
+        if mesh is None:
+            continue
+        box = mesh.get_bounding_box()
+        wt = comp.get_world_transform()
+        for x in (box.min.x, box.max.x):
+            for y in (box.min.y, box.max.y):
+                for z in (box.min.z, box.max.z):
+                    c = wt.transform_location(unreal.Vector(x, y, z))
+                    if min_pt is None:
+                        min_pt = unreal.Vector(c.x, c.y, c.z)
+                        max_pt = unreal.Vector(c.x, c.y, c.z)
+                    else:
+                        min_pt = unreal.Vector(min(min_pt.x, c.x), min(min_pt.y, c.y), min(min_pt.z, c.z))
+                        max_pt = unreal.Vector(max(max_pt.x, c.x), max(max_pt.y, c.y), max(max_pt.z, c.z))
+    return min_pt, max_pt
+
+
+def spawn_door_frame(label, folder, loc_m, yaw_deg, door_width=1.6, door_height=2.4):
     """Places the real BP_DoorFrame prop at a doorway gap instead of leaving it a bare
     cutout. yaw_deg is a first guess (0 for a gap in a north/south wall running along X,
     90 for a gap in an east/west wall running along Y) -- verify/rotate by hand once it's
-    visible, same as this script's other placed-blind guesses (ramp roll, sea wall, etc.)."""
+    visible, same as this script's other placed-blind guesses (ramp roll, sea wall, etc.).
+
+    BP_DoorFrame's own authored size was never checked against the 1.6m/2.4m gap this
+    script cuts for it. First fix attempt scaled to fit get_actor_bounds() (the WHOLE
+    actor, including any non-mesh components) -- that made it worse: a big interaction
+    trigger volume on the Blueprint dominated the measurement, so the visible door mesh
+    got scaled down to nearly invisible. This version measures only the mesh geometry
+    itself (_static_mesh_world_bounds, above) and scales X/Z to that instead."""
     if DOOR_FRAME_CLASS is None:
         return
     location = unreal.Vector(loc_m[0] * M, loc_m[1] * M, loc_m[2] * M)
-    rotation = unreal.Rotator(0.0, 0.0, yaw_deg)
-    door = actor_subsystem.spawn_actor_from_class(DOOR_FRAME_CLASS, location, rotation)
+    door = actor_subsystem.spawn_actor_from_class(DOOR_FRAME_CLASS, location, unreal.Rotator(0.0, 0.0, 0.0))
+    min_pt, max_pt = _static_mesh_world_bounds(door)
+    if min_pt is not None:
+        native_w, native_h = max_pt.x - min_pt.x, max_pt.z - min_pt.z
+    else:
+        native_w = native_h = 0.0
+    if native_w > 0.01 and native_h > 0.01:
+        # A small oversize margin (fit to a slightly bigger target than the actual gap)
+        # instead of an exact match -- if the frame mesh is an arch/rounded shape (looks
+        # like it is, from the screenshot) rather than a plain rectangle, an exact fit
+        # still leaves gaps at the corners where the rounded frame doesn't reach the
+        # wall cutout's square corners. Overlapping slightly into the surrounding wall
+        # hides that instead.
+        FIT_MARGIN = 1.12
+        scale_w = (door_width * M * FIT_MARGIN) / native_w
+        scale_h = (door_height * M * FIT_MARGIN) / native_h
+        door.set_actor_scale3d(unreal.Vector(scale_w, scale_w, scale_h))
+        unreal.log(f"[Carrowgate Blockout] {label}: BP_DoorFrame mesh was {native_w / M:.2f}m x {native_h / M:.2f}m native -- scaled x{scale_w:.2f}/x{scale_h:.2f} (with {FIT_MARGIN}x overlap margin) to cover the {door_width}m x {door_height}m gap.")
+    else:
+        unreal.log_warning(f"[Carrowgate Blockout] {label}: couldn't find a StaticMeshComponent on BP_DoorFrame -- left at default scale, check it by hand.")
+
+    # The proximity trigger that opens the door is a child component too, so it got
+    # shrunk by the same scale_w/scale_h as everything else above -- if it was sized
+    # for the (much bigger) original mesh, it's now an even smaller detection range
+    # than before. Re-expand any Box/Sphere trigger shape to a fixed ~3m world-space
+    # range, independent of the visual mesh's scale, instead of just inheriting it.
+    SENSOR_RANGE_M = 3.0
+    for shape in door.get_components_by_class(unreal.ShapeComponent):
+        world_scale = shape.get_world_transform().scale3d
+        if isinstance(shape, unreal.BoxComponent):
+            shape.set_box_extent(unreal.Vector(
+                (SENSOR_RANGE_M * M) / max(abs(world_scale.x), 0.01),
+                (SENSOR_RANGE_M * M) / max(abs(world_scale.y), 0.01),
+                (door_height * M * 0.6) / max(abs(world_scale.z), 0.01),
+            ))
+        elif isinstance(shape, unreal.SphereComponent):
+            shape.set_sphere_radius((SENSOR_RANGE_M * M) / max(abs(world_scale.x), 0.01))
+
+    # Force every mesh piece of the frame to MAT_WALL, unconditionally -- the previous
+    # version only did this for components it detected as materialless, but the side
+    # panels flanking the doorway (visible in-editor as flat light-gray/blue boxes,
+    # clashing with the textured wall around them) were still showing up unfinished,
+    # so that detection was apparently wrong for at least some of this Blueprint's
+    # components. Just overwriting all of them is safe and guarantees a consistent look.
+    if MAT_WALL is not None:
+        for comp in door.get_components_by_class(unreal.StaticMeshComponent):
+            if comp.static_mesh is not None:
+                comp.set_material(0, MAT_WALL)
+
+    # Full component dump -- if the sensor range or "finish" guesses above are still
+    # off, this tells us exactly what's on the Blueprint instead of guessing again.
+    comp_summary = ", ".join(f"{c.get_name()}({c.get_class().get_name()})" for c in door.get_components_by_class(unreal.ActorComponent))
+    unreal.log(f"[Carrowgate Blockout] {label}: BP_DoorFrame components -- {comp_summary}")
+
+    door.set_actor_rotation(unreal.Rotator(0.0, 0.0, yaw_deg), False)
     door.set_actor_label(f"{label}_DoorFrame")
     door.set_folder_path(f"{ROOT_FOLDER}/{folder}")
 
 
 def spawn_room(area_id, name, folder, loc_m, size_m, door_side="south",
-                wall_thickness=0.3, door_width=1.6, door_height=2.4):
+                wall_thickness=0.3, door_width=1.6, door_height=2.4, open_roof=False):
     """Builds a hollow, ENTERABLE room out of wall/ceiling cubes, with a doorway gap
     on door_side ('north'/'south'/'east'/'west'). No dedicated floor slab -- the
     shared Ground segments underneath already serve as the floor, same as they do for
     every solid pad, so this drops straight into the existing footprint. loc_m/size_m
     use the exact same center/size convention as spawn_block, so swapping an area from
-    a solid pad to a room doesn't move or resize it."""
+    a solid pad to a room doesn't move or resize it. open_roof=True skips the ceiling
+    slab entirely (used for the Watch Tower, whose staircase leads to an open railed
+    observation deck at the top instead of a sealed roof -- see add_watch_tower_stairs(),
+    which supplies its own railing around the opening)."""
     cx, cy, cz = loc_m
     sx, sy, sz = size_m
     base_z = cz - sz / 2.0
@@ -300,6 +396,82 @@ def spawn_room(area_id, name, folder, loc_m, size_m, door_side="south",
 
     def solid_wall(suffix, center, size):
         spawn_block(f"{label}_{suffix}", folder, center, size)
+
+    def _default_window_bands(h):
+        """Auto-picks window band(s) (sill_h, head_h) up a wall of height h, both in
+        meters from the floor. Short rooms get one eye/chest-height band; tall shafts
+        (Watch Tower) get 3 stacked bands roughly matching its low/mid/top light tiers,
+        so no floor's worth of wall is left windowless."""
+        if h <= 10.0:
+            head = min(2.3, h - 0.4)
+            if head - 1.1 > 0.3:
+                return [(1.1, head)]
+            return []
+        bands = []
+        band_span = 1.3
+        for i in range(3):
+            center = (i + 0.5) / 3.0 * h
+            sill = max(0.6, center - band_span / 2.0)
+            head = min(h - 0.4, center + band_span / 2.0)
+            if head - sill > 0.3:
+                bands.append((sill, head))
+        return bands
+
+    window_bands = _default_window_bands(wall_h)
+    win_width_x = min(2.4, sx * 0.4)  # window width for walls that run along X (N/S)
+    win_width_y = min(2.4, sy * 0.4)  # window width for walls that run along Y (E/W)
+
+    def windowed_wall_x(suffix, wall_y):
+        """N/S solid wall (no door on this side): flanking pillars plus a stack of
+        window gaps up the middle, left open (no glass yet -- just a real cutout that
+        shows sky/exterior and lets ambient light in, matching this project's blockout
+        scope). Falls back to a fully solid wall if no bands fit (very short room)."""
+        if not window_bands:
+            solid_wall(suffix, (cx, wall_y, wall_cz), (sx, wall_thickness, wall_h))
+            return
+        win_width = win_width_x
+        side_len = (sx - win_width) / 2.0
+        if side_len > 0.05:
+            solid_wall(f"{suffix}_L", (cx - (win_width / 2.0 + side_len / 2.0), wall_y, wall_cz), (side_len, wall_thickness, wall_h))
+            solid_wall(f"{suffix}_R", (cx + (win_width / 2.0 + side_len / 2.0), wall_y, wall_cz), (side_len, wall_thickness, wall_h))
+        prev_top = base_z
+        for i, (sill_h, head_h) in enumerate(window_bands):
+            seg_h = (base_z + sill_h) - prev_top
+            if seg_h > 0.05:
+                solid_wall(f"{suffix}_Fill{i}", (cx, wall_y, prev_top + seg_h / 2.0), (win_width, wall_thickness, seg_h))
+            pane_h = head_h - sill_h
+            if pane_h > 0.05:
+                spawn_block(f"{label}_{suffix}_Glass{i}", folder, (cx, wall_y, base_z + sill_h + pane_h / 2.0),
+                            (win_width - 0.1, 0.04, pane_h - 0.1), material=MAT_GLASS)
+            prev_top = base_z + head_h
+        seg_h = (base_z + wall_h) - prev_top
+        if seg_h > 0.05:
+            solid_wall(f"{suffix}_FillTop", (cx, wall_y, prev_top + seg_h / 2.0), (win_width, wall_thickness, seg_h))
+
+    def windowed_wall_y(suffix, wall_x):
+        """E/W solid wall (no door on this side): same pillar + stacked-window-gap
+        pattern as windowed_wall_x, just transposed onto the Y-running wall."""
+        if not window_bands:
+            solid_wall(suffix, (wall_x, cy, wall_cz), (wall_thickness, sy, wall_h))
+            return
+        win_width = win_width_y
+        side_len = (sy - win_width) / 2.0
+        if side_len > 0.05:
+            solid_wall(f"{suffix}_L", (wall_x, cy - (win_width / 2.0 + side_len / 2.0), wall_cz), (wall_thickness, side_len, wall_h))
+            solid_wall(f"{suffix}_R", (wall_x, cy + (win_width / 2.0 + side_len / 2.0), wall_cz), (wall_thickness, side_len, wall_h))
+        prev_top = base_z
+        for i, (sill_h, head_h) in enumerate(window_bands):
+            seg_h = (base_z + sill_h) - prev_top
+            if seg_h > 0.05:
+                solid_wall(f"{suffix}_Fill{i}", (wall_x, cy, prev_top + seg_h / 2.0), (wall_thickness, win_width, seg_h))
+            pane_h = head_h - sill_h
+            if pane_h > 0.05:
+                spawn_block(f"{label}_{suffix}_Glass{i}", folder, (wall_x, cy, base_z + sill_h + pane_h / 2.0),
+                            (0.04, win_width - 0.1, pane_h - 0.1), material=MAT_GLASS)
+            prev_top = base_z + head_h
+        seg_h = (base_z + wall_h) - prev_top
+        if seg_h > 0.05:
+            solid_wall(f"{suffix}_FillTop", (wall_x, cy, prev_top + seg_h / 2.0), (wall_thickness, win_width, seg_h))
 
     def doored_wall_x(suffix, wall_y):
         """North/south wall: runs along X, split around a door gap centered on X."""
@@ -326,25 +498,26 @@ def spawn_room(area_id, name, folder, loc_m, size_m, door_side="south",
 
     if door_side == "north":
         doored_wall_x("Wall_N", north_y)
-        solid_wall("Wall_S", (cx, south_y, wall_cz), (sx, wall_thickness, wall_h))
+        windowed_wall_x("Wall_S", south_y)
     elif door_side == "south":
-        solid_wall("Wall_N", (cx, north_y, wall_cz), (sx, wall_thickness, wall_h))
+        windowed_wall_x("Wall_N", north_y)
         doored_wall_x("Wall_S", south_y)
     else:
-        solid_wall("Wall_N", (cx, north_y, wall_cz), (sx, wall_thickness, wall_h))
-        solid_wall("Wall_S", (cx, south_y, wall_cz), (sx, wall_thickness, wall_h))
+        windowed_wall_x("Wall_N", north_y)
+        windowed_wall_x("Wall_S", south_y)
 
     if door_side == "east":
         doored_wall_y("Wall_E", east_x)
-        solid_wall("Wall_W", (west_x, cy, wall_cz), (wall_thickness, sy, wall_h))
+        windowed_wall_y("Wall_W", west_x)
     elif door_side == "west":
-        solid_wall("Wall_E", (east_x, cy, wall_cz), (wall_thickness, sy, wall_h))
+        windowed_wall_y("Wall_E", east_x)
         doored_wall_y("Wall_W", west_x)
     else:
-        solid_wall("Wall_E", (east_x, cy, wall_cz), (wall_thickness, sy, wall_h))
-        solid_wall("Wall_W", (west_x, cy, wall_cz), (wall_thickness, sy, wall_h))
+        windowed_wall_y("Wall_E", east_x)
+        windowed_wall_y("Wall_W", west_x)
 
-    spawn_block(f"{label}_Ceiling", folder, (cx, cy, base_z + sz - ceiling_t / 2.0), (sx, sy, ceiling_t))
+    if not open_roof:
+        spawn_block(f"{label}_Ceiling", folder, (cx, cy, base_z + sz - ceiling_t / 2.0), (sx, sy, ceiling_t))
 
     door_gap_positions = {
         "north": ((cx, north_y, base_z), 0.0),
@@ -354,7 +527,7 @@ def spawn_room(area_id, name, folder, loc_m, size_m, door_side="south",
     }
     if door_side in door_gap_positions:
         door_loc, door_yaw = door_gap_positions[door_side]
-        safe(lambda: spawn_door_frame(label, folder, door_loc, door_yaw), f"{label} door frame")
+        safe(lambda: spawn_door_frame(label, folder, door_loc, door_yaw, door_width, door_height), f"{label} door frame")
 
 
 def spawn_gate_arch(area_id, name, folder, loc_m, size_m, gate_width=4.0, gate_height=4.5):
@@ -417,11 +590,13 @@ AREAS = [
          note="Open flat staging ground for formation / briefings. Central hub where "
               "the map's main paths converge."),
     dict(id=4, name="Watch Tower", loc=(56, 44, 11), size=(7, 7, 22), kind="room", door="south",
+         open_roof=True,
          note="Tall thin tower, overlooks coast/harbor. Vertical traversal beat. On its "
-              "own spur at the NORTH tip of the complex, per the area map. Blockout is "
-              "one hollow shaft top-to-bottom -- worth manually adding an intermediate "
-              "floor + ladder gap and opening the top into a railed observation deck "
-              "once you're past greybox."),
+              "own spur at the NORTH tip of the complex, per the area map. Now has a "
+              "spiral staircase (add_watch_tower_stairs(), below) climbing from the "
+              "ground floor to a mid landing at the mid window band, then on to a top "
+              "landing at the top window band and a railed open-roof observation deck "
+              "-- open_roof=True skips this room's ceiling for that deck."),
     dict(id=5, name="Barracks", loc=(55, -32, 3), size=(20, 12, 6), kind="room", door="south",
          note="Player starts here. Living quarters, spartan/functional. Door faces the "
               "PlayerStart just south of it, so they land looking straight at it. (Door "
@@ -463,7 +638,8 @@ for area in AREAS:
     label = f"{area['id']:02d}_{area['name']}"
     kind = area.get("kind", "pad")
     if kind == "room":
-        spawn_room(area["id"], area["name"], area["name"], area["loc"], area["size"], door_side=area.get("door", "south"))
+        spawn_room(area["id"], area["name"], area["name"], area["loc"], area["size"],
+                   door_side=area.get("door", "south"), open_roof=area.get("open_roof", False))
     elif kind == "gate":
         spawn_gate_arch(area["id"], area["name"], area["name"], area["loc"], area["size"])
     else:
@@ -488,26 +664,29 @@ def prop_block(label, folder, loc_m, size_m, rot_z=0.0, material=MAT_FURNITURE):
 
 def add_vehicle_bay_props():
     # Vehicle Bay pad: loc=(35,-3,0.025), size=(25,18,0.05) -> top at Z=0.05,
-    # spans X=[22.5,47.5] Y=[-12,6]. Three ~8.5x3x3m vehicle boxes parked in a
-    # row, long axis along X (the pad's long axis), staggered slightly in X so
-    # they don't read as three identical boxes in a perfect line.
+    # spans X=[22.5,47.5] Y=[-12,6]. Three trucks parked in a row, long axis
+    # along X (the pad's long axis), staggered slightly in X so they don't
+    # read as identical boxes in a perfect line.
     top_z = 0.05
     veh_size = (8.5, 3.0, 3.0)
     cz = top_z + veh_size[2] / 2.0
+    TRUCK_MESH = "/Game/LevelPrototyping/AIModels/SM_Truck_Cargo.SM_Truck_Cargo"
 
-    # Pilot: Truck_01 uses the real Meshy-generated mesh (import_ai_models.py) if it's
-    # been imported yet; otherwise falls back to the same placeholder box as 02/03. Only
-    # one truck is swapped for now -- see if this looks right before doing the rest.
-    real_truck = spawn_mesh_actor(
-        "VehicleBay_Truck_01", "Vehicle Bay",
-        "/Game/LevelPrototyping/AIModels/SM_Truck_Cargo.SM_Truck_Cargo",
-        (32.0, -8.0, top_z), material=MAT_VEHICLE)
-    if real_truck is None:
-        unreal.log_warning("[Carrowgate Blockout] SM_Truck_Cargo not found -- run import_ai_models.py first (after moving the downloaded FBX into Content/LevelPrototyping/AIModels/). Using placeholder box for Truck_01 for now.")
-        prop_block("VehicleBay_Truck_01", "Vehicle Bay", (32.0, -8.0, cz), veh_size, material=MAT_VEHICLE)
-
-    prop_block("VehicleBay_Truck_02", "Vehicle Bay", (36.5, -3.0, cz), veh_size, material=MAT_VEHICLE)
-    prop_block("VehicleBay_Truck_03", "Vehicle Bay", (33.5, 2.0, cz), veh_size, material=MAT_VEHICLE)
+    # Pilot proved out on Truck_01 alone; now all three reuse the same imported
+    # mesh (free -- no extra Meshy generation) with a little yaw variation so
+    # three copies of one mesh don't read as obviously cloned. Any that fail to
+    # load fall back to the placeholder box individually, same safety net as before.
+    trucks = [
+        ("VehicleBay_Truck_01", (32.0, -8.0), 0.0),
+        ("VehicleBay_Truck_02", (36.5, -3.0), 8.0),
+        ("VehicleBay_Truck_03", (33.5, 2.0), -6.0),
+    ]
+    for label, (x, y), yaw in trucks:
+        real_truck = spawn_mesh_actor(label, "Vehicle Bay", TRUCK_MESH, (x, y, top_z),
+                                       rotation_deg=(0.0, 0.0, yaw), material=MAT_VEHICLE)
+        if real_truck is None:
+            unreal.log_warning(f"[Carrowgate Blockout] SM_Truck_Cargo not found -- run import_ai_models.py first (after moving the downloaded FBX into Content/LevelPrototyping/AIModels/). Using placeholder box for {label} for now.")
+            prop_block(label, "Vehicle Bay", (x, y, cz), veh_size, rot_z=yaw, material=MAT_VEHICLE)
 
 
 safe(add_vehicle_bay_props, "Vehicle Bay placeholder props")
@@ -522,19 +701,43 @@ def add_docks_harbor_props():
     # Y=-107..-120) and the Sea Wall/Helipad area further north.
     dock_top = -3.7
 
-    hull_size = (7.0, 22.0, 5.0)
-    hull_cz = dock_top + hull_size[2] / 2.0
-    hull_loc = (104.0, -145.0, hull_cz)
-    prop_block("Docks_Ship_Hull", "Docks / Harbor", hull_loc, hull_size, material=MAT_SHIP)
+    # Real mesh (import_ai_models.py) replaces BOTH the old hull and deckhouse
+    # boxes at once -- it's one combined hull+deckhouse+mast model, downloaded
+    # with Origin=Bottom so dock_top is exactly where its keel should sit.
+    # Position is the old hull box's X/Y center; rotation is a first guess
+    # (Meshy's default forward isn't known ahead of time) -- check in-editor
+    # and add a yaw here if it's facing the wrong way, same as the ramp/truck.
+    real_ship = spawn_mesh_actor(
+        "Docks_Ship_Hull", "Docks / Harbor",
+        "/Game/LevelPrototyping/AIModels/SM_Ship_Hull.SM_Ship_Hull",
+        (104.0, -145.0, dock_top), material=MAT_SHIP)
+    if real_ship is None:
+        unreal.log_warning("[Carrowgate Blockout] SM_Ship_Hull not found -- run import_ai_models.py first (after moving the downloaded FBX into Content/LevelPrototyping/AIModels/). Using placeholder boxes for the ship for now.")
+        hull_size = (7.0, 22.0, 5.0)
+        hull_cz = dock_top + hull_size[2] / 2.0
+        hull_loc = (104.0, -145.0, hull_cz)
+        prop_block("Docks_Ship_Hull", "Docks / Harbor", hull_loc, hull_size, material=MAT_SHIP)
 
-    deckhouse_size = (6.0, 6.0, 3.0)
-    deckhouse_loc = (104.0, -153.0, dock_top + hull_size[2] + deckhouse_size[2] / 2.0)
-    prop_block("Docks_Ship_Deckhouse", "Docks / Harbor", deckhouse_loc, deckhouse_size, material=MAT_SHIP)
+        deckhouse_size = (6.0, 6.0, 3.0)
+        deckhouse_loc = (104.0, -153.0, dock_top + hull_size[2] + deckhouse_size[2] / 2.0)
+        prop_block("Docks_Ship_Deckhouse", "Docks / Harbor", deckhouse_loc, deckhouse_size, material=MAT_SHIP)
+
+    CRANE_MESH = "/Game/LevelPrototyping/AIModels/SM_Dock_Crane.SM_Dock_Crane"
 
     def crane(label, loc_xy):
         cx, cy = loc_xy
         mast_size = (1.5, 1.5, 10.0)
         mast_cz = dock_top + mast_size[2] / 2.0
+
+        # Real mesh (import_ai_models.py) already combines mast+jib+base into
+        # one model -- replaces both the old Mast and Jib boxes at once. Same
+        # fallback pattern as the truck/ship: missing asset -> the two boxes.
+        real_crane = spawn_mesh_actor(f"{label}", "Docks / Harbor", CRANE_MESH,
+                                       (cx, cy, dock_top), material=MAT_CRANE)
+        if real_crane is not None:
+            return
+
+        unreal.log_warning(f"[Carrowgate Blockout] SM_Dock_Crane not found -- run import_ai_models.py first. Using placeholder boxes for {label} for now.")
         prop_block(f"{label}_Mast", "Docks / Harbor", (cx, cy, mast_cz), mast_size, material=MAT_CRANE)
         jib_size = (1.0, 12.0, 1.0)
         jib_cz = dock_top + mast_size[2] + jib_size[2] / 2.0
@@ -634,8 +837,16 @@ GROUND_SEGMENTS = [
     ("SE_CoastalReach_Helipad", (125.0, -37.5), (50, 45)),  # toward Helipad/Sea Wall
     ("SouthTaper_CivicRoute", (95.0, -77.5), (40, 35)),  # Civic Route, tapering toward the causeway
 ]
+# Depth: was a thin 1m slab (top=0, bottom=-1.0) sitting ~3.5m above the water
+# plane's surface (top=-4.45) -- with the water now an actual reflective
+# material instead of a flat texture, that gap read as the whole landmass
+# floating above a visible cliff/void instead of rising out of the water.
+# Deepened to 6m (top=0, bottom=-6.0) so the underside now extends well below
+# the waterline -- same top-surface convention everywhere else in this script
+# (top always at Z=0), just no longer a thin hovering plate.
+GROUND_DEPTH = 6.0
 for seg_name, (gx, gy), (gsx, gsy) in GROUND_SEGMENTS:
-    spawn_block(f"Ground_{seg_name}", "Ground", (gx, gy, -0.5), (gsx, gsy, 1.0), material=MAT_GROUND, mesh=CHAMFER_MESH, base_pivot=False)
+    spawn_block(f"Ground_{seg_name}", "Ground", (gx, gy, -GROUND_DEPTH / 2.0), (gsx, gsy, GROUND_DEPTH), material=MAT_GROUND, mesh=CHAMFER_MESH, base_pivot=False)
 
 # ---------------------------------------------------------------------------
 # Corner fillets -- tried twice, pulled both times (SM_QuarterCylinderOuter:
@@ -696,7 +907,7 @@ safe(tint_water, "Water tint (fallback-only)")
 
 def add_player_start():
     ps = actor_subsystem.spawn_actor_from_class(
-        unreal.PlayerStart, unreal.Vector(55 * M, -41 * M, 1 * M), unreal.Rotator(0, 90, 0)
+        unreal.PlayerStart, unreal.Vector(55 * M, -41 * M, 1 * M), unreal.Rotator(0, 0, 270)
     )
     ps.set_actor_label("PS_Barracks_MissionStart")
     ps.set_folder_path(f"{ROOT_FOLDER}/Barracks")
@@ -874,6 +1085,31 @@ def furn(folder, prefix, name, origin_xy, base_z, dx, dy, dz, size_m, rot_z=0.0)
     spawn_block(f"{prefix}_{name}", folder, center, size_m, rotation_deg=(0.0, 0.0, rot_z), material=MAT_FURNITURE)
 
 
+LOCKER_MESH = "/Game/LevelPrototyping/AIModels/SM_Locker.SM_Locker"
+BUNK_MESH = "/Game/LevelPrototyping/AIModels/SM_Bunk.SM_Bunk"
+WEAPON_RACK_MESH = "/Game/LevelPrototyping/AIModels/SM_WeaponRack.SM_WeaponRack"
+MESS_TABLE_MESH = "/Game/LevelPrototyping/AIModels/SM_MessTable.SM_MessTable"
+DESK_MESH = "/Game/LevelPrototyping/AIModels/SM_Desk.SM_Desk"
+CHAIR_MESH = "/Game/LevelPrototyping/AIModels/SM_Chair.SM_Chair"
+VENDING_MESH = "/Game/LevelPrototyping/AIModels/SM_VendingMachine.SM_VendingMachine"
+COMMS_CONSOLE_MESH = "/Game/LevelPrototyping/AIModels/SM_CommsConsole.SM_CommsConsole"
+
+
+def furn_mesh(folder, prefix, name, origin_xy, base_z, dx, dy, dz, asset_path, fallback_size_m, rot_z=0.0):
+    """Same placement convention as furn(), but uses a real Meshy-generated mesh
+    (Origin=Bottom, so base_z+dz is exactly where it should sit) if the asset has
+    been imported; falls back to furn()'s placeholder cube otherwise. Rotation is
+    a first guess (0 deg, same as the boxes it replaces) -- doors may not face the
+    room correctly on every wall; check in-editor and add per-instance yaw here."""
+    cx, cy = origin_xy
+    loc = (cx + dx, cy + dy, base_z + dz)
+    real = spawn_mesh_actor(f"{prefix}_{name}", folder, asset_path, loc, rotation_deg=(0.0, 0.0, rot_z), material=MAT_FURNITURE)
+    if real is None:
+        asset_name = asset_path.split("/")[-1].split(".")[0]
+        unreal.log_warning(f"[Carrowgate Blockout] {asset_name} not found -- run import_ai_models.py first. Using placeholder box for {prefix}_{name} for now.")
+        furn(folder, prefix, name, origin_xy, base_z, dx, dy, dz, fallback_size_m, rot_z=rot_z)
+
+
 def add_furniture():
     BASE_Z = 0.0  # every furnished building's floor sits at Z=0, same as the Ground segments' top
     # Must match each building's (loc[0], loc[1]) in AREAS above -- these were
@@ -887,48 +1123,68 @@ def add_furniture():
 
     # -- Watch Tower: overlook post, minimal furniture, a marker for the climb up. --
     furn("Watch Tower", "04", "SensorConsole", WATCH_TOWER, BASE_Z, 0.0, 2.6, 0.0, (1.4, 0.6, 1.2))
-    furn("Watch Tower", "04", "Chair", WATCH_TOWER, BASE_Z, 0.0, 1.7, 0.0, (0.5, 0.5, 0.9))
+    furn_mesh("Watch Tower", "04", "Chair", WATCH_TOWER, BASE_Z, 0.0, 1.7, 0.0, CHAIR_MESH, (0.5, 0.5, 0.9))
     furn("Watch Tower", "04", "LadderMarker", WATCH_TOWER, BASE_Z, -2.4, -2.4, 0.0, (0.15, 0.6, 3.0))
 
     # -- Barracks: 4 bunks along the back wall, lockers flanking the door, a
     # notice board (per the M1 design doc's QUIET beat -- "the notice board"). --
     for i, dx in enumerate((-7.5, -2.5, 2.5, 7.5)):
-        furn("Barracks", "05", f"Bunk_{i + 1:02d}", BARRACKS, BASE_Z, dx, 5.0, 0.0, (2.0, 0.9, 0.5))
-    furn("Barracks", "05", "Locker_L", BARRACKS, BASE_Z, -7.0, -5.3, 0.0, (0.5, 0.5, 2.0))
-    furn("Barracks", "05", "Locker_R", BARRACKS, BASE_Z, 7.0, -5.3, 0.0, (0.5, 0.5, 2.0))
+        furn_mesh("Barracks", "05", f"Bunk_{i + 1:02d}", BARRACKS, BASE_Z, dx, 5.0, 0.0, BUNK_MESH, (2.0, 0.9, 0.5))
+    furn_mesh("Barracks", "05", "Locker_L", BARRACKS, BASE_Z, -7.0, -5.3, 0.0, LOCKER_MESH, (0.5, 0.5, 2.0), rot_z=180.0)
+    furn_mesh("Barracks", "05", "Locker_R", BARRACKS, BASE_Z, 7.0, -5.3, 0.0, LOCKER_MESH, (0.5, 0.5, 2.0), rot_z=180.0)
     furn("Barracks", "05", "NoticeBoard", BARRACKS, BASE_Z, 9.6, 0.0, 1.0, (0.1, 1.5, 1.2))
 
     # -- Mess Hall: 3 tables + 6 benches down the middle, a vending machine, a
     # serving counter along the back wall. --
+    # SM_MessTable came back as a full picnic-table-style unit with benches
+    # already attached on both sides -- one mesh replaces the old Table +
+    # BenchA + BenchB trio per group instead of needing 3 separate models.
     for i, dx in enumerate((-5.0, 0.0, 5.0)):
-        furn("Mess Hall", "06", f"Table_{i + 1:02d}", MESS_HALL, BASE_Z, dx, 0.5, 0.0, (1.5, 0.8, 0.75))
-        furn("Mess Hall", "06", f"Bench_{i + 1:02d}A", MESS_HALL, BASE_Z, dx, -0.2, 0.0, (1.2, 0.35, 0.45))
-        furn("Mess Hall", "06", f"Bench_{i + 1:02d}B", MESS_HALL, BASE_Z, dx, 1.2, 0.0, (1.2, 0.35, 0.45))
-    furn("Mess Hall", "06", "VendingMachine", MESS_HALL, BASE_Z, -8.0, -5.0, 0.0, (0.9, 0.8, 1.9))
+        real_table = spawn_mesh_actor(f"06_MessTable_{i + 1:02d}", "Mess Hall", MESS_TABLE_MESH,
+                                       (MESS_HALL[0] + dx, MESS_HALL[1] + 0.5, BASE_Z), material=MAT_FURNITURE)
+        if real_table is None:
+            unreal.log_warning(f"[Carrowgate Blockout] SM_MessTable not found -- run import_ai_models.py first. Using placeholder boxes for Table_{i + 1:02d} group.")
+            furn("Mess Hall", "06", f"Table_{i + 1:02d}", MESS_HALL, BASE_Z, dx, 0.5, 0.0, (1.5, 0.8, 0.75))
+            furn("Mess Hall", "06", f"Bench_{i + 1:02d}A", MESS_HALL, BASE_Z, dx, -0.2, 0.0, (1.2, 0.35, 0.45))
+            furn("Mess Hall", "06", f"Bench_{i + 1:02d}B", MESS_HALL, BASE_Z, dx, 1.2, 0.0, (1.2, 0.35, 0.45))
+    furn_mesh("Mess Hall", "06", "VendingMachine", MESS_HALL, BASE_Z, -8.0, -5.0, 0.0, VENDING_MESH, (0.9, 0.8, 1.9))
     furn("Mess Hall", "06", "ServingCounter", MESS_HALL, BASE_Z, 0.0, 6.5, 0.0, (6.0, 0.8, 1.1))
 
     # -- Armory: weapon racks along the back wall, lockers along both side
     # walls, a checkout counter near the door. --
     for i, dx in enumerate((-3.0, 0.0, 3.0)):
-        furn("Armory", "07", f"WeaponRack_{i + 1:02d}", ARMORY, BASE_Z, dx, -5.0, 0.0, (1.2, 0.3, 2.0))
+        furn_mesh("Armory", "07", f"WeaponRack_{i + 1:02d}", ARMORY, BASE_Z, dx, -5.0, 0.0, WEAPON_RACK_MESH, (1.2, 0.3, 2.0))
+    # East wall (dx=+5) needs doors facing west (-X) into the room; West wall
+    # (dx=-5) needs doors facing east (+X) -- opposite walls, opposite yaw.
+    # rot_z=-90/+90 fixed the axis (no longer "sideways") but overshot by 180 --
+    # fronts ended up facing INTO the wall instead of out into the room, same
+    # 180 flip the Barracks lockers needed. Swapped signs here to correct it.
     for i, dy in enumerate((-3.0, 0.0, 3.0)):
-        furn("Armory", "07", f"Locker_E{i + 1:02d}", ARMORY, BASE_Z, 5.0, dy, 0.0, (0.3, 0.5, 2.0))
-        furn("Armory", "07", f"Locker_W{i + 1:02d}", ARMORY, BASE_Z, -5.0, dy, 0.0, (0.3, 0.5, 2.0))
+        furn_mesh("Armory", "07", f"Locker_E{i + 1:02d}", ARMORY, BASE_Z, 5.0, dy, 0.0, LOCKER_MESH, (0.3, 0.5, 2.0), rot_z=90.0)
+        furn_mesh("Armory", "07", f"Locker_W{i + 1:02d}", ARMORY, BASE_Z, -5.0, dy, 0.0, LOCKER_MESH, (0.3, 0.5, 2.0), rot_z=-90.0)
     furn("Armory", "07", "CheckoutCounter", ARMORY, BASE_Z, -3.5, 4.5, 0.0, (1.5, 0.6, 1.0))
 
     # -- Command & Comms: a comms console opposite the door, desks along the
     # north/south walls, a map table (offset from the doorway's direct line so
     # you don't spawn nose-to-nose with it). --
-    furn("Command & Comms", "08", "CommsConsole", COMMAND, BASE_Z, 6.0, 0.0, 0.0, (1.6, 0.6, 1.3))
+    # Came back with an operator chair already built in -- no separate chair
+    # needed for this room.
+    # Was at dx=6.0 with no rot_z (defaults to facing east, i.e. straight into the east
+    # wall) -- only 1.5m clearance to that wall (east_x = cx+7.5=80.5 vs console at
+    # cx+6=79), and the REAL imported mesh's footprint was never checked against that
+    # gap the way furn_mesh's fallback_size_m placeholder box is, so it read as
+    # embedded in the wall. Pulled back to dx=4.5 (3m clearance) and rot_z=180 so the
+    # console/chair face west into the room instead of into the wall.
+    furn_mesh("Command & Comms", "08", "CommsConsole", COMMAND, BASE_Z, 4.5, 0.0, 0.0, COMMS_CONSOLE_MESH, (1.6, 0.6, 1.3), rot_z=180.0)
     for i, dx in enumerate((-3.0, 3.0)):
-        furn("Command & Comms", "08", f"Desk_N{i + 1:02d}", COMMAND, BASE_Z, dx, 5.0, 0.0, (1.2, 0.6, 0.9))
-        furn("Command & Comms", "08", f"Desk_S{i + 1:02d}", COMMAND, BASE_Z, dx, -5.0, 0.0, (1.2, 0.6, 0.9))
+        furn_mesh("Command & Comms", "08", f"Desk_N{i + 1:02d}", COMMAND, BASE_Z, dx, 5.0, 0.0, DESK_MESH, (1.2, 0.6, 0.9))
+        furn_mesh("Command & Comms", "08", f"Desk_S{i + 1:02d}", COMMAND, BASE_Z, dx, -5.0, 0.0, DESK_MESH, (1.2, 0.6, 0.9))
     furn("Command & Comms", "08", "MapTable", COMMAND, BASE_Z, 1.5, 0.0, 0.0, (1.8, 1.0, 0.9))
 
     # -- Sensor Array: the "pour coffee for the sensor post, sign the log" beat
     # from the M1 design doc -- console, chair, log stand, equipment rack. --
     furn("Sensor Array", "09", "SensorConsole", SENSOR_ARRAY, BASE_Z, 0.0, 2.6, 0.0, (1.4, 0.6, 1.2))
-    furn("Sensor Array", "09", "Chair", SENSOR_ARRAY, BASE_Z, 0.0, 1.8, 0.0, (0.5, 0.5, 0.9))
+    furn_mesh("Sensor Array", "09", "Chair", SENSOR_ARRAY, BASE_Z, 0.0, 1.8, 0.0, CHAIR_MESH, (0.5, 0.5, 0.9))
     furn("Sensor Array", "09", "EquipmentRack", SENSOR_ARRAY, BASE_Z, -2.6, 1.5, 0.0, (0.6, 0.5, 1.8))
     furn("Sensor Array", "09", "LogStand", SENSOR_ARRAY, BASE_Z, 1.0, 2.6, 0.0, (0.3, 0.3, 0.9))
 
@@ -983,28 +1239,136 @@ def add_interior_lighting():
         return light
 
     # Watch Tower: 22m shaft, stacked low/mid/top so the climb isn't dark partway up.
-    point_light("Watch Tower", "PL_WatchTower_Low", WATCH_TOWER, 3.0, 3000.0, 6.0)
-    point_light("Watch Tower", "PL_WatchTower_Mid", WATCH_TOWER, 11.0, 3000.0, 6.0)
-    point_light("Watch Tower", "PL_WatchTower_Top", WATCH_TOWER, 19.0, 3000.0, 6.0)
+    point_light("Watch Tower", "PL_WatchTower_Low", WATCH_TOWER, 3.0, 5500.0, 8.0)
+    point_light("Watch Tower", "PL_WatchTower_Mid", WATCH_TOWER, 11.0, 5500.0, 8.0)
+    point_light("Watch Tower", "PL_WatchTower_Top", WATCH_TOWER, 19.0, 5500.0, 8.0)
 
-    # Barracks: 20m x 12m -- two lights down the long axis over the bunks.
-    point_light("Barracks", "PL_Barracks_A", (BARRACKS[0] - 5.0, BARRACKS[1]), 5.3, 3500.0, 8.0)
-    point_light("Barracks", "PL_Barracks_B", (BARRACKS[0] + 5.0, BARRACKS[1]), 5.3, 3500.0, 8.0)
+    # Barracks: 20m x 12m -- 2x2 grid over the bunks instead of just two lights
+    # down the centerline, so the corners aren't left dim.
+    point_light("Barracks", "PL_Barracks_NW", (BARRACKS[0] - 5.0, BARRACKS[1] + 3.0), 5.3, 6000.0, 10.0)
+    point_light("Barracks", "PL_Barracks_NE", (BARRACKS[0] + 5.0, BARRACKS[1] + 3.0), 5.3, 6000.0, 10.0)
+    point_light("Barracks", "PL_Barracks_SW", (BARRACKS[0] - 5.0, BARRACKS[1] - 3.0), 5.3, 6000.0, 10.0)
+    point_light("Barracks", "PL_Barracks_SE", (BARRACKS[0] + 5.0, BARRACKS[1] - 3.0), 5.3, 6000.0, 10.0)
 
-    # Mess Hall: 18m x 15m -- centered over the tables.
-    point_light("Mess Hall", "PL_MessHall", MESS_HALL, 4.5, 5000.0, 10.0)
+    # Mess Hall: 18m x 15m -- center light plus 4 corners so the whole floor
+    # over the tables reads evenly instead of one hot spot in the middle.
+    point_light("Mess Hall", "PL_MessHall_Center", MESS_HALL, 4.5, 8000.0, 13.0)
+    point_light("Mess Hall", "PL_MessHall_NW", (MESS_HALL[0] - 6.0, MESS_HALL[1] + 5.0), 4.5, 5500.0, 9.0)
+    point_light("Mess Hall", "PL_MessHall_NE", (MESS_HALL[0] + 6.0, MESS_HALL[1] + 5.0), 4.5, 5500.0, 9.0)
+    point_light("Mess Hall", "PL_MessHall_SW", (MESS_HALL[0] - 6.0, MESS_HALL[1] - 5.0), 4.5, 5500.0, 9.0)
+    point_light("Mess Hall", "PL_MessHall_SE", (MESS_HALL[0] + 6.0, MESS_HALL[1] - 5.0), 4.5, 5500.0, 9.0)
 
-    # Armory: 12m x 12m -- centered.
-    point_light("Armory", "PL_Armory", ARMORY, 4.5, 3500.0, 8.0)
+    # Armory: 12m x 12m -- center plus two side lights over the lockers/racks.
+    point_light("Armory", "PL_Armory_Center", ARMORY, 4.5, 6500.0, 11.0)
+    point_light("Armory", "PL_Armory_E", (ARMORY[0] + 4.0, ARMORY[1]), 4.5, 4500.0, 8.0)
+    point_light("Armory", "PL_Armory_W", (ARMORY[0] - 4.0, ARMORY[1]), 4.5, 4500.0, 8.0)
 
-    # Command & Comms: taller room (8m) -- centered near the ceiling.
-    point_light("Command & Comms", "PL_Command", COMMAND, 7.0, 4000.0, 9.0)
+    # Command & Comms: taller room (8m) -- center plus north/south lights over
+    # the desks so the ceiling height doesn't leave the floor dim.
+    point_light("Command & Comms", "PL_Command_Center", COMMAND, 7.0, 7000.0, 12.0)
+    point_light("Command & Comms", "PL_Command_N", (COMMAND[0], COMMAND[1] + 4.5), 6.0, 4500.0, 8.0)
+    point_light("Command & Comms", "PL_Command_S", (COMMAND[0], COMMAND[1] - 4.5), 6.0, 4500.0, 8.0)
 
     # Sensor Array: 8m x 8m, 10m tall -- centered.
-    point_light("Sensor Array", "PL_SensorArray", SENSOR_ARRAY, 9.0, 3000.0, 7.0)
+    point_light("Sensor Array", "PL_SensorArray", SENSOR_ARRAY, 9.0, 5500.0, 9.0)
 
 
 safe(add_interior_lighting, "Interior lighting")
+
+
+# ---------------------------------------------------------------------------
+# Watch Tower switchback staircase -- reworked from a radial spiral to a
+# SQUARE run that hugs the 4 interior walls (per feedback: "make it square
+# and attach to the walls"), climbing straight from the ground floor to the
+# open roof deck with no intermediate landing/floor partway up -- just the
+# two ends ("dont have any floors just the ground floor and the roof"). Each
+# tread is a small rotated box walked around a fixed square path, same
+# blockout-scope approach as every other prop in this script. open_roof=True
+# on this room already skips its ceiling, and its walls are left intact up to
+# their full height -- the ~0.7m of wall above the roof deck doubles as a
+# parapet/railing, so no separate railing prop is needed.
+# ---------------------------------------------------------------------------
+
+def add_watch_tower_stairs():
+    cx, cy = 56.0, 44.0  # must match Watch Tower's AREAS loc[0]/loc[1]
+    wall_top_z = 21.7     # sz(22) - wall_thickness(0.3), matches spawn_room's wall_h
+    half = 2.8             # stair centerline distance from tower center -- hugs the
+                            # ~3.2m-clear interior wall face, ~0.4m walking margin from it
+    tread_len, tread_width, tread_t = 0.4, 1.1, 0.15  # tread_len = along travel, tread_width = walkway width
+    riser = 0.22
+    # start_z was 1.0 -- that's not "just above the floor", it's the HEIGHT of the
+    # first tread above start_z (frac*rise is added on top of it in the loop below),
+    # so the actual bottom step floated at ~1m with nothing connecting it down to the
+    # z=0 floor. Starting at 0.0 instead means the first tread lands right at floor
+    # level and the run climbs continuously from there -- no gap at the bottom.
+    start_z, deck_z = 0.0, wall_top_z - 0.7  # deck sits 0.7m below the wall tops, which
+                                              # then act as a chest-height parapet around it
+    laps = 1.5  # how many times the run wraps the tower's 4 walls on its way up
+
+    # Starts on the EAST wall, not the south wall -- the door is on the south wall, and
+    # the very first (lowest) run used to trace straight along it at head height,
+    # physically blocking the doorway. Ordered so the south-wall crossing lands late in
+    # the first lap instead (~10.5-14m up, per the rise math below), well above the
+    # 2.4m door header and clear of the entrance entirely.
+    corners = [(half, -half), (half, half), (-half, half), (-half, -half)]  # SE, NE, NW, SW
+
+    def point_on_square(frac):
+        """frac (can exceed 1 for multiple laps) -> (x_off, y_off, yaw_deg), walking
+        clockwise around the square starting at the SE corner along the east wall."""
+        f = frac % 1.0
+        seg_f = f * 4.0
+        seg_i = int(seg_f) % 4
+        seg_t = seg_f - int(seg_f)
+        p0, p1 = corners[seg_i], corners[(seg_i + 1) % 4]
+        x = p0[0] + (p1[0] - p0[0]) * seg_t
+        y = p0[1] + (p1[1] - p0[1]) * seg_t
+        yaw = math.degrees(math.atan2(p1[1] - p0[1], p1[0] - p0[0]))
+        return x, y, yaw
+
+    rise = deck_z - start_z
+    steps = max(1, int(round(rise / riser)))
+    for i in range(steps):
+        frac = (i + 1) / steps
+        z = start_z + frac * rise
+        x_off, y_off, yaw = point_on_square(frac * laps)
+        spawn_block(f"04_WatchTower_Stair_{i:03d}", "Watch Tower", (cx + x_off, cy + y_off, z),
+                    (tread_len, tread_width, tread_t), rotation_deg=(0.0, 0.0, yaw), material=MAT_FURNITURE)
+
+    # Small square landing at every corner turn instead of just letting the treads
+    # rotate through it -- there are 5 interior corner crossings across the 1.5 laps
+    # (the start and the very end, handled separately below, aren't counted here).
+    total_segments = int(round(4 * laps))
+    for k in range(1, total_segments):
+        frac = k / total_segments
+        z = start_z + frac * rise
+        cxo, cyo = corners[k % 4]
+        spawn_block(f"04_WatchTower_Landing_{k}", "Watch Tower", (cx + cxo, cy + cyo, z),
+                    (1.3, 1.3, 0.15), material=MAT_FURNITURE)
+
+    # Roof deck. Previous version cut a small corner notch sized/positioned by guesswork
+    # -- it didn't actually line up with where the stairs run, so the deck's underside
+    # blocked the last stretch of climbing, AND separately its solid edge sat ~2m away
+    # from the actual last tread (a gap too far to step across). Fixed with a simpler,
+    # more robust split: the ENTIRE final approach runs along the north wall at a fixed
+    # Y (the NE->NW leg, constant y_off=+half) regardless of X, so leaving that whole
+    # strip open (not just a corner square) guarantees no ceiling collision no matter
+    # where along X the stairs happen to be. A separate landing pad is then placed
+    # exactly at the stairs' own final computed position (not a guessed coordinate), so
+    # it can't drift out of sync with the actual last tread.
+    deck_half, open_strip_depth = 3.1, 1.6
+    spawn_block("04_WatchTower_RoofDeck", "Watch Tower",
+                (cx, cy - deck_half + (2 * deck_half - open_strip_depth) / 2.0, deck_z),
+                (2 * deck_half, 2 * deck_half - open_strip_depth, 0.2), material=MAT_GROUND)
+
+    end_x_off, end_y_off, end_yaw = point_on_square(laps)
+    spawn_block("04_WatchTower_RoofLanding", "Watch Tower",
+                (cx + end_x_off, cy + end_y_off, deck_z), (2.2, 2.2, 0.2), material=MAT_GROUND)
+
+    # No door, no hatch -- just left open. The top step leads straight onto the
+    # roof deck through the open strip, nothing standing in the way.
+
+
+safe(add_watch_tower_stairs, "Watch Tower stairs")
 
 
 # ---------------------------------------------------------------------------
