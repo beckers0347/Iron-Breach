@@ -72,6 +72,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void RequestTakeFromRack(AIBWeaponRack* Rack, int32 Index);
 
+	/** Move an owned weapon INSTANCE onto Rack (the storage deposit — Shane's
+	 *  rack loop, other half of TakeFromRack). Client-safe; the server
+	 *  re-validates ownership + Weapon category, auto-unequips if worn, removes
+	 *  one from the bag, and stocks the rack. Weapons only for now. */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void RequestStoreToRack(AIBWeaponRack* Rack, FGuid InstanceId);
+
 	// ---- Queries (safe everywhere; read replicated state) ----
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
@@ -106,6 +113,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_TakeFromRack(AIBWeaponRack* Rack, int32 Index);
 
+	UFUNCTION(Server, Reliable)
+	void Server_StoreToRack(AIBWeaponRack* Rack, FGuid InstanceId);
+
 	UFUNCTION()
 	void OnRep_Equipment(const TArray<FIBEquipmentEntry>& OldEquipment);
 
@@ -120,6 +130,7 @@ private:
 	void Equip_OnServer(FGuid InstanceId);
 	void Unequip_OnServer(EIBEquipSlot Slot);
 	void TakeFromRack_OnServer(AIBWeaponRack* Rack, int32 Index);
+	void StoreToRack_OnServer(AIBWeaponRack* Rack, FGuid InstanceId);
 	void SetEquipmentSlot(EIBEquipSlot Slot, const FIBItemInstance& Item);
 
 	bool HasAuth() const;

@@ -1,0 +1,2 @@
+@echo off
+"D:\Git\cmd\git.exe" -C "D:\Unreal Games\IronBreach" pull --no-rebase origin main > "D:\Unreal Games\IronBreach\Saved\loot_pull_report.txt" 2>&1 & "D:\Git\cmd\git.exe" -C "D:\Unreal Games\IronBreach" status --short >> "D:\Unreal Games\IronBreach\Saved\loot_pull_report.txt" 2>&1 & "D:\Git\cmd\git.exe" -C "D:\Unreal Games\IronBreach" log --oneline -4 >> "D:\Unreal Games\IronBreach\Saved\loot_pull_report.txt" 2>&1 & echo ZZPULL DONE >> "D:\Unreal Games\IronBreach\Saved\loot_pull_report.txt"

@@ -5,6 +5,7 @@
 #include "Items/IBItemDefinition.h"
 #include "Items/IBInventoryComponent.h"
 #include "Items/IBPlayerState.h"
+#include "Infantry/IBCharacter_Infantry.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/TextBlock.h"
@@ -32,6 +33,33 @@ void UIBWeaponRackScreen::NativeOnInitialized()
 		CloseButton->OnClicked.RemoveDynamic(this, &UIBWeaponRackScreen::HandleCloseClicked);
 		CloseButton->OnClicked.AddDynamic(this, &UIBWeaponRackScreen::HandleCloseClicked);
 	}
+	if (StoreButton)
+	{
+		StoreButton->OnClicked.RemoveDynamic(this, &UIBWeaponRackScreen::HandleStoreClicked);
+		StoreButton->OnClicked.AddDynamic(this, &UIBWeaponRackScreen::HandleStoreClicked);
+	}
+}
+
+void UIBWeaponRackScreen::HandleStoreClicked()
+{
+	if (!Rack) { return; }
+
+	APlayerController* PC = GetOwningPlayer();
+	AIBPlayerState* PS = PC ? PC->GetPlayerState<AIBPlayerState>() : nullptr;
+	UIBInventoryComponent* Inventory = PS ? PS->GetInventory() : nullptr;
+	APawn* Pawn = PC ? PC->GetPawn() : nullptr;
+	AIBCharacter_Infantry* Infantry = Cast<AIBCharacter_Infantry>(Pawn);
+	if (!Inventory || !Infantry) { return; }
+
+	// Store whatever is in the ACTIVE well — matches what's in your hands.
+	FIBItemInstance Equipped;
+	if (!Inventory->GetEquippedItem(Infantry->GetActiveWeaponSlot(), Equipped) || !Equipped.IsValid())
+	{
+		return; // empty hands, nothing to store
+	}
+
+	Inventory->RequestStoreToRack(Rack, Equipped.InstanceId);
+	RebuildGrid(); // optimistic; OnStockChanged re-confirms when the deposit replicates
 }
 
 void UIBWeaponRackScreen::BuildFallbackLayout()
@@ -69,6 +97,16 @@ void UIBWeaponRackScreen::BuildFallbackLayout()
 		TitleSlot->SetHorizontalAlignment(HAlign_Left);
 		TitleSlot->SetPadding(FMargin(0.f, 0.f, 40.f, 0.f));
 	}
+
+	UButton* Store = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+	UTextBlock* StoreLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+	StoreLabel->SetText(NSLOCTEXT("IBWeaponRack", "Store", "STORE EQUIPPED"));
+	Store->AddChild(StoreLabel);
+	if (UHorizontalBoxSlot* StoreSlot = HeaderRow->AddChildToHorizontalBox(Store))
+	{
+		StoreSlot->SetPadding(FMargin(0.f, 0.f, 12.f, 0.f));
+	}
+	StoreButton = Store;
 
 	UButton* Close = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
 	UTextBlock* CloseLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());

@@ -177,6 +177,45 @@ void UIBInventoryComponent::Server_TakeFromRack_Implementation(AIBWeaponRack* Ra
 	TakeFromRack_OnServer(Rack, Index);
 }
 
+void UIBInventoryComponent::RequestStoreToRack(AIBWeaponRack* Rack, FGuid InstanceId)
+{
+	if (HasAuth()) { StoreToRack_OnServer(Rack, InstanceId); }
+	else           { Server_StoreToRack(Rack, InstanceId); }
+}
+
+void UIBInventoryComponent::Server_StoreToRack_Implementation(AIBWeaponRack* Rack, FGuid InstanceId)
+{
+	StoreToRack_OnServer(Rack, InstanceId);
+}
+
+void UIBInventoryComponent::StoreToRack_OnServer(AIBWeaponRack* Rack, FGuid InstanceId)
+{
+	if (!Rack) { return; }
+
+	FIBItemInstance Item;
+	if (!FindItem(InstanceId, Item) || !Item.Definition)
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("[Inventory] StoreToRack rejected — unknown instance."));
+		return;
+	}
+	if (Item.Definition->Category != EIBItemCategory::Weapon)
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("[Inventory] StoreToRack rejected — %s is not a weapon."),
+			*GetNameSafe(Item.Definition));
+		return;
+	}
+
+	// Deposit only after the removal succeeds — RemoveItem also auto-unequips,
+	// so a worn weapon goes hands -> rack in one request and can never dupe.
+	const UIBItemDefinition* Definition = Item.Definition;
+	if (RemoveItem(InstanceId, 1))
+	{
+		Rack->Server_DepositItem(Definition);
+		UE_LOG(LogIronBreach, Log, TEXT("[Inventory] %s stored to rack %s"),
+			*GetNameSafe(Definition), *GetNameSafe(Rack));
+	}
+}
+
 void UIBInventoryComponent::TakeFromRack_OnServer(AIBWeaponRack* Rack, int32 Index)
 {
 	if (!Rack) { return; }

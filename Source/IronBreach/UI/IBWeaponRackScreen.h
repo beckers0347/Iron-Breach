@@ -57,6 +57,9 @@ protected:
 	void HandleCloseClicked();
 
 	UFUNCTION()
+	void HandleStoreClicked();
+
+	UFUNCTION()
 	void HandleStockChanged();
 
 	// ---- Optional-bind layout hooks (names matter) ----
@@ -69,6 +72,11 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Weapon Rack")
 	TObjectPtr<UButton> CloseButton;
+
+	/** Deposits the weapon currently in the pawn's ACTIVE well onto this rack
+	 *  (hands -> rack in one click). Optional bind, built by the fallback. */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Weapon Rack")
+	TObjectPtr<UButton> StoreButton;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Rack")
 	TSubclassOf<UIBItemTileWidget> GridTileClass;

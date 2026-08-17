@@ -61,6 +61,11 @@ public:
 	 *  index (two players clicking the same last slot in the same frame). */
 	const UIBItemDefinition* Server_TakeAt(int32 Index);
 
+	/** Authority only. Puts Definition on the rack (the storage deposit —
+	 *  called through UIBInventoryComponent::RequestStoreToRack, never with a
+	 *  client-claimed definition). Returns false off-authority or on null. */
+	bool Server_DepositItem(const UIBItemDefinition* Definition);
+
 	/** Fires on this machine whenever StockedWeapons changes (server grant, or
 	 *  OnRep on clients) so an open picker widget can refresh live. */
 	UPROPERTY(BlueprintAssignable, Category = "Weapon Rack")

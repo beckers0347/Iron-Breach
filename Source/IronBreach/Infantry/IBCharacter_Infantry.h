@@ -266,6 +266,19 @@ protected:
 	/** Resolve the active slot's item -> weapon data -> ApplyWeaponData. */
 	void ApplyActiveSlot();
 
+	/** Empty hands: weapon mesh hidden, optic off, Fire() refuses. Entered when
+	 *  the active well is EMPTY and a real inventory exists (unequip/storage —
+	 *  the gun must actually leave your hands or storage feels fake). Maps
+	 *  without an IBPlayerState keep the designer-default gun as before. */
+	void SetUnarmed(bool bNewUnarmed);
+
+	UFUNCTION(BlueprintPure, Category = "Weapon|Slots")
+	bool IsUnarmed() const { return bUnarmed; }
+
+	/** See SetUnarmed. Not replicated: derived from replicated Equipment on
+	 *  every machine via HandleEquipmentChanged/ApplyActiveSlot. */
+	bool bUnarmed = false;
+
 	// Raw 1/2/3 input thunks (BindKey — no IA assets required).
 	void SelectPrimarySlot()  { SetActiveWeaponSlot(EIBEquipSlot::WeaponPrimary); }
 	void SelectSpecialSlot()  { SetActiveWeaponSlot(EIBEquipSlot::WeaponSpecial); }

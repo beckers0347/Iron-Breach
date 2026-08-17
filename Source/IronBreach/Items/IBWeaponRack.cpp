@@ -228,6 +228,20 @@ const UIBItemDefinition* AIBWeaponRack::Server_TakeAt(int32 Index)
 	return Definition;
 }
 
+bool AIBWeaponRack::Server_DepositItem(const UIBItemDefinition* Definition)
+{
+	if (!HasAuthority() || !Definition)
+	{
+		return false;
+	}
+
+	// const_cast mirrors the inventory's own grammar: instances carry const
+	// definitions, storage holds the mutable asset pointer type UHT requires.
+	StockedWeapons.Add(const_cast<UIBItemDefinition*>(Definition));
+	OnRep_StockedWeapons(); // manual for the listen host, same as Server_TakeAt
+	return true;
+}
+
 void AIBWeaponRack::OnRep_StockedWeapons()
 {
 	OnStockChanged.Broadcast();

@@ -526,17 +526,44 @@ void AIBCharacter_Infantry::OnRep_ActiveWeaponSlot()
 
 void AIBCharacter_Infantry::ApplyActiveSlot()
 {
-	UWeaponDataAsset* NewData = CurrentWeaponData.Get(); // designer default floor
+	// With a real inventory, the well is the truth: empty well = empty hands.
+	// Without one (Shane's default-GM test maps), the designer default stays.
 	if (BoundInventory.IsValid())
 	{
 		FIBItemInstance Equipped;
-		if (BoundInventory->GetEquippedItem(ActiveWeaponSlot, Equipped) &&
-		    Equipped.Definition && Equipped.Definition->WeaponData)
+		if (BoundInventory->GetEquippedItem(ActiveWeaponSlot, Equipped) && Equipped.Definition)
 		{
-			NewData = Equipped.Definition->WeaponData.Get();
+			SetUnarmed(false);
+			ApplyWeaponData(Equipped.Definition->WeaponData
+				? Equipped.Definition->WeaponData.Get()
+				: CurrentWeaponData.Get());
 		}
+		else
+		{
+			SetUnarmed(true);
+		}
+		return;
 	}
-	ApplyWeaponData(NewData);
+
+	SetUnarmed(false);
+	ApplyWeaponData(CurrentWeaponData.Get());
+}
+
+void AIBCharacter_Infantry::SetUnarmed(bool bNewUnarmed)
+{
+	if (bUnarmed == bNewUnarmed) { return; }
+	bUnarmed = bNewUnarmed;
+
+	if (WeaponMesh)
+	{
+		WeaponMesh->SetVisibility(!bUnarmed, /*bPropagateToChildren=*/true);
+	}
+	if (bUnarmed)
+	{
+		SetScopePipEnabled(false); // rearm path re-runs SetupScopePip via ApplyWeaponData
+	}
+
+	UE_LOG(LogIronBreach, Log, TEXT("%s: %s"), *GetName(), bUnarmed ? TEXT("unarmed (well empty)") : TEXT("re-armed"));
 }
 
 void AIBCharacter_Infantry::Move(const FInputActionValue& Value)
@@ -621,9 +648,9 @@ void AIBCharacter_Infantry::Tick(float DeltaSeconds)
 
 void AIBCharacter_Infantry::Fire()
 {
-	if (bIsSprinting)
+	if (bIsSprinting || bUnarmed)
 	{
-		return;
+		return; // empty hands don't shoot
 	}
 	// Consolidated: cosmetics + Server_Fire routing + authoritative trace all live in the
 	// weapon component now (ADR-002 pattern-setter). One fire path for the whole project.
@@ -671,10 +698,21 @@ void AIBCharacter_Infantry::HandleEquipmentChanged(EIBEquipSlot Slot, const FIBI
 		return; // armor/gear/off-hand wells are stat/cosmetic concerns until they're the active slot
 	}
 
-	UWeaponDataAsset* NewData = (Item.Definition && Item.Definition->WeaponData)
-		? Item.Definition->WeaponData.Get()
-		: CurrentWeaponData.Get(); // slot emptied -> fall back to the designer default (never unarmed)
+	// Slot emptied with a real inventory -> truly unarmed (Shane's storage
+	// loop: the gun must leave your hands). The old designer-default fallback
+	// only applies where no inventory exists at all (ApplyActiveSlot handles
+	// that path); here we KNOW there's an inventory — it just signaled us.
+	if (!Item.Definition)
+	{
+		SetUnarmed(true);
+		return;
+	}
 
+	UWeaponDataAsset* NewData = Item.Definition->WeaponData
+		? Item.Definition->WeaponData.Get()
+		: CurrentWeaponData.Get(); // item with no combat data yet -> keep the floor
+
+	SetUnarmed(false);
 	ApplyWeaponData(NewData);
 }
 
