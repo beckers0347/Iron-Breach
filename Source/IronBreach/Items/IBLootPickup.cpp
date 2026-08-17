@@ -5,6 +5,10 @@
 #include "Items/IBPlayerState.h"
 #include "UI/IBUISettings.h"
 #include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/PointLightComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -29,6 +33,32 @@ AIBLootPickup::AIBLootPickup()
 	CollectionSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollectionSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollectionSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+	// Zero-content floor: engine sphere + light so drops are visible before
+	// any art exists. Tinted per-rarity in OnRep_Loot. Shane's BP unticks
+	// bUseFallbackVisuals and these hide themselves.
+	FallbackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FallbackMesh"));
+	FallbackMesh->SetupAttachment(Root);
+	FallbackMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FallbackMesh->SetRelativeScale3D(FVector(0.35f));
+	FallbackMesh->SetCastShadow(false);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	if (SphereMesh.Succeeded())
+	{
+		FallbackMesh->SetStaticMesh(SphereMesh.Object);
+	}
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> ShapeMat(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	if (ShapeMat.Succeeded())
+	{
+		FallbackMesh->SetMaterial(0, ShapeMat.Object);
+	}
+
+	FallbackLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("FallbackLight"));
+	FallbackLight->SetupAttachment(Root);
+	FallbackLight->SetIntensity(2500.0f);
+	FallbackLight->SetAttenuationRadius(280.0f);
+	FallbackLight->SetCastShadows(false);
+	FallbackLight->bUseInverseSquaredFalloff = true;
 }
 
 void AIBLootPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -85,6 +115,29 @@ void AIBLootPickup::OnRep_Loot()
 
 	// Pre-resolve the rarity color so the BP never touches settings plumbing.
 	const FLinearColor RarityColor = UIBUISettings::Get()->GetRarityColor(Definition->Rarity);
+
+	// Fallback visual: tint the placeholder sphere + light the rarity color
+	// (or hide both when a BP child brings real art).
+	if (FallbackMesh)
+	{
+		FallbackMesh->SetVisibility(bUseFallbackVisuals);
+		if (bUseFallbackVisuals)
+		{
+			if (UMaterialInstanceDynamic* MID = FallbackMesh->CreateAndSetMaterialInstanceDynamic(0))
+			{
+				MID->SetVectorParameterValue(TEXT("Color"), RarityColor);
+			}
+		}
+	}
+	if (FallbackLight)
+	{
+		FallbackLight->SetVisibility(bUseFallbackVisuals);
+		if (bUseFallbackVisuals)
+		{
+			FallbackLight->SetLightColor(RarityColor);
+		}
+	}
+
 	BP_OnLootInitialized(Definition, Count, RarityColor);
 }
 

@@ -3,6 +3,9 @@
 #include "Kaiju/IBKaijuOrganComponent.h"
 #include "IronBreach.h"
 #include "Combat/HealthComponent.h"
+#include "Items/IBLootDropComponent.h"
+#include "Items/IBLootTableAsset.h"
+#include "Items/IBLootPickup.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -17,6 +20,12 @@ AIBCharacter_Kaiju::AIBCharacter_Kaiju()
 	bReplicates = true; // Explicit for clarity (ACharacter defaults on) — the kaiju is server-owned truth
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+	// Native loot faucet: every kaiju drops without BP wiring. The C++
+	// pickup is spawnable on its own (fallback visuals), so the whole loop
+	// has a zero-content floor. BP overrides both freely.
+	LootDropComponent = CreateDefaultSubobject<UIBLootDropComponent>(TEXT("LootDropComponent"));
+	LootDropComponent->PickupClass = AIBLootPickup::StaticClass();
 
 	bUseControllerRotationYaw = false;
 	if (GetCharacterMovement())
@@ -38,6 +47,14 @@ void AIBCharacter_Kaiju::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 
 void AIBCharacter_Kaiju::BeginPlay()
 {
+	// Loot floor: no table assigned in the BP -> the Class-D default, so a
+	// kill never silently pays nothing. Death is later than any load hitch.
+	if (HasAuthority() && LootDropComponent && !LootDropComponent->LootTable)
+	{
+		LootDropComponent->LootTable = LoadObject<UIBLootTableAsset>(nullptr,
+			TEXT("/Game/IronBreach/Items/DA_Loot_ClassD.DA_Loot_ClassD"));
+	}
+
 	ApplySpecies();
 
 	// Anatomy census: every organ sphere the BP placed on this body.

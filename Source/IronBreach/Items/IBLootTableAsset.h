@@ -12,23 +12,23 @@ struct FIBLootTableEntry
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
 	TObjectPtr<UIBItemDefinition> Definition = nullptr;
 
 	/** Relative weight against the other rollable entries. Higher = more
 	 *  common. Ignored for guaranteed entries. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "0.0", EditCondition = "!bGuaranteed"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "0.0", EditCondition = "!bGuaranteed"))
 	float Weight = 1.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "1"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "1"))
 	int32 MinCount = 1;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "1"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "1"))
 	int32 MaxCount = 1;
 
 	/** Always drops (in addition to the weighted rolls). The genre staple:
 	 *  chitin ALWAYS comes off the kaiju; the Doctrine is the roll. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
 	bool bGuaranteed = false;
 };
 

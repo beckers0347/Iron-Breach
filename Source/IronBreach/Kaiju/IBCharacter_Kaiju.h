@@ -8,6 +8,7 @@
 class UHealthComponent;
 class UKaijuSpeciesData;
 class UIBKaijuOrganComponent;
+class UIBLootDropComponent;
 
 /** The shape of the boss fight, in order. Server-authoritative, replicated. */
 UENUM(BlueprintType)
@@ -76,6 +77,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHealthComponent> HealthComponent;
+
+	/** Native loot faucet — every kaiju drops. BP assigns the table; if it
+	 *  doesn't, BeginPlay falls back to DA_Loot_ClassD so kills always pay. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UIBLootDropComponent> LootDropComponent;
 
 	/** Server-authoritative; clients mirror armor-break FX through the OnRep. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentArmor, Category = "Kaiju")

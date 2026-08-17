@@ -3,6 +3,9 @@
 #include "IronBreach.h"
 #include "Combat/HealthComponent.h"
 #include "Combat/WeaponDataAsset.h"
+#include "Items/IBLootDropComponent.h"
+#include "Items/IBLootTableAsset.h"
+#include "Items/IBLootPickup.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -16,6 +19,10 @@ AIBCharacter_Enemy::AIBCharacter_Enemy()
 	PrimaryActorTick.bCanEverTick = false;
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+	// Native loot faucet — same zero-content floor as the kaiju.
+	LootDropComponent = CreateDefaultSubobject<UIBLootDropComponent>(TEXT("LootDropComponent"));
+	LootDropComponent->PickupClass = AIBLootPickup::StaticClass();
 
 	// AI possession
 	AIControllerClass = AIBEnemyAIController::StaticClass();
@@ -32,6 +39,13 @@ AIBCharacter_Enemy::AIBCharacter_Enemy()
 
 void AIBCharacter_Enemy::BeginPlay()
 {
+	// Loot floor: unassigned table -> Class-D default (see kaiju note).
+	if (HasAuthority() && LootDropComponent && !LootDropComponent->LootTable)
+	{
+		LootDropComponent->LootTable = LoadObject<UIBLootTableAsset>(nullptr,
+			TEXT("/Game/IronBreach/Items/DA_Loot_ClassD.DA_Loot_ClassD"));
+	}
+
 	if (HealthComponent)
 	{
 		HealthComponent->SetMaxHealth(EnemyMaxHealth);

@@ -5,6 +5,8 @@
 #include "IBLootPickup.generated.h"
 
 class USphereComponent;
+class UStaticMeshComponent;
+class UPointLightComponent;
 class UIBItemDefinition;
 class AIBPlayerState;
 
@@ -19,7 +21,9 @@ class AIBPlayerState;
  * with a null owner) and it's a shared, visible-to-all, first-come pickup —
  * chest/cache behavior for free.
  *
- * This C++ actor is invisible on its own. Shane: make BP_LootPickup, add a
+ * Spawnable as-is: C++ builds a fallback visual (rarity-tinted glowing
+ * sphere + point light) so the loop works before any content exists. Shane:
+ * make BP_LootPickup when ready — untick bUseFallbackVisuals, add a
  * mesh + Niagara + point light under the root, and drive them from
  * BP_OnLootInitialized (fires wherever the pickup exists, with the rarity
  * color from Project Settings > Iron Breach UI). BP_OnCollected fires
@@ -27,7 +31,7 @@ class AIBPlayerState;
  * come from the inventory's OnItemGranted signal instead (it fires on the
  * collecting player's own machine — the loot toast hook).
  */
-UCLASS(Abstract)
+UCLASS()
 class IRONBREACH_API AIBLootPickup : public AActor
 {
 	GENERATED_BODY()
@@ -80,6 +84,20 @@ protected:
 	/** Trigger volume; Shane's visuals attach to the root beside it. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Loot")
 	TObjectPtr<USphereComponent> CollectionSphere;
+
+	// --- C++ fallback visual (the zero-content floor) ---
+	// A small engine-sphere + point light, both tinted the rarity color in
+	// OnRep_Loot. BP children with real art untick bUseFallbackVisuals and
+	// both components hide themselves.
+
+	UPROPERTY(EditDefaultsOnly, Category = "Loot|Fallback Visual")
+	bool bUseFallbackVisuals = true;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Loot|Fallback Visual")
+	TObjectPtr<UStaticMeshComponent> FallbackMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Loot|Fallback Visual")
+	TObjectPtr<UPointLightComponent> FallbackLight;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Loot", meta = (ClampMin = "10.0"))
 	float CollectionRadius = 90.0f;

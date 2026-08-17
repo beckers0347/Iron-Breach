@@ -8,6 +8,7 @@
 
 class UHealthComponent;
 class UWeaponDataAsset;
+class UIBLootDropComponent;
 
 /**
  * Basic hostile infantry. Patrol/chase/attack logic lives in AIBEnemyAIController;
@@ -39,6 +40,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHealthComponent> HealthComponent;
+
+	/** Native loot faucet. BP assigns the table; unassigned falls back to
+	 *  DA_Loot_ClassD at BeginPlay so every kill pays. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UIBLootDropComponent> LootDropComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy|Combat")
 	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
