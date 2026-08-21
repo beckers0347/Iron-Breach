@@ -44,7 +44,7 @@ enum class EWeaponTier : uint8
 /** Result of one balance roll. Fire Rate is expressed two ways: RPS (rounds per
  *  second -- the intuitive "how fast does it shoot" number shown in the panel)
  *  and FireIntervalSeconds, the seconds-between-shots value that
- *  UWeaponDataAsset::FireRate actually stores (its own field comment already
+ *  UWeaponCombatData::FireRate actually stores (its own field comment already
  *  calls this "Time between shots" -- functionally the weapon's per-shot
  *  cooldown, just the reciprocal of RPS rather than a separate stat). */
 struct FRolledWeaponStats

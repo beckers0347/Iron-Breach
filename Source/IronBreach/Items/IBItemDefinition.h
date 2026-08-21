@@ -6,7 +6,8 @@
 #include "IBItemDefinition.generated.h"
 
 class UTexture2D;
-class UWeaponDataAsset;
+class UWeaponCombatData;
+class UWeaponVisualData;
 
 /**
  * The static half of an item (DA_Item_* assets). Instance-varying data lives in
@@ -62,11 +63,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
 	TArray<FIBItemStat> Stats;
 
-	/** Weapons only: the existing combat-side data this item resolves to. This is
-	 *  the loot→gun seam — equipping WeaponPrimary forwards this to
-	 *  UHitscanWeaponComponent::SetWeaponData / the rig's ADS settings. */
+	/** Weapons only: the power-scaling half (damage, fire rate, range) this
+	 *  item resolves to. Loot→gun seam — equipping WeaponPrimary forwards
+	 *  this to UHitscanWeaponComponent. Populated for existing items by
+	 *  migrate_weapon_data_split.py; set directly for new content. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	TObjectPtr<UWeaponDataAsset> WeaponData;
+	TObjectPtr<UWeaponCombatData> CombatData;
+
+	/** Weapons only: the presentation half (viewmodel mesh/scale/alignment,
+	 *  fire effects, ADS handling) this item resolves to. Same seam as
+	 *  CombatData, feeding AIBCharacter_Infantry::ApplyWeaponData and the
+	 *  weapon rig instead of the fire component. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UWeaponVisualData> VisualData;
 
 	/** Untick for quest tokens etc. that should never appear in the ledger. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ledger")

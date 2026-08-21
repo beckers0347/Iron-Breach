@@ -225,7 +225,18 @@ void UIBInventoryComponent::TakeFromRack_OnServer(AIBWeaponRack* Rack, int32 Ind
 	// two players can't both claim the last copy of something in the same frame.
 	if (const UIBItemDefinition* Definition = Rack->Server_TakeAt(Index))
 	{
-		GrantItem(Definition, 1);
+		const FIBItemInstance Granted = GrantItem(Definition, 1);
+
+		// Walking up to a rack and clicking a weapon should put it in your hands,
+		// not just quietly add it to the bag — GrantItem alone never broadcasts
+		// OnEquipmentChanged, so nothing in HandleEquipmentChanged (the loot->gun
+		// seam on AIBCharacter_Infantry) ever fires and the picker feels dead.
+		// Only equip if the definition actually resolves to a weapon slot;
+		// Equip_OnServer already guards None itself, this just avoids the log spam.
+		if (Granted.IsValid() && Definition->EquipSlot != EIBEquipSlot::None)
+		{
+			Equip_OnServer(Granted.InstanceId);
+		}
 	}
 }
 

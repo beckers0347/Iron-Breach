@@ -67,7 +67,7 @@ FVector UWeaponRigComponent::SocketLocalOffset(FName Socket) const
 		// it does NOT scale with WeaponMesh's current RelativeScale3D. UpdateWeaponPose()
 		// rotates this offset and uses it directly as a translation, so it must represent
 		// the socket's ACTUAL offset from the mesh origin at the mesh's current size, or a
-		// scaled weapon (see UWeaponDataAsset::ViewmodelScale) grips/aims off-anchor.
+		// scaled weapon (see UWeaponVisualData::ViewmodelScale) grips/aims off-anchor.
 		const FVector RawLocal = WeaponMesh->GetSocketTransform(Socket, RTS_Component).GetLocation();
 		return RawLocal * WeaponMesh->GetRelativeScale3D();
 	}

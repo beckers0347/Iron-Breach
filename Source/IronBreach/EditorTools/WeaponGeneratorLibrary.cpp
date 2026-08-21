@@ -1,6 +1,6 @@
 // WeaponGeneratorLibrary.cpp
 #include "EditorTools/WeaponGeneratorLibrary.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponCombatData.h"
 #include "IronBreach.h"
 
 #if WITH_EDITOR
@@ -27,7 +27,7 @@ void UWeaponGeneratorLibrary::SpawnWeaponGeneratorNotification(const FString& Me
 #endif
 }
 
-UWeaponDataAsset* UWeaponGeneratorLibrary::GenerateWeaponAsset(const FWeaponGenerationParams& Params)
+UWeaponCombatData* UWeaponGeneratorLibrary::GenerateWeaponAsset(const FWeaponGenerationParams& Params)
 {
 #if WITH_EDITOR
 	const FString CleanWeaponName = FPaths::MakeValidFileName(Params.NewWeaponName);
@@ -78,16 +78,15 @@ UWeaponDataAsset* UWeaponGeneratorLibrary::GenerateWeaponAsset(const FWeaponGene
 	}
 
 	UObject* DuplicatedObject = UEditorAssetLibrary::DuplicateAsset(Params.SourceTemplatePath, TargetObjectPath);
-	UWeaponDataAsset* NewWeaponDA = Cast<UWeaponDataAsset>(DuplicatedObject);
+	UWeaponCombatData* NewWeaponDA = Cast<UWeaponCombatData>(DuplicatedObject);
 	if (!NewWeaponDA)
 	{
 		SpawnWeaponGeneratorNotification(TEXT("Weapon generation failed: could not duplicate template asset."), false);
 		return nullptr;
 	}
 
-	// Override the stats the generator resolved; everything else (Ads tuning, tracer,
-	// fire sound, viewmodel scale) carries over from the template untouched.
-	NewWeaponDA->WeaponName = FName(*Params.NewWeaponName);
+	// Override the stats the generator resolved. UWeaponCombatData carries nothing else --
+	// no name, no Ads/tracer/mesh (those live on the sibling UWeaponVisualData asset).
 	NewWeaponDA->BaseDamage = ResolvedDamage;
 	NewWeaponDA->FireRate = ResolvedFireRate;
 	NewWeaponDA->MaxRange = ResolvedMaxRange;

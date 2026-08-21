@@ -1,7 +1,7 @@
 // ItemIconCaptureLibrary.cpp
 #include "EditorTools/ItemIconCaptureLibrary.h"
 #include "Items/IBItemDefinition.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponVisualData.h"
 #include "EditorTools/WeaponGeneratorLibrary.h" // shared success/failure toast helper
 #include "IronBreach.h"
 
@@ -29,15 +29,15 @@ UTexture2D* UItemIconCaptureLibrary::CaptureItemIcon(UIBItemDefinition* Definiti
 		return nullptr;
 	}
 
-	UWeaponDataAsset* WeaponData = Definition->WeaponData;
-	if (!WeaponData)
+	UWeaponVisualData* VisualData = Definition->VisualData;
+	if (!VisualData)
 	{
 		UWeaponGeneratorLibrary::SpawnWeaponGeneratorNotification(
-			FString::Printf(TEXT("Icon capture failed: %s has no Weapon Data assigned."), *Definition->GetName()), false);
+			FString::Printf(TEXT("Icon capture failed: %s has no Visual Data assigned."), *Definition->GetName()), false);
 		return nullptr;
 	}
 
-	UStaticMesh* Mesh = WeaponData->ViewmodelMesh.LoadSynchronous();
+	UStaticMesh* Mesh = VisualData->ViewmodelMesh.LoadSynchronous();
 	if (!Mesh)
 	{
 		UWeaponGeneratorLibrary::SpawnWeaponGeneratorNotification(

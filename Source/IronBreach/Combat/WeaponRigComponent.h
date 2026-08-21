@@ -53,7 +53,7 @@ public:
 	void SetAdsSettings(const FIBAdsSettings& InSettings) { Settings = InSettings; }
 
 	/** Per-weapon fine-alignment nudge, layered on top of WeaponMountRotation
-	 *  below (see UWeaponDataAsset::ViewmodelLocationOffset/RotationOffset for the
+	 *  below (see UWeaponVisualData::ViewmodelLocationOffset/RotationOffset for the
 	 *  designer-facing side of this). Call whenever the equipped weapon changes,
 	 *  same as SetAdsSettings -- safe to call in any order relative to
 	 *  SetReferences, since this re-runs that same socket cache internally so the

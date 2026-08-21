@@ -7,7 +7,8 @@
 #include "IBCharacter_Enemy.generated.h"
 
 class UHealthComponent;
-class UWeaponDataAsset;
+class UWeaponCombatData;
+class UWeaponVisualData;
 class UIBLootDropComponent;
 
 /**
@@ -47,7 +48,12 @@ protected:
 	TObjectPtr<UIBLootDropComponent> LootDropComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy|Combat")
-	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
+	TObjectPtr<UWeaponCombatData> CurrentCombatData;
+
+	/** Fire cosmetics only (sound, and eventually tracer FX). Not required to fire --
+	 *  FireAt() only needs CurrentCombatData. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy|Combat")
+	TObjectPtr<UWeaponVisualData> CurrentVisualData;
 
 	/** Max health applied to the HealthComponent on spawn. */
 	UPROPERTY(EditAnywhere, Category = "Enemy|Combat", meta = (ClampMin = "1"))

@@ -1,11 +1,13 @@
 // WeaponGeneratorLibrary.h
 //
 // Editor-only content tool: spins up a new weapon by duplicating an existing
-// UWeaponDataAsset (default: /Game/Weapons/Rifle/DA_AssultRifle) and overriding
-// its core combat stats. This intentionally does NOT touch meshes -- the real
-// UWeaponDataAsset (Combat/WeaponDataAsset.h) has no mesh field; viewmodel
-// meshes live on the character/weapon actor and are posed by WeaponRigComponent
-// via named sockets (Grip/Aim), so there's nothing here for a generator to wire.
+// UWeaponCombatData template (power-scaling only: BaseDamage/FireRate/MaxRange)
+// and overriding its core combat stats. This tool intentionally never touches
+// mesh/FX/ADS presentation at all -- that's UWeaponVisualData's job
+// (Combat/WeaponVisualData.h), a separate asset the generator doesn't create or
+// modify. Viewmodel meshes live on the character/weapon actor and are posed by
+// WeaponRigComponent via named sockets (Grip/Aim), so there's nothing here for
+// a generator to wire.
 //
 // Two modes, both going through the same GenerateWeaponAsset:
 //  - Auto-balance (bAutoBalanceFromClassAndTier = true, the default -- what the
@@ -22,14 +24,16 @@
 #include "EditorTools/WeaponBalanceTable.h"
 #include "WeaponGeneratorLibrary.generated.h"
 
-class UWeaponDataAsset;
+class UWeaponCombatData;
 
 USTRUCT(BlueprintType)
 struct FWeaponGenerationParams
 {
 	GENERATED_BODY()
 
-	/** Used to derive both the new asset's file name (DA_<Name>[_<Tier>]) and its WeaponName field. */
+	/** Used to derive the new asset's file name (DA_Combat_<Name>[_<Tier>]). WeaponCombatData
+	 *  has no name field of its own (that's UWeaponVisualData::WeaponName) -- this string only
+	 *  drives the asset's file name. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generator")
 	FString NewWeaponName = "NewWeapon";
 
@@ -38,8 +42,9 @@ struct FWeaponGenerationParams
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generator")
 	FString TargetFolderPath = "/Game/Weapons/Generated";
 
-	/** Existing UWeaponDataAsset to clone (Ads tuning, tracer/sound, viewmodel scale all
-	 *  carry over as-is; only the stat fields below are overridden on the copy). */
+	/** Existing UWeaponCombatData asset to clone (a DA_Combat_* asset). Only the stat fields
+	 *  below are overridden on the copy -- there's nothing else on a combat-data asset to carry
+	 *  over, unlike the old combined UWeaponDataAsset this replaced. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generator")
 	FString SourceTemplatePath = "/Game/Weapons/Rifle/DA_AssultRifle";
 
@@ -80,11 +85,11 @@ class IRONBREACH_API UWeaponGeneratorLibrary : public UBlueprintFunctionLibrary
 public:
 	/** Editor-only: duplicates Params.SourceTemplatePath into Params.TargetFolderPath as
 	 *  DA_<CleanName>[_<Tier>], resolves stats (auto-balanced or manual, see
-	 *  bAutoBalanceFromClassAndTier), overrides WeaponName/BaseDamage/FireRate/MaxRange,
+	 *  bAutoBalanceFromClassAndTier), overrides BaseDamage/FireRate/MaxRange,
 	 *  saves, and returns the new asset. Returns nullptr outside the editor or if the
 	 *  template can't be loaded. */
 	UFUNCTION(BlueprintCallable, Category = "Weapon System|Editor Tools", meta = (DevelopmentOnly))
-	static UWeaponDataAsset* GenerateWeaponAsset(const FWeaponGenerationParams& Params);
+	static UWeaponCombatData* GenerateWeaponAsset(const FWeaponGenerationParams& Params);
 
 	/** Shared success/failure toast so the Slate widget and the right-click asset action
 	 *  give identical feedback. Editor-only. */

@@ -13,7 +13,8 @@ class UIBInventoryComponent;
 class UHealthComponent;
 class UHitscanWeaponComponent;
 class UWeaponRigComponent;
-class UWeaponDataAsset;
+class UWeaponCombatData;
+class UWeaponVisualData;
 class UCameraComponent;
 class UStaticMeshComponent;
 class USceneCaptureComponent2D;
@@ -41,7 +42,7 @@ protected:
 	TObjectPtr<UHealthComponent> HealthComponent;
 
 	/** Single damage path for the project: all player firing goes through this component
-	 *  (cosmetic-first + Server_Fire). Uses CurrentWeaponData, forwarded in BeginPlay. */
+	 *  (cosmetic-first + Server_Fire). Uses CurrentCombatData/CurrentVisualData, forwarded in BeginPlay. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHitscanWeaponComponent> WeaponComponent;
 
@@ -174,7 +175,10 @@ protected:
 
 	// Current Weapon Context
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
+	TObjectPtr<UWeaponCombatData> CurrentCombatData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UWeaponVisualData> CurrentVisualData;
 
 	/** Base walk speed the ADS move-speed multiplier scales from. Captured at BeginPlay. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
@@ -236,7 +240,7 @@ protected:
 
 	/** Loot -> gun seam: an equipped weapon in the ACTIVE slot is forwarded
 	 *  to the weapon component + ADS rig; anything else leaves the designer
-	 *  default (CurrentWeaponData) in place. */
+	 *  default (CurrentCombatData/CurrentVisualData) in place. */
 	UFUNCTION()
 	void HandleEquipmentChanged(EIBEquipSlot Slot, const FIBItemInstance& Item);
 
@@ -297,7 +301,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Scope")
 	void SetScopePipEnabled(bool bEnabled);
 
-	/** Rescale the first-person viewmodel mesh. Normally driven by CurrentWeaponData's
+	/** Rescale the first-person viewmodel mesh. Normally driven by CurrentVisualData's
 	 *  ViewmodelScale (BeginPlay/ApplyWeaponData), but exposed for runtime tuning, a
 	 *  debug console command, etc. Re-caches the rig's Grip/Aim socket offsets so ADS
 	 *  alignment stays correct at the new scale instead of drifting off the anchor. */
@@ -305,13 +309,13 @@ public:
 	void SetWeaponMeshScale(FVector NewScale);
 
 private:
-	void ApplyWeaponData(UWeaponDataAsset* WeaponData);
+	void ApplyWeaponData(UWeaponCombatData* CombatData, UWeaponVisualData* VisualData);
 
-	/** Swaps WeaponMesh's static mesh to WeaponData->ViewmodelMesh (sync-loading the
+	/** Swaps WeaponMesh's static mesh to VisualData->ViewmodelMesh (sync-loading the
 	 *  soft reference). Split out of ApplyWeaponData because BeginPlay needs the same
 	 *  swap for the starting loadout, before ApplyWeaponData's rig/scope wiring runs.
 	 *  No-op (keeps current mesh) if ViewmodelMesh is unset -- see its header comment. */
-	void ApplyWeaponMesh(UWeaponDataAsset* WeaponData);
+	void ApplyWeaponMesh(UWeaponVisualData* VisualData);
 
 	FTimerHandle RespawnTimerHandle;
 	bool bDead = false;

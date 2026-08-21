@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "XPTypes.generated.h"
 
-class UWeaponDataAsset;
+class UIBItemDefinition;
 
 /**
  * Which XP ledger an event feeds. Deliberately separate from CONCORD (the sync meter is
@@ -38,6 +38,10 @@ struct FXPRecord
  * One level's unlock entry. Unlocks are sidegrades -- alternate loadout options, never a
  * stat upgrade of an existing weapon (progression design decision: leveling adds choice,
  * not power, so a raid's difficulty doesn't shift under a higher-level crew).
+ *
+ * Unlocks reference UIBItemDefinition (not the raw weapon data assets directly) -- the same
+ * item-level abstraction the loot/inventory/rack systems already key off of, so a future
+ * loadout system can grant these the same way GrantItem does elsewhere.
  */
 USTRUCT(BlueprintType)
 struct FXPLevelUnlock
@@ -52,5 +56,5 @@ struct FXPLevelUnlock
 	FText UnlockLabel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "XP")
-	TArray<TObjectPtr<UWeaponDataAsset>> UnlockedWeapons;
+	TArray<TObjectPtr<UIBItemDefinition>> UnlockedWeapons;
 };

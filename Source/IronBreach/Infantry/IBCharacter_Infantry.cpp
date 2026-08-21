@@ -16,7 +16,8 @@
 #include "Combat/HealthComponent.h"
 #include "Combat/HitscanWeaponComponent.h"
 #include "Combat/WeaponRigComponent.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponCombatData.h"
+#include "Combat/WeaponVisualData.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -48,7 +49,7 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	WeaponMesh->CastShadow = false;
 
 	// The template rifle is authored at full world scale. This is just the pre-data
-	// default: BeginPlay/ApplyWeaponData overwrite it with CurrentWeaponData's
+	// default: BeginPlay/ApplyWeaponData overwrite it with CurrentVisualData's
 	// ViewmodelScale so scale is a per-weapon, designer-facing knob (tune alongside
 	// the rig's hip anchor — a smaller weapon sits closer to camera).
 	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
@@ -122,25 +123,25 @@ void AIBCharacter_Infantry::BeginPlay()
 	}
 
 	// The loadout property stays the designer-facing knob; the component does the firing.
-	if (WeaponComponent && CurrentWeaponData)
+	if (WeaponComponent && (CurrentCombatData || CurrentVisualData))
 	{
-		WeaponComponent->SetWeaponData(CurrentWeaponData);
+		WeaponComponent->SetWeaponData(CurrentCombatData, CurrentVisualData);
 	}
 
 	// Swap in this weapon's viewmodel mesh before anything below reads socket
 	// offsets off WeaponMesh -- scale and rig wiring both solve against whatever
 	// mesh is currently attached.
-	if (CurrentWeaponData)
+	if (CurrentVisualData)
 	{
-		ApplyWeaponMesh(CurrentWeaponData);
+		ApplyWeaponMesh(CurrentVisualData);
 	}
 
 	// Scale the viewmodel before the rig caches socket offsets below — GripLocal/AimLocal
 	// are captured at whatever scale WeaponMesh has *right now*, so this must run first
 	// or ADS alignment solves against the old (default) scale.
-	if (WeaponMesh && CurrentWeaponData)
+	if (WeaponMesh && CurrentVisualData)
 	{
-		WeaponMesh->SetRelativeScale3D(CurrentWeaponData->ViewmodelScale);
+		WeaponMesh->SetRelativeScale3D(CurrentVisualData->ViewmodelScale);
 	}
 
 	// Wire the first-person weapon rig: camera + viewmodel mesh + this weapon's ADS tuning.
@@ -151,15 +152,15 @@ void AIBCharacter_Infantry::BeginPlay()
 		WeaponRig->SetReferences(FirstPersonCamera, WeaponMesh);
 		UE_LOG(LogIronBreach, Log, TEXT("[Character] WeaponRig found and valid!"));
 
-		if (CurrentWeaponData)
+		if (CurrentVisualData)
 		{
-			WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
-			WeaponRig->SetWeaponAlignmentOffset(CurrentWeaponData->ViewmodelLocationOffset, CurrentWeaponData->ViewmodelRotationOffset);
-			UE_LOG(LogIronBreach, Log, TEXT("%s: ADS settings applied from %s"), *GetName(), *CurrentWeaponData->GetName());
+			WeaponRig->SetAdsSettings(CurrentVisualData->Ads);
+			WeaponRig->SetWeaponAlignmentOffset(CurrentVisualData->ViewmodelLocationOffset, CurrentVisualData->ViewmodelRotationOffset);
+			UE_LOG(LogIronBreach, Log, TEXT("%s: ADS settings applied from %s"), *GetName(), *CurrentVisualData->GetName());
 		}
 		else
 		{
-			UE_LOG(LogIronBreach, Error, TEXT("%s: CurrentWeaponData is NULL! Check Blueprint Class Defaults."), *GetName());
+			UE_LOG(LogIronBreach, Error, TEXT("%s: CurrentVisualData is NULL! Check Blueprint Class Defaults."), *GetName());
 		}
 	}
 
@@ -534,9 +535,9 @@ void AIBCharacter_Infantry::ApplyActiveSlot()
 		if (BoundInventory->GetEquippedItem(ActiveWeaponSlot, Equipped) && Equipped.Definition)
 		{
 			SetUnarmed(false);
-			ApplyWeaponData(Equipped.Definition->WeaponData
-				? Equipped.Definition->WeaponData.Get()
-				: CurrentWeaponData.Get());
+			ApplyWeaponData(
+				Equipped.Definition->CombatData ? Equipped.Definition->CombatData.Get() : CurrentCombatData.Get(),
+				Equipped.Definition->VisualData ? Equipped.Definition->VisualData.Get() : CurrentVisualData.Get());
 		}
 		else
 		{
@@ -546,7 +547,7 @@ void AIBCharacter_Infantry::ApplyActiveSlot()
 	}
 
 	SetUnarmed(false);
-	ApplyWeaponData(CurrentWeaponData.Get());
+	ApplyWeaponData(CurrentCombatData.Get(), CurrentVisualData.Get());
 }
 
 void AIBCharacter_Infantry::SetUnarmed(bool bNewUnarmed)
@@ -708,69 +709,77 @@ void AIBCharacter_Infantry::HandleEquipmentChanged(EIBEquipSlot Slot, const FIBI
 		return;
 	}
 
-	UWeaponDataAsset* NewData = Item.Definition->WeaponData
-		? Item.Definition->WeaponData.Get()
-		: CurrentWeaponData.Get(); // item with no combat data yet -> keep the floor
+	UWeaponCombatData* NewCombatData = Item.Definition->CombatData
+		? Item.Definition->CombatData.Get()
+		: CurrentCombatData.Get(); // item with no combat data yet -> keep the floor
+	UWeaponVisualData* NewVisualData = Item.Definition->VisualData
+		? Item.Definition->VisualData.Get()
+		: CurrentVisualData.Get();
 
 	SetUnarmed(false);
-	ApplyWeaponData(NewData);
+	ApplyWeaponData(NewCombatData, NewVisualData);
 }
 
-void AIBCharacter_Infantry::ApplyWeaponData(UWeaponDataAsset* WeaponData)
+void AIBCharacter_Infantry::ApplyWeaponData(UWeaponCombatData* CombatData, UWeaponVisualData* VisualData)
 {
-	if (!WeaponData) { return; }
+	if (!CombatData && !VisualData) { return; }
 
 	// Same two forwards BeginPlay does for the default loadout — one weapon
 	// truth for firing (component) and one for feel (rig ADS settings).
 	if (WeaponComponent)
 	{
-		WeaponComponent->SetWeaponData(WeaponData);
+		WeaponComponent->SetWeaponData(CombatData, VisualData);
 	}
-	if (WeaponRig)
+
+	if (VisualData)
 	{
-		WeaponRig->SetAdsSettings(WeaponData->Ads);
-		WeaponRig->SetWeaponAlignmentOffset(WeaponData->ViewmodelLocationOffset, WeaponData->ViewmodelRotationOffset);
+		if (WeaponRig)
+		{
+			WeaponRig->SetAdsSettings(VisualData->Ads);
+			WeaponRig->SetWeaponAlignmentOffset(VisualData->ViewmodelLocationOffset, VisualData->ViewmodelRotationOffset);
+		}
+
+		// New weapon, new mesh — swap it in before scale/rig/scope below all re-solve
+		// against whatever's attached. No-ops (keeps the current mesh) if this weapon
+		// has no ViewmodelMesh assigned yet.
+		ApplyWeaponMesh(VisualData);
+
+		// Apply this weapon's viewmodel scale (also re-caches the rig's Grip/Aim socket
+		// offsets — see SetWeaponMeshScale) before re-snapping the optic below, so the
+		// scope mounts against the mesh at its final size, not the previous weapon's.
+		SetWeaponMeshScale(VisualData->ViewmodelScale);
 	}
-
-	// New weapon, new mesh — swap it in before scale/rig/scope below all re-solve
-	// against whatever's attached. No-ops (keeps the current mesh) if this weapon
-	// has no ViewmodelMesh assigned yet.
-	ApplyWeaponMesh(WeaponData);
-
-	// Apply this weapon's viewmodel scale (also re-caches the rig's Grip/Aim socket
-	// offsets — see SetWeaponMeshScale) before re-snapping the optic below, so the
-	// scope mounts against the mesh at its final size, not the previous weapon's.
-	SetWeaponMeshScale(WeaponData->ViewmodelScale);
 
 	// A new weapon means a new mesh and a new scope socket — re-snap the optic,
 	// or it keeps hanging off wherever the last gun's socket happened to be.
 	SetupScopePip();
 
-	UE_LOG(LogIronBreach, Log, TEXT("%s: weapon set from equipment -> %s"), *GetName(), *WeaponData->GetName());
+	UE_LOG(LogIronBreach, Log, TEXT("%s: weapon set from equipment -> combat=%s visual=%s"),
+		*GetName(), *GetNameSafe(CombatData), *GetNameSafe(VisualData));
 }
 
-void AIBCharacter_Infantry::ApplyWeaponMesh(UWeaponDataAsset* WeaponData)
+void AIBCharacter_Infantry::ApplyWeaponMesh(UWeaponVisualData* VisualData)
 {
-	if (!WeaponMesh || !WeaponData)
+	if (!WeaponMesh || !VisualData)
 	{
 		return;
 	}
 
-	if (WeaponData->ViewmodelMesh.IsNull())
+	if (VisualData->ViewmodelMesh.IsNull())
 	{
 		// No mesh authored for this weapon yet (e.g. freshly generated, no art
 		// assigned) -- keep whatever's currently shown rather than going blank.
 		return;
 	}
 
-	if (UStaticMesh* NewMesh = WeaponData->ViewmodelMesh.LoadSynchronous())
+	if (UStaticMesh* NewMesh = VisualData->ViewmodelMesh.LoadSynchronous())
 	{
 		WeaponMesh->SetStaticMesh(NewMesh);
 	}
 	else
 	{
 		UE_LOG(LogIronBreach, Warning, TEXT("%s: ViewmodelMesh on %s failed to load -- keeping previous mesh."),
-			*GetName(), *WeaponData->GetName());
+			*GetName(), *VisualData->GetName());
 	}
 }
 

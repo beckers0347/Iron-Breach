@@ -17,11 +17,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRackStockChanged);
  * Walk-up weapon picker for a physical rack in the world.
  *
  * Pass 1 (now): hand-place a few generated weapons on it. Run the weapon
- * generator (right-click a UWeaponDataAsset -> Generate Weapon Variant, or the
- * Weapon Generator editor widget) to get a few DA_* combat data assets, wrap
- * each in a DA_Item_* per IBItemDefinition.h (Category = Weapon, WeaponData =
- * the generated DA), and drop those item definitions into StockedWeapons on
- * the placed BP_WeaponRack instance.
+ * generator (right-click a UWeaponCombatData -> Generate Weapon Variant, or the
+ * Weapon Generator editor widget) to get a few DA_Combat_* assets, pair each
+ * with a DA_Visual_* (mesh/FX/ADS), wrap the pair in a DA_Item_* per
+ * IBItemDefinition.h (Category = Weapon, CombatData/VisualData = the pair),
+ * and drop those item definitions into StockedWeapons on the placed
+ * BP_WeaponRack instance.
  *
  * Pass 2 (later, per Shane): this becomes the shared bulk-storage / prize
  * rack. Same actor, same request path — only StockedWeapons's source changes

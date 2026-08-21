@@ -1,7 +1,8 @@
 #include "Combat/HitscanWeaponComponent.h"
 #include "IronBreach.h"
 #include "Combat/DamageableInterface.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponCombatData.h"
+#include "Combat/WeaponVisualData.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -71,7 +72,7 @@ void UHitscanWeaponComponent::Fire()
 	if (!Pawn || !World) return;
 
 	// Client-side spam guard (UX only — the server enforces the real cooldown).
-	const float UseInterval = WeaponData ? WeaponData->FireRate : FireInterval;
+	const float UseInterval = CombatData ? CombatData->FireRate : FireInterval;
 	const float Now = World->GetTimeSeconds();
 	if (Now - LastFireTime < FMath::Max(UseInterval, 0.05f)) return;
 	LastFireTime = Now;
@@ -83,7 +84,7 @@ void UHitscanWeaponComponent::Fire()
 
 	// The shooter hears/sees their shot immediately, no round-trip (cosmetic-first).
 	// Predicted end point; the server's Multicast_FireFX covers everyone else.
-	const float CosmeticRange = WeaponData ? WeaponData->MaxRange : Range;
+	const float CosmeticRange = CombatData ? CombatData->MaxRange : Range;
 	PlayFireCosmeticsAt(ViewLocation, ViewLocation + ViewRotation.Vector() * CosmeticRange);
 
 	if (Pawn->HasAuthority())
@@ -115,13 +116,13 @@ void UHitscanWeaponComponent::PerformFire(const FVector& ViewLocation, const FVe
 	if (!Pawn || !World) return;
 
 	// Authoritative cooldown — a hacked client spamming Server_Fire gains nothing.
-	const float UseInterval = WeaponData ? WeaponData->FireRate : FireInterval;
+	const float UseInterval = CombatData ? CombatData->FireRate : FireInterval;
 	const float Now = World->GetTimeSeconds();
 	if (Now - LastServerFireTime < FMath::Max(UseInterval, 0.05f)) return;
 	LastServerFireTime = Now;
 
-	const float UseDamage = WeaponData ? WeaponData->BaseDamage : Damage;
-	const float UseRange = WeaponData ? WeaponData->MaxRange : Range;
+	const float UseDamage = CombatData ? CombatData->BaseDamage : Damage;
+	const float UseRange = CombatData ? CombatData->MaxRange : Range;
 
 	// Apply the owner's current spread cone (hip = loose, ADS = tight). Read from
 	// the weapon rig if present; no rig -> pinpoint (preserves prior behavior).
@@ -176,17 +177,17 @@ void UHitscanWeaponComponent::Multicast_FireFX_Implementation(FVector_NetQuantiz
 
 void UHitscanWeaponComponent::PlayFireCosmeticsAt(const FVector& TraceStart, const FVector& TraceEnd) const
 {
-	if (!WeaponData) return;
+	if (!VisualData) return;
 
-	if (WeaponData->FireSound)
+	if (VisualData->FireSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, WeaponData->FireSound, TraceStart);
+		UGameplayStatics::PlaySoundAtLocation(this, VisualData->FireSound, TraceStart);
 	}
 
-	if (WeaponData->MFXTracer)
+	if (VisualData->MFXTracer)
 	{
 		UNiagaraComponent* Tracer = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			this, WeaponData->MFXTracer, TraceStart, (TraceEnd - TraceStart).Rotation());
+			this, VisualData->MFXTracer, TraceStart, (TraceEnd - TraceStart).Rotation());
 		if (Tracer)
 		{
 			// Harmless no-op if the Niagara system has no such user parameter.
@@ -196,8 +197,8 @@ void UHitscanWeaponComponent::PlayFireCosmeticsAt(const FVector& TraceStart, con
 	else if (UWorld* World = GetWorld())
 	{
 		// No Niagara asset assigned yet: draw a prototype tracer (Development builds).
-		// Assigning WeaponData->MFXTracer later takes over automatically.
+		// Assigning VisualData->MFXTracer later takes over automatically.
 		DrawDebugLine(World, TraceStart, TraceEnd, FColor(120, 200, 255), false, 0.06f, 0, 1.0f);
 	}
-	// TODO: impact FX at TraceEnd once an asset exists in WeaponData.
+	// TODO: impact FX at TraceEnd once an asset exists in VisualData.
 }

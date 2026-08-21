@@ -5,21 +5,21 @@
 
 #include "EditorTools/WeaponGeneratorLibrary.h"
 #include "EditorTools/ItemIconCaptureLibrary.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponCombatData.h"
 #include "Items/IBItemDefinition.h"
 #include "Misc/PackageName.h"
 
-void UWeaponAssetActions::GenerateWeaponVariant(UWeaponDataAsset* SourceWeapon)
+void UWeaponAssetActions::GenerateWeaponVariant(UWeaponCombatData* SourceWeapon)
 {
 	if (!SourceWeapon)
 	{
 		return;
 	}
 
-	const FString SourcePackagePath = SourceWeapon->GetOutermost()->GetName(); // e.g. /Game/Weapons/Rifle/DA_AssultRifle
-	const FString SourceName = SourceWeapon->WeaponName.IsNone()
-		? SourceWeapon->GetName()
-		: SourceWeapon->WeaponName.ToString();
+	const FString SourcePackagePath = SourceWeapon->GetOutermost()->GetName(); // e.g. /Game/Weapons/Rifle/DA_Combat_AssultRifle
+	// UWeaponCombatData has no name field of its own (that moved to UWeaponVisualData::WeaponName) --
+	// the asset's own name is the only identity available here.
+	const FString SourceName = SourceWeapon->GetName();
 
 	FWeaponGenerationParams Params;
 	Params.NewWeaponName = SourceName + TEXT("_Variant");

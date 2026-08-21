@@ -6,9 +6,9 @@
 /**
  * Per-weapon aim-down-sights tuning. Port of the Unity AdsSettings.
  *
- * Composes into UWeaponDataAsset via a single field:
+ * Composes into UWeaponVisualData via a single field:
  *     UPROPERTY(EditDefaultsOnly) FIBAdsSettings Ads;
- * Existing weapon data assets pick up these defaults automatically.
+ * Existing weapon visual data assets pick up these defaults automatically.
  *
  * UNITS: Unreal is centimetres (Unity was metres). Distance defaults below
  * are the Unity values * 100. Degrees and multipliers are unchanged.

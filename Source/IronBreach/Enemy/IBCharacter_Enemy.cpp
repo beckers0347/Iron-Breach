@@ -2,7 +2,8 @@
 #include "Enemy/IBEnemyAIController.h"
 #include "IronBreach.h"
 #include "Combat/HealthComponent.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponCombatData.h"
+#include "Combat/WeaponVisualData.h"
 #include "Items/IBLootDropComponent.h"
 #include "Items/IBLootTableAsset.h"
 #include "Items/IBLootPickup.h"
@@ -57,14 +58,14 @@ void AIBCharacter_Enemy::BeginPlay()
 
 void AIBCharacter_Enemy::FireAt(AActor* Target)
 {
-	if (bDead || !Target || !CurrentWeaponData) return;
+	if (bDead || !Target || !CurrentCombatData) return;
 
 	UWorld* World = GetWorld();
 	if (!World) return;
 
 	// Respect the weapon's fire rate
 	const float Now = World->GetTimeSeconds();
-	if (Now - LastFireTime < FMath::Max(CurrentWeaponData->FireRate, 0.05f)) return;
+	if (Now - LastFireTime < FMath::Max(CurrentCombatData->FireRate, 0.05f)) return;
 	LastFireTime = Now;
 
 	UE_LOG(LogIronBreach, Verbose, TEXT("%s fires at %s"), *GetName(), *GetNameSafe(Target));
@@ -76,7 +77,7 @@ void AIBCharacter_Enemy::FireAt(AActor* Target)
 
 	const FVector TargetPoint = Target->GetActorLocation();
 	const FVector AimDir = FMath::VRandCone((TargetPoint - EyeLocation).GetSafeNormal(), FMath::DegreesToRadians(AimSpreadDegrees));
-	const FVector TraceEnd = EyeLocation + AimDir * CurrentWeaponData->MaxRange;
+	const FVector TraceEnd = EyeLocation + AimDir * CurrentCombatData->MaxRange;
 
 	// FireAt only runs on the server (AI controllers don't exist on clients) — the
 	// multicast makes the shot audible/visible on every machine, including this one.
@@ -93,28 +94,28 @@ void AIBCharacter_Enemy::FireAt(AActor* Target)
 	{
 		if (HitResult.GetActor()->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()))
 		{
-			IDamageableInterface::Execute_HandleTakeDamage(HitResult.GetActor(), CurrentWeaponData->BaseDamage, HitResult, GetController(), this);
+			IDamageableInterface::Execute_HandleTakeDamage(HitResult.GetActor(), CurrentCombatData->BaseDamage, HitResult, GetController(), this);
 		}
 		else
 		{
 			// Fallback: generic engine damage so non-interface actors (e.g. the template player BP) still get hurt
-			UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeaponData->BaseDamage, GetController(), this, nullptr);
+			UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentCombatData->BaseDamage, GetController(), this, nullptr);
 		}
 	}
 }
 
 void AIBCharacter_Enemy::Multicast_FireFX_Implementation(FVector_NetQuantize TraceEnd)
 {
-	if (!CurrentWeaponData) return;
+	if (!CurrentVisualData) return;
 
-	if (CurrentWeaponData->FireSound)
+	if (CurrentVisualData->FireSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, CurrentWeaponData->FireSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, CurrentVisualData->FireSound, GetActorLocation());
 	}
 
 	// Visible tracer. Start = this enemy's muzzle/eye (pawn position replicates, so this is
 	// accurate on every client). Prototype line for now; swap to a Niagara beam later by
-	// spawning CurrentWeaponData->MFXTracer here instead. DrawDebugLine renders in
+	// spawning CurrentVisualData->MFXTracer here instead. DrawDebugLine renders in
 	// Development builds (compiled out of Shipping — fine for playtesting).
 	if (UWorld* World = GetWorld())
 	{

@@ -230,9 +230,9 @@ int32 UIBXPSubsystem::GetCrewXP(AController* SeatA, AController* SeatB) const
 	return Record ? Record->TotalXP : 0;
 }
 
-TArray<UWeaponDataAsset*> UIBXPSubsystem::GetUnlockedWeapons(EXPTrack Track, int32 UpToLevel) const
+TArray<UIBItemDefinition*> UIBXPSubsystem::GetUnlockedWeapons(EXPTrack Track, int32 UpToLevel) const
 {
-	TArray<UWeaponDataAsset*> Result;
+	TArray<UIBItemDefinition*> Result;
 	if (!Tuning) return Result;
 
 	const TArray<FXPLevelUnlock>& Unlocks = (Track == EXPTrack::Pilot) ? Tuning->PilotUnlocks : Tuning->CrewUnlocks;
@@ -240,7 +240,7 @@ TArray<UWeaponDataAsset*> UIBXPSubsystem::GetUnlockedWeapons(EXPTrack Track, int
 	{
 		if (Entry.Level > UpToLevel) continue;
 
-		for (UWeaponDataAsset* Weapon : Entry.UnlockedWeapons)
+		for (UIBItemDefinition* Weapon : Entry.UnlockedWeapons)
 		{
 			if (Weapon)
 			{
