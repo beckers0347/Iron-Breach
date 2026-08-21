@@ -29,7 +29,18 @@ UTexture2D* UItemIconCaptureLibrary::CaptureItemIcon(UIBItemDefinition* Definiti
 		return nullptr;
 	}
 
-	UWeaponVisualData* VisualData = Definition->VisualData;
+	// New-style weapon content IS its own VisualData (UWeaponVisualData : public
+	// UIBItemDefinition) -- there's no separate DA_Item_* wrapper to point at one
+	// anymore. Try that first; Definition->VisualData below is the legacy fallback
+	// for any DA_Item_* that still wraps a separate DA_Visual_* asset. Reading only
+	// the deprecated link (as this used to) meant every migrated/new weapon failed
+	// here with "no Visual Data assigned" and never got an icon captured at all --
+	// which is exactly why only one (an unmigrated legacy item) had a working icon.
+	UWeaponVisualData* VisualData = Cast<UWeaponVisualData>(Definition);
+	if (!VisualData)
+	{
+		VisualData = Definition->VisualData;
+	}
 	if (!VisualData)
 	{
 		UWeaponGeneratorLibrary::SpawnWeaponGeneratorNotification(

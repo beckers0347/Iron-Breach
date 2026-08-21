@@ -114,9 +114,9 @@ void AIBMech_Base::BeginPlay()
 	if (WeaponRigComponent)
 	{
 		WeaponRigComponent->SetReferences(GunnerCamera_FPV, MechWeaponMesh);
-		if (CurrentVisualData)
+		if (CurrentVisualData && CurrentVisualData->CombatData)
 		{
-			WeaponRigComponent->SetAdsSettings(CurrentVisualData->Ads);
+			WeaponRigComponent->SetAdsSettings(CurrentVisualData->CombatData->Ads);
 		}
 	}
 
@@ -756,9 +756,9 @@ void AIBMech_Base::EquipWeapon(UWeaponCombatData* NewCombatData, UWeaponVisualDa
 	CurrentCombatData = NewCombatData;
 	CurrentVisualData = NewVisualData;
 
-	if (WeaponRigComponent && NewVisualData)
+	if (WeaponRigComponent && NewVisualData && NewVisualData->CombatData)
 	{
-		WeaponRigComponent->SetAdsSettings(NewVisualData->Ads);
+		WeaponRigComponent->SetAdsSettings(NewVisualData->CombatData->Ads);
 	}
 
 	// The seat fires the same weapon — keep its component in step.

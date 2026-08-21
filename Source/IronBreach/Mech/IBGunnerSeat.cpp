@@ -71,9 +71,9 @@ void AIBGunnerSeat::PawnClientRestart()
 	if (OwningMech && OwningMech->WeaponRigComponent)
 	{
 		OwningMech->WeaponRigComponent->SetReferences(CockpitCamera, OwningMech->MechWeaponMesh);
-		if (OwningMech->CurrentVisualData)
+		if (OwningMech->CurrentVisualData && OwningMech->CurrentVisualData->CombatData)
 		{
-			OwningMech->WeaponRigComponent->SetAdsSettings(OwningMech->CurrentVisualData->Ads);
+			OwningMech->WeaponRigComponent->SetAdsSettings(OwningMech->CurrentVisualData->CombatData->Ads);
 		}
 	}
 	SyncWeaponFromMech();

@@ -63,18 +63,30 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
 	TArray<FIBItemStat> Stats;
 
-	/** Weapons only: the power-scaling half (damage, fire rate, range) this
-	 *  item resolves to. Loot→gun seam — equipping WeaponPrimary forwards
-	 *  this to UHitscanWeaponComponent. Populated for existing items by
-	 *  migrate_weapon_data_split.py; set directly for new content. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	TObjectPtr<UWeaponCombatData> CombatData;
+	/** DEPRECATED -- UWeaponVisualData is now itself a UIBItemDefinition subclass (see
+	 *  Combat/WeaponVisualData.h), so a weapon's item data lives directly on that one
+	 *  asset instead of a separate DA_Item_* wrapper pointing at it. Named LegacyCombatData
+	 *  rather than CombatData because (a) that name collides with UWeaponVisualData's own
+	 *  new CombatData field -- UHT rejects a derived class member shadowing a base class
+	 *  member of the same name -- and (b) the literal suffix "_DEPRECATED" is a reserved
+	 *  UHT convention that requires the property to drop all Edit/BlueprintReadOnly
+	 *  specifiers (UHT errors otherwise), and this still needs to stay editor-visible so
+	 *  Python's get_editor_property can read it during migration. Both this field and
+	 *  VisualData below are left in place ONLY so the migration script (Content/Python/
+	 *  migrate_item_into_visual.py) can still read each old item's Combat link and copy
+	 *  this item's own fields (DisplayName, Icon, EquipSlot, Rarity, Stats, ...) onto the
+	 *  matching VisualData asset's newly-inherited fields. Do not point new content at
+	 *  this -- once the migration has run and been verified, both fields go away and
+	 *  weapons stop needing a DA_Item_* wrapper at all. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Deprecated")
+	TObjectPtr<UWeaponCombatData> LegacyCombatData;
 
-	/** Weapons only: the presentation half (viewmodel mesh/scale/alignment,
-	 *  fire effects, ADS handling) this item resolves to. Same seam as
-	 *  CombatData, feeding AIBCharacter_Infantry::ApplyWeaponData and the
-	 *  weapon rig instead of the fire component. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	/** DEPRECATED (weapons only) -- see the note on LegacyCombatData above. New
+	 *  weapon content doesn't need a DA_Item_* at all: create a UWeaponVisualData asset
+	 *  directly (it IS an item now) and attach THAT to the rack/inventory/loadout. This
+	 *  field stays only so the migration script can find the VisualData asset a legacy
+	 *  DA_Item_* used to point at. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Deprecated")
 	TObjectPtr<UWeaponVisualData> VisualData;
 
 	/** Untick for quest tokens etc. that should never appear in the ledger. */

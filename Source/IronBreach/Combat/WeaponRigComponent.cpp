@@ -35,6 +35,20 @@ void UWeaponRigComponent::SetReferences(UCameraComponent* InCamera, UMeshCompone
 	// SetWeaponAlignmentOffset, which re-runs this same cache so the two never
 	// disagree regardless of call order). If the mesh lacks the sockets we fall
 	// back to zero (weapon root aligns to the anchor) and warn once.
+	//
+	// PerWeaponLocationOffset (UWeaponVisualData::ViewmodelLocationOffset) is a
+	// fixed, absolute-space nudge in CM -- deliberately NOT scaled by the mesh's
+	// current ViewmodelScale, unlike SocketLocalOffset()'s result. It's authored
+	// as "shift the socket this many cm," and that has to mean the same physical
+	// distance regardless of how small a weapon's ViewmodelScale is, or a designer
+	// dialing it in has no idea how big a number to type for a given mesh's scale --
+	// worse, on a very small ViewmodelScale (the floor relaxation now allows values
+	// far below 1.0) a scaled offset shrinks in lockstep and the nudge stops doing
+	// anything visible at all. A previous version of this scaled the offset by
+	// MeshScale to fix ADS landing wildly wrong on non-SMG weapons; that turned out
+	// to be the AIBCharacter_Infantry::ResolveAdsSettings bug (reading the wrong,
+	// deprecated Ads field) rather than this, so it's back to unscaled -- re-tune
+	// ViewmodelLocationOffset per weapon if positions drift now that this changed.
 	GripLocal = SocketLocalOffset(GripSocket) + PerWeaponLocationOffset;
 	AimLocal = SocketLocalOffset(AimSocket) + PerWeaponLocationOffset;
 
