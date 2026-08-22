@@ -20,6 +20,8 @@
 #include "Combat/WeaponVisualData.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h" // GetMesh() target for the carry attach socket
+#include "Components/PrimitiveComponent.h"    // carried actor's collision/physics toggle
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameModeBase.h"
 #include "TimerManager.h"
@@ -28,6 +30,7 @@
 #include "Items/IBItemDefinition.h"
 #include "Items/IBPlayerState.h"
 #include "Net/UnrealNetwork.h" // DOREPLIFETIME (ActiveWeaponSlot)
+#include "Combat/IBInteractableInterface.h" // Interact() trace target
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()
 {
@@ -618,6 +621,7 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		if (MoveAction) { EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AIBCharacter_Infantry::Move); }
 		if (LookAction) { EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AIBCharacter_Infantry::Look); }
 		if (FireAction) { EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::Fire); }
+		if (InteractAction) { EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::Interact); }
 		if (AimAction)
 		{
 			// Hold to aim: press raises the sights, release lowers them.
@@ -676,6 +680,10 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		PlayerInputComponent->BindKey(EKeys::One,   IE_Pressed, this, &AIBCharacter_Infantry::SelectPrimarySlot);
 		PlayerInputComponent->BindKey(EKeys::Two,   IE_Pressed, this, &AIBCharacter_Infantry::SelectSpecialSlot);
 		PlayerInputComponent->BindKey(EKeys::Three, IE_Pressed, this, &AIBCharacter_Infantry::SelectHeavySlot);
+
+		// Scroll wheel cycles the same three wells. Same raw-key grammar as 1/2/3.
+		PlayerInputComponent->BindKey(EKeys::MouseScrollUp,   IE_Pressed, this, &AIBCharacter_Infantry::CycleWeaponSlotUp);
+		PlayerInputComponent->BindKey(EKeys::MouseScrollDown, IE_Pressed, this, &AIBCharacter_Infantry::CycleWeaponSlotDown);
 	}
 }
 
@@ -702,6 +710,44 @@ void AIBCharacter_Infantry::SetActiveWeaponSlot(EIBEquipSlot NewSlot)
 	else
 	{
 		Server_SetActiveWeaponSlot(NewSlot);
+	}
+}
+
+void AIBCharacter_Infantry::CycleWeaponSlot(int32 Direction)
+{
+	static const EIBEquipSlot Wells[] = { EIBEquipSlot::WeaponPrimary, EIBEquipSlot::WeaponSpecial, EIBEquipSlot::WeaponHeavy };
+	constexpr int32 NumWells = UE_ARRAY_COUNT(Wells);
+
+	int32 CurrentIndex = 0;
+	for (int32 i = 0; i < NumWells; ++i)
+	{
+		if (Wells[i] == ActiveWeaponSlot) { CurrentIndex = i; break; }
+	}
+
+	// Walk the wells in Direction, skipping empty ones -- SetActiveWeaponSlot
+	// already refuses to switch INTO an empty non-Primary well, so without this
+	// skip a scroll tick on a one-weapon loadout would just silently do nothing
+	// instead of continuing on to the next occupied well.
+	for (int32 Step = 1; Step <= NumWells; ++Step)
+	{
+		const int32 NextIndex = ((CurrentIndex + Direction * Step) % NumWells + NumWells) % NumWells;
+		const EIBEquipSlot Candidate = Wells[NextIndex];
+		if (Candidate == ActiveWeaponSlot) { break; } // full loop, nothing else occupied
+
+		if (Candidate == EIBEquipSlot::WeaponPrimary)
+		{
+			SetActiveWeaponSlot(Candidate); // Primary is always a valid landing spot, even empty
+			return;
+		}
+		if (BoundInventory.IsValid())
+		{
+			FIBItemInstance Equipped;
+			if (BoundInventory->GetEquippedItem(Candidate, Equipped) && Equipped.Definition)
+			{
+				SetActiveWeaponSlot(Candidate);
+				return;
+			}
+		}
 	}
 }
 
@@ -761,6 +807,13 @@ void AIBCharacter_Infantry::SetUnarmed(bool bNewUnarmed)
 	if (bUnarmed == bNewUnarmed) { return; }
 	bUnarmed = bNewUnarmed;
 
+	// ABP_Infantry's locomotion state machine (BS_Armed_Locomotion vs.
+	// BS_Unarmed_Locomotion) reads bIsArmed off this actor -- NOT bUnarmed --
+	// so it has to be kept in sync here or the anim graph never sees a spawn's
+	// "empty-handed" state or a later pickup at the armory; bUnarmed stays the
+	// one real source of truth, this is just mirroring it out for the ABP.
+	bIsArmed = !bUnarmed;
+
 	if (WeaponMesh)
 	{
 		WeaponMesh->SetVisibility(!bUnarmed, /*bPropagateToChildren=*/true);
@@ -771,6 +824,11 @@ void AIBCharacter_Infantry::SetUnarmed(bool bNewUnarmed)
 	}
 
 	UE_LOG(LogIronBreach, Log, TEXT("%s: %s"), *GetName(), bUnarmed ? TEXT("unarmed (well empty)") : TEXT("re-armed"));
+}
+
+bool AIBCharacter_Infantry::IsDead() const
+{
+	return HealthComponent && HealthComponent->IsDepleted();
 }
 
 void AIBCharacter_Infantry::Move(const FInputActionValue& Value)
@@ -809,11 +867,78 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 	}
 }
 
+void AIBCharacter_Infantry::Interact()
+{
+	if (bIsCarrying || !FirstPersonCamera)
+	{
+		return; // hands are full -- carrying is the only thing they're doing
+	}
+
+	const FVector Start = FirstPersonCamera->GetComponentLocation();
+	const FVector End = Start + FirstPersonCamera->GetForwardVector() * InteractTraceDistance;
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	if (GetWorld() && GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
+	{
+		if (Hit.GetActor() && Hit.GetActor()->Implements<UIBInteractable>())
+		{
+			IIBInteractable::Execute_Interact(Hit.GetActor(), this);
+		}
+	}
+}
+
+bool AIBCharacter_Infantry::BeginCarry(AActor* Target)
+{
+	if (bIsCarrying || !Target) { return false; }
+
+	bIsCarrying = true;
+	CarriedActor = Target;
+
+	SetUnarmed(true); // weapon holstered -- EndCarry() re-arms via ApplyActiveSlot()
+
+	if (USkeletalMeshComponent* BodyMesh = GetMesh())
+	{
+		Target->AttachToComponent(BodyMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, CarrySocket);
+	}
+	if (UPrimitiveComponent* TargetRoot = Cast<UPrimitiveComponent>(Target->GetRootComponent()))
+	{
+		TargetRoot->SetSimulatePhysics(false);
+		TargetRoot->SetCollisionEnabled(ECollisionEnabled::NoCollision); // don't let her collide with the carrier
+	}
+
+	OnCarryStateChanged.Broadcast(true); // UI clears the HUD entirely -- §4.4/§7
+
+	UE_LOG(LogIronBreach, Log, TEXT("%s: begin carry -> %s"), *GetName(), *GetNameSafe(Target));
+	return true;
+}
+
+void AIBCharacter_Infantry::EndCarry()
+{
+	if (!bIsCarrying) { return; }
+
+	if (AActor* Target = CarriedActor.Get())
+	{
+		Target->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform); // level places her on the stretcher, we don't teleport her there
+	}
+
+	bIsCarrying = false;
+	CarriedActor.Reset();
+
+	SetUnarmed(false);
+	ApplyActiveSlot(); // restore whatever's actually equipped, not just visibility
+
+	OnCarryStateChanged.Broadcast(false); // UI restores the HUD
+
+	UE_LOG(LogIronBreach, Log, TEXT("%s: end carry"), *GetName());
+}
+
 void AIBCharacter_Infantry::StartAiming()
 {
-	if (bIsSprinting)
+	if (bIsSprinting || bIsCarrying)
 	{
-		return; // can't start aiming while sprinting
+		return; // can't start aiming while sprinting or carrying
 	}
 
 	bIsAiming = true;
@@ -842,9 +967,17 @@ void AIBCharacter_Infantry::Tick(float DeltaSeconds)
 	// after Start/StopSprint and silently overwrote the sprint speed back to walk
 	// speed, since the ADS multiplier is 1.0 while not aiming. bIsSprinting still
 	// flipped correctly (gating Fire/Aim), the character just never sped up.
-	if (BaseWalkSpeed > 0.0f)
+	if (UCharacterMovementComponent* Move = GetCharacterMovement())
 	{
-		if (UCharacterMovementComponent* Move = GetCharacterMovement())
+		if (bIsCarrying)
+		{
+			// Forced pace, LOCKED (§4.4) -- overrides ADS/sprint entirely rather than
+			// composing with them; carrying pre-empts aiming/sprinting anyway (see the
+			// bIsCarrying guards in StartAiming/StartSprint/Fire), so this is never
+			// fighting those multipliers for the same frame.
+			Move->MaxWalkSpeed = CarryWalkSpeed;
+		}
+		else if (BaseWalkSpeed > 0.0f)
 		{
 			const float AdsMultiplier = WeaponRig ? WeaponRig->GetMoveSpeedMultiplier() : 1.0f;
 			const float SprintMultiplier = (bIsSprinting && NormalWalkSpeed > 0.0f) ? (SprintSpeed / NormalWalkSpeed) : 1.0f;
@@ -855,9 +988,9 @@ void AIBCharacter_Infantry::Tick(float DeltaSeconds)
 
 void AIBCharacter_Infantry::Fire()
 {
-	if (bIsSprinting || bUnarmed)
+	if (bIsSprinting || bUnarmed || bIsCarrying)
 	{
-		return; // empty hands don't shoot
+		return; // empty hands don't shoot -- and carrying is unarmed by construction (BeginCarry), this is belt-and-suspenders
 	}
 	// Consolidated: cosmetics + Server_Fire routing + authoritative trace all live in the
 	// weapon component now (ADR-002 pattern-setter). One fire path for the whole project.
@@ -1140,9 +1273,9 @@ void AIBCharacter_Infantry::HandleDeath(AActor* Killer)
 
 void AIBCharacter_Infantry::StartSprint()
 {
-	if (bIsAiming || bIsCrouched)
+	if (bIsAiming || bIsCrouched || bIsCarrying)
 	{
-		return; // can't sprint while aiming or crouched
+		return; // can't sprint while aiming, crouched, or carrying -- walking pace is forced (§4.4)
 	}
 
 	bIsSprinting = true;
