@@ -27,6 +27,16 @@ namespace
 		default:                              return NSLOCTEXT("IBSettings", "Windowed", "WINDOWED");
 		}
 	}
+
+	FText OnOff(bool bValue)
+	{
+		return bValue ? NSLOCTEXT("IBSettings", "On", "ON") : NSLOCTEXT("IBSettings", "Off", "OFF");
+	}
+
+	FText Percent(float Normalized)
+	{
+		return FText::FromString(FString::Printf(TEXT("%d%%"), FMath::RoundToInt(Normalized * 100.f)));
+	}
 }
 
 void UIBSettingsScreen::NativeOnInitialized()
@@ -46,6 +56,8 @@ void UIBSettingsScreen::NativeOnInitialized()
 		}
 	}
 
+	FpsCapOptions = { 0, 60, 120, 144, 240 };
+
 	BuildFallbackLayout();
 }
 
@@ -54,13 +66,28 @@ void UIBSettingsScreen::NativeScreenOpened()
 	RefreshValues();
 }
 
+void UIBSettingsScreen::AddSection(UVerticalBox* Column, const FText& Label)
+{
+	UTextBlock* Section = IBStyle::MakeSection(WidgetTree, Label);
+	if (UVerticalBoxSlot* SectionSlot = Column->AddChildToVerticalBox(Section))
+	{
+		SectionSlot->SetPadding(FMargin(0.f, 12.f, 0.f, 2.f));
+	}
+	UBorder* Line = IBStyle::MakeAccentBar(WidgetTree, IBStyle::Line());
+	Line->SetPadding(FMargin(0.f, 0.5f));
+	if (UVerticalBoxSlot* LineSlot = Column->AddChildToVerticalBox(Line))
+	{
+		LineSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 4.f));
+	}
+}
+
 UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label, UButton*& OutPrev, UButton*& OutNext)
 {
 	UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 
-	UTextBlock* RowLabel = IBStyle::MakeText(WidgetTree, Label, 13, IBStyle::TextLo(), 400);
+	UTextBlock* RowLabel = IBStyle::MakeText(WidgetTree, Label, 12, IBStyle::TextLo(), 300);
 	USizeBox* LabelSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	LabelSize->SetWidthOverride(240.f);
+	LabelSize->SetWidthOverride(190.f);
 	LabelSize->AddChild(RowLabel);
 	if (UHorizontalBoxSlot* LabelSlot = Row->AddChildToHorizontalBox(LabelSize))
 	{
@@ -69,7 +96,7 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 
 	auto MakeArrow = [this](const FText& Glyph)
 	{
-		return IBStyle::MakeButton(WidgetTree, Glyph, 13);
+		return IBStyle::MakeButton(WidgetTree, Glyph, 12);
 	};
 
 	OutPrev = MakeArrow(NSLOCTEXT("IBSettings", "Prev", "<"));
@@ -78,10 +105,10 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 		PrevSlot->SetVerticalAlignment(VAlign_Center);
 	}
 
-	UTextBlock* Value = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 15, IBStyle::Amber(), 150);
+	UTextBlock* Value = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 13, IBStyle::Amber(), 150);
 	Value->SetJustification(ETextJustify::Center);
 	USizeBox* ValueSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	ValueSize->SetWidthOverride(190.f);
+	ValueSize->SetWidthOverride(150.f);
 	ValueSize->AddChild(Value);
 	if (UHorizontalBoxSlot* ValueSlot = Row->AddChildToHorizontalBox(ValueSize))
 	{
@@ -96,7 +123,7 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 
 	if (UVerticalBoxSlot* RowSlot = Column->AddChildToVerticalBox(Row))
 	{
-		RowSlot->SetPadding(FMargin(0.f, 7.f));
+		RowSlot->SetPadding(FMargin(0.f, 4.f));
 	}
 	return Value;
 }
@@ -121,57 +148,133 @@ void UIBSettingsScreen::BuildFallbackLayout()
 		DimSlot->SetVerticalAlignment(VAlign_Fill);
 	}
 
-	UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+	UVerticalBox* Outer = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 
 	UTextBlock* Title = IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBSettings", "Title", "SETTINGS"));
-	Column->AddChildToVerticalBox(Title);
-
+	Outer->AddChildToVerticalBox(Title);
 	UBorder* Accent = IBStyle::MakeAccentBar(WidgetTree, IBStyle::Amber());
 	Accent->SetPadding(FMargin(0.f, 1.5f));
-	if (UVerticalBoxSlot* AccentSlot = Column->AddChildToVerticalBox(Accent))
+	if (UVerticalBoxSlot* AccentSlot = Outer->AddChildToVerticalBox(Accent))
 	{
-		AccentSlot->SetPadding(FMargin(0.f, 6.f, 380.f, 12.f));
+		AccentSlot->SetPadding(FMargin(0.f, 6.f, 760.f, 12.f));
 	}
+
+	// Two columns: VIDEO left; AUDIO + CONTROLS right.
+	UHorizontalBox* Columns = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	UVerticalBox* Left = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+	UVerticalBox* Right = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+	if (UHorizontalBoxSlot* LeftSlot = Columns->AddChildToHorizontalBox(Left))
+	{
+		LeftSlot->SetPadding(FMargin(0.f, 0.f, 26.f, 0.f));
+	}
+	Columns->AddChildToHorizontalBox(Right);
+	Outer->AddChildToVerticalBox(Columns);
 
 	UButton *Prev = nullptr, *Next = nullptr;
 
-	QualityValue = MakeRow(Column, NSLOCTEXT("IBSettings", "Quality", "QUALITY"), Prev, Next);
+	// ---- VIDEO (left) ----
+	AddSection(Left, NSLOCTEXT("IBSettings", "Video", "VIDEO"));
+
+	QualityValue = MakeRow(Left, NSLOCTEXT("IBSettings", "Quality", "QUALITY"), Prev, Next);
 	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleQualityPrev);
 	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleQualityNext);
 
-	WindowValue = MakeRow(Column, NSLOCTEXT("IBSettings", "Window", "WINDOW"), Prev, Next);
+	WindowValue = MakeRow(Left, NSLOCTEXT("IBSettings", "Window", "WINDOW"), Prev, Next);
 	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleWindowPrev);
 	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleWindowNext);
 
-	ResolutionValue = MakeRow(Column, NSLOCTEXT("IBSettings", "Resolution", "RESOLUTION"), Prev, Next);
+	ResolutionValue = MakeRow(Left, NSLOCTEXT("IBSettings", "Resolution", "RESOLUTION"), Prev, Next);
 	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleResPrev);
 	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleResNext);
 
-	VolumeValue = MakeRow(Column, NSLOCTEXT("IBSettings", "Volume", "MASTER VOLUME"), Prev, Next);
-	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleVolumeDown);
-	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleVolumeUp);
+	ScaleValue = MakeRow(Left, NSLOCTEXT("IBSettings", "RenderScale", "RENDER SCALE"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleScalePrev);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleScaleNext);
 
-	SensitivityValue = MakeRow(Column, NSLOCTEXT("IBSettings", "Sensitivity", "MOUSE SENSITIVITY"), Prev, Next);
-	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleSensDown);
-	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleSensUp);
+	VSyncValue = MakeRow(Left, NSLOCTEXT("IBSettings", "VSync", "VSYNC"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleVSyncToggle);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleVSyncToggle);
 
+	FpsCapValue = MakeRow(Left, NSLOCTEXT("IBSettings", "FpsCap", "FRAME RATE CAP"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleFpsCapPrev);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleFpsCapNext);
+
+	FovValue = MakeRow(Left, NSLOCTEXT("IBSettings", "Fov", "FIELD OF VIEW"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleFovPrev);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleFovNext);
+
+	GammaValue = MakeRow(Left, NSLOCTEXT("IBSettings", "Gamma", "BRIGHTNESS"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleGammaPrev);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleGammaNext);
+
+	ShowFpsValue = MakeRow(Left, NSLOCTEXT("IBSettings", "ShowFps", "FPS COUNTER"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleShowFpsToggle);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleShowFpsToggle);
+
+	// ---- AUDIO (right) ----
+	AddSection(Right, NSLOCTEXT("IBSettings", "Audio", "AUDIO"));
+
+	MasterValue = MakeRow(Right, NSLOCTEXT("IBSettings", "Master", "MASTER VOLUME"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleMasterPrev);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleMasterNext);
+
+	MusicValue = MakeRow(Right, NSLOCTEXT("IBSettings", "Music", "MUSIC"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleMusicPrev);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleMusicNext);
+
+	SfxValue = MakeRow(Right, NSLOCTEXT("IBSettings", "Sfx", "EFFECTS"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleSfxPrev);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleSfxNext);
+
+	// ---- CONTROLS (right) ----
+	AddSection(Right, NSLOCTEXT("IBSettings", "Controls", "CONTROLS"));
+
+	SensitivityValue = MakeRow(Right, NSLOCTEXT("IBSettings", "Sensitivity", "MOUSE SENSITIVITY"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleSensPrev);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleSensNext);
+
+	AdsSensitivityValue = MakeRow(Right, NSLOCTEXT("IBSettings", "AdsSens", "ADS SENSITIVITY"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleAdsSensPrev);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleAdsSensNext);
+
+	InvertValue = MakeRow(Right, NSLOCTEXT("IBSettings", "InvertY", "INVERT Y"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleInvertToggle);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleInvertToggle);
+
+	AdsModeValue = MakeRow(Right, NSLOCTEXT("IBSettings", "AdsMode", "AIM MODE"), Prev, Next);
+	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleAdsModeToggle);
+	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleAdsModeToggle);
+
+	// ---- Footer: reset + hint ----
+	UHorizontalBox* Footer = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	UButton* Reset = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBSettings", "Reset", "RESET TO DEFAULTS"), 11);
+	Reset->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleResetClicked);
+	if (UHorizontalBoxSlot* ResetSlot = Footer->AddChildToHorizontalBox(Reset))
+	{
+		ResetSlot->SetVerticalAlignment(VAlign_Center);
+		ResetSlot->SetPadding(FMargin(0.f, 0.f, 18.f, 0.f));
+	}
 	UTextBlock* Hint = IBStyle::MakeText(WidgetTree,
 		NSLOCTEXT("IBSettings", "Hint", "CHANGES APPLY AND SAVE IMMEDIATELY  ·  ESC TO CLOSE"),
 		10, IBStyle::TextLo(), 300);
-	Hint->SetJustification(ETextJustify::Center);
-	if (UVerticalBoxSlot* HintSlot = Column->AddChildToVerticalBox(Hint))
+	if (UHorizontalBoxSlot* HintSlot = Footer->AddChildToHorizontalBox(Hint))
 	{
-		HintSlot->SetPadding(FMargin(0.f, 18.f, 0.f, 0.f));
+		HintSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	if (UVerticalBoxSlot* FooterSlot = Outer->AddChildToVerticalBox(Footer))
+	{
+		FooterSlot->SetPadding(FMargin(0.f, 16.f, 0.f, 0.f));
+		FooterSlot->SetHorizontalAlignment(HAlign_Center);
 	}
 
 	// Card chrome, same sheet as the System screen.
 	UBorder* Card = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.96f), 14.f);
-	Card->SetPadding(FMargin(34.f, 28.f));
-	Card->SetContent(Column);
-	if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(Card))
+	Card->SetPadding(FMargin(34.f, 26.f));
+	Card->SetContent(Outer);
+	if (UOverlaySlot* CardSlot = Root->AddChildToOverlay(Card))
 	{
-		ColumnSlot->SetHorizontalAlignment(HAlign_Center);
-		ColumnSlot->SetVerticalAlignment(VAlign_Center);
+		CardSlot->SetHorizontalAlignment(HAlign_Center);
+		CardSlot->SetVerticalAlignment(VAlign_Center);
 	}
 }
 
@@ -183,27 +286,39 @@ void UIBSettingsScreen::RefreshValues()
 	if (QualityValue)
 	{
 		const int32 Quality = FMath::Clamp(Settings->GetOverallScalabilityLevel(), 0, 3);
-		// -1 = custom per-category levels; show as CUSTOM rather than lying.
 		QualityValue->SetText(Settings->GetOverallScalabilityLevel() < 0
 			? NSLOCTEXT("IBSettings", "Custom", "CUSTOM")
 			: FText::FromString(QualityNames[Quality]));
 	}
-	if (WindowValue)
-	{
-		WindowValue->SetText(WindowModeName(Settings->GetFullscreenMode()));
-	}
+	if (WindowValue)     { WindowValue->SetText(WindowModeName(Settings->GetFullscreenMode())); }
 	if (ResolutionValue)
 	{
 		const FIntPoint Res = Settings->GetScreenResolution();
 		ResolutionValue->SetText(FText::FromString(FString::Printf(TEXT("%d × %d"), Res.X, Res.Y)));
 	}
-	if (VolumeValue)
+	if (ScaleValue)      { ScaleValue->SetText(Percent(Settings->GetResolutionScaleNormalized())); }
+	if (VSyncValue)      { VSyncValue->SetText(OnOff(Settings->IsVSyncEnabled())); }
+	if (FpsCapValue)
 	{
-		VolumeValue->SetText(FText::FromString(FString::Printf(TEXT("%d%%"), FMath::RoundToInt(Settings->GetMasterVolume() * 100.f))));
+		const int32 Cap = FMath::RoundToInt(Settings->GetFrameRateLimit());
+		FpsCapValue->SetText(Cap <= 0
+			? NSLOCTEXT("IBSettings", "Uncapped", "UNCAPPED")
+			: FText::FromString(FString::Printf(TEXT("%d"), Cap)));
 	}
-	if (SensitivityValue)
+	if (FovValue)        { FovValue->SetText(FText::FromString(FString::Printf(TEXT("%d°"), FMath::RoundToInt(Settings->GetFieldOfView())))); }
+	if (GammaValue)      { GammaValue->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), Settings->GetGamma()))); }
+	if (ShowFpsValue)    { ShowFpsValue->SetText(OnOff(Settings->GetShowFPS())); }
+	if (MasterValue)     { MasterValue->SetText(Percent(Settings->GetMasterVolume())); }
+	if (MusicValue)      { MusicValue->SetText(Percent(Settings->GetMusicVolume())); }
+	if (SfxValue)        { SfxValue->SetText(Percent(Settings->GetSFXVolume())); }
+	if (SensitivityValue)    { SensitivityValue->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), Settings->GetMouseSensitivity()))); }
+	if (AdsSensitivityValue) { AdsSensitivityValue->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), Settings->GetADSSensitivity()))); }
+	if (InvertValue)     { InvertValue->SetText(OnOff(Settings->GetInvertY())); }
+	if (AdsModeValue)
 	{
-		SensitivityValue->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), Settings->GetMouseSensitivity())));
+		AdsModeValue->SetText(Settings->GetToggleADS()
+			? NSLOCTEXT("IBSettings", "AdsToggle", "TOGGLE")
+			: NSLOCTEXT("IBSettings", "AdsHold", "HOLD"));
 	}
 }
 
@@ -211,8 +326,7 @@ void UIBSettingsScreen::ApplyAndSave()
 {
 	if (UIBUserSettings* Settings = UIBUserSettings::Get())
 	{
-		Settings->ApplySettings(false); // pushes video changes live
-		Settings->ApplyIBSettings();
+		Settings->ApplySettings(false); // video + custom (ApplyNonResolutionSettings chains ApplyIBSettings)
 		Settings->SaveSettings();
 	}
 	RefreshValues();
@@ -232,7 +346,6 @@ void UIBSettingsScreen::StepWindowMode(int32 Direction)
 {
 	if (UIBUserSettings* Settings = UIBUserSettings::Get())
 	{
-		// Cycle order: Fullscreen -> Borderless -> Windowed.
 		static const EWindowMode::Type Order[] = { EWindowMode::Fullscreen, EWindowMode::WindowedFullscreen, EWindowMode::Windowed };
 		int32 Index = 0;
 		for (int32 i = 0; i < 3; ++i) { if (Order[i] == Settings->GetFullscreenMode()) { Index = i; break; } }
@@ -256,11 +369,88 @@ void UIBSettingsScreen::StepResolution(int32 Direction)
 	ApplyAndSave();
 }
 
-void UIBSettingsScreen::StepVolume(float Delta)
+void UIBSettingsScreen::StepRenderScale(int32 Delta)
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		const float Current = Settings->GetResolutionScaleNormalized() * 100.f;
+		Settings->SetResolutionScaleNormalized(FMath::Clamp(Current + Delta, 50.f, 100.f) / 100.f);
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::ToggleVSync()
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetVSyncEnabled(!Settings->IsVSyncEnabled());
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::StepFpsCap(int32 Direction)
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		const int32 Cap = FMath::RoundToInt(Settings->GetFrameRateLimit());
+		int32 Index = FpsCapOptions.IndexOfByKey(Cap);
+		if (Index == INDEX_NONE) { Index = 0; }
+		const int32 Count = FpsCapOptions.Num();
+		Settings->SetFrameRateLimit(static_cast<float>(FpsCapOptions[(Index + Direction + Count) % Count]));
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::StepFov(float Delta)
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetFieldOfView(Settings->GetFieldOfView() + Delta);
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::StepGamma(float Delta)
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetGamma(Settings->GetGamma() + Delta);
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::ToggleShowFps()
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetShowFPS(!Settings->GetShowFPS());
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::StepMaster(float Delta)
 {
 	if (UIBUserSettings* Settings = UIBUserSettings::Get())
 	{
 		Settings->SetMasterVolume(Settings->GetMasterVolume() + Delta);
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::StepMusic(float Delta)
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetMusicVolume(Settings->GetMusicVolume() + Delta);
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::StepSfx(float Delta)
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetSFXVolume(Settings->GetSFXVolume() + Delta);
 	}
 	ApplyAndSave();
 }
@@ -270,6 +460,42 @@ void UIBSettingsScreen::StepSensitivity(float Delta)
 	if (UIBUserSettings* Settings = UIBUserSettings::Get())
 	{
 		Settings->SetMouseSensitivity(Settings->GetMouseSensitivity() + Delta);
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::StepAdsSensitivity(float Delta)
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetADSSensitivity(Settings->GetADSSensitivity() + Delta);
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::ToggleInvertY()
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetInvertY(!Settings->GetInvertY());
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::ToggleAdsMode()
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetToggleADS(!Settings->GetToggleADS());
+	}
+	ApplyAndSave();
+}
+
+void UIBSettingsScreen::HandleResetClicked()
+{
+	if (UIBUserSettings* Settings = UIBUserSettings::Get())
+	{
+		Settings->SetToDefaults();
 	}
 	ApplyAndSave();
 }

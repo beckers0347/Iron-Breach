@@ -310,6 +310,9 @@ protected:
 	/** F thunk: open the Squad tab (friends/invites) via the menu subsystem. */
 	void OpenSquadScreen();
 
+	/** Push the saved FOV into the rig/camera (BeginPlay + live on settings apply). */
+	void ApplyUserFOV();
+
 public:
 	// Implementation of IDamageableInterface
 	virtual void HandleTakeDamage_Implementation(float DamageAmount, const FHitResult& HitResult, AController* InstigatedBy, AActor* DamageCauser) override;

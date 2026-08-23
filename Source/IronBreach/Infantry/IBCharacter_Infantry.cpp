@@ -120,6 +120,14 @@ void AIBCharacter_Infantry::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// User FOV: apply now and again whenever the Settings screen changes it.
+	// Weak lambda — dies with the pawn, no EndPlay bookkeeping.
+	ApplyUserFOV();
+	if (UIBUserSettings* UserSettings = UIBUserSettings::Get())
+	{
+		UserSettings->OnIBSettingsApplied.AddWeakLambda(this, [this]() { ApplyUserFOV(); });
+	}
+
 	// Re-assert here, not just in the constructor: BP_IBCharacter_Infantry's Character
 	// Movement Component carries its own serialized override on top of this native class's
 	// CDO (confirmed by CanEverCrouch() logging false at runtime despite the constructor
@@ -609,6 +617,23 @@ void AIBCharacter_Infantry::SetWeaponMeshScale(FVector NewScale)
 	}
 }
 
+void AIBCharacter_Infantry::ApplyUserFOV()
+{
+	const UIBUserSettings* UserSettings = UIBUserSettings::Get();
+	if (!UserSettings) { return; }
+
+	if (WeaponRig)
+	{
+		// The rig rewrites the camera from BaseFov every frame (through the
+		// ADS blend), so this is the one true knob.
+		WeaponRig->SetBaseFov(UserSettings->GetFieldOfView());
+	}
+	else if (FirstPersonCamera)
+	{
+		FirstPersonCamera->SetFieldOfView(UserSettings->GetFieldOfView());
+	}
+}
+
 void AIBCharacter_Infantry::OpenSquadScreen()
 {
 	if (const APlayerController* PC = Cast<APlayerController>(Controller))
@@ -815,12 +840,16 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 	if (Controller != nullptr)
 	{
 		// Damp look sensitivity while zoomed so ADS aim isn't twitchy (tracks FOV
-		// ratio), scaled by the player's saved preference (Settings screen).
+		// ratio), scaled by the player's saved preferences (Settings screen):
+		// base sensitivity, an extra ADS multiplier while aiming, and invert Y.
 		const UIBUserSettings* UserSettings = UIBUserSettings::Get();
 		const float UserSens = UserSettings ? UserSettings->GetMouseSensitivity() : 1.0f;
-		const float Sens = (WeaponRig ? WeaponRig->GetLookSensitivityMultiplier() : 1.0f) * UserSens;
+		const float AdsSens = (UserSettings && WeaponRig && WeaponRig->IsAiming())
+			? UserSettings->GetADSSensitivity() : 1.0f;
+		const float Sens = (WeaponRig ? WeaponRig->GetLookSensitivityMultiplier() : 1.0f) * UserSens * AdsSens;
+		const float YSign = (UserSettings && UserSettings->GetInvertY()) ? -1.0f : 1.0f;
 		AddControllerYawInput(LookAxisVector.X * Sens);
-		AddControllerPitchInput(LookAxisVector.Y * Sens);
+		AddControllerPitchInput(LookAxisVector.Y * Sens * YSign);
 
 		// Feed the raw delta to the rig for weapon sway.
 		if (WeaponRig)
@@ -837,6 +866,16 @@ void AIBCharacter_Infantry::StartAiming()
 		return; // can't start aiming while sprinting
 	}
 
+	// Toggle-ADS mode (Settings): the second press lowers the weapon — the
+	// release is ignored in StopAiming, so this is the only way down.
+	const UIBUserSettings* UserSettings = UIBUserSettings::Get();
+	if (UserSettings && UserSettings->GetToggleADS() && bIsAiming)
+	{
+		bIsAiming = false;
+		if (WeaponRig) WeaponRig->SetAiming(false);
+		return;
+	}
+
 	bIsAiming = true;
 
 	UE_LOG(LogIronBreach, Log, TEXT("[Input] StartAiming called. WeaponRig valid: %s"), WeaponRig ? TEXT("Yes") : TEXT("No"));
@@ -845,6 +884,14 @@ void AIBCharacter_Infantry::StartAiming()
 
 void AIBCharacter_Infantry::StopAiming()
 {
+	// Toggle-ADS mode: RMB release means nothing — StartAiming's second press
+	// is the only way down.
+	const UIBUserSettings* UserSettings = UIBUserSettings::Get();
+	if (UserSettings && UserSettings->GetToggleADS())
+	{
+		return;
+	}
+
 	// bIsAiming was never cleared here, so it stuck true forever after the first ADS,
 	// permanently blocking StartSprint()'s "can't sprint while aiming" guard.
 	bIsAiming = false;
