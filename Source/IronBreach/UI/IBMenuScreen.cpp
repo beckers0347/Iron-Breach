@@ -1,6 +1,8 @@
 #include "UI/IBMenuScreen.h"
 #include "UI/IBMenuSubsystem.h"
 #include "UI/IBUISettings.h"
+#include "UI/IBStyleKit.h"
+#include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
@@ -40,11 +42,16 @@ void UIBMenuScreen::EnsureTabBanner()
 		if (!Root) { return; }
 
 		TabBannerBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-		if (UOverlaySlot* BannerSlot = Root->AddChildToOverlay(TabBannerBox))
+
+		// House chrome: the tab rail rides in a rounded ink chip.
+		UBorder* Rail = IBStyle::MakePanel(WidgetTree, FLinearColor(0.008f, 0.012f, 0.022f, 0.85f), 18.f);
+		Rail->SetPadding(FMargin(10.f, 7.f));
+		Rail->SetContent(TabBannerBox);
+		if (UOverlaySlot* BannerSlot = Root->AddChildToOverlay(Rail))
 		{
 			BannerSlot->SetHorizontalAlignment(HAlign_Center);
 			BannerSlot->SetVerticalAlignment(VAlign_Top);
-			BannerSlot->SetPadding(FMargin(0.f, 44.f, 0.f, 0.f));
+			BannerSlot->SetPadding(FMargin(0.f, 40.f, 0.f, 0.f));
 		}
 	}
 
@@ -53,16 +60,12 @@ void UIBMenuScreen::EnsureTabBanner()
 	{
 		const FIBMenuScreenDef& Def = Settings->Screens[i];
 
-		UTextBlock* Label = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-		Label->SetText(Def.TabLabel.IsEmpty() ? FText::FromName(Def.ScreenId) : Def.TabLabel);
-		FSlateFontInfo Font = Label->GetFont();
-		Font.Size = 15;
-		Label->SetFont(Font);
-		Label->SetShadowOffset(FVector2D(1.f, 1.f));
-		Label->SetShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.7f));
+		UTextBlock* Label = IBStyle::MakeText(WidgetTree,
+			Def.TabLabel.IsEmpty() ? FText::FromName(Def.ScreenId) : Def.TabLabel,
+			14, IBStyle::TextLo(), 500);
 		if (UHorizontalBoxSlot* LabelSlot = TabBannerBox->AddChildToHorizontalBox(Label))
 		{
-			LabelSlot->SetPadding(FMargin(18.f, 0.f));
+			LabelSlot->SetPadding(FMargin(16.f, 0.f));
 		}
 		TabLabels.Add(Label);
 		TabIds.Add(Def.ScreenId);

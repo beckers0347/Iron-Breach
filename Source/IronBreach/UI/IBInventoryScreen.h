@@ -35,8 +35,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void SetCategoryFilter(EIBItemCategory Category);
 
+	/** Show everything (the default — kaiju materials must be visible without
+	 *  hunting for the right tab). */
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void SetFilterAll();
+
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	EIBItemCategory GetCategoryFilter() const { return CategoryFilter; }
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	bool IsFilterAll() const { return bFilterAll; }
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	UIBInventoryComponent* GetInventory() const;
@@ -66,6 +74,12 @@ protected:
 
 	UFUNCTION()
 	void HandleTileHoverChanged(UIBItemTileWidget* Tile, bool bHovered);
+
+	// Filter tab click thunks (dynamic delegates carry no payload).
+	UFUNCTION() void HandleFilterAllClicked()       { SetFilterAll(); }
+	UFUNCTION() void HandleFilterWeaponsClicked()   { SetCategoryFilter(EIBItemCategory::Weapon); }
+	UFUNCTION() void HandleFilterArmorClicked()     { SetCategoryFilter(EIBItemCategory::Armor); }
+	UFUNCTION() void HandleFilterMaterialsClicked() { SetCategoryFilter(EIBItemCategory::KaijuMaterial); }
 
 	// ---- Optional-bind layout hooks (names matter) ----
 
@@ -120,6 +134,8 @@ private:
 	void BuildFallbackLayout();
 	UIBItemTileWidget* MakeWell(class UVerticalBox* Column, EIBEquipSlot ForSlot);
 	void SetDetails(const class UIBItemTileWidget* Tile);
+	class UButton* MakeFilterTab(class UHorizontalBox* Row, const FText& Label);
+	void RefreshFilterTabs();
 
 	void RebuildAll();
 	void RebuildGrid();
@@ -137,4 +153,12 @@ private:
 	TObjectPtr<class USizeBox> DetailPanel;
 
 	EIBItemCategory CategoryFilter = EIBItemCategory::Weapon;
+
+	/** True (default) = grid shows everything, CategoryFilter ignored. */
+	bool bFilterAll = true;
+
+	/** Fallback filter-tab labels, in tab order: ALL/WEAPONS/ARMOR/MATERIALS.
+	 *  Active renders amber, rest service-gray (same grammar as the tab banner). */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UTextBlock>> FilterTabLabels;
 };

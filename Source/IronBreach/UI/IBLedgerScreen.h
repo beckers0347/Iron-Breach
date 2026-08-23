@@ -69,5 +69,9 @@ private:
 	UIBLedgerSubsystem* GetLedger() const;
 
 	EIBItemCategory CategoryFilter = EIBItemCategory::Weapon;
+
+	/** Default: the whole book, sorted category -> clearance -> name. Calling
+	 *  SetCategoryFilter narrows it; the BP API is unchanged. */
+	bool bFilterAll = true;
 	bool bDiscoveryBound = false;
 };

@@ -1,5 +1,6 @@
 // IBWeaponRackScreen.cpp
 #include "UI/IBWeaponRackScreen.h"
+#include "UI/IBStyleKit.h"
 #include "UI/IBItemTileWidget.h"
 #include "Items/IBWeaponRack.h"
 #include "Items/IBItemDefinition.h"
@@ -86,35 +87,26 @@ void UIBWeaponRackScreen::BuildFallbackLayout()
 
 	UHorizontalBox* HeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 
-	UTextBlock* Title = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-	Title->SetText(NSLOCTEXT("IBWeaponRack", "Title", "WEAPON RACK"));
-	FSlateFontInfo TitleFont = Title->GetFont();
-	TitleFont.Size = 26;
-	Title->SetFont(TitleFont);
-	Title->SetColorAndOpacity(FSlateColor(FLinearColor(0.85f, 0.9f, 1.f)));
+	UTextBlock* Title = IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBWeaponRack", "Title", "WEAPON RACK"));
 	if (UHorizontalBoxSlot* TitleSlot = HeaderRow->AddChildToHorizontalBox(Title))
 	{
 		TitleSlot->SetHorizontalAlignment(HAlign_Left);
 		TitleSlot->SetPadding(FMargin(0.f, 0.f, 40.f, 0.f));
 	}
 
-	UButton* Store = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
-	UTextBlock* StoreLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-	StoreLabel->SetText(NSLOCTEXT("IBWeaponRack", "Store", "STORE EQUIPPED"));
-	Store->AddChild(StoreLabel);
+	UButton* Store = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBWeaponRack", "Store", "STORE EQUIPPED"), 12, /*bAccent=*/true);
 	if (UHorizontalBoxSlot* StoreSlot = HeaderRow->AddChildToHorizontalBox(Store))
 	{
 		StoreSlot->SetPadding(FMargin(0.f, 0.f, 12.f, 0.f));
+		StoreSlot->SetVerticalAlignment(VAlign_Center);
 	}
 	StoreButton = Store;
 
-	UButton* Close = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
-	UTextBlock* CloseLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-	CloseLabel->SetText(NSLOCTEXT("IBWeaponRack", "Close", "Close (Esc)"));
-	Close->AddChild(CloseLabel);
+	UButton* Close = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBWeaponRack", "Close", "CLOSE (ESC)"), 12);
 	if (UHorizontalBoxSlot* CloseSlot = HeaderRow->AddChildToHorizontalBox(Close))
 	{
 		CloseSlot->SetHorizontalAlignment(HAlign_Right);
+		CloseSlot->SetVerticalAlignment(VAlign_Center);
 	}
 	CloseButton = Close;
 
@@ -128,6 +120,18 @@ void UIBWeaponRackScreen::BuildFallbackLayout()
 	Grid->SetSlotPadding(FMargin(4.f));
 	Column->AddChildToVerticalBox(Grid);
 	ItemGrid = Grid;
+
+	UTextBlock* Hint = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+	Hint->SetText(NSLOCTEXT("IBWeaponRack", "Hint", "CLICK A WEAPON TO TAKE IT  ·  STORE EQUIPPED RACKS THE GUN IN YOUR HANDS"));
+	FSlateFontInfo HintFont = Hint->GetFont();
+	HintFont.Size = 10;
+	Hint->SetFont(HintFont);
+	Hint->SetColorAndOpacity(FSlateColor(FLinearColor(0.5f, 0.56f, 0.68f)));
+	if (UVerticalBoxSlot* HintSlot = Column->AddChildToVerticalBox(Hint))
+	{
+		HintSlot->SetPadding(FMargin(0.f, 10.f, 0.f, 0.f));
+		HintSlot->SetHorizontalAlignment(HAlign_Center);
+	}
 
 	if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(Column))
 	{

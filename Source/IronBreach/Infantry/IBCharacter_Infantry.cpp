@@ -27,6 +27,7 @@
 #include "Items/IBItemDefinition.h"
 #include "Items/IBPlayerState.h"
 #include "Net/UnrealNetwork.h" // DOREPLIFETIME (ActiveWeaponSlot)
+#include "Player/IBUserSettings.h" // mouse sensitivity in Look()
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()
 {
@@ -589,8 +590,11 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		// Damp look sensitivity while zoomed so ADS aim isn't twitchy (tracks FOV ratio).
-		const float Sens = WeaponRig ? WeaponRig->GetLookSensitivityMultiplier() : 1.0f;
+		// Damp look sensitivity while zoomed so ADS aim isn't twitchy (tracks FOV
+		// ratio), scaled by the player's saved preference (Settings screen).
+		const UIBUserSettings* UserSettings = UIBUserSettings::Get();
+		const float UserSens = UserSettings ? UserSettings->GetMouseSensitivity() : 1.0f;
+		const float Sens = (WeaponRig ? WeaponRig->GetLookSensitivityMultiplier() : 1.0f) * UserSens;
 		AddControllerYawInput(LookAxisVector.X * Sens);
 		AddControllerPitchInput(LookAxisVector.Y * Sens);
 

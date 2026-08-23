@@ -12,6 +12,47 @@ namespace
 	const FName IBSessionName(NAME_GameSession);
 }
 
+void UIBSessionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	// Steam overlay invites: accepting one lands here — join the sender.
+	if (IOnlineSessionPtr Sessions = GetSessionInterface())
+	{
+		InviteAcceptedHandle = Sessions->AddOnSessionUserInviteAcceptedDelegate_Handle(
+			FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UIBSessionSubsystem::OnInviteAccepted));
+	}
+}
+
+void UIBSessionSubsystem::Deinitialize()
+{
+	if (IOnlineSessionPtr Sessions = GetSessionInterface())
+	{
+		Sessions->ClearOnSessionUserInviteAcceptedDelegate_Handle(InviteAcceptedHandle);
+	}
+	Super::Deinitialize();
+}
+
+void UIBSessionSubsystem::OnInviteAccepted(const bool bWasSuccessful, const int32 /*ControllerId*/,
+	FUniqueNetIdPtr /*UserId*/, const FOnlineSessionSearchResult& InviteResult)
+{
+	if (!bWasSuccessful || !InviteResult.IsValid())
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("Invite accepted but the session result was invalid"));
+		ReportStatus(EIBSessionStatus::JoinFailed, TEXT("INVITE EXPIRED"));
+		return;
+	}
+	UE_LOG(LogIronBreach, Log, TEXT("Invite accepted — joining the sender's squad"));
+	ReportStatus(EIBSessionStatus::Joining, TEXT("INVITE ACCEPTED - LINKING..."));
+	JoinSearchResult(InviteResult);
+}
+
+bool UIBSessionSubsystem::IsInSession() const
+{
+	IOnlineSessionPtr Sessions = GetSessionInterface();
+	return Sessions.IsValid() && Sessions->GetNamedSession(IBSessionName) != nullptr;
+}
+
 void UIBSessionSubsystem::ReportStatus(EIBSessionStatus Status, const FString& Message)
 {
 	UE_LOG(LogIronBreach, Log, TEXT("Session status: %s"), *Message);
@@ -88,6 +129,19 @@ void UIBSessionSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSu
 		return;
 	}
 
+	if (bLobbyBeforeDeploy)
+	{
+		// Dwell in the menu as a live lobby: the squad assembles in front of
+		// the banners, then the host pulls the trigger (IBDeploy).
+		UE_LOG(LogIronBreach, Log, TEXT("IBHost: session live - lobby-hosting %s"), *LobbyTravelURL);
+		ReportStatus(EIBSessionStatus::LobbyLive, TEXT("LOBBY LIVE - SQUAD CAN JOIN"));
+		if (UWorld* World = GetWorld())
+		{
+			World->ServerTravel(LobbyTravelURL);
+		}
+		return;
+	}
+
 	UE_LOG(LogIronBreach, Log, TEXT("IBHost: session live - listen-hosting %s"), *HostTravelURL);
 	ReportStatus(EIBSessionStatus::HostLive, TEXT("SERVER LIVE - DEPLOYING..."));
 
@@ -95,6 +149,19 @@ void UIBSessionSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSu
 	{
 		World->ServerTravel(HostTravelURL);
 	}
+}
+
+void UIBSessionSubsystem::IBDeploy()
+{
+	UWorld* World = GetWorld();
+	if (!World || World->GetNetMode() == NM_Client)
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("IBDeploy: only the host can deploy the squad"));
+		return;
+	}
+	UE_LOG(LogIronBreach, Log, TEXT("IBDeploy: taking the squad to %s"), *HostTravelURL);
+	ReportStatus(EIBSessionStatus::Deploying, TEXT("DEPLOYING SQUAD..."));
+	World->ServerTravel(HostTravelURL);
 }
 
 void UIBSessionSubsystem::IBJoin()
@@ -146,13 +213,27 @@ void UIBSessionSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 
 	UE_LOG(LogIronBreach, Log, TEXT("IBJoin: %d session(s) found - joining the first"), SessionSearch->SearchResults.Num());
 	ReportStatus(EIBSessionStatus::Joining, TEXT("SQUAD FOUND - LINKING..."));
+	JoinSearchResult(SessionSearch->SearchResults[0]);
+}
+
+void UIBSessionSubsystem::JoinSearchResult(const FOnlineSessionSearchResult& Result)
+{
+	IOnlineSessionPtr Sessions = GetSessionInterface();
+	if (!Sessions.IsValid()) { return; }
+
+	// A stale local entry blocks JoinSession — clear it first (e.g. accepting
+	// an invite while already hosting your own empty lobby).
+	if (Sessions->GetNamedSession(IBSessionName))
+	{
+		Sessions->DestroySession(IBSessionName);
+	}
 
 	JoinCompleteHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 		FOnJoinSessionCompleteDelegate::CreateUObject(this, &UIBSessionSubsystem::OnJoinSessionComplete));
 
-	if (!Sessions->JoinSession(0, IBSessionName, SessionSearch->SearchResults[0]))
+	if (!Sessions->JoinSession(0, IBSessionName, Result))
 	{
-		UE_LOG(LogIronBreach, Error, TEXT("IBJoin: JoinSession call failed immediately"));
+		UE_LOG(LogIronBreach, Error, TEXT("JoinSearchResult: JoinSession call failed immediately"));
 		Sessions->ClearOnJoinSessionCompleteDelegate_Handle(JoinCompleteHandle);
 		ReportStatus(EIBSessionStatus::JoinFailed, TEXT("LINK REFUSED"));
 	}

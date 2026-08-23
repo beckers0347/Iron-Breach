@@ -1,4 +1,5 @@
 #include "UI/IBLedgerScreen.h"
+#include "UI/IBStyleKit.h"
 #include "Items/IBLedgerSubsystem.h"
 #include "Items/IBItemDefinition.h"
 #include "UI/IBItemTileWidget.h"
@@ -40,22 +41,20 @@ void UIBLedgerScreen::NativeOnInitialized()
 
 		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 
-		UTextBlock* Title = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-		Title->SetText(NSLOCTEXT("IBLedger", "Title", "THE LEDGER"));
-		FSlateFontInfo TitleFont = Title->GetFont();
-		TitleFont.Size = 26;
-		Title->SetFont(TitleFont);
-		Title->SetColorAndOpacity(FSlateColor(FLinearColor(0.85f, 0.9f, 1.f)));
+		UTextBlock* Title = IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBLedger", "Title", "THE LEDGER"));
 		Column->AddChildToVerticalBox(Title);
 
-		UTextBlock* Progress = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-		FSlateFontInfo ProgFont = Progress->GetFont();
-		ProgFont.Size = 13;
-		Progress->SetFont(ProgFont);
-		Progress->SetColorAndOpacity(FSlateColor(FLinearColor(0.6f, 0.68f, 0.8f)));
+		UBorder* Accent = IBStyle::MakeAccentBar(WidgetTree, IBStyle::Amber());
+		Accent->SetPadding(FMargin(0.f, 1.5f));
+		if (UVerticalBoxSlot* AccentSlot = Column->AddChildToVerticalBox(Accent))
+		{
+			AccentSlot->SetPadding(FMargin(0.f, 6.f, 200.f, 0.f));
+		}
+
+		UTextBlock* Progress = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 12, IBStyle::TextLo(), 300);
 		if (UVerticalBoxSlot* ProgSlot = Column->AddChildToVerticalBox(Progress))
 		{
-			ProgSlot->SetPadding(FMargin(0.f, 4.f, 0.f, 14.f));
+			ProgSlot->SetPadding(FMargin(0.f, 8.f, 0.f, 14.f));
 		}
 		ProgressText = Progress;
 
@@ -94,8 +93,9 @@ void UIBLedgerScreen::NativeScreenOpened()
 
 void UIBLedgerScreen::SetCategoryFilter(EIBItemCategory Category)
 {
-	if (CategoryFilter != Category)
+	if (bFilterAll || CategoryFilter != Category)
 	{
+		bFilterAll = false;
 		CategoryFilter = Category;
 		RebuildGrid();
 	}
@@ -118,9 +118,20 @@ void UIBLedgerScreen::RebuildGrid()
 	int32 DiscoveredInCategory = 0;
 	int32 TotalInCategory = 0;
 
-	for (const UIBItemDefinition* Def : Ledger->GetFullCatalog())
+	// Stable reading order: category sections, rising clearance inside each,
+	// names as the tiebreak — the book always reads the same way.
+	TArray<UIBItemDefinition*> Catalog = Ledger->GetFullCatalog();
+	Catalog.Sort([](const UIBItemDefinition& A, const UIBItemDefinition& B)
 	{
-		if (!Def || Def->Category != CategoryFilter) { continue; }
+		if (A.Category != B.Category) { return A.Category < B.Category; }
+		if (A.BaseClearanceRating != B.BaseClearanceRating) { return A.BaseClearanceRating < B.BaseClearanceRating; }
+		return A.DisplayName.CompareTo(B.DisplayName) < 0;
+	});
+
+	for (const UIBItemDefinition* Def : Catalog)
+	{
+		if (!Def) { continue; }
+		if (!bFilterAll && Def->Category != CategoryFilter) { continue; }
 		++TotalInCategory;
 
 		UIBItemTileWidget* Tile = CreateWidget<UIBItemTileWidget>(this, GridTileClass);
