@@ -5,7 +5,7 @@
 
 #include "EditorTools/WeaponGeneratorLibrary.h"
 #include "EditorTools/ItemIconCaptureLibrary.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponCombatData.h"
 #include "Items/IBItemDefinition.h"
 #include "ToolMenus.h"
 #include "ContentBrowserMenuContexts.h"
@@ -20,7 +20,7 @@ namespace
 
 	void AddGenerateWeaponVariantEntry()
 	{
-		UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu.WeaponDataAsset");
+		UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu.WeaponCombatData");
 		if (!Menu)
 		{
 			return;
@@ -47,7 +47,7 @@ namespace
 					// Same clone-exact-stats logic WeaponAssetActions::GenerateWeaponVariant used --
 					// mirrored here rather than shared since that class's Blueprint-driven path is
 					// no longer the recommended entry point (see this file's header comment).
-					for (UWeaponDataAsset* SourceWeapon : Context->LoadSelectedObjects<UWeaponDataAsset>())
+					for (UWeaponCombatData* SourceWeapon : Context->LoadSelectedObjects<UWeaponCombatData>())
 					{
 						if (!SourceWeapon)
 						{
@@ -55,9 +55,9 @@ namespace
 						}
 
 						const FString SourcePackagePath = SourceWeapon->GetOutermost()->GetName();
-						const FString SourceName = SourceWeapon->WeaponName.IsNone()
-							? SourceWeapon->GetName()
-							: SourceWeapon->WeaponName.ToString();
+						// UWeaponCombatData has no name field of its own (that's UWeaponVisualData::WeaponName) --
+						// the asset's own name is the only identity available here.
+						const FString SourceName = SourceWeapon->GetName();
 
 						FWeaponGenerationParams Params;
 						Params.NewWeaponName = SourceName + TEXT("_Variant");

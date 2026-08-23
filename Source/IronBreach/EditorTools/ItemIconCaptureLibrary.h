@@ -1,10 +1,11 @@
 // ItemIconCaptureLibrary.h
 //
-// Editor-only content tool: renders an item's linked weapon mesh in an isolated
-// lightbox (spawned far above any real level geometry, and further isolated via
-// PrimitiveRenderMode::PRM_UseShowOnlyList so nothing from whatever level
-// happens to be open in the editor bleeds into frame) and bakes the capture into
-// a saved Texture2D icon, assigned to UIBItemDefinition::Icon.
+// Editor-only content tool: renders an item's linked weapon mesh (from its
+// UWeaponVisualData) in an isolated lightbox (spawned far above any real level
+// geometry, and further isolated via PrimitiveRenderMode::PRM_UseShowOnlyList so
+// nothing from whatever level happens to be open in the editor bleeds into
+// frame) and bakes the capture into a saved Texture2D icon, assigned to
+// UIBItemDefinition::Icon.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,11 +21,15 @@ class IRONBREACH_API UItemIconCaptureLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	/** Captures Definition->WeaponData->ViewmodelMesh into a new Texture2D icon
-	 *  saved under /Game/Items/Icons/Generated/T_Icon_<ItemName>, assigns it to
-	 *  Definition->Icon, and saves Definition. Returns nullptr (with a toast
-	 *  explaining why) outside the editor, if Definition has no WeaponData, or if
-	 *  that WeaponData has no ViewmodelMesh assigned yet.
+	/** Captures a weapon's ViewmodelMesh into a new Texture2D icon saved under
+	 *  /Game/Items/Icons/Generated/T_Icon_<ItemName>, assigns it to Definition->Icon,
+	 *  and saves Definition. The VisualData to read the mesh from is resolved as
+	 *  Definition itself when Definition IS a UWeaponVisualData (new-style weapon
+	 *  content -- the common case), falling back to the deprecated
+	 *  Definition->VisualData link for any not-yet-migrated legacy DA_Item_* that
+	 *  still wraps a separate DA_Visual_* asset. Returns nullptr (with a toast
+	 *  explaining why) outside the editor, if neither resolves to a VisualData, or
+	 *  if that VisualData has no ViewmodelMesh assigned yet.
 	 *
 	 *  LightIntensity / ExposureBias are starting points, not guaranteed-correct
 	 *  numbers -- there's no way to preview the render ahead of time, so treat the

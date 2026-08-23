@@ -16,7 +16,8 @@
 #include "Combat/HealthComponent.h"
 #include "Combat/HitscanWeaponComponent.h"
 #include "Combat/WeaponRigComponent.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponCombatData.h"
+#include "Combat/WeaponVisualData.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -49,7 +50,7 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	WeaponMesh->CastShadow = false;
 
 	// The template rifle is authored at full world scale. This is just the pre-data
-	// default: BeginPlay/ApplyWeaponData overwrite it with CurrentWeaponData's
+	// default: BeginPlay/ApplyWeaponData overwrite it with CurrentVisualData's
 	// ViewmodelScale so scale is a per-weapon, designer-facing knob (tune alongside
 	// the rig's hip anchor — a smaller weapon sits closer to camera).
 	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
@@ -85,7 +86,15 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	ScopeCamera->bCaptureEveryFrame = true;
 	ScopeCamera->bCaptureOnMovement = false; // every-frame already covers it; both is wasted work
 	ScopeCamera->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
-	ScopeCamera->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_RenderScenePrimitives;
+	// Explicitly the "render everything, minus HiddenComponents/HiddenActors" mode --
+	// the OTHER two options on this enum (PRM_UseShowOnlyList / PRM_HideOnlyList) only
+	// render primitives that are explicitly listed in ShowOnlyComponents/ShowOnlyActors,
+	// which SetupScopePip() never populates (it only ever adds to HiddenComponents). If
+	// this were resolving to either show-only mode, the capture would render nothing at
+	// all -- a permanently blank/black render target -- regardless of camera position,
+	// exactly the symptom this was chasing. PRM_LegacySceneCapture is the one guaranteed,
+	// long-standing enum member that means "capture normally" across engine versions.
+	ScopeCamera->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_LegacySceneCapture;
 	ScopeCamera->FOVAngle = 20.0f; // overwritten from ScopeFOV in SetupScopePip
 
 	// The third-person body should NOT render for the owning player (they see the viewmodel instead).
@@ -123,25 +132,46 @@ void AIBCharacter_Infantry::BeginPlay()
 	}
 
 	// The loadout property stays the designer-facing knob; the component does the firing.
-	if (WeaponComponent && CurrentWeaponData)
+	if (WeaponComponent && (CurrentCombatData || CurrentVisualData))
 	{
-		WeaponComponent->SetWeaponData(CurrentWeaponData);
+		WeaponComponent->SetWeaponData(CurrentCombatData, CurrentVisualData);
 	}
+
+	// This path (the designer-default loadout) doesn't go through ApplyWeaponData,
+	// so track it here too -- otherwise SetupScopePip() later in BeginPlay would
+	// read a null EquippedVisualData and never find this weapon's PIP toggle/scale.
+	if (CurrentVisualData) { EquippedVisualData = CurrentVisualData; }
+	if (CurrentCombatData) { EquippedCombatData = CurrentCombatData; }
 
 	// Swap in this weapon's viewmodel mesh before anything below reads socket
 	// offsets off WeaponMesh -- scale and rig wiring both solve against whatever
 	// mesh is currently attached.
-	if (CurrentWeaponData)
+	if (CurrentVisualData)
 	{
-		ApplyWeaponMesh(CurrentWeaponData);
+		ApplyWeaponMesh(CurrentVisualData);
 	}
 
 	// Scale the viewmodel before the rig caches socket offsets below — GripLocal/AimLocal
 	// are captured at whatever scale WeaponMesh has *right now*, so this must run first
 	// or ADS alignment solves against the old (default) scale.
-	if (WeaponMesh && CurrentWeaponData)
+	if (WeaponMesh && CurrentVisualData)
 	{
-		WeaponMesh->SetRelativeScale3D(CurrentWeaponData->ViewmodelScale);
+		WeaponMesh->SetRelativeScale3D(CurrentVisualData->ViewmodelScale);
+
+		// TEMP DIAGNOSTIC (scale/location not visibly updating from DA_Visual edits):
+		// confirms which asset BeginPlay actually resolved and what WeaponMesh's scale
+		// reads back as immediately after we set it. If ReadBack != ViewmodelScale here,
+		// something else (a BP Construction Script/EventGraph override, most likely) is
+		// touching WeaponMesh's transform after this point. If ReadBack matches but the
+		// gun still looks unchanged in PIE, the asset being edited isn't the one actually
+		// resolved -- check the name logged here against what you're editing.
+		UE_LOG(LogIronBreach, Warning,
+			TEXT("[WeaponScaleDebug] BeginPlay: CurrentVisualData=%s ViewmodelScale=%s LocationOffset=%s RotationOffset=%s -> WeaponMesh ReadBack Scale=%s"),
+			*CurrentVisualData->GetName(),
+			*CurrentVisualData->ViewmodelScale.ToString(),
+			*CurrentVisualData->ViewmodelLocationOffset.ToString(),
+			*CurrentVisualData->ViewmodelRotationOffset.ToString(),
+			*WeaponMesh->GetRelativeScale3D().ToString());
 	}
 
 	// Wire the first-person weapon rig: camera + viewmodel mesh + this weapon's ADS tuning.
@@ -152,15 +182,15 @@ void AIBCharacter_Infantry::BeginPlay()
 		WeaponRig->SetReferences(FirstPersonCamera, WeaponMesh);
 		UE_LOG(LogIronBreach, Log, TEXT("[Character] WeaponRig found and valid!"));
 
-		if (CurrentWeaponData)
+		if (CurrentVisualData)
 		{
-			WeaponRig->SetAdsSettings(CurrentWeaponData->Ads);
-			WeaponRig->SetWeaponAlignmentOffset(CurrentWeaponData->ViewmodelLocationOffset, CurrentWeaponData->ViewmodelRotationOffset);
-			UE_LOG(LogIronBreach, Log, TEXT("%s: ADS settings applied from %s"), *GetName(), *CurrentWeaponData->GetName());
+			WeaponRig->SetAdsSettings(ResolveAdsSettings(CurrentVisualData));
+			WeaponRig->SetWeaponAlignmentOffset(CurrentVisualData->ViewmodelLocationOffset, CurrentVisualData->ViewmodelRotationOffset);
+			UE_LOG(LogIronBreach, Log, TEXT("%s: ADS settings applied from %s"), *GetName(), *CurrentVisualData->GetName());
 		}
 		else
 		{
-			UE_LOG(LogIronBreach, Error, TEXT("%s: CurrentWeaponData is NULL! Check Blueprint Class Defaults."), *GetName());
+			UE_LOG(LogIronBreach, Error, TEXT("%s: CurrentVisualData is NULL! Check Blueprint Class Defaults."), *GetName());
 		}
 	}
 
@@ -199,6 +229,15 @@ void AIBCharacter_Infantry::BeginPlay()
 			}
 		}
 	}
+
+	// Spawn empty-handed (see bStartUnarmed's header comment) -- last thing in
+	// BeginPlay so nothing above (scope pip mount, rig wiring) re-enables what this
+	// turns off. The loot->gun seam (OnPlayerStateChanged/HandleEquipmentChanged)
+	// re-arms this from the real inventory once the PlayerState/equipment catches up.
+	if (bStartUnarmed)
+	{
+		SetUnarmed(true);
+	}
 }
 
 // ---- PIP scope ----
@@ -214,9 +253,29 @@ void AIBCharacter_Infantry::SetupScopePip()
 	if (!bEnableScopePip)
 	{
 		SetScopePipEnabled(false);
-		UE_LOG(LogIronBreach, Verbose, TEXT("%s: [Scope] disabled by bEnableScopePip."), *GetName());
+		UE_LOG(LogIronBreach, Verbose, TEXT("%s: [Scope] disabled by bEnableScopePip (character master switch)."), *GetName());
 		return;
 	}
+
+	// Per-weapon override, on top of the character's master switch above: most
+	// weapon meshes don't have a real lens/ScopeSocket authored, and forcing the
+	// PIP on for one anyway mounts a floating render-target screen at the mesh
+	// root instead of a lens (see the bSocketExists check below) -- which is
+	// exactly what "PIP doesn't work" looks like for a weapon that was never
+	// meant to have one. See UWeaponVisualData::bEnableScopePip/ScopePipSizeMultiplier.
+	const UWeaponVisualData* Equipped = EquippedVisualData.Get();
+	const bool bWeaponWantsScope = Equipped && Equipped->bEnableScopePip;
+	if (!bWeaponWantsScope)
+	{
+		SetScopePipEnabled(false);
+		UE_LOG(LogIronBreach, Verbose,
+			TEXT("%s: [Scope] disabled -- %s."), *GetName(),
+			Equipped ? TEXT("equipped weapon's bEnableScopePip is off") : TEXT("no equipped weapon tracked yet"));
+		return;
+	}
+	// X/Y independent -- Z left at 1.0 since it's the plane's near-zero-thickness
+	// axis and doesn't change what's visible on screen either way.
+	const FVector PipSizeMultiplier(Equipped->ScopePipSizeMultiplier.X, Equipped->ScopePipSizeMultiplier.Y, 1.0f);
 
 	// The optic is a local viewmodel prop. Remote clients and the dedicated server
 	// gain nothing from a scene capture running every frame for a gun they can't see.
@@ -230,23 +289,67 @@ void AIBCharacter_Infantry::SetupScopePip()
 	// artist authored — including a socket whose +X points at the sky, which poses a
 	// plane flat and invisible. The offsets below are the correction, in one readable place.
 	const bool bSocketExists = WeaponMesh->DoesSocketExist(ScopeSocketName);
-	const FName AttachSocket = bSocketExists ? ScopeSocketName : NAME_None;
 
 	if (!bSocketExists)
 	{
+		// This USED to fall back to mounting at the mesh root and hope for the best.
+		// "Hope for the best" turned out to mean: the root of a custom-imported weapon
+		// mesh is an arbitrary point the artist never authored as a lens position, so
+		// ScopeScreenOffset/ScopeCameraOffset (tuned against an actual socket sitting at
+		// the eyepiece) could land the screen anywhere -- including right on top of or
+		// just in front of the camera, where a plane a few cm across covers half the
+		// viewport through sheer proximity. That is exactly what "big black square
+		// covering the left of the screen" looks like, and it's very likely every
+		// custom weapon mesh hits this same fallback since none of them have a
+		// 'ScopeSocket' authored yet. Disabling outright instead of guessing a position
+		// converts a silently-broken visual into a clean off-state plus a fix path.
+		SetScopePipEnabled(false);
 		UE_LOG(LogIronBreach, Warning,
-			TEXT("%s: [Scope] weapon mesh '%s' has no socket '%s' — mounting to the mesh root. Add the socket or clear bEnableScopePip."),
-			*GetName(), *GetNameSafe(WeaponMesh->GetStaticMesh()), *ScopeSocketName.ToString());
+			TEXT("%s: [Scope] weapon mesh '%s' has no socket '%s' -- PIP disabled for this weapon rather than guessing a mount point. This weapon has bEnableScopePip on but no socket authored: add a socket named '%s' at the scope's eyepiece in the Static Mesh Editor (or on the skeleton, if this is a skeletal mesh), or turn bEnableScopePip off on its DA_Visual_* asset."),
+			*GetName(), *GetNameSafe(WeaponMesh->GetStaticMesh()), *ScopeSocketName.ToString(), *ScopeSocketName.ToString());
+		return;
 	}
 
 	const FAttachmentTransformRules Rules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
-	ScopeScreen->AttachToComponent(WeaponMesh, Rules, AttachSocket);
-	ScopeCamera->AttachToComponent(WeaponMesh, Rules, AttachSocket);
+	ScopeScreen->AttachToComponent(WeaponMesh, Rules, ScopeSocketName);
+	ScopeCamera->AttachToComponent(WeaponMesh, Rules, ScopeSocketName);
+
+	// ScopeScreenOffset/ScopeCameraOffset/ScopeScreenScale are authored ONCE as
+	// rig-wide constants, not per-weapon -- but they're set as RELATIVE transforms
+	// on children now parented under WeaponMesh's socket, so Unreal composes them
+	// through WeaponMesh's current world scale same as any other attached child.
+	// A weapon whose ViewmodelScale is far from whatever these were tuned against
+	// (exactly what the ViewmodelScale floor relaxation now allows) puts the optic
+	// on top of the lens or shrinks the screen to nothing. Divide out WeaponMesh's
+	// current scale here so the optic's WORLD position/size stays constant no
+	// matter which weapon (or what scale it's authored at) is equipped.
+	const FVector MeshScale = WeaponMesh->GetComponentScale();
+	const FVector InvMeshScale(
+		FMath::IsNearlyZero(MeshScale.X) ? 1.0f : 1.0f / MeshScale.X,
+		FMath::IsNearlyZero(MeshScale.Y) ? 1.0f : 1.0f / MeshScale.Y,
+		FMath::IsNearlyZero(MeshScale.Z) ? 1.0f : 1.0f / MeshScale.Z);
 
 	// Screen: stand it up, face it at the eye, push it clear of the sight's baked glass.
-	ScopeScreen->SetRelativeLocation(ScopeScreenOffset);
-	ScopeScreen->SetRelativeRotation(ScopeScreenRotation);
-	ScopeScreen->SetRelativeScale3D(ScopeScreenScale);
+	// PipSizeMultiplier is the per-weapon width/height knob (UWeaponVisualData::
+	// ScopePipSizeMultiplier) -- applied on top of the InvMeshScale compensation so
+	// a sniper's larger lens and a red dot's tiny one can differ, and so width and
+	// height can be tuned independently, without touching the shared rig-wide constant.
+	//
+	// ScopeScreenRotationOffset/ScopeScreenLocationOffset (UWeaponVisualData) are the
+	// per-weapon correction on top of the rig-wide ScopeScreenRotation/ScopeScreenOffset
+	// constants above -- same reason ScopePipSizeMultiplier exists: ScopeSocket authoring
+	// isn't consistent across meshes, so a single shared rotation only lands upright for
+	// whichever weapon it happened to be tuned against. Composed the same order as
+	// UWeaponRigComponent::UpdateWeaponPose composes PerWeaponMountOffset with
+	// WeaponMountRotation -- per-weapon offset first, in the screen's own local space,
+	// then the rig-wide constant on top -- so a weapon left at the offset defaults
+	// behaves exactly as before this existed. The location offset is deliberately NOT
+	// run through InvMeshScale, same as WeaponRigComponent's PerWeaponLocationOffset:
+	// it's "shift the screen this many cm for this weapon," not a scale-relative nudge.
+	const FQuat ScreenRotationQuat = ScopeScreenRotation.Quaternion() * Equipped->ScopeScreenRotationOffset.Quaternion();
+	ScopeScreen->SetRelativeLocation((ScopeScreenOffset * InvMeshScale) + Equipped->ScopeScreenLocationOffset);
+	ScopeScreen->SetRelativeRotation(ScreenRotationQuat.Rotator());
+	ScopeScreen->SetRelativeScale3D(ScopeScreenScale * PipSizeMultiplier * InvMeshScale);
 	ScopeScreen->SetHiddenInGame(false);
 	ScopeScreen->SetVisibility(true);
 
@@ -271,48 +374,103 @@ void AIBCharacter_Infantry::SetupScopePip()
 
 	if (ScopeScreenMaterial)
 	{
-		if (ScopeTextureParameterName != NAME_None && ScopeRenderTarget)
+		// ALWAYS a dynamic instance now. The old "hardwired" path below used to
+		// SetMaterial() the raw asset directly whenever ScopeTextureParameterName was
+		// left at its NAME_None default -- which meant the screen never received the
+		// live capture at all, it just showed whatever the material's Texture Sample
+		// Parameter defaults to (black, for an unset default) forever. That is exactly
+		// the "big black square" symptom -- the capture, positioning and render target
+		// were all working, the screen was just never told to display them. A MID costs
+		// nothing extra and is also where the shape-mask parameters below get pushed,
+		// so there's one path now instead of two.
+		if (UMaterialInstanceDynamic* MID = ScopeScreen->CreateDynamicMaterialInstance(0, ScopeScreenMaterial))
 		{
-			// Parameterised path: one material serves every optic, each with its own RT.
-			if (UMaterialInstanceDynamic* MID = ScopeScreen->CreateDynamicMaterialInstance(0, ScopeScreenMaterial))
+			if (ScopeRenderTarget)
 			{
-				MID->SetTextureParameterValue(ScopeTextureParameterName, ScopeRenderTarget);
-
-				UE_LOG(LogIronBreach, Verbose,
-					TEXT("%s: [Scope] bound '%s' -> parameter '%s' on MID '%s' (base material '%s')."),
-					*GetName(), *GetNameSafe(ScopeRenderTarget), *ScopeTextureParameterName.ToString(),
-					*GetNameSafe(MID), *GetNameSafe(ScopeScreenMaterial));
-
-				// If ScopeTextureParameterName doesn't actually exist as a Texture Sample
-				// Parameter on the material, SetTextureParameterValue() silently no-ops —
-				// there's no error for a bad parameter name. Read it back to catch that.
-				UTexture* Readback = nullptr;
-				if (MID->GetTextureParameterValue(ScopeTextureParameterName, Readback))
+				FName ResolvedParam = ScopeTextureParameterName;
+				if (ResolvedParam == NAME_None)
 				{
-					UE_LOG(LogIronBreach, Verbose, TEXT("%s: [Scope] parameter readback = '%s'."),
-						*GetName(), *GetNameSafe(Readback));
+					// No parameter name configured -- auto-discover instead of silently
+					// falling back to a black screen. Most optic materials only expose one
+					// Texture Sample Parameter (the RT feed), so this covers the common case
+					// without making ScopeTextureParameterName mandatory to get past black.
+					TMap<FMaterialParameterInfo, FMaterialParameterMetadata> TextureParams;
+					ScopeScreenMaterial->GetAllParametersOfType(EMaterialParameterType::Texture, TextureParams);
+
+					if (TextureParams.Num() == 1)
+					{
+						ResolvedParam = TextureParams.CreateConstIterator()->Key.Name;
+						UE_LOG(LogIronBreach, Verbose,
+							TEXT("%s: [Scope] ScopeTextureParameterName not set -- auto-detected the material's only texture parameter '%s'."),
+							*GetName(), *ResolvedParam.ToString());
+					}
+					else if (TextureParams.Num() > 1)
+					{
+						// Prefer one that looks meant for this; otherwise the first one found,
+						// logged loudly since a silent guess here is exactly the kind of bug
+						// this whole path exists to stop happening again.
+						for (const TPair<FMaterialParameterInfo, FMaterialParameterMetadata>& Pair : TextureParams)
+						{
+							const FString NameStr = Pair.Key.Name.ToString();
+							if (NameStr.Contains(TEXT("Scope")) || NameStr.Contains(TEXT("Texture")) || NameStr.Contains(TEXT("Screen")))
+							{
+								ResolvedParam = Pair.Key.Name;
+								break;
+							}
+						}
+						if (ResolvedParam == NAME_None)
+						{
+							ResolvedParam = TextureParams.CreateConstIterator()->Key.Name;
+						}
+						UE_LOG(LogIronBreach, Warning,
+							TEXT("%s: [Scope] ScopeTextureParameterName not set and material '%s' exposes %d texture parameters -- guessed '%s'. Set ScopeTextureParameterName explicitly to be sure."),
+							*GetName(), *GetNameSafe(ScopeScreenMaterial), TextureParams.Num(), *ResolvedParam.ToString());
+					}
+					else
+					{
+						UE_LOG(LogIronBreach, Error,
+							TEXT("%s: [Scope] material '%s' has no Texture Sample Parameter at all -- the screen can only ever show a hardcoded texture, never the live capture. Add a Texture Sample Parameter 2D node to the material and expose it as a parameter."),
+							*GetName(), *GetNameSafe(ScopeScreenMaterial));
+					}
 				}
-				else
+
+				if (ResolvedParam != NAME_None)
 				{
-					UE_LOG(LogIronBreach, Error,
-						TEXT("%s: [Scope] parameter '%s' does not exist on material '%s' — check the exact name of the Texture Sample Parameter node in the material graph (case-sensitive)."),
-						*GetName(), *ScopeTextureParameterName.ToString(), *GetNameSafe(ScopeScreenMaterial));
+					MID->SetTextureParameterValue(ResolvedParam, ScopeRenderTarget);
+
+					// SetTextureParameterValue() silently no-ops on a bad name -- there's no
+					// error for that on its own. Read it back to catch a still-wrong guess/name.
+					UTexture* Readback = nullptr;
+					if (MID->GetTextureParameterValue(ResolvedParam, Readback))
+					{
+						UE_LOG(LogIronBreach, Verbose,
+							TEXT("%s: [Scope] bound '%s' -> parameter '%s' on MID '%s' (base material '%s')."),
+							*GetName(), *GetNameSafe(ScopeRenderTarget), *ResolvedParam.ToString(),
+							*GetNameSafe(MID), *GetNameSafe(ScopeScreenMaterial));
+					}
+					else
+					{
+						UE_LOG(LogIronBreach, Error,
+							TEXT("%s: [Scope] parameter '%s' does not exist on material '%s' — check the exact name of the Texture Sample Parameter node in the material graph (case-sensitive)."),
+							*GetName(), *ResolvedParam.ToString(), *GetNameSafe(ScopeScreenMaterial));
+					}
 				}
 			}
-			else
-			{
-				UE_LOG(LogIronBreach, Error,
-					TEXT("%s: [Scope] CreateDynamicMaterialInstance failed on slot 0 of ScopeScreen."), *GetName());
-			}
+
+			// Shape mask, sourced from the equipped weapon's DA_Visual_* (Equipped is
+			// guaranteed non-null here -- bWeaponWantsScope returned early otherwise).
+			// Square is a no-op if the material was never wired for it (params just go
+			// unused); Circle only actually masks anything once the material graph reads
+			// these via a RadialGradientExponent node -- see
+			// UWeaponVisualData::ScopePipShape's comment for the exact recipe.
+			const bool bWantCircle = Equipped->ScopePipShape == EIBScopePipShape::Circle;
+			MID->SetScalarParameterValue(TEXT("PipShapeIsCircle"), bWantCircle ? 1.0f : 0.0f);
+			MID->SetScalarParameterValue(TEXT("PipCircleRadius"), Equipped->ScopePipCircleRadius);
 		}
 		else
 		{
-			// Hardwired path: the material samples its RT directly, no parameter.
-			ScopeScreen->SetMaterial(0, ScopeScreenMaterial);
-
-			UE_LOG(LogIronBreach, Warning,
-				TEXT("%s: [Scope] no texture parameter bound (ScopeTextureParameterName='%s'). If the optic shows the engine's default texture, set this to the TextureSampleParameter2D's name on the material."),
-				*GetName(), *ScopeTextureParameterName.ToString());
+			UE_LOG(LogIronBreach, Error,
+				TEXT("%s: [Scope] CreateDynamicMaterialInstance failed on slot 0 of ScopeScreen."), *GetName());
 		}
 	}
 	else
@@ -322,12 +480,39 @@ void AIBCharacter_Infantry::SetupScopePip()
 			*GetName());
 	}
 
-	// Capture: sits ahead of the screen looking downrange.
-	ScopeCamera->SetRelativeLocation(ScopeCameraOffset);
-	ScopeCamera->SetRelativeRotation(ScopeCameraRotation);
-	ScopeCamera->FOVAngle = ScopeFOV;
+	// Capture: sits ahead of the screen looking downrange. Same InvMeshScale
+	// compensation as the screen above -- keeps the capture's world offset from
+	// the socket constant regardless of the equipped weapon's ViewmodelScale.
+	//
+	// ScopeCameraRotationOffset/ScopeCameraLocationOffset (UWeaponVisualData) are the
+	// per-weapon correction on top of the rig-wide ScopeCameraRotation/ScopeCameraOffset
+	// constants -- same composition order as the screen's own offsets above (per-weapon
+	// first, in the camera's own local space, then the rig-wide constant on top), and
+	// the fix for "screen faces the right way but shows a view aimed off to one side of
+	// the reticle" -- that's the CAMERA's aim being wrong for this weapon's socket, not
+	// the screen's rotation.
+	const FQuat CameraRotationQuat = ScopeCameraRotation.Quaternion() * Equipped->ScopeCameraRotationOffset.Quaternion();
+	ScopeCamera->SetRelativeLocation((ScopeCameraOffset * InvMeshScale) + Equipped->ScopeCameraLocationOffset);
+	ScopeCamera->SetRelativeRotation(CameraRotationQuat.Rotator());
+	// ScopeFOVOverride (UWeaponVisualData) lets one weapon's optic zoom in/out
+	// differently from the rig-wide ScopeFOV constant -- 0 means "not set, use the
+	// rig-wide value as authored," same fallback convention as ScopePipSizeMultiplier.
+	const float ResolvedScopeFOV = (Equipped->ScopeFOVOverride > 0.0f) ? Equipped->ScopeFOVOverride : ScopeFOV;
+	ScopeCamera->FOVAngle = ResolvedScopeFOV;
 	ScopeCamera->TextureTarget = ScopeRenderTarget;
 	ScopeCamera->bCaptureEveryFrame = true;
+	// SetScopePipEnabled(false) -- called from every early-return guard clause above,
+	// including the very first SetupScopePip() in BeginPlay before any weapon is
+	// tracked yet -- also calls SetComponentTickEnabled(false) on ScopeCamera. USceneCapture
+	// Component2D actually performs its per-frame capture from inside its OWN
+	// TickComponent() override, so once that's been disabled once, setting
+	// bCaptureEveryFrame back to true here is NOT enough to resume capturing --
+	// the component's Tick itself has to be turned back on too, or CaptureScene()
+	// never runs again and the render target sits frozen at its initial (black)
+	// clear color forever, no matter how correct the position/material/render-mode
+	// setup is. This is very likely why the PIP has read as a dead black square
+	// this entire session regardless of what else got changed.
+	ScopeCamera->SetComponentTickEnabled(true);
 
 	UE_LOG(LogIronBreach, Verbose, TEXT("%s: [Scope] ScopeCamera->TextureTarget = %s"),
 		*GetName(), *GetNameSafe(ScopeCamera->TextureTarget));
@@ -357,15 +542,24 @@ void AIBCharacter_Infantry::SetupScopePip()
 		ScopeCamera->HiddenComponents.Add(WeaponMesh);
 	}
 
-	UE_LOG(LogIronBreach, Verbose,
-		TEXT("%s: [Scope] mounted on '%s' | screen loc=%s rot=%s scale=%s | capture loc=%s fov=%.1f | RT=%s"),
+	// Logged at Warning (not Verbose) for now -- the world-scale figure here is the
+	// single most useful number for diagnosing "PIP is huge/tiny": it's what the
+	// screen ACTUALLY measures in world cm regardless of the weapon's ViewmodelScale,
+	// since ScopeScreen->GetComponentScale() already has WeaponMesh's scale folded
+	// back in. A Plane primitive is ~100uu (1m) per side at scale 1.0, so e.g. a
+	// world scale of 0.04 -> a ~4uu (4cm) screen; if this number is much bigger than
+	// expected, ScopeScreenScale/ScopePipSizeMultiplier are set too high, not a
+	// mesh-scale bug. Drop back to Verbose once the sizing is confirmed correct.
+	UE_LOG(LogIronBreach, Warning,
+		TEXT("%s: [Scope] mounted on '%s' | screen loc=%s rot=%s relScale=%s worldScale=%s | capture loc=%s fov=%.1f | RT=%s"),
 		*GetName(),
-		bSocketExists ? *ScopeSocketName.ToString() : TEXT("<mesh root>"),
+		*ScopeSocketName.ToString(),
 		*ScopeScreen->GetRelativeLocation().ToString(),
 		*ScopeScreen->GetRelativeRotation().ToString(),
 		*ScopeScreen->GetRelativeScale3D().ToString(),
+		*ScopeScreen->GetComponentScale().ToString(),
 		*ScopeCamera->GetRelativeLocation().ToString(),
-		ScopeFOV,
+		ResolvedScopeFOV,
 		*GetNameSafe(ScopeRenderTarget));
 }
 
@@ -393,6 +587,17 @@ void AIBCharacter_Infantry::SetWeaponMeshScale(FVector NewScale)
 	}
 
 	WeaponMesh->SetRelativeScale3D(NewScale);
+
+	// TEMP DIAGNOSTIC (scale/location not visibly updating from DA_Visual edits): this
+	// is the one place scale actually gets set from an equipped weapon (BeginPlay's
+	// default-loadout path calls SetRelativeScale3D directly, everything else -- equip
+	// changes, active-slot switches -- routes through here). If ReadBack below doesn't
+	// match NewScale, something ran between this call and the log and reset it; if it
+	// matches but the gun still looks the same size in PIE, the mesh itself isn't
+	// changing -- check ApplyWeaponMesh actually swapped WeaponMesh's StaticMesh.
+	UE_LOG(LogIronBreach, Warning,
+		TEXT("[WeaponScaleDebug] SetWeaponMeshScale: requested=%s -> WeaponMesh ReadBack Scale=%s (mesh=%s)"),
+		*NewScale.ToString(), *WeaponMesh->GetRelativeScale3D().ToString(), *GetNameSafe(WeaponMesh->GetStaticMesh()));
 
 	// The rig caches Grip/Aim socket offsets in SetReferences() and does not track
 	// scale changes on its own — re-cache now so hip/ADS pose keeps landing on the
@@ -535,9 +740,11 @@ void AIBCharacter_Infantry::ApplyActiveSlot()
 		if (BoundInventory->GetEquippedItem(ActiveWeaponSlot, Equipped) && Equipped.Definition)
 		{
 			SetUnarmed(false);
-			ApplyWeaponData(Equipped.Definition->WeaponData
-				? Equipped.Definition->WeaponData.Get()
-				: CurrentWeaponData.Get());
+			UWeaponVisualData* ResolvedVisual = ResolveVisualData(Equipped.Definition.Get());
+			UWeaponCombatData* ResolvedCombat = ResolveCombatData(Equipped.Definition.Get(), ResolvedVisual);
+			ApplyWeaponData(
+				ResolvedCombat ? ResolvedCombat : CurrentCombatData.Get(),
+				ResolvedVisual ? ResolvedVisual : CurrentVisualData.Get());
 		}
 		else
 		{
@@ -547,7 +754,7 @@ void AIBCharacter_Infantry::ApplyActiveSlot()
 	}
 
 	SetUnarmed(false);
-	ApplyWeaponData(CurrentWeaponData.Get());
+	ApplyWeaponData(CurrentCombatData.Get(), CurrentVisualData.Get());
 }
 
 void AIBCharacter_Infantry::SetUnarmed(bool bNewUnarmed)
@@ -680,7 +887,18 @@ void AIBCharacter_Infantry::OnPlayerStateChanged(APlayerState* NewPlayerState, A
 
 	const AIBPlayerState* IBPS = Cast<AIBPlayerState>(NewPlayerState);
 	UIBInventoryComponent* Inventory = IBPS ? IBPS->GetInventory() : nullptr;
-	if (!Inventory) { return; } // not an IBPlayerState (e.g. Shane's default GM) — designer default stays
+	if (!Inventory)
+	{
+		// Not a real IBPlayerState (e.g. Shane's default-GM test maps) -- there's no
+		// loot->gun seam to ever re-arm from here, so bStartUnarmed's BeginPlay call
+		// would otherwise leave the pawn (and the scope pip, which SetUnarmed(true)
+		// switches off) unarmed for good. Re-run ApplyActiveSlot()'s own no-inventory
+		// branch (BoundInventory is null at this point) to bring back the designer
+		// default -- and, via ApplyWeaponData's SetupScopePip() call, the pip -- same
+		// as before bStartUnarmed existed.
+		ApplyActiveSlot();
+		return;
+	}
 
 	Inventory->OnEquipmentChanged.AddDynamic(this, &AIBCharacter_Infantry::HandleEquipmentChanged);
 	BoundInventory = Inventory;
@@ -712,69 +930,156 @@ void AIBCharacter_Infantry::HandleEquipmentChanged(EIBEquipSlot Slot, const FIBI
 		return;
 	}
 
-	UWeaponDataAsset* NewData = Item.Definition->WeaponData
-		? Item.Definition->WeaponData.Get()
-		: CurrentWeaponData.Get(); // item with no combat data yet -> keep the floor
+	UWeaponVisualData* NewVisualData = ResolveVisualData(Item.Definition.Get());
+	UWeaponCombatData* NewCombatData = ResolveCombatData(Item.Definition.Get(), NewVisualData);
+	if (!NewVisualData) { NewVisualData = CurrentVisualData.Get(); }
+	if (!NewCombatData) { NewCombatData = CurrentCombatData.Get(); } // item with no combat data yet -> keep the floor
 
 	SetUnarmed(false);
-	ApplyWeaponData(NewData);
+	ApplyWeaponData(NewCombatData, NewVisualData);
 }
 
-void AIBCharacter_Infantry::ApplyWeaponData(UWeaponDataAsset* WeaponData)
+UWeaponVisualData* AIBCharacter_Infantry::ResolveVisualData(const UIBItemDefinition* Definition) const
 {
-	if (!WeaponData) { return; }
+	if (!Definition) { return nullptr; }
+
+	// Current pattern: the rack/inventory point directly at a DA_Visual_* asset,
+	// which IS the item definition now (UWeaponVisualData : public UIBItemDefinition
+	// -- see that class's comment). Nothing to look up; the item itself is the answer.
+	if (const UWeaponVisualData* AsVisual = Cast<UWeaponVisualData>(Definition))
+	{
+		return const_cast<UWeaponVisualData*>(AsVisual);
+	}
+
+	// Legacy pattern: an old DA_Item_* wrapper still carrying its own (deprecated)
+	// VisualData link -- content that hasn't been migrated/re-pointed yet.
+	return Definition->VisualData.Get();
+}
+
+UWeaponCombatData* AIBCharacter_Infantry::ResolveCombatData(const UIBItemDefinition* Definition, UWeaponVisualData* ResolvedVisual) const
+{
+	// Current pattern: Combat is reached through the resolved Visual asset's own link.
+	if (ResolvedVisual && ResolvedVisual->CombatData)
+	{
+		return ResolvedVisual->CombatData.Get();
+	}
+
+	// Legacy pattern: the DA_Item_* wrapper's own (deprecated) Combat link.
+	return Definition ? Definition->LegacyCombatData.Get() : nullptr;
+}
+
+FIBAdsSettings AIBCharacter_Infantry::ResolveAdsSettings(const UWeaponVisualData* VisualData) const
+{
+	// Ads lives on the linked CombatData asset (see WeaponCombatData.h). The old
+	// deprecated UWeaponVisualData::Ads field has been removed -- a weapon with no
+	// CombatData link just gets default ADS tuning rather than a stale/duplicate
+	// value that could silently disagree with the Combat asset.
+	if (VisualData && VisualData->CombatData)
+	{
+		return VisualData->CombatData->Ads;
+	}
+
+	return FIBAdsSettings();
+}
+
+void AIBCharacter_Infantry::ApplyWeaponData(UWeaponCombatData* CombatData, UWeaponVisualData* VisualData)
+{
+	if (!CombatData && !VisualData) { return; }
+
+	// Track what's actually equipped (unlike CurrentCombatData/CurrentVisualData,
+	// which stay pinned to the designer-default floor) so SetupScopePip() can read
+	// the equipped weapon's own PIP toggle/scale, and so the editor-only live-tune
+	// binding below always rebinds to the right asset.
+#if WITH_EDITOR
+	// Live-tune: (re)bind to whichever VisualData is being applied so editing its
+	// ViewmodelScale/alignment-offset/ViewmodelMesh in the editor re-runs this same
+	// apply path on a running PIE session -- see RefreshLiveTunedWeapon. Only rebind
+	// the delegate when the asset itself changed.
+	if (VisualData && VisualData != EquippedVisualData.Get())
+	{
+		if (UWeaponVisualData* Previous = EquippedVisualData.Get())
+		{
+			Previous->OnVisualDataChanged.RemoveAll(this);
+		}
+		VisualData->OnVisualDataChanged.AddUObject(this, &AIBCharacter_Infantry::RefreshLiveTunedWeapon);
+	}
+#endif
+	if (VisualData)
+	{
+		EquippedVisualData = VisualData;
+		EquippedCombatData = CombatData;
+	}
 
 	// Same two forwards BeginPlay does for the default loadout — one weapon
 	// truth for firing (component) and one for feel (rig ADS settings).
 	if (WeaponComponent)
 	{
-		WeaponComponent->SetWeaponData(WeaponData);
+		WeaponComponent->SetWeaponData(CombatData, VisualData);
 	}
-	if (WeaponRig)
+
+	if (VisualData)
 	{
-		WeaponRig->SetAdsSettings(WeaponData->Ads);
-		WeaponRig->SetWeaponAlignmentOffset(WeaponData->ViewmodelLocationOffset, WeaponData->ViewmodelRotationOffset);
+		if (WeaponRig)
+		{
+			WeaponRig->SetAdsSettings(ResolveAdsSettings(VisualData));
+			WeaponRig->SetWeaponAlignmentOffset(VisualData->ViewmodelLocationOffset, VisualData->ViewmodelRotationOffset);
+		}
+
+		// New weapon, new mesh — swap it in before scale/rig/scope below all re-solve
+		// against whatever's attached. No-ops (keeps the current mesh) if this weapon
+		// has no ViewmodelMesh assigned yet.
+		ApplyWeaponMesh(VisualData);
+
+		// Apply this weapon's viewmodel scale (also re-caches the rig's Grip/Aim socket
+		// offsets — see SetWeaponMeshScale) before re-snapping the optic below, so the
+		// scope mounts against the mesh at its final size, not the previous weapon's.
+		SetWeaponMeshScale(VisualData->ViewmodelScale);
 	}
-
-	// New weapon, new mesh — swap it in before scale/rig/scope below all re-solve
-	// against whatever's attached. No-ops (keeps the current mesh) if this weapon
-	// has no ViewmodelMesh assigned yet.
-	ApplyWeaponMesh(WeaponData);
-
-	// Apply this weapon's viewmodel scale (also re-caches the rig's Grip/Aim socket
-	// offsets — see SetWeaponMeshScale) before re-snapping the optic below, so the
-	// scope mounts against the mesh at its final size, not the previous weapon's.
-	SetWeaponMeshScale(WeaponData->ViewmodelScale);
 
 	// A new weapon means a new mesh and a new scope socket — re-snap the optic,
 	// or it keeps hanging off wherever the last gun's socket happened to be.
 	SetupScopePip();
 
-	UE_LOG(LogIronBreach, Log, TEXT("%s: weapon set from equipment -> %s"), *GetName(), *WeaponData->GetName());
+	UE_LOG(LogIronBreach, Log, TEXT("%s: weapon set from equipment -> combat=%s visual=%s"),
+		*GetName(), *GetNameSafe(CombatData), *GetNameSafe(VisualData));
 }
 
-void AIBCharacter_Infantry::ApplyWeaponMesh(UWeaponDataAsset* WeaponData)
+#if WITH_EDITOR
+void AIBCharacter_Infantry::RefreshLiveTunedWeapon()
 {
-	if (!WeaponMesh || !WeaponData)
+	// UWeaponVisualData::OnVisualDataChanged fired -- re-run the exact same apply
+	// path BeginPlay/equip already use, with whatever this weapon was last paired
+	// with, so ViewmodelScale/alignment-offset/ViewmodelMesh edits show up on a
+	// running PIE session immediately instead of needing a restart.
+	if (UWeaponVisualData* Visual = EquippedVisualData.Get())
+	{
+		ApplyWeaponData(EquippedCombatData.Get(), Visual);
+	}
+}
+#endif
+
+void AIBCharacter_Infantry::ApplyWeaponMesh(UWeaponVisualData* VisualData)
+{
+	if (!WeaponMesh || !VisualData)
 	{
 		return;
 	}
 
-	if (WeaponData->ViewmodelMesh.IsNull())
+	if (VisualData->ViewmodelMesh.IsNull())
 	{
 		// No mesh authored for this weapon yet (e.g. freshly generated, no art
 		// assigned) -- keep whatever's currently shown rather than going blank.
 		return;
 	}
 
-	if (UStaticMesh* NewMesh = WeaponData->ViewmodelMesh.LoadSynchronous())
+	if (UStaticMesh* NewMesh = VisualData->ViewmodelMesh.LoadSynchronous())
 	{
 		WeaponMesh->SetStaticMesh(NewMesh);
 	}
 	else
 	{
 		UE_LOG(LogIronBreach, Warning, TEXT("%s: ViewmodelMesh on %s failed to load -- keeping previous mesh."),
-			*GetName(), *WeaponData->GetName());
+			*GetName(), *VisualData->GetName());
 	}
 }
 

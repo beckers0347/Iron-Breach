@@ -7,6 +7,6 @@
 /NAME:"UnrealEditor-meshy.dll"
 /IGNORE:4221
 /NODEFAULTLIB
-"C:/IronBreach/Intermediate/Build/Win64/x64/IronBreachEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
-"C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/Module.meshy.cpp.obj"
-/OUT:"C:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/UnrealEditor-meshy.lib"
+"D:/Unreal Games/IronBreach/Intermediate/Build/Win64/x64/IronBreachEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
+"D:/Unreal Games/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/Module.meshy.cpp.obj"
+/OUT:"D:/Unreal Games/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/UnrealEditor-meshy.lib"

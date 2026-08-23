@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Progression/XPTypes.h"
-#include "Combat/WeaponDataAsset.h"
 #include "IBXPSubsystem.generated.h"
 
 class AController;
@@ -11,6 +10,7 @@ class AActor;
 class AIBMech_Base;
 class UXPTuningData;
 class UXPSaveGame;
+class UIBItemDefinition;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnXPAwarded, EXPTrack, Track, const FString&, RecordKey, int32, NewTotalXP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnXPLevelUp, EXPTrack, Track, const FString&, RecordKey, int32, NewLevel, int32, OldLevel);
@@ -101,9 +101,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "XP")
 	int32 GetCrewXP(AController* SeatA, AController* SeatB) const;
 
-	/** Flattened list of every weapon unlocked at or below UpToLevel on the given track. */
+	/** Flattened list of every weapon item unlocked at or below UpToLevel on the given track. */
 	UFUNCTION(BlueprintCallable, Category = "XP")
-	TArray<UWeaponDataAsset*> GetUnlockedWeapons(EXPTrack Track, int32 UpToLevel) const;
+	TArray<UIBItemDefinition*> GetUnlockedWeapons(EXPTrack Track, int32 UpToLevel) const;
 
 	/** Flush in-memory records to disk now. Call this from wherever a raid actually ends --
 	 *  RaidStateMachine's owner reaching ERaidPhase::Completed is Blueprint-side today

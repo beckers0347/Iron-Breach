@@ -1,6 +1,6 @@
 // WeaponContextMenuExtensions.h
 //
-// Adds "Generate Weapon Variant" (UWeaponDataAsset) and "Capture Icon From Mesh"
+// Adds "Generate Weapon Variant" (UWeaponCombatData) and "Capture Icon From Mesh"
 // (UIBItemDefinition) directly onto the Content Browser's native asset right-click
 // menu via UToolMenus. Deliberately NOT the Editor Utility Blueprint / Blutility
 // route (see WeaponAssetActions.h, left in place but no longer the recommended

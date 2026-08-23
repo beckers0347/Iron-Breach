@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Combat/DamageableInterface.h"
+#include "Combat/AdsSettings.h" // FIBAdsSettings return type on ResolveAdsSettings
 #include "InputActionValue.h"
 #include "Items/IBItemTypes.h" // EIBEquipSlot / FIBItemInstance in the equipment handler signature
 #include "IBCharacter_Infantry.generated.h"
@@ -13,7 +14,9 @@ class UIBInventoryComponent;
 class UHealthComponent;
 class UHitscanWeaponComponent;
 class UWeaponRigComponent;
-class UWeaponDataAsset;
+class UWeaponCombatData;
+class UWeaponVisualData;
+class UIBItemDefinition;
 class UCameraComponent;
 class UStaticMeshComponent;
 class USceneCaptureComponent2D;
@@ -41,7 +44,7 @@ protected:
 	TObjectPtr<UHealthComponent> HealthComponent;
 
 	/** Single damage path for the project: all player firing goes through this component
-	 *  (cosmetic-first + Server_Fire). Uses CurrentWeaponData, forwarded in BeginPlay. */
+	 *  (cosmetic-first + Server_Fire). Uses CurrentCombatData/CurrentVisualData, forwarded in BeginPlay. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHitscanWeaponComponent> WeaponComponent;
 
@@ -102,9 +105,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
 	TObjectPtr<UMaterialInterface> ScopeScreenMaterial;
 
-	/** Optional texture parameter name on the screen material. When set, the render
-	 *  target is pushed into a dynamic instance at runtime instead of being hardwired
-	 *  in the material — lets several weapons share one material with distinct RTs. */
+	/** Texture parameter name on the screen material that the render target gets
+	 *  pushed into. Optional -- leave at None and SetupScopePip() auto-detects the
+	 *  material's Texture Sample Parameter as long as it only exposes one (logs
+	 *  which name it picked). Only set this explicitly if the material exposes more
+	 *  than one texture parameter and the auto-guess picks the wrong one, or if you
+	 *  just want to be unambiguous about it. A material with NO texture parameter at
+	 *  all (a hardcoded Texture Sample instead) can never show the live capture no
+	 *  matter what this is set to — that shows up as a solid black (or static)
+	 *  screen and logs an Error explaining exactly that. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Scope")
 	FName ScopeTextureParameterName = NAME_None;
 
@@ -174,7 +183,21 @@ protected:
 
 	// Current Weapon Context
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
+	TObjectPtr<UWeaponCombatData> CurrentCombatData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UWeaponVisualData> CurrentVisualData;
+
+	/** Skip arming the designer-default loadout at spawn -- the pawn starts with
+	 *  WeaponMesh hidden and Fire() refusing (SetUnarmed(true) in BeginPlay), same
+	 *  as walking into storage and emptying the active well. A real inventory
+	 *  (IBPlayerState) re-arms this the moment its equipped-item pull/
+	 *  HandleEquipmentChanged runs, so this only changes what's in your hands for
+	 *  the first instant of a spawn. On maps with no IBPlayerState at all (Shane's
+	 *  default-GM test maps) there's no equipment signal to re-arm from, so this
+	 *  flag alone decides armed vs. unarmed there. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	bool bStartUnarmed = true;
 
 	/** Base walk speed the ADS move-speed multiplier scales from. Captured at BeginPlay. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
@@ -236,7 +259,7 @@ protected:
 
 	/** Loot -> gun seam: an equipped weapon in the ACTIVE slot is forwarded
 	 *  to the weapon component + ADS rig; anything else leaves the designer
-	 *  default (CurrentWeaponData) in place. */
+	 *  default (CurrentCombatData/CurrentVisualData) in place. */
 	UFUNCTION()
 	void HandleEquipmentChanged(EIBEquipSlot Slot, const FIBItemInstance& Item);
 
@@ -297,7 +320,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Scope")
 	void SetScopePipEnabled(bool bEnabled);
 
-	/** Rescale the first-person viewmodel mesh. Normally driven by CurrentWeaponData's
+	/** Rescale the first-person viewmodel mesh. Normally driven by CurrentVisualData's
 	 *  ViewmodelScale (BeginPlay/ApplyWeaponData), but exposed for runtime tuning, a
 	 *  debug console command, etc. Re-caches the rig's Grip/Aim socket offsets so ADS
 	 *  alignment stays correct at the new scale instead of drifting off the anchor. */
@@ -305,13 +328,51 @@ public:
 	void SetWeaponMeshScale(FVector NewScale);
 
 private:
-	void ApplyWeaponData(UWeaponDataAsset* WeaponData);
+	void ApplyWeaponData(UWeaponCombatData* CombatData, UWeaponVisualData* VisualData);
 
-	/** Swaps WeaponMesh's static mesh to WeaponData->ViewmodelMesh (sync-loading the
+	/** Swaps WeaponMesh's static mesh to VisualData->ViewmodelMesh (sync-loading the
 	 *  soft reference). Split out of ApplyWeaponData because BeginPlay needs the same
 	 *  swap for the starting loadout, before ApplyWeaponData's rig/scope wiring runs.
 	 *  No-op (keeps current mesh) if ViewmodelMesh is unset -- see its header comment. */
-	void ApplyWeaponMesh(UWeaponDataAsset* WeaponData);
+	void ApplyWeaponMesh(UWeaponVisualData* VisualData);
+
+	/** Resolve an equipped item's UWeaponVisualData. Handles both wiring styles so
+	 *  in-progress content migration doesn't break pickups: if Definition itself IS
+	 *  a UWeaponVisualData (the rack/inventory point directly at a DA_Visual_* asset
+	 *  -- see WeaponVisualData.h's class comment), that's the answer; otherwise falls
+	 *  back to the legacy DA_Item_*::VisualData link for content not yet migrated.
+	 *  Returns null if neither resolves. */
+	UWeaponVisualData* ResolveVisualData(const UIBItemDefinition* Definition) const;
+
+	/** Resolve an equipped item's UWeaponCombatData: through ResolvedVisual's own
+	 *  CombatData link first (the current wiring), falling back to the legacy
+	 *  DA_Item_*::LegacyCombatData link. Returns null if neither resolves. */
+	UWeaponCombatData* ResolveCombatData(const UIBItemDefinition* Definition, UWeaponVisualData* ResolvedVisual) const;
+
+	/** Resolve a weapon's ADS tuning: VisualData->CombatData->Ads (current wiring --
+	 *  Ads lives on the Combat asset now) if a CombatData link is set, else falls
+	 *  back to VisualData's own (deprecated) Ads field for content that hasn't been
+	 *  migrated yet. Was reading VisualData->Ads unconditionally, which is why ADS
+	 *  looked right only for whichever weapon's deprecated field happened to still
+	 *  match its real tuning -- every other weapon read stale/default settings. */
+	FIBAdsSettings ResolveAdsSettings(const UWeaponVisualData* VisualData) const;
+
+	/** Whichever Visual/Combat pair ApplyWeaponData most recently applied. Tracked
+	 *  (unlike CurrentCombatData/CurrentVisualData, which stay pinned to the
+	 *  designer-default floor -- see HandleEquipmentChanged's comment) so anything
+	 *  that needs to know what's ACTUALLY in the character's hands right now has
+	 *  somewhere to read that from. Used by SetupScopePip() to read the equipped
+	 *  weapon's own PIP toggle/scale, and (editor-only) by RefreshLiveTunedWeapon. */
+	TWeakObjectPtr<UWeaponVisualData> EquippedVisualData;
+	TWeakObjectPtr<UWeaponCombatData> EquippedCombatData;
+
+#if WITH_EDITOR
+	/** Bound to EquippedVisualData->OnVisualDataChanged in ApplyWeaponData. Re-runs
+	 *  ApplyWeaponData with whatever's currently equipped so a ViewmodelScale/
+	 *  alignment-offset/ViewmodelMesh edit shows up without exiting PIE. Editor-only;
+	 *  compiled out of packaged builds. */
+	void RefreshLiveTunedWeapon();
+#endif
 
 	FTimerHandle RespawnTimerHandle;
 	bool bDead = false;

@@ -5,7 +5,8 @@
 #include "Engine/NetSerialization.h" // Explicit include: FVector_NetQuantize used in the Server RPC signature
 #include "HitscanWeaponComponent.generated.h"
 
-class UWeaponDataAsset;
+class UWeaponCombatData;
+class UWeaponVisualData;
 
 /**
  * Drop-in hitscan gun for any pawn. Fire() may be called from anywhere (Enhanced Input,
@@ -24,9 +25,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Fire();
 
-	/** Lets owning characters forward their equipped weapon data (e.g. infantry loadout). */
+	/** Lets owning characters forward their equipped weapon data (e.g. infantry loadout).
+	 *  VisualData may be null even when CombatData is set (fire cosmetics just skip). */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void SetWeaponData(UWeaponDataAsset* NewWeaponData) { WeaponData = NewWeaponData; }
+	void SetWeaponData(UWeaponCombatData* NewCombatData, UWeaponVisualData* NewVisualData) { CombatData = NewCombatData; VisualData = NewVisualData; }
 
 	/** Auto-bind left mouse via the legacy input path (used by the template character,
 	 *  which has no Enhanced Input graph). Owners that call Fire() themselves must
@@ -37,9 +39,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	/** Optional data asset; overrides the loose values below when set. */
+	/** Optional power-scaling data asset; overrides Damage/Range/FireInterval below when set. */
 	UPROPERTY(EditAnywhere, Category = "Weapon")
-	TObjectPtr<UWeaponDataAsset> WeaponData;
+	TObjectPtr<UWeaponCombatData> CombatData;
+
+	/** Optional presentation data asset; drives fire sound + tracer FX when set. */
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TObjectPtr<UWeaponVisualData> VisualData;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon", meta = (ClampMin = "0"))
 	float Damage = 25.0f;
@@ -65,7 +71,7 @@ private:
 	/** Shared authoritative fire path (server + standalone). */
 	void PerformFire(const FVector& ViewLocation, const FVector& ViewDirection);
 
-	/** Fire cosmetics (sound + optional Niagara tracer from WeaponData). */
+	/** Fire cosmetics (sound + optional Niagara tracer from VisualData). */
 	void PlayFireCosmeticsAt(const FVector& TraceStart, const FVector& TraceEnd) const;
 
 	bool GetOwnerViewPoint(FVector& OutLocation, FRotator& OutRotation) const;

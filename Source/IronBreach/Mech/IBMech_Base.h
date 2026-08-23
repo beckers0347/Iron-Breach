@@ -3,7 +3,8 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponCombatData.h"
+#include "Combat/WeaponVisualData.h"
 #include "Combat/WeaponRigComponent.h"
 #include "Mech/ConcordComponent.h"
 #include "IBMech_Base.generated.h"
@@ -182,13 +183,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Mech|Combat")
 	void FireWeapon(AController* Requester);
 
-	// Active weapon data reference
+	// Active weapon data reference (power-scaling half)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mech|Combat")
-	TObjectPtr<UWeaponDataAsset> CurrentWeaponData;
+	TObjectPtr<UWeaponCombatData> CurrentCombatData;
+
+	// Active weapon data reference (presentation half -- ADS tuning, mesh/FX)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mech|Combat")
+	TObjectPtr<UWeaponVisualData> CurrentVisualData;
 
 	// Weapon equip function
 	UFUNCTION(BlueprintCallable, Category = "Mech|Combat")
-	void EquipWeapon(UWeaponDataAsset* NewWeaponData);
+	void EquipWeapon(UWeaponCombatData* NewCombatData, UWeaponVisualData* NewVisualData);
 
 	// The massive mech chassis and head mesh.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech|Components")
@@ -258,7 +263,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mech Stats")
 	float PartnerCooldownRemaining = 0.0f;
 
-	/** Seconds between shots. Falls back to this when CurrentWeaponData has no fire rate. */
+	/** Seconds between shots. Falls back to this when CurrentCombatData has no fire rate. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mech Stats", meta = (ClampMin = "0.0"))
 	float WeaponFireInterval = 0.35f;
 

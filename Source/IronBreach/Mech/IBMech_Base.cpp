@@ -114,9 +114,9 @@ void AIBMech_Base::BeginPlay()
 	if (WeaponRigComponent)
 	{
 		WeaponRigComponent->SetReferences(GunnerCamera_FPV, MechWeaponMesh);
-		if (CurrentWeaponData)
+		if (CurrentVisualData && CurrentVisualData->CombatData)
 		{
-			WeaponRigComponent->SetAdsSettings(CurrentWeaponData->Ads);
+			WeaponRigComponent->SetAdsSettings(CurrentVisualData->CombatData->Ads);
 		}
 	}
 
@@ -709,7 +709,7 @@ void AIBMech_Base::RouteLookInput(AController* Requester, const FVector2D& Input
 void AIBMech_Base::FireWeapon(AController* Requester)
 {
 	if (!Requester || Requester != CurrentGunner) return;
-	if (!CurrentWeaponData) return;
+	if (!CurrentCombatData) return;
 
 	// Desync safety-lock (spec §3.2): heavy weapons refuse while the clasp is broken.
 	if (AreWeaponsSafetyLocked())
@@ -722,9 +722,9 @@ void AIBMech_Base::FireWeapon(AController* Requester)
 	if (CurrentAmmo <= 0) return;
 
 	CurrentAmmo--;
-	// WeaponDataAsset already carries FireRate (seconds between shots) — use it, and only
+	// UWeaponCombatData already carries FireRate (seconds between shots) — use it, and only
 	// fall back to the chassis default if the asset leaves it at zero.
-	WeaponCooldownRemaining = (CurrentWeaponData->FireRate > 0.0f) ? CurrentWeaponData->FireRate : WeaponFireInterval;
+	WeaponCooldownRemaining = (CurrentCombatData->FireRate > 0.0f) ? CurrentCombatData->FireRate : WeaponFireInterval;
 
 	// Left/right heat tracking (folded in from the orphaned RouteFireInput).
 	if (Requester == LeftSeatController)
@@ -740,27 +740,31 @@ void AIBMech_Base::FireWeapon(AController* Requester)
 
 	if (GEngine)
 	{
+		const FString DisplayName = CurrentVisualData && !CurrentVisualData->WeaponName.IsNone()
+			? CurrentVisualData->WeaponName.ToString()
+			: GetNameSafe(CurrentCombatData);
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red,
 			FString::Printf(TEXT("Firing %s! Damage: %.1f | Ammo: %d"),
-				*CurrentWeaponData->WeaponName.ToString(), CurrentWeaponData->BaseDamage, CurrentAmmo));
+				*DisplayName, CurrentCombatData->BaseDamage, CurrentAmmo));
 	}
 }
 
-void AIBMech_Base::EquipWeapon(UWeaponDataAsset* NewWeaponData)
+void AIBMech_Base::EquipWeapon(UWeaponCombatData* NewCombatData, UWeaponVisualData* NewVisualData)
 {
-	if (!NewWeaponData) return;
+	if (!NewCombatData && !NewVisualData) return;
 
-	CurrentWeaponData = NewWeaponData;
+	CurrentCombatData = NewCombatData;
+	CurrentVisualData = NewVisualData;
 
-	if (WeaponRigComponent)
+	if (WeaponRigComponent && NewVisualData && NewVisualData->CombatData)
 	{
-		WeaponRigComponent->SetAdsSettings(NewWeaponData->Ads);
+		WeaponRigComponent->SetAdsSettings(NewVisualData->CombatData->Ads);
 	}
 
 	// The seat fires the same weapon — keep its component in step.
 	if (GunnerSeat && GunnerSeat->WeaponComponent)
 	{
-		GunnerSeat->WeaponComponent->SetWeaponData(NewWeaponData);
+		GunnerSeat->WeaponComponent->SetWeaponData(NewCombatData, NewVisualData);
 	}
 }
 
@@ -792,7 +796,7 @@ void AIBMech_Base::PerformWeaponTrace()
 		CamRot = GetActorRotation();
 	}
 
-	const float Range = CurrentWeaponData ? CurrentWeaponData->MaxRange : 5000.0f;
+	const float Range = CurrentCombatData ? CurrentCombatData->MaxRange : 5000.0f;
 	const FVector StartTrace = CamLoc;
 	const FVector EndTrace = StartTrace + (CamRot.Vector() * Range);
 
@@ -817,18 +821,18 @@ void AIBMech_Base::PerformWeaponTrace()
 		// a mech cannon that ignores the boss fight's phases defeats the whole design.
 		// Non-damageable actors still get the generic path as a fallback.
 		AActor* HitActor = HitResult.GetActor();
-		if (HitActor && CurrentWeaponData)
+		if (HitActor && CurrentCombatData)
 		{
 			if (HitActor->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass()))
 			{
 				IDamageableInterface::Execute_HandleTakeDamage(
-					HitActor, CurrentWeaponData->BaseDamage, HitResult, CurrentGunner, this);
+					HitActor, CurrentCombatData->BaseDamage, HitResult, CurrentGunner, this);
 			}
 			else
 			{
 				UGameplayStatics::ApplyDamage(
 					HitActor,
-					CurrentWeaponData->BaseDamage,
+					CurrentCombatData->BaseDamage,
 					CurrentGunner,
 					this,
 					UDamageType::StaticClass()

@@ -6,7 +6,8 @@
 #include "Combat/HitscanWeaponComponent.h"
 #include "Combat/TargetingComponent.h"
 #include "Combat/WeaponRigComponent.h"
-#include "Combat/WeaponDataAsset.h"
+#include "Combat/WeaponCombatData.h"
+#include "Combat/WeaponVisualData.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
@@ -55,9 +56,9 @@ void AIBGunnerSeat::OnRep_OwningMech()
 
 void AIBGunnerSeat::SyncWeaponFromMech()
 {
-	if (OwningMech && WeaponComponent && OwningMech->CurrentWeaponData)
+	if (OwningMech && WeaponComponent && (OwningMech->CurrentCombatData || OwningMech->CurrentVisualData))
 	{
-		WeaponComponent->SetWeaponData(OwningMech->CurrentWeaponData);
+		WeaponComponent->SetWeaponData(OwningMech->CurrentCombatData, OwningMech->CurrentVisualData);
 	}
 }
 
@@ -70,9 +71,9 @@ void AIBGunnerSeat::PawnClientRestart()
 	if (OwningMech && OwningMech->WeaponRigComponent)
 	{
 		OwningMech->WeaponRigComponent->SetReferences(CockpitCamera, OwningMech->MechWeaponMesh);
-		if (OwningMech->CurrentWeaponData)
+		if (OwningMech->CurrentVisualData && OwningMech->CurrentVisualData->CombatData)
 		{
-			OwningMech->WeaponRigComponent->SetAdsSettings(OwningMech->CurrentWeaponData->Ads);
+			OwningMech->WeaponRigComponent->SetAdsSettings(OwningMech->CurrentVisualData->CombatData->Ads);
 		}
 	}
 	SyncWeaponFromMech();
