@@ -307,6 +307,9 @@ protected:
 	void SelectSpecialSlot()  { SetActiveWeaponSlot(EIBEquipSlot::WeaponSpecial); }
 	void SelectHeavySlot()    { SetActiveWeaponSlot(EIBEquipSlot::WeaponHeavy); }
 
+	/** F thunk: open the Squad tab (friends/invites) via the menu subsystem. */
+	void OpenSquadScreen();
+
 public:
 	// Implementation of IDamageableInterface
 	virtual void HandleTakeDamage_Implementation(float DamageAmount, const FHitResult& HitResult, AController* InstigatedBy, AActor* DamageCauser) override;

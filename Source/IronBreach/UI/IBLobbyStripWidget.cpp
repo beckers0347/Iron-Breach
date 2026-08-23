@@ -1,12 +1,10 @@
 #include "UI/IBLobbyStripWidget.h"
 #include "UI/IBStyleKit.h"
 #include "UI/IBPlayerBannerWidget.h"
-#include "UI/IBFriendRowWidget.h"
-#include "Online/IBFriendsSubsystem.h"
-#include "Online/IBSessionSubsystem.h"
+#include "UI/IBMenuSubsystem.h"
 #include "IronBreach.h"
 #include "Engine/World.h"
-#include "Engine/GameInstance.h"
+#include "Engine/LocalPlayer.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Components/HorizontalBox.h"
@@ -15,9 +13,7 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
-#include "Components/ScrollBox.h"
-#include "Components/ScrollBoxSlot.h"
-#include "Components/SizeBox.h"
+#include "Blueprint/WidgetTree.h"
 
 namespace
 {
@@ -38,15 +34,14 @@ void UIBLobbyStripWidget::BuildLayout()
 	UOverlay* Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
 	WidgetTree->RootWidget = Root;
 
-	// ---- Bottom-center: header + the banner row ----
+	// Bottom-center: header + the banner row.
 	UVerticalBox* StripColumn = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 
 	UHorizontalBox* Header = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 	LobbyTitleText = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBLobby", "Title", "SQUAD"), 13, IBStyle::TextLo(), 600);
 	CountText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 13, IBStyle::Amber(), 300);
-	UTextBlock* FriendsLabel = nullptr;
-	FriendsButton = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBLobby", "Friends", "FRIENDS"), 11, false, &FriendsLabel);
-	FriendsButton->OnClicked.AddDynamic(this, &UIBLobbyStripWidget::HandleFriendsToggle);
+	FriendsButton = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBLobby", "Friends", "FRIENDS"), 11);
+	FriendsButton->OnClicked.AddDynamic(this, &UIBLobbyStripWidget::HandleFriendsClicked);
 
 	if (UHorizontalBoxSlot* TitleSlot = Header->AddChildToHorizontalBox(LobbyTitleText))
 	{
@@ -76,54 +71,6 @@ void UIBLobbyStripWidget::BuildLayout()
 		StripSlot->SetVerticalAlignment(VAlign_Bottom);
 		StripSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 42.f));
 	}
-
-	// ---- Right flyout: the friends panel (hidden until toggled) ----
-	FriendsPanel = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.97f), 12.f);
-	FriendsPanel->SetPadding(FMargin(16.f));
-
-	UVerticalBox* PanelColumn = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	FriendsPanel->SetContent(PanelColumn);
-
-	UHorizontalBox* PanelHeader = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	UTextBlock* PanelTitle = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBLobby", "FriendsTitle", "FRIENDS"), 18, IBStyle::TextHi(), 500);
-	UButton* RefreshButton = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBLobby", "Refresh", "REFRESH"), 10);
-	RefreshButton->OnClicked.AddDynamic(this, &UIBLobbyStripWidget::HandleFriendsRefresh);
-	if (UHorizontalBoxSlot* PTitleSlot = PanelHeader->AddChildToHorizontalBox(PanelTitle))
-	{
-		PTitleSlot->SetVerticalAlignment(VAlign_Center);
-		PTitleSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-	}
-	if (UHorizontalBoxSlot* RefSlot = PanelHeader->AddChildToHorizontalBox(RefreshButton))
-	{
-		RefSlot->SetVerticalAlignment(VAlign_Center);
-	}
-	if (UVerticalBoxSlot* PanelHeaderSlot = PanelColumn->AddChildToVerticalBox(PanelHeader))
-	{
-		PanelHeaderSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 10.f));
-	}
-
-	FriendsEmptyText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 11, IBStyle::TextLo(), 200);
-	FriendsEmptyText->SetAutoWrapText(true);
-	PanelColumn->AddChildToVerticalBox(FriendsEmptyText);
-
-	FriendsList = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass());
-	if (UVerticalBoxSlot* ListSlot = PanelColumn->AddChildToVerticalBox(FriendsList))
-	{
-		ListSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-	}
-
-	USizeBox* PanelFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	PanelFrame->SetWidthOverride(340.f);
-	PanelFrame->SetHeightOverride(520.f);
-	PanelFrame->AddChild(FriendsPanel);
-	if (UOverlaySlot* PanelSlot = Root->AddChildToOverlay(PanelFrame))
-	{
-		PanelSlot->SetHorizontalAlignment(HAlign_Right);
-		PanelSlot->SetVerticalAlignment(VAlign_Center);
-		PanelSlot->SetPadding(FMargin(0.f, 0.f, 36.f, 0.f));
-	}
-	PanelFrame->SetVisibility(ESlateVisibility::Collapsed);
-	FriendsPanelFrame = PanelFrame; // the SizeBox is the show/hide target
 
 	// Banner pool: MaxPlayers cards, filled/emptied in place.
 	for (int32 i = 0; i < LobbySlots; ++i)
@@ -165,7 +112,6 @@ void UIBLobbyStripWidget::RefreshBanners(bool bForce)
 	if (!bForce && Roster == LastRoster) { return; }
 	LastRoster = Roster;
 
-	const int32 PlayerCount = GameState->PlayerArray.Num();
 	for (int32 i = 0; i < Banners.Num(); ++i)
 	{
 		if (!Banners[i]) { continue; }
@@ -182,109 +128,19 @@ void UIBLobbyStripWidget::RefreshBanners(bool bForce)
 
 	if (CountText)
 	{
-		CountText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), PlayerCount, Banners.Num())));
+		CountText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"),
+			GameState->PlayerArray.Num(), Banners.Num())));
 	}
 }
 
-UIBFriendsSubsystem* UIBLobbyStripWidget::GetFriendsSubsystem() const
+void UIBLobbyStripWidget::HandleFriendsClicked()
 {
-	const UGameInstance* GI = GetGameInstance();
-	return GI ? GI->GetSubsystem<UIBFriendsSubsystem>() : nullptr;
-}
-
-void UIBLobbyStripWidget::HandleFriendsToggle()
-{
-	bFriendsOpen = !bFriendsOpen;
-	if (FriendsPanelFrame)
+	// One friends surface everywhere: the SQUAD menu tab.
+	if (const ULocalPlayer* LP = GetOwningLocalPlayer())
 	{
-		FriendsPanelFrame->SetVisibility(bFriendsOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-	}
-	if (bFriendsOpen)
-	{
-		if (UIBFriendsSubsystem* Friends = GetFriendsSubsystem())
+		if (UIBMenuSubsystem* Menu = LP->GetSubsystem<UIBMenuSubsystem>())
 		{
-			if (!bFriendsBound)
-			{
-				Friends->OnFriendsUpdated.AddDynamic(this, &UIBLobbyStripWidget::HandleFriendsUpdated);
-				bFriendsBound = true;
-			}
-			if (FriendsEmptyText)
-			{
-				FriendsEmptyText->SetText(NSLOCTEXT("IBLobby", "FriendsLoading", "READING FRIENDS LIST..."));
-			}
-			Friends->RefreshFriends();
+			Menu->ToggleScreen(FName(TEXT("Squad")));
 		}
-	}
-}
-
-void UIBLobbyStripWidget::HandleFriendsRefresh()
-{
-	if (UIBFriendsSubsystem* Friends = GetFriendsSubsystem())
-	{
-		Friends->RefreshFriends();
-	}
-}
-
-void UIBLobbyStripWidget::HandleFriendsUpdated()
-{
-	RebuildFriendRows();
-}
-
-void UIBLobbyStripWidget::RebuildFriendRows()
-{
-	if (!FriendsList) { return; }
-	FriendsList->ClearChildren();
-
-	UIBFriendsSubsystem* Friends = GetFriendsSubsystem();
-	if (!Friends) { return; }
-
-	if (!Friends->HasFriendsService())
-	{
-		FriendsEmptyText->SetText(NSLOCTEXT("IBLobby", "NoService",
-			"STEAM OFFLINE — FRIENDS UNAVAILABLE IN LAN MODE."));
-		return;
-	}
-
-	const UGameInstance* GI = GetGameInstance();
-	const UIBSessionSubsystem* Sessions = GI ? GI->GetSubsystem<UIBSessionSubsystem>() : nullptr;
-	const bool bCanInvite = Sessions && Sessions->IsInSession();
-
-	const TArray<FIBFriendInfo> List = Friends->GetFriends();
-	if (List.Num() == 0)
-	{
-		FriendsEmptyText->SetText(NSLOCTEXT("IBLobby", "NoFriends", "NO FRIENDS RETURNED BY STEAM."));
-		return;
-	}
-
-	FriendsEmptyText->SetText(bCanInvite
-		? FText::GetEmpty()
-		: NSLOCTEXT("IBLobby", "HostHint", "HOST A LOBBY TO SEND INVITES."));
-
-	for (const FIBFriendInfo& Info : List)
-	{
-		UIBFriendRowWidget* Row = CreateWidget<UIBFriendRowWidget>(GetOwningPlayer(), UIBFriendRowWidget::StaticClass());
-		if (!Row) { continue; }
-		Row->InitRow(Info, bCanInvite);
-		Row->OnAction.AddDynamic(this, &UIBLobbyStripWidget::HandleRowAction);
-		if (UScrollBoxSlot* RowSlot = Cast<UScrollBoxSlot>(FriendsList->AddChild(Row)))
-		{
-			RowSlot->SetPadding(FMargin(0.f, 2.f));
-		}
-	}
-}
-
-void UIBLobbyStripWidget::HandleRowAction(const FString& NetIdStr, bool bJoin)
-{
-	UIBFriendsSubsystem* Friends = GetFriendsSubsystem();
-	if (!Friends) { return; }
-	if (bJoin)
-	{
-		UE_LOG(LogIronBreach, Log, TEXT("[Lobby] Joining friend %s"), *NetIdStr);
-		Friends->JoinFriend(NetIdStr);
-	}
-	else
-	{
-		UE_LOG(LogIronBreach, Log, TEXT("[Lobby] Inviting friend %s"), *NetIdStr);
-		Friends->InviteFriend(NetIdStr);
 	}
 }

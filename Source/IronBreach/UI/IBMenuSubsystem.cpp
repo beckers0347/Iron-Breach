@@ -159,6 +159,21 @@ void UIBMenuSubsystem::RestoreGameInputMode()
 {
 	if (APlayerController* PC = GetOwningPC())
 	{
+		// Front-end worlds (title / squad lobby) are cursor places: restoring
+		// GameOnly there after closing a screen (e.g. the Squad tab opened from
+		// the lobby strip) would strand the player cursor-less in a clickable
+		// menu. Everywhere else, hand input back to the pawn as before.
+		const UWorld* World = PC->GetWorld();
+		const bool bFrontEndWorld = World && World->GetMapName().Contains(TEXT("MainMenu"));
+		if (bFrontEndWorld)
+		{
+			FInputModeUIOnly Mode;
+			Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PC->SetInputMode(Mode);
+			PC->SetShowMouseCursor(true);
+			return;
+		}
+
 		PC->SetInputMode(FInputModeGameOnly());
 		PC->SetShowMouseCursor(false);
 	}

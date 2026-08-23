@@ -29,6 +29,7 @@
 #include "Items/IBPlayerState.h"
 #include "Net/UnrealNetwork.h" // DOREPLIFETIME (ActiveWeaponSlot)
 #include "Player/IBUserSettings.h" // mouse sensitivity in Look()
+#include "UI/IBMenuSubsystem.h"    // F -> Squad tab
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()
 {
@@ -608,6 +609,20 @@ void AIBCharacter_Infantry::SetWeaponMeshScale(FVector NewScale)
 	}
 }
 
+void AIBCharacter_Infantry::OpenSquadScreen()
+{
+	if (const APlayerController* PC = Cast<APlayerController>(Controller))
+	{
+		if (const ULocalPlayer* LP = PC->GetLocalPlayer())
+		{
+			if (UIBMenuSubsystem* Menu = LP->GetSubsystem<UIBMenuSubsystem>())
+			{
+				Menu->ToggleScreen(FName(TEXT("Squad")));
+			}
+		}
+	}
+}
+
 void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -677,6 +692,8 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		PlayerInputComponent->BindKey(EKeys::One,   IE_Pressed, this, &AIBCharacter_Infantry::SelectPrimarySlot);
 		PlayerInputComponent->BindKey(EKeys::Two,   IE_Pressed, this, &AIBCharacter_Infantry::SelectSpecialSlot);
 		PlayerInputComponent->BindKey(EKeys::Three, IE_Pressed, this, &AIBCharacter_Infantry::SelectHeavySlot);
+		// F: the Squad tab (friends/invites), same zero-content floor as 1/2/3.
+		PlayerInputComponent->BindKey(EKeys::F, IE_Pressed, this, &AIBCharacter_Infantry::OpenSquadScreen);
 	}
 }
 
