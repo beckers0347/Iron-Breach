@@ -54,12 +54,9 @@ def make_amethyst():
     da.set_editor_property("equip_slot", unreal.IBEquipSlot.WEAPON_SPECIAL)
     da.set_editor_property("base_clearance_rating", 14)
     da.set_editor_property("max_stack", 1)
-    wd = EAL.load_asset("/Game/Weapons/Rifle/Meshes/Amethyst_Arc/DA_Amethyst_Arc")
-    if wd:
-        da.set_editor_property("weapon_data", wd)
-        log("amethyst weapon_data wired")
-    else:
-        log("WARN DA_Amethyst_Arc not found — item created without weapon_data")
+    # NOTE (post-refactor): weapon combat/visual data now lives on Shane's
+    # UWeaponVisualData item subclass (DA_Visual_*). New loot weapons should be
+    # those assets directly; this wrapper stays for the already-shipped table.
     return da
 
 da_arc = step("DA_Item_AmethystArc", make_amethyst)

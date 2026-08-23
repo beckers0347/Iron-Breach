@@ -7,16 +7,41 @@
                 {
                     "ruleId": "C4996",
                     "message": {
-                        "text": "'FSlateFontInfo::FSlateFontInfo': Use constructor with FCompositeFont instead. - Please update your code to the new API before upgrading to the next release, otherwise your project will no longer compile."
+                        "text": "'UMaterialExpression::GetInputsView': Use FExpressionInputIterator instead or GetInput() directly. - Please update your code to the new API before upgrading to the next release, otherwise your project will no longer compile."
                     },
                     "analysisTarget": {
-                        "uri": "file:///X:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/Module.meshy.cpp"
+                        "uri": "file:///D:/Unreal Games/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/Module.meshy.cpp"
                     },
                     "locations": [
                         {
                             "physicalLocation": {
                                 "artifactLocation": {
-                                    "uri": "file:///X:/IronBreach/Plugins/meshy/Source/meshy/Private/meshyStyle.cpp"
+                                    "uri": "file:///A:/Unreal Engine/UE_5.8/Engine/Source/Runtime/Engine/Public/Materials/MaterialExpressionTextureSample.h"
+                                },
+                                "region": {
+                                    "startLine": 120,
+                                    "startColumn": 51,
+                                    "snippet": {
+                                        "text": "\tENGINE_API virtual TArrayView<FExpressionInput*> GetInputsView() override;"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "C4996",
+                    "message": {
+                        "text": "'FSlateFontInfo::FSlateFontInfo': Use constructor with FCompositeFont instead. - Please update your code to the new API before upgrading to the next release, otherwise your project will no longer compile."
+                    },
+                    "analysisTarget": {
+                        "uri": "file:///D:/Unreal Games/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/Module.meshy.cpp"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "file:///D:/Unreal Games/IronBreach/Plugins/meshy/Source/meshy/Private/meshyStyle.cpp"
                                 },
                                 "region": {
                                     "startLine": 78,
