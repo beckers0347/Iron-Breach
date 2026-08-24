@@ -10,7 +10,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "DialogueTypes.h"
+#include "IBLandfallDialogueTypes.h"
 #include "ActBeatProviderInterface.generated.h"
 
 UINTERFACE(BlueprintType, MinimalAPI)

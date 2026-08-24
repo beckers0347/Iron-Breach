@@ -17,7 +17,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "DialogueTypes.h"
+#include "IBLandfallDialogueTypes.h"
 #include "ActBeatProviderInterface.h"
 #include "Act2EscalationDirector.generated.h"
 

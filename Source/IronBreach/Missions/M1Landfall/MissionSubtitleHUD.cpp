@@ -2,7 +2,7 @@
 
 #include "MissionSubtitleHUD.h"
 #include "ActBeatProviderInterface.h"
-#include "DialogueTypes.h"
+#include "IBLandfallDialogueTypes.h"
 #include "Engine/Canvas.h"
 #include "Engine/Font.h"
 #include "Engine/Engine.h"
