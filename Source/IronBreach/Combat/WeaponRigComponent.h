@@ -95,6 +95,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapon Rig")
 	float GetLookSensitivityMultiplier() const;
 
+	/** User FOV (Settings screen). UpdateFov rewrites the camera from BaseFov
+	 *  every frame, so setting it here flows through the ADS blend for free. */
+	UFUNCTION(BlueprintCallable, Category = "Weapon Rig")
+	void SetBaseFov(float InFov) { BaseFov = InFov; }
+
 	UPROPERTY(BlueprintAssignable, Category = "Weapon Rig|Events")
 	FOnAimChangedSignature OnAimChanged;
 

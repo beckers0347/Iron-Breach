@@ -62,6 +62,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
 	TObjectPtr<UButton> Btn_Quit;
 
+	/** Opens the Settings screen (registry id "Settings") if one is registered. */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
+	TObjectPtr<UButton> Btn_Settings;
+
+	/** Session context line: map · mode · player count. Fallback builds one. */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
+	TObjectPtr<UTextBlock> Txt_SessionInfo;
+
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
 	TObjectPtr<UTextBlock> Txt_Resume;
 
@@ -74,11 +82,21 @@ protected:
 	UFUNCTION() void HandleResumeClicked();
 	UFUNCTION() void HandleLeaveClicked();
 	UFUNCTION() void HandleQuitClicked();
+	UFUNCTION() void HandleSettingsClicked();
+
+	virtual void NativeScreenOpened() override;
 
 private:
 	/** Bare-WBP fallback: build a centered Resume/Leave/Quit column in code. */
 	void ConstructFallbackLayout();
 
-	/** Make a fallback button+label pair and register it in the given box. */
-	UButton* MakeFallbackButton(class UVerticalBox* Box, const FText& Label);
+	/** Make a fallback button+label pair and register it in the given box.
+	 *  OutLabel (optional) receives the created TextBlock for later relabeling. */
+	UButton* MakeFallbackButton(class UVerticalBox* Box, const FText& Label, TObjectPtr<UTextBlock>* OutLabel = nullptr);
+
+	void RefreshSessionInfo();
+
+	/** Two-step quit: first click arms (label turns amber), second quits.
+	 *  Re-opening the screen disarms. Misclicks shouldn't end the session. */
+	bool bQuitArmed = false;
 };

@@ -5,9 +5,13 @@
 #include "Items/IBPlayerState.h"
 #include "UI/IBItemTileWidget.h"
 #include "UI/IBUISettings.h"
+#include "UI/IBStyleKit.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Components/Overlay.h"
@@ -86,7 +90,7 @@ void UIBInventoryScreen::BuildFallbackLayout()
 	}
 
 	// Header: title left, Clearance Rating right (the POWER number).
-	UTextBlock* Title = IBMakeLabel(WidgetTree, NSLOCTEXT("IBInv", "Title", "CHARACTER"), 26, FLinearColor(0.85f, 0.9f, 1.f));
+	UTextBlock* Title = IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBInv", "Title", "CHARACTER"));
 	if (UOverlaySlot* TitleSlot = Root->AddChildToOverlay(Title))
 	{
 		TitleSlot->SetHorizontalAlignment(HAlign_Left);
@@ -95,8 +99,8 @@ void UIBInventoryScreen::BuildFallbackLayout()
 	}
 
 	UVerticalBox* ClearanceBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	UTextBlock* ClearanceLabel = IBMakeLabel(WidgetTree, NSLOCTEXT("IBInv", "Clearance", "CLEARANCE"), 12, FLinearColor(0.6f, 0.68f, 0.8f));
-	UTextBlock* ClearanceNum = IBMakeLabel(WidgetTree, FText::AsNumber(0), 44, FLinearColor(0.85f, 0.62f, 0.18f)); // Relic amber
+	UTextBlock* ClearanceLabel = IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBInv", "Clearance", "CLEARANCE"));
+	UTextBlock* ClearanceNum = IBStyle::MakeText(WidgetTree, FText::AsNumber(0), 44, IBStyle::Amber(), 0);
 	ClearanceBox->AddChildToVerticalBox(ClearanceLabel);
 	ClearanceBox->AddChildToVerticalBox(ClearanceNum);
 	if (UOverlaySlot* ClearSlot = Root->AddChildToOverlay(ClearanceBox))
@@ -109,7 +113,7 @@ void UIBInventoryScreen::BuildFallbackLayout()
 
 	// Left column: the three weapon wells.
 	UVerticalBox* Weapons = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	Weapons->AddChildToVerticalBox(IBMakeLabel(WidgetTree, NSLOCTEXT("IBInv", "Weapons", "WEAPONS"), 13, FLinearColor(0.6f, 0.68f, 0.8f)));
+	Weapons->AddChildToVerticalBox(IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBInv", "Weapons", "WEAPONS")));
 	Tile_WeaponPrimary = MakeWell(Weapons, EIBEquipSlot::WeaponPrimary);
 	Tile_WeaponSpecial = MakeWell(Weapons, EIBEquipSlot::WeaponSpecial);
 	Tile_WeaponHeavy   = MakeWell(Weapons, EIBEquipSlot::WeaponHeavy);
@@ -122,7 +126,7 @@ void UIBInventoryScreen::BuildFallbackLayout()
 
 	// Right column: armor + anti-kaiju gear.
 	UVerticalBox* Armor = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	Armor->AddChildToVerticalBox(IBMakeLabel(WidgetTree, NSLOCTEXT("IBInv", "Armor", "ARMOR"), 13, FLinearColor(0.6f, 0.68f, 0.8f)));
+	Armor->AddChildToVerticalBox(IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBInv", "Armor", "ARMOR")));
 	Tile_ArmorHead     = MakeWell(Armor, EIBEquipSlot::ArmorHead);
 	Tile_ArmorChest    = MakeWell(Armor, EIBEquipSlot::ArmorChest);
 	Tile_ArmorArms     = MakeWell(Armor, EIBEquipSlot::ArmorArms);
@@ -135,9 +139,25 @@ void UIBInventoryScreen::BuildFallbackLayout()
 		ArmorSlot->SetPadding(FMargin(0.f, 0.f, 120.f, 60.f));
 	}
 
-	// Bottom center: the backpack grid.
+	// Bottom center: the backpack grid, with the category tab row above it.
 	UVerticalBox* GridBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	GridBox->AddChildToVerticalBox(IBMakeLabel(WidgetTree, NSLOCTEXT("IBInv", "Backpack", "BACKPACK"), 13, FLinearColor(0.6f, 0.68f, 0.8f)));
+	GridBox->AddChildToVerticalBox(IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBInv", "Backpack", "BACKPACK")));
+
+	UHorizontalBox* TabRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	FilterTabLabels.Reset();
+	UButton* TabAll       = MakeFilterTab(TabRow, NSLOCTEXT("IBInv", "TabAll", "ALL"));
+	UButton* TabWeapons   = MakeFilterTab(TabRow, NSLOCTEXT("IBInv", "TabWeapons", "WEAPONS"));
+	UButton* TabArmor     = MakeFilterTab(TabRow, NSLOCTEXT("IBInv", "TabArmor", "ARMOR"));
+	UButton* TabMaterials = MakeFilterTab(TabRow, NSLOCTEXT("IBInv", "TabMaterials", "MATERIALS"));
+	if (TabAll)       { TabAll->OnClicked.AddDynamic(this, &UIBInventoryScreen::HandleFilterAllClicked); }
+	if (TabWeapons)   { TabWeapons->OnClicked.AddDynamic(this, &UIBInventoryScreen::HandleFilterWeaponsClicked); }
+	if (TabArmor)     { TabArmor->OnClicked.AddDynamic(this, &UIBInventoryScreen::HandleFilterArmorClicked); }
+	if (TabMaterials) { TabMaterials->OnClicked.AddDynamic(this, &UIBInventoryScreen::HandleFilterMaterialsClicked); }
+	if (UVerticalBoxSlot* TabSlot = GridBox->AddChildToVerticalBox(TabRow))
+	{
+		TabSlot->SetPadding(FMargin(0.f, 4.f, 0.f, 6.f));
+	}
+	RefreshFilterTabs();
 	UUniformGridPanel* Grid = WidgetTree->ConstructWidget<UUniformGridPanel>(UUniformGridPanel::StaticClass());
 	Grid->SetSlotPadding(FMargin(4.f));
 	GridBox->AddChildToVerticalBox(Grid);
@@ -150,9 +170,8 @@ void UIBInventoryScreen::BuildFallbackLayout()
 	ItemGrid = Grid;
 
 	// Details pane: bottom-left card, filled on hover.
-	UBorder* DetailCard = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	DetailCard->SetBrushColor(FLinearColor(0.02f, 0.03f, 0.05f, 0.9f));
-	DetailCard->SetPadding(FMargin(14.f));
+	UBorder* DetailCard = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.95f), 10.f);
+	DetailCard->SetPadding(FMargin(16.f, 14.f));
 	UVerticalBox* DetailBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	DetailCard->SetContent(DetailBox);
 	Txt_DetailName = IBMakeLabel(WidgetTree, FText::GetEmpty(), 18, FLinearColor::White);
@@ -191,9 +210,17 @@ void UIBInventoryScreen::SetDetails(const UIBItemTileWidget* Tile)
 	FString Info = FString::Printf(TEXT("%s  ·  Clearance %d"),
 		*UEnum::GetDisplayValueAsText(Def->Category).ToString(),
 		Def->BaseClearanceRating);
+	if (Tile->GetItem().StackCount > 1)
+	{
+		Info += FString::Printf(TEXT("  ·  x%d"), Tile->GetItem().StackCount);
+	}
 	if (!Def->Description.IsEmpty())
 	{
 		Info += TEXT("\n\n") + Def->Description.ToString();
+	}
+	if (!Def->Flavor.IsEmpty())
+	{
+		Info += TEXT("\n\n“") + Def->Flavor.ToString() + TEXT("”");
 	}
 	Txt_DetailInfo->SetText(FText::FromString(Info));
 
@@ -243,11 +270,54 @@ void UIBInventoryScreen::UnbindInventory()
 	}
 }
 
+UButton* UIBInventoryScreen::MakeFilterTab(UHorizontalBox* Row, const FText& Label)
+{
+	if (!WidgetTree || !Row) { return nullptr; }
+
+	UTextBlock* TabLabel = nullptr;
+	UButton* Tab = IBStyle::MakeButton(WidgetTree, Label, 11, false, &TabLabel);
+	TabLabel->SetColorAndOpacity(FSlateColor(IBStyle::TextLo()));
+	if (UHorizontalBoxSlot* TabSlot = Row->AddChildToHorizontalBox(Tab))
+	{
+		TabSlot->SetPadding(FMargin(0.f, 0.f, 8.f, 0.f));
+	}
+	FilterTabLabels.Add(TabLabel);
+	return Tab;
+}
+
+void UIBInventoryScreen::RefreshFilterTabs()
+{
+	// Index -> mode mapping mirrors build order: ALL, Weapon, Armor, KaijuMaterial.
+	const EIBItemCategory TabCategories[] = { EIBItemCategory::None, EIBItemCategory::Weapon, EIBItemCategory::Armor, EIBItemCategory::KaijuMaterial };
+	for (int32 i = 0; i < FilterTabLabels.Num() && i < 4; ++i)
+	{
+		if (UTextBlock* Label = FilterTabLabels[i])
+		{
+			const bool bActive = (i == 0) ? bFilterAll : (!bFilterAll && CategoryFilter == TabCategories[i]);
+			Label->SetColorAndOpacity(FSlateColor(bActive
+				? FLinearColor(0.85f, 0.62f, 0.18f)     // Relic amber: current filter
+				: FLinearColor(0.5f, 0.56f, 0.68f)));
+		}
+	}
+}
+
 void UIBInventoryScreen::SetCategoryFilter(EIBItemCategory Category)
 {
-	if (CategoryFilter != Category)
+	if (bFilterAll || CategoryFilter != Category)
 	{
+		bFilterAll = false;
 		CategoryFilter = Category;
+		RefreshFilterTabs();
+		RebuildGrid();
+	}
+}
+
+void UIBInventoryScreen::SetFilterAll()
+{
+	if (!bFilterAll)
+	{
+		bFilterAll = true;
+		RefreshFilterTabs();
 		RebuildGrid();
 	}
 }
@@ -288,7 +358,10 @@ void UIBInventoryScreen::RebuildGrid()
 	}
 
 	int32 CellIndex = 0;
-	for (const FIBItemInstance& Item : BoundInventory->GetItemsByCategory(CategoryFilter))
+	const TArray<FIBItemInstance> Items = bFilterAll
+		? BoundInventory->GetAllItems()
+		: BoundInventory->GetItemsByCategory(CategoryFilter);
+	for (const FIBItemInstance& Item : Items)
 	{
 		if (EquippedIds.Contains(Item.InstanceId)) { continue; }
 

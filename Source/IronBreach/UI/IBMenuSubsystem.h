@@ -81,4 +81,8 @@ private:
 	TObjectPtr<UIBMenuScreen> ActiveScreen;
 
 	FName ActiveScreenId;
+
+	/** Toggle debounce (raw Escape floor + IA route can fire on one press). */
+	FName LastToggleId;
+	double LastToggleTime = -1.0;
 };

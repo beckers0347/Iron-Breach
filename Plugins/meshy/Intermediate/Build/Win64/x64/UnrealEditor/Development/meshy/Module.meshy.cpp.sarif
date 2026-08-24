@@ -1,0 +1,69 @@
+{
+    "version": "2.1.0",
+    "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+    "runs": [
+        {
+            "results": [
+                {
+                    "ruleId": "C4996",
+                    "message": {
+                        "text": "'UMaterialExpression::GetInputsView': Use FExpressionInputIterator instead or GetInput() directly. - Please update your code to the new API before upgrading to the next release, otherwise your project will no longer compile."
+                    },
+                    "analysisTarget": {
+                        "uri": "file:///D:/Unreal Games/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/Module.meshy.cpp"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "file:///A:/Unreal Engine/UE_5.8/Engine/Source/Runtime/Engine/Public/Materials/MaterialExpressionTextureSample.h"
+                                },
+                                "region": {
+                                    "startLine": 120,
+                                    "startColumn": 51,
+                                    "snippet": {
+                                        "text": "\tENGINE_API virtual TArrayView<FExpressionInput*> GetInputsView() override;"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "C4996",
+                    "message": {
+                        "text": "'FSlateFontInfo::FSlateFontInfo': Use constructor with FCompositeFont instead. - Please update your code to the new API before upgrading to the next release, otherwise your project will no longer compile."
+                    },
+                    "analysisTarget": {
+                        "uri": "file:///D:/Unreal Games/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/Module.meshy.cpp"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "file:///D:/Unreal Games/IronBreach/Plugins/meshy/Source/meshy/Private/meshyStyle.cpp"
+                                },
+                                "region": {
+                                    "startLine": 78,
+                                    "startColumn": 25,
+                                    "snippet": {
+                                        "text": "\t.SetFont(FSlateFontInfo(FontPath, 16))"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            ],
+            "tool": {
+                "driver": {
+                    "name": "MSVC",
+                    "shortDescription": {
+                        "text": "Microsoft Visual C++ Compiler Warnings/Errors"
+                    },
+                    "informationUri": "https://docs.microsoft.com/cpp/error-messages/compiler-errors-1/c-cpp-build-errors"
+                }
+            }
+        }
+    ]
+}

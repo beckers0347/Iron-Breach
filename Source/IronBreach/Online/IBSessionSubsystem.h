@@ -21,7 +21,9 @@ enum class EIBSessionStatus : uint8
 	Joined,      // Connect string resolved, client travel imminent
 	JoinFailed,  // Terminal, re-enable the UI
 	Leaving,
-	Failed       // Any hard failure (no OSS, immediate call rejection, create failed)
+	Failed,      // Any hard failure (no OSS, immediate call rejection, create failed)
+	LobbyLive,   // Hosting a pre-deploy lobby in the menu level — squad can join
+	Deploying    // Host pulled the trigger: ServerTravel to the mission map
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIBSessionStatusChanged, EIBSessionStatus, Status, const FText&, Message);
@@ -42,9 +44,27 @@ class IRONBREACH_API UIBSessionSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
-	/** Create a listen session and travel to the gameplay map. */
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
+
+	/** Create a listen session. With bLobbyBeforeDeploy (default) the host
+	 *  stays in the menu level as a live lobby — friends join THERE, banners
+	 *  fill in, and IBDeploy launches the squad. Legacy behavior (straight to
+	 *  the mission map) with the flag off. */
 	UFUNCTION(BlueprintCallable, Exec, Category = "IronBreach|Online")
 	void IBHost();
+
+	/** Host-only: ServerTravel the whole lobby to the mission map. */
+	UFUNCTION(BlueprintCallable, Exec, Category = "IronBreach|Online")
+	void IBDeploy();
+
+	/** Join a specific search result (friend join / accepted invite / picked
+	 *  row). Native-only: FOnlineSessionSearchResult isn't a BP type. */
+	void JoinSearchResult(const FOnlineSessionSearchResult& Result);
+
+	/** True while a named game session exists on this machine (host or client). */
+	UFUNCTION(BlueprintPure, Category = "IronBreach|Online")
+	bool IsInSession() const;
 
 	/** Find sessions and join the first result. */
 	UFUNCTION(BlueprintCallable, Exec, Category = "IronBreach|Online")
@@ -63,6 +83,15 @@ public:
 	 *  world for the demo (Lvl_Plains was the pre-FirstPerson spike map). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
 	FString HostTravelURL = TEXT("/Game/FirstPerson/Lvl_FirstPerson?listen");
+
+	/** Pre-deploy lobby: host dwells in the menu level so the squad assembles
+	 *  in front of the banners before anyone shoots anything. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
+	bool bLobbyBeforeDeploy = true;
+
+	/** Where the lobby lives (must be ?listen — clients travel into it). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
+	FString LobbyTravelURL = TEXT("/Game/FirstPerson/Lvl_MainMenu?listen");
 
 	/** Where IBLeave lands. Matches DefaultEngine.ini's GameDefaultMap. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
@@ -91,8 +120,12 @@ private:
 
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 
+	void OnInviteAccepted(const bool bWasSuccessful, const int32 ControllerId,
+		FUniqueNetIdPtr UserId, const FOnlineSessionSearchResult& InviteResult);
+
 	FDelegateHandle CreateCompleteHandle;
 	FDelegateHandle FindCompleteHandle;
 	FDelegateHandle JoinCompleteHandle;
 	FDelegateHandle LeaveDestroyHandle;
+	FDelegateHandle InviteAcceptedHandle;
 };

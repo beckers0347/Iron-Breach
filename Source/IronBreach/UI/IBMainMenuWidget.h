@@ -49,8 +49,18 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Menu")
 	TObjectPtr<UButton> Btn_Quit;
 
+	/** Opens the Settings screen (registry id "Settings") over the title. */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Menu")
+	TObjectPtr<UButton> Btn_Settings;
+
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Menu")
 	TObjectPtr<UTextBlock> Txt_Status;
+
+	/** House pass over whatever buttons the WBP bound: service-console chip
+	 *  background + label font/color, so the title buttons match the in-game
+	 *  screens without Shane restyling each one. Untick to keep WBP art. */
+	UPROPERTY(EditDefaultsOnly, Category = "Menu|Style")
+	bool bApplyHouseStyle = true;
 
 	/** Title-screen flourishes (pulse the status line, flicker on failure). */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Menu", meta = (DisplayName = "On Session Status"))
@@ -60,6 +70,7 @@ protected:
 	UFUNCTION() void HandleHost();
 	UFUNCTION() void HandleJoin();
 	UFUNCTION() void HandleQuit();
+	UFUNCTION() void HandleSettings();
 
 	UFUNCTION()
 	void HandleSessionStatus(EIBSessionStatus Status, const FText& Message);
@@ -75,4 +86,16 @@ private:
 
 	void SetButtonsEnabled(bool bEnabled);
 	void SetStatus(const FText& Message);
+	void ApplyHouseStyle();
+
+	/** Post-travel lobby detection: a fresh menu widget in a ?listen menu
+	 *  world IS the lobby screen. Host gets DEPLOY, clients get patience. */
+	void EnterHostLobbyState();
+	void EnterClientLobbyState();
+
+	/** The Valorant strip: banners + friends flyout, viewport-anchored. */
+	UPROPERTY(Transient)
+	TObjectPtr<class UIBLobbyStripWidget> LobbyStrip;
+
+	bool bHostingLobby = false;
 };

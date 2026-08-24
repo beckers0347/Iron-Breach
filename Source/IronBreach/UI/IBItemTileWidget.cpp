@@ -1,6 +1,7 @@
 #include "UI/IBItemTileWidget.h"
 #include "Items/IBItemDefinition.h"
 #include "UI/IBUISettings.h"
+#include "UI/IBStyleKit.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
@@ -24,11 +25,13 @@ void UIBItemTileWidget::NativeOnInitialized()
 		WidgetTree->RootWidget = Size;
 
 		UBorder* Frame = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+		Frame->SetBrush(IBStyle::RoundedBrush(FLinearColor::White, 7.f)); // rounded; SetBrushColor tints it
 		Frame->SetPadding(FMargin(3.f));
 		Frame->SetBrushColor(FLinearColor(0.45f, 0.48f, 0.44f)); // Common; RefreshVisuals recolors
 		Size->AddChild(Frame);
 
 		UBorder* Inner = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+		Inner->SetBrush(IBStyle::RoundedBrush(FLinearColor::White, 6.f));
 		Inner->SetBrushColor(FLinearColor(0.03f, 0.035f, 0.05f, 0.95f));
 		Inner->SetPadding(FMargin(0.f));
 		Frame->SetContent(Inner);

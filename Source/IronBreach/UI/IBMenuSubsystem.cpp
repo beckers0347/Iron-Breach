@@ -35,6 +35,17 @@ void UIBMenuSubsystem::PurgeStaleScreens(const APlayerController* CurrentPC)
 
 void UIBMenuSubsystem::ToggleScreen(FName ScreenId)
 {
+	// Debounce: one keypress can arrive through two routes (the raw Escape
+	// floor AND the Enhanced Input action) — without this the menu opens and
+	// closes in the same frame.
+	const double Now = FPlatformTime::Seconds();
+	if (ScreenId == LastToggleId && Now - LastToggleTime < 0.15)
+	{
+		return;
+	}
+	LastToggleId = ScreenId;
+	LastToggleTime = Now;
+
 	if (IsMenuOpen() && ActiveScreenId == ScreenId)
 	{
 		CloseMenu();
@@ -112,8 +123,17 @@ void UIBMenuSubsystem::CycleScreen(int32 Direction)
 		[this](const FIBMenuScreenDef& S) { return S.ScreenId == ActiveScreenId; });
 	if (Index == INDEX_NONE) { Index = 0; }
 
-	Index = (Index + (Direction > 0 ? 1 : -1) + Num) % Num;
-	OpenScreen(Settings->Screens[Index].ScreenId);
+	// Walk until the next TAB screen — the Escape layer (System, Settings)
+	// isn't part of the bumper loop. Bounded so an all-hidden registry can't spin.
+	for (int32 Step = 0; Step < Num; ++Step)
+	{
+		Index = (Index + (Direction > 0 ? 1 : -1) + Num) % Num;
+		if (Settings->Screens[Index].bShowInTabBar)
+		{
+			OpenScreen(Settings->Screens[Index].ScreenId);
+			return;
+		}
+	}
 }
 
 UIBMenuScreen* UIBMenuSubsystem::GetOrCreateScreen(FName ScreenId)
@@ -159,6 +179,21 @@ void UIBMenuSubsystem::RestoreGameInputMode()
 {
 	if (APlayerController* PC = GetOwningPC())
 	{
+		// Front-end worlds (title / squad lobby) are cursor places: restoring
+		// GameOnly there after closing a screen (e.g. the Squad tab opened from
+		// the lobby strip) would strand the player cursor-less in a clickable
+		// menu. Everywhere else, hand input back to the pawn as before.
+		const UWorld* World = PC->GetWorld();
+		const bool bFrontEndWorld = World && World->GetMapName().Contains(TEXT("MainMenu"));
+		if (bFrontEndWorld)
+		{
+			FInputModeUIOnly Mode;
+			Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PC->SetInputMode(Mode);
+			PC->SetShowMouseCursor(true);
+			return;
+		}
+
 		PC->SetInputMode(FInputModeGameOnly());
 		PC->SetShowMouseCursor(false);
 	}

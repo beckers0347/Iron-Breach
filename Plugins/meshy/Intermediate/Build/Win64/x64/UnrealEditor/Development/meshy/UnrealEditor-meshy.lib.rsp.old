@@ -1,0 +1,12 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/experimental:deterministic
+/DEF
+/NAME:"UnrealEditor-meshy.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"X:/IronBreach/Intermediate/Build/Win64/x64/IronBreachEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
+"X:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/Module.meshy.cpp.obj"
+/OUT:"X:/IronBreach/Plugins/meshy/Intermediate/Build/Win64/x64/UnrealEditor/Development/meshy/UnrealEditor-meshy.lib"

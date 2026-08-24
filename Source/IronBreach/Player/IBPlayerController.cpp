@@ -64,6 +64,15 @@ void AIBPlayerController::SetupInputComponent()
 	if (OpenMapAction)       { EIC->BindAction(OpenMapAction,       ETriggerEvent::Started, this, &AIBPlayerController::OpenMapMenu); }
 	if (OpenLedgerAction)    { EIC->BindAction(OpenLedgerAction,    ETriggerEvent::Started, this, &AIBPlayerController::OpenLedgerMenu); }
 	if (OpenSystemAction)    { EIC->BindAction(OpenSystemAction,    ETriggerEvent::Started, this, &AIBPlayerController::OpenSystemMenu); }
+
+	// Raw floor: Escape ALWAYS raises the System menu in-game — any pawn, any
+	// map, even if IMC_Menus / the IA assets aren't wired there (the packaged
+	// zero-content rule; "Esc quits and there's no way out" must never recur).
+	// Safe alongside OpenSystemAction: the menu subsystem debounces the toggle.
+	// NB: through the BASE UInputComponent pointer — UEnhancedInputComponent
+	// deletes BindKey on the derived type (the infantry's raw binds work the
+	// same way).
+	InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &AIBPlayerController::OpenSystemMenu);
 }
 
 void AIBPlayerController::ToggleMenuScreen(FName ScreenId) const
