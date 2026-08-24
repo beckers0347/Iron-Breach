@@ -35,6 +35,7 @@ void UIBPlayerBannerWidget::BuildLayout()
 	if (!WidgetTree || MonogramText) { return; }
 
 	Frame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
+	Frame->SetClipping(EWidgetClipping::ClipToBounds); // long Steam names stay inside the card
 	WidgetTree->RootWidget = Frame;
 
 	Card = IBStyle::MakePanel(WidgetTree, IBStyle::Panel(), 12.f);
@@ -69,8 +70,11 @@ void UIBPlayerBannerWidget::BuildLayout()
 	}
 
 	// Callsign, over its own accent underline (the concept's name plate).
-	NameText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 15, IBStyle::TextHi(), 250);
+	// Wraps: machine names in LAN PIE (DESKTOP-XXXX) and long Steam handles
+	// fold to a second line instead of escaping the card.
+	NameText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 13, IBStyle::TextHi(), 150);
 	NameText->SetJustification(ETextJustify::Center);
+	NameText->SetAutoWrapText(true);
 	if (UVerticalBoxSlot* NameSlot = Column->AddChildToVerticalBox(NameText))
 	{
 		NameSlot->SetPadding(FMargin(12.f, 0.f, 12.f, 3.f));
@@ -127,6 +131,7 @@ void UIBPlayerBannerWidget::SetFromPlayerState(const APlayerState* PS, bool bIsH
 	MonogramText->SetFont([this]{ FSlateFontInfo F = MonogramText->GetFont(); F.Size = bFeatured ? 78 : 64; return F; }());
 	NameText->SetText(FText::FromString(Name.ToUpper()));
 	NameText->SetColorAndOpacity(FSlateColor(IBStyle::TextHi()));
+	NameText->SetFont([this]{ FSlateFontInfo F = NameText->GetFont(); F.Size = bFeatured ? 14 : 12; return F; }());
 
 	int32 Clearance = 0;
 	if (const AIBPlayerState* IBPS = Cast<AIBPlayerState>(PS))
@@ -160,6 +165,7 @@ void UIBPlayerBannerWidget::SetEmptySlot(int32 /*SlotIndex*/, bool bInvitable)
 	MonogramText->SetColorAndOpacity(FSlateColor(IBStyle::Cyan() * FLinearColor(1.f, 1.f, 1.f, 0.75f)));
 	NameText->SetText(NSLOCTEXT("IBBanner", "Invite", "INVITE PLAYER"));
 	NameText->SetColorAndOpacity(FSlateColor(IBStyle::TextLo()));
+	NameText->SetFont([this]{ FSlateFontInfo F = NameText->GetFont(); F.Size = 11; return F; }());
 	ClearanceValue->SetVisibility(ESlateVisibility::Collapsed);
 	ClearanceLabel->SetVisibility(ESlateVisibility::Collapsed);
 	StatusChip->SetText(NSLOCTEXT("IBBanner", "SlotOpen", "SLOT OPEN"));
