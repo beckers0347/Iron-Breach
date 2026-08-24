@@ -35,6 +35,17 @@ void UIBMenuSubsystem::PurgeStaleScreens(const APlayerController* CurrentPC)
 
 void UIBMenuSubsystem::ToggleScreen(FName ScreenId)
 {
+	// Debounce: one keypress can arrive through two routes (the raw Escape
+	// floor AND the Enhanced Input action) — without this the menu opens and
+	// closes in the same frame.
+	const double Now = FPlatformTime::Seconds();
+	if (ScreenId == LastToggleId && Now - LastToggleTime < 0.15)
+	{
+		return;
+	}
+	LastToggleId = ScreenId;
+	LastToggleTime = Now;
+
 	if (IsMenuOpen() && ActiveScreenId == ScreenId)
 	{
 		CloseMenu();

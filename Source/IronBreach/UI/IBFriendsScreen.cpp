@@ -1,14 +1,18 @@
 #include "UI/IBFriendsScreen.h"
+#include "UI/IBMenuSubsystem.h"
 #include "UI/IBStyleKit.h"
 #include "UI/IBPlayerBannerWidget.h"
 #include "UI/IBFriendRowWidget.h"
 #include "Online/IBFriendsSubsystem.h"
 #include "Online/IBSessionSubsystem.h"
+#include "World/IBMapSubsystem.h"
+#include "World/IBMapTypes.h"
 #include "IronBreach.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "GameFramework/PlayerController.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/VerticalBox.h"
@@ -46,121 +50,150 @@ void UIBFriendsScreen::BuildLayout()
 
 	// Menu-standard dim sheet.
 	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	Dim->SetBrushColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.78f));
+	Dim->SetBrushColor(FLinearColor(0.008f, 0.012f, 0.025f, 0.84f));
 	if (UOverlaySlot* DimSlot = Root->AddChildToOverlay(Dim))
 	{
 		DimSlot->SetHorizontalAlignment(HAlign_Fill);
 		DimSlot->SetVerticalAlignment(VAlign_Fill);
 	}
 
-	// Title, house grammar (top-left like CHARACTER / THE LEDGER).
+	// ---- Title block, concept grammar: IRON BREACH // FIRETEAM ----
 	UVerticalBox* TitleBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	TitleBox->AddChildToVerticalBox(IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBSquad", "Title", "SQUAD")));
-	UBorder* Accent = IBStyle::MakeAccentBar(WidgetTree, IBStyle::Amber());
-	Accent->SetPadding(FMargin(0.f, 1.5f));
-	if (UVerticalBoxSlot* AccentSlot = TitleBox->AddChildToVerticalBox(Accent))
-	{
-		AccentSlot->SetPadding(FMargin(0.f, 6.f, 60.f, 0.f));
-	}
+	TitleBox->AddChildToVerticalBox(IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBSquad", "TitleTop", "IRON BREACH"), 24, IBStyle::TextHi(), 500));
+	TitleBox->AddChildToVerticalBox(IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBSquad", "TitleSub", "// FIRETEAM"), 15, IBStyle::Cyan(), 500));
 	if (UOverlaySlot* TitleSlot = Root->AddChildToOverlay(TitleBox))
 	{
 		TitleSlot->SetHorizontalAlignment(HAlign_Left);
 		TitleSlot->SetVerticalAlignment(VAlign_Top);
-		TitleSlot->SetPadding(FMargin(90.f, 50.f, 0.f, 0.f));
+		TitleSlot->SetPadding(FMargin(90.f, 46.f, 0.f, 0.f));
 	}
 
-	// Center column: banner row up top, friends card under it.
-	UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-
-	UHorizontalBox* SquadHeader = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	UTextBlock* SquadLabel = IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBSquad", "Roster", "ACTIVE ROSTER"));
-	CountText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 13, IBStyle::Amber(), 300);
-	if (UHorizontalBoxSlot* LabelSlot = SquadHeader->AddChildToHorizontalBox(SquadLabel))
+	// ---- SOCIAL chip top-right (online count; toggles the flyout) ----
+	UTextBlock* RawSocialText = nullptr;
+	UButton* SocialButton = IBStyle::MakeButton(WidgetTree, FText::GetEmpty(), 12, false, &RawSocialText);
+	SocialCountText = RawSocialText;
+	SocialCountText->SetText(NSLOCTEXT("IBSquad", "Social", "SOCIAL"));
+	SocialButton->OnClicked.AddDynamic(this, &UIBFriendsScreen::HandleSocialToggle);
+	if (UOverlaySlot* SocialSlot = Root->AddChildToOverlay(SocialButton))
 	{
-		LabelSlot->SetVerticalAlignment(VAlign_Center);
-		LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-	}
-	if (UHorizontalBoxSlot* CountSlot = SquadHeader->AddChildToHorizontalBox(CountText))
-	{
-		CountSlot->SetVerticalAlignment(VAlign_Center);
-	}
-	if (UVerticalBoxSlot* SquadHeaderSlot = Column->AddChildToVerticalBox(SquadHeader))
-	{
-		SquadHeaderSlot->SetPadding(FMargin(4.f, 0.f, 4.f, 8.f));
+		SocialSlot->SetHorizontalAlignment(HAlign_Right);
+		SocialSlot->SetVerticalAlignment(VAlign_Top);
+		SocialSlot->SetPadding(FMargin(0.f, 96.f, 90.f, 0.f));
 	}
 
+	// ---- Center: the banner row (hero card at LocalSlotIndex) ----
 	BannerRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	if (UVerticalBoxSlot* BannerSlot = Column->AddChildToVerticalBox(BannerRow))
-	{
-		BannerSlot->SetHorizontalAlignment(HAlign_Center);
-		BannerSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 18.f));
-	}
-
 	for (int32 i = 0; i < SquadSlots; ++i)
 	{
 		UIBPlayerBannerWidget* Banner = CreateWidget<UIBPlayerBannerWidget>(GetOwningPlayer(), UIBPlayerBannerWidget::StaticClass());
 		if (!Banner) { continue; }
+		Banner->SetFeatured(i == LocalSlotIndex);
+		Banner->OnInviteClicked.AddDynamic(this, &UIBFriendsScreen::HandleInviteSlotClicked);
 		if (UHorizontalBoxSlot* CardSlot = BannerRow->AddChildToHorizontalBox(Banner))
 		{
-			CardSlot->SetPadding(FMargin(7.f, 0.f));
+			CardSlot->SetPadding(FMargin(9.f, 0.f));
+			CardSlot->SetVerticalAlignment(VAlign_Center);
 		}
 		Banners.Add(Banner);
 	}
+	if (UOverlaySlot* RowSlot = Root->AddChildToOverlay(BannerRow))
+	{
+		RowSlot->SetHorizontalAlignment(HAlign_Center);
+		RowSlot->SetVerticalAlignment(VAlign_Center);
+		RowSlot->SetPadding(FMargin(0.f, 30.f, 0.f, 0.f));
+	}
 
-	// Friends card.
-	UBorder* Card = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.96f), 12.f);
-	Card->SetPadding(FMargin(18.f, 14.f));
-	UVerticalBox* CardColumn = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	Card->SetContent(CardColumn);
+	// ---- Right flyout: the friends list ----
+	UBorder* FlyoutCard = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.97f), 12.f);
+	FlyoutCard->SetPadding(FMargin(16.f));
+	UVerticalBox* FlyoutColumn = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+	FlyoutCard->SetContent(FlyoutColumn);
 
-	UHorizontalBox* CardHeader = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	UTextBlock* CardTitle = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBSquad", "Friends", "FRIENDS"), 16, IBStyle::TextHi(), 500);
+	UHorizontalBox* FlyoutHeader = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	UTextBlock* FlyoutTitle = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBSquad", "Friends", "FRIENDS"), 16, IBStyle::TextHi(), 500);
 	UButton* RefreshButton = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBSquad", "Refresh", "REFRESH"), 10);
 	RefreshButton->OnClicked.AddDynamic(this, &UIBFriendsScreen::HandleRefreshClicked);
-	if (UHorizontalBoxSlot* CardTitleSlot = CardHeader->AddChildToHorizontalBox(CardTitle))
+	if (UHorizontalBoxSlot* FTitleSlot = FlyoutHeader->AddChildToHorizontalBox(FlyoutTitle))
 	{
-		CardTitleSlot->SetVerticalAlignment(VAlign_Center);
-		CardTitleSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		FTitleSlot->SetVerticalAlignment(VAlign_Center);
+		FTitleSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 	}
-	if (UHorizontalBoxSlot* RefreshSlot = CardHeader->AddChildToHorizontalBox(RefreshButton))
+	if (UHorizontalBoxSlot* RefSlot = FlyoutHeader->AddChildToHorizontalBox(RefreshButton))
 	{
-		RefreshSlot->SetVerticalAlignment(VAlign_Center);
+		RefSlot->SetVerticalAlignment(VAlign_Center);
 	}
-	if (UVerticalBoxSlot* CardHeaderSlot = CardColumn->AddChildToVerticalBox(CardHeader))
+	if (UVerticalBoxSlot* FlyoutHeaderSlot = FlyoutColumn->AddChildToVerticalBox(FlyoutHeader))
 	{
-		CardHeaderSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 8.f));
+		FlyoutHeaderSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 8.f));
 	}
 
 	FriendsEmptyText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 11, IBStyle::TextLo(), 200);
 	FriendsEmptyText->SetAutoWrapText(true);
-	CardColumn->AddChildToVerticalBox(FriendsEmptyText);
+	FlyoutColumn->AddChildToVerticalBox(FriendsEmptyText);
 
 	FriendsList = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass());
-	if (UVerticalBoxSlot* ListSlot = CardColumn->AddChildToVerticalBox(FriendsList))
+	if (UVerticalBoxSlot* ListSlot = FlyoutColumn->AddChildToVerticalBox(FriendsList))
 	{
 		ListSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 	}
 
-	USizeBox* CardFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	CardFrame->SetWidthOverride(560.f);
-	CardFrame->SetHeightOverride(300.f);
-	CardFrame->AddChild(Card);
-	if (UVerticalBoxSlot* CardFrameSlot = Column->AddChildToVerticalBox(CardFrame))
+	FlyoutFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
+	FlyoutFrame->SetWidthOverride(340.f);
+	FlyoutFrame->SetHeightOverride(500.f);
+	FlyoutFrame->AddChild(FlyoutCard);
+	if (UOverlaySlot* FlyoutSlot = Root->AddChildToOverlay(FlyoutFrame))
 	{
-		CardFrameSlot->SetHorizontalAlignment(HAlign_Center);
+		FlyoutSlot->SetHorizontalAlignment(HAlign_Right);
+		FlyoutSlot->SetVerticalAlignment(VAlign_Center);
+		FlyoutSlot->SetPadding(FMargin(0.f, 0.f, 42.f, 0.f));
+	}
+	FlyoutFrame->SetVisibility(ESlateVisibility::Collapsed);
+
+	// ---- Bottom-left: CURRENT LOCATION card ----
+	UBorder* LocationCard = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.94f), 10.f);
+	LocationCard->SetPadding(FMargin(14.f, 10.f));
+	UVerticalBox* LocationColumn = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+	LocationCard->SetContent(LocationColumn);
+	LocationColumn->AddChildToVerticalBox(IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBSquad", "Location", "CURRENT LOCATION"), 9, IBStyle::TextLo(), 600));
+	LocationMapText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 15, IBStyle::TextHi(), 300);
+	LocationColumn->AddChildToVerticalBox(LocationMapText);
+	LocationZoneText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 10, IBStyle::Cyan(), 300);
+	LocationColumn->AddChildToVerticalBox(LocationZoneText);
+	if (UOverlaySlot* LocationSlot = Root->AddChildToOverlay(LocationCard))
+	{
+		LocationSlot->SetHorizontalAlignment(HAlign_Left);
+		LocationSlot->SetVerticalAlignment(VAlign_Bottom);
+		LocationSlot->SetPadding(FMargin(90.f, 0.f, 0.f, 46.f));
 	}
 
-	if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(Column))
+	// ---- Bottom bar: LEAVE FIRETEAM + privacy line ----
+	UHorizontalBox* BottomBar = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	UTextBlock* LeaveLabel = nullptr;
+	LeaveButton = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBSquad", "Leave", "LEAVE FIRETEAM"), 11, false, &LeaveLabel);
+	LeaveButton->OnClicked.AddDynamic(this, &UIBFriendsScreen::HandleLeaveClicked);
+	if (UHorizontalBoxSlot* LeaveSlot = BottomBar->AddChildToHorizontalBox(LeaveButton))
 	{
-		ColumnSlot->SetHorizontalAlignment(HAlign_Center);
-		ColumnSlot->SetVerticalAlignment(VAlign_Center);
-		ColumnSlot->SetPadding(FMargin(0.f, 40.f, 0.f, 0.f)); // clear the tab rail
+		LeaveSlot->SetVerticalAlignment(VAlign_Center);
+		LeaveSlot->SetPadding(FMargin(0.f, 0.f, 22.f, 0.f));
+	}
+	UTextBlock* Privacy = IBStyle::MakeText(WidgetTree,
+		NSLOCTEXT("IBSquad", "Privacy", "FIRETEAM PRIVACY  ·  FRIENDS ONLY"), 10, IBStyle::TextLo(), 400);
+	if (UHorizontalBoxSlot* PrivacySlot = BottomBar->AddChildToHorizontalBox(Privacy))
+	{
+		PrivacySlot->SetVerticalAlignment(VAlign_Center);
+	}
+	if (UOverlaySlot* BottomSlot = Root->AddChildToOverlay(BottomBar))
+	{
+		BottomSlot->SetHorizontalAlignment(HAlign_Center);
+		BottomSlot->SetVerticalAlignment(VAlign_Bottom);
+		BottomSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 46.f));
 	}
 }
 
 void UIBFriendsScreen::NativeScreenOpened()
 {
 	RefreshBanners(/*bForce=*/true);
+	RefreshLocationCard();
 
 	if (UIBFriendsSubsystem* Friends = GetFriendsSubsystem())
 	{
@@ -174,6 +207,15 @@ void UIBFriendsScreen::NativeScreenOpened()
 			FriendsEmptyText->SetText(NSLOCTEXT("IBSquad", "Loading", "READING FRIENDS LIST..."));
 		}
 		Friends->RefreshFriends();
+	}
+
+	// LEAVE only means something with a live session under you.
+	const UGameInstance* GI = GetGameInstance();
+	const UIBSessionSubsystem* Sessions = GI ? GI->GetSubsystem<UIBSessionSubsystem>() : nullptr;
+	if (LeaveButton)
+	{
+		LeaveButton->SetVisibility((Sessions && Sessions->IsInSession())
+			? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
 }
 
@@ -203,31 +245,109 @@ void UIBFriendsScreen::RefreshBanners(bool bForce)
 	if (!bForce && Roster == LastRoster) { return; }
 	LastRoster = Roster;
 
+	// Display order: the LOCAL player always takes the hero slot; everyone
+	// else fills around them in join order. Host = first login (chip only).
+	const APlayerController* PC = GetOwningPlayer();
+	const APlayerState* LocalPS = PC ? PC->PlayerState : nullptr;
+
+	TArray<const APlayerState*> Others;
+	const APlayerState* HostPS = GameState->PlayerArray.Num() > 0 ? GameState->PlayerArray[0].Get() : nullptr;
+	for (const APlayerState* PS : GameState->PlayerArray)
+	{
+		if (PS && PS != LocalPS) { Others.Add(PS); }
+	}
+
+	TArray<const APlayerState*> Display;
+	Display.SetNum(SquadSlots);
+	int32 OtherIndex = 0;
+	for (int32 i = 0; i < SquadSlots; ++i)
+	{
+		if (i == LocalSlotIndex)
+		{
+			Display[i] = LocalPS;
+		}
+		else if (OtherIndex < Others.Num())
+		{
+			Display[i] = Others[OtherIndex++];
+		}
+	}
+
 	for (int32 i = 0; i < Banners.Num(); ++i)
 	{
 		if (!Banners[i]) { continue; }
-		if (GameState->PlayerArray.IsValidIndex(i) && GameState->PlayerArray[i])
+		if (Display.IsValidIndex(i) && Display[i])
 		{
-			// Listen-server convention: first login is the host.
-			Banners[i]->SetFromPlayerState(GameState->PlayerArray[i], /*bIsHost=*/i == 0);
+			Banners[i]->SetFromPlayerState(Display[i], /*bIsHost=*/Display[i] == HostPS);
 		}
 		else
 		{
 			Banners[i]->SetEmptySlot(i);
 		}
 	}
+}
 
-	if (CountText)
+void UIBFriendsScreen::RefreshLocationCard()
+{
+	const UWorld* World = GetWorld();
+	if (!World || !LocationMapText) { return; }
+
+	LocationMapText->SetText(FText::FromString(
+		World->GetMapName().Replace(TEXT("UEDPIE_0_"), TEXT("")).Replace(TEXT("Lvl_"), TEXT("")).ToUpper()));
+
+	FText Zone = FText::GetEmpty();
+	if (const UIBMapSubsystem* MapSub = World->GetSubsystem<UIBMapSubsystem>())
 	{
-		CountText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"),
-			GameState->PlayerArray.Num(), Banners.Num())));
+		if (const UIBMapZoneData* ZoneData = MapSub->GetZoneData())
+		{
+			Zone = ZoneData->ZoneName;
+		}
 	}
+	LocationZoneText->SetText(Zone);
+	LocationZoneText->SetVisibility(Zone.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
 }
 
 UIBFriendsSubsystem* UIBFriendsScreen::GetFriendsSubsystem() const
 {
 	const UGameInstance* GI = GetGameInstance();
 	return GI ? GI->GetSubsystem<UIBFriendsSubsystem>() : nullptr;
+}
+
+void UIBFriendsScreen::SetFlyoutOpen(bool bOpen)
+{
+	bFlyoutOpen = bOpen;
+	if (FlyoutFrame)
+	{
+		FlyoutFrame->SetVisibility(bFlyoutOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+	}
+}
+
+void UIBFriendsScreen::HandleSocialToggle()
+{
+	SetFlyoutOpen(!bFlyoutOpen);
+	if (bFlyoutOpen)
+	{
+		HandleRefreshClicked();
+	}
+}
+
+void UIBFriendsScreen::HandleInviteSlotClicked(UIBPlayerBannerWidget* /*Banner*/)
+{
+	// The concept's +: an empty seat IS the invite affordance.
+	SetFlyoutOpen(true);
+	HandleRefreshClicked();
+}
+
+void UIBFriendsScreen::HandleLeaveClicked()
+{
+	UGameInstance* GI = GetGameInstance();
+	if (UIBSessionSubsystem* Sessions = GI ? GI->GetSubsystem<UIBSessionSubsystem>() : nullptr)
+	{
+		if (UIBMenuSubsystem* Menu = GetMenuSubsystem())
+		{
+			Menu->CloseMenu(); // input-mode restore must run against THIS world
+		}
+		Sessions->IBLeave();
+	}
 }
 
 void UIBFriendsScreen::HandleRefreshClicked()
@@ -251,6 +371,14 @@ void UIBFriendsScreen::RebuildFriendRows()
 	UIBFriendsSubsystem* Friends = GetFriendsSubsystem();
 	if (!Friends) { return; }
 
+	// SOCIAL chip count: friends online right now.
+	const TArray<FIBFriendInfo> List = Friends->GetFriends();
+	if (SocialCountText)
+	{
+		const int32 Online = List.FilterByPredicate([](const FIBFriendInfo& F) { return F.bOnline; }).Num();
+		SocialCountText->SetText(FText::FromString(FString::Printf(TEXT("SOCIAL  ·  %d"), Online)));
+	}
+
 	if (!Friends->HasFriendsService())
 	{
 		FriendsEmptyText->SetText(NSLOCTEXT("IBSquad", "NoService",
@@ -262,7 +390,6 @@ void UIBFriendsScreen::RebuildFriendRows()
 	const UIBSessionSubsystem* Sessions = GI ? GI->GetSubsystem<UIBSessionSubsystem>() : nullptr;
 	const bool bCanInvite = Sessions && Sessions->IsInSession();
 
-	const TArray<FIBFriendInfo> List = Friends->GetFriends();
 	if (List.Num() == 0)
 	{
 		FriendsEmptyText->SetText(NSLOCTEXT("IBSquad", "NoFriends", "NO FRIENDS RETURNED BY STEAM."));
@@ -292,12 +419,12 @@ void UIBFriendsScreen::HandleRowAction(const FString& NetIdStr, bool bJoin)
 	if (!Friends) { return; }
 	if (bJoin)
 	{
-		UE_LOG(LogIronBreach, Log, TEXT("[Squad] Joining friend %s"), *NetIdStr);
+		UE_LOG(LogIronBreach, Log, TEXT("[Fireteam] Joining friend %s"), *NetIdStr);
 		Friends->JoinFriend(NetIdStr);
 	}
 	else
 	{
-		UE_LOG(LogIronBreach, Log, TEXT("[Squad] Inviting friend %s"), *NetIdStr);
+		UE_LOG(LogIronBreach, Log, TEXT("[Fireteam] Inviting friend %s"), *NetIdStr);
 		Friends->InviteFriend(NetIdStr);
 	}
 }
