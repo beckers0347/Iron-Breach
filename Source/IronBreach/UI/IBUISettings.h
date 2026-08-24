@@ -34,6 +34,12 @@ struct FIBMenuScreenDef
 	 *  in-game and in-menu behavior feel like one system. */
 	UPROPERTY(EditAnywhere, Category = "Screen")
 	TArray<FKey> Hotkeys;
+
+	/** False = registered and openable (hotkey / Escape / buttons) but NOT a
+	 *  tab: hidden from the banner and skipped by Q/E cycling. The Escape
+	 *  layer (System, Settings) lives here — tabs are for the play loop. */
+	UPROPERTY(EditAnywhere, Category = "Screen")
+	bool bShowInTabBar = true;
 };
 
 /**

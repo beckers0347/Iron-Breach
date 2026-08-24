@@ -112,8 +112,17 @@ void UIBMenuSubsystem::CycleScreen(int32 Direction)
 		[this](const FIBMenuScreenDef& S) { return S.ScreenId == ActiveScreenId; });
 	if (Index == INDEX_NONE) { Index = 0; }
 
-	Index = (Index + (Direction > 0 ? 1 : -1) + Num) % Num;
-	OpenScreen(Settings->Screens[Index].ScreenId);
+	// Walk until the next TAB screen — the Escape layer (System, Settings)
+	// isn't part of the bumper loop. Bounded so an all-hidden registry can't spin.
+	for (int32 Step = 0; Step < Num; ++Step)
+	{
+		Index = (Index + (Direction > 0 ? 1 : -1) + Num) % Num;
+		if (Settings->Screens[Index].bShowInTabBar)
+		{
+			OpenScreen(Settings->Screens[Index].ScreenId);
+			return;
+		}
+	}
 }
 
 UIBMenuScreen* UIBMenuSubsystem::GetOrCreateScreen(FName ScreenId)

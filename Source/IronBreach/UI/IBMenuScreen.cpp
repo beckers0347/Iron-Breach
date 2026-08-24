@@ -59,6 +59,7 @@ void UIBMenuScreen::EnsureTabBanner()
 	for (int32 i = 0; i < Settings->Screens.Num(); ++i)
 	{
 		const FIBMenuScreenDef& Def = Settings->Screens[i];
+		if (!Def.bShowInTabBar) { continue; } // Escape-layer screens aren't tabs
 
 		UTextBlock* Label = IBStyle::MakeText(WidgetTree,
 			Def.TabLabel.IsEmpty() ? FText::FromName(Def.ScreenId) : Def.TabLabel,
@@ -74,6 +75,17 @@ void UIBMenuScreen::EnsureTabBanner()
 
 void UIBMenuScreen::RefreshTabBanner()
 {
+	// On an Escape-layer screen (System, Settings) the rail itself hides —
+	// you're off the tab loop, the bar would just be noise.
+	if (TabBannerBox)
+	{
+		const FIBMenuScreenDef* OwnDef = UIBUISettings::Get()->Screens.FindByPredicate(
+			[this](const FIBMenuScreenDef& S) { return S.ScreenId == GetScreenId(); });
+		const bool bOwnIsTab = !OwnDef || OwnDef->bShowInTabBar;
+		UWidget* Rail = TabBannerBox->GetParent() ? static_cast<UWidget*>(TabBannerBox->GetParent()) : TabBannerBox;
+		Rail->SetVisibility(bOwnIsTab ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
 	for (int32 i = 0; i < TabLabels.Num(); ++i)
 	{
 		if (UTextBlock* Label = TabLabels[i])
