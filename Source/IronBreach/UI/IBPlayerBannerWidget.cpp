@@ -1,4 +1,5 @@
 #include "UI/IBPlayerBannerWidget.h"
+#include "UI/IBHexBorder.h"
 #include "UI/IBStyleKit.h"
 #include "Items/IBPlayerState.h"
 #include "Items/IBInventoryComponent.h"
@@ -25,9 +26,16 @@ void UIBPlayerBannerWidget::SetFeatured(bool bInFeatured)
 void UIBPlayerBannerWidget::ApplySize()
 {
 	if (!Frame) { return; }
-	// The hero card stands taller — the concept sheet's center banner.
-	Frame->SetWidthOverride(bFeatured ? 214.f : 176.f);
-	Frame->SetHeightOverride(bFeatured ? 372.f : 306.f);
+	// The hero card stands taller — the concept sheet's center banner. Heights
+	// include the hex points, so content padding below clears them.
+	Frame->SetWidthOverride(bFeatured ? 216.f : 178.f);
+	Frame->SetHeightOverride(bFeatured ? 404.f : 336.f);
+	if (Card)
+	{
+		Card->SetContentPadding(bFeatured
+			? FMargin(16.f, 50.f, 16.f, 44.f)
+			: FMargin(14.f, 42.f, 14.f, 38.f));
+	}
 }
 
 void UIBPlayerBannerWidget::BuildLayout()
@@ -38,8 +46,8 @@ void UIBPlayerBannerWidget::BuildLayout()
 	Frame->SetClipping(EWidgetClipping::ClipToBounds); // long Steam names stay inside the card
 	WidgetTree->RootWidget = Frame;
 
-	Card = IBStyle::MakePanel(WidgetTree, IBStyle::Panel(), 12.f);
-	Card->SetPadding(FMargin(0.f));
+	// The banner silhouette — pointed hex, not a rounded box.
+	Card = WidgetTree->ConstructWidget<UIBHexBorder>(UIBHexBorder::StaticClass());
 	Frame->AddChild(Card);
 
 	UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
@@ -123,8 +131,15 @@ void UIBPlayerBannerWidget::SetFromPlayerState(const APlayerState* PS, bool bIsH
 	const FString Name = PS->GetPlayerName().IsEmpty() ? TEXT("OPERATIVE") : PS->GetPlayerName();
 	const FLinearColor Accent = IBStyle::Cyan(); // the fireteam ice-blue; host reads amber on the chip
 
-	Card->SetBrush(IBStyle::RoundedBrush(IBStyle::Panel(), 12.f, bFeatured ? Accent : IBStyle::Line(), bFeatured ? 1.5f : 1.0f));
+	Card->SetFillColor(IBStyle::Panel());
+	Card->SetOutlineColor(bFeatured ? Accent : Accent * FLinearColor(1.f, 1.f, 1.f, 0.55f));
+	Card->SetOutlineThickness(bFeatured ? 2.0f : 1.25f);
 	AccentBar->SetBrush(IBStyle::RoundedBrush(Accent, 2.f));
+
+	// Filled card shows the full plate again (banners are pooled and reused).
+	NameText->SetVisibility(ESlateVisibility::HitTestInvisible);
+	UnderBar->SetVisibility(ESlateVisibility::HitTestInvisible);
+	StatusChip->SetVisibility(ESlateVisibility::HitTestInvisible);
 	UnderBar->SetBrush(IBStyle::RoundedBrush(Accent * FLinearColor(1.f, 1.f, 1.f, 0.8f), 2.f));
 	MonogramText->SetText(FText::FromString(Name.Left(1).ToUpper()));
 	MonogramText->SetColorAndOpacity(FSlateColor(Accent * FLinearColor(1.f, 1.f, 1.f, 0.55f)));
@@ -157,19 +172,19 @@ void UIBPlayerBannerWidget::SetEmptySlot(int32 /*SlotIndex*/, bool bInvitable)
 	if (!MonogramText) { return; }
 	bEmptyInvitable = bInvitable;
 
-	Card->SetBrush(IBStyle::RoundedBrush(FLinearColor(0.018f, 0.026f, 0.045f, 0.92f), 12.f, IBStyle::Line(), 1.0f));
+	Card->SetFillColor(FLinearColor(0.018f, 0.026f, 0.045f, 0.92f));
+	Card->SetOutlineColor(IBStyle::Line());
+	Card->SetOutlineThickness(1.0f);
 	AccentBar->SetBrush(IBStyle::RoundedBrush(IBStyle::Line(), 2.f));
-	UnderBar->SetBrush(IBStyle::RoundedBrush(IBStyle::Line(), 2.f));
 
+	// Just the +. It IS the invite button — no caption needed (Connor's call).
 	MonogramText->SetText(FText::FromString(TEXT("+")));
 	MonogramText->SetColorAndOpacity(FSlateColor(IBStyle::Cyan() * FLinearColor(1.f, 1.f, 1.f, 0.75f)));
-	NameText->SetText(NSLOCTEXT("IBBanner", "Invite", "INVITE PLAYER"));
-	NameText->SetColorAndOpacity(FSlateColor(IBStyle::TextLo()));
-	NameText->SetFont([this]{ FSlateFontInfo F = NameText->GetFont(); F.Size = 11; return F; }());
+	NameText->SetVisibility(ESlateVisibility::Collapsed);
+	UnderBar->SetVisibility(ESlateVisibility::Collapsed);
 	ClearanceValue->SetVisibility(ESlateVisibility::Collapsed);
 	ClearanceLabel->SetVisibility(ESlateVisibility::Collapsed);
-	StatusChip->SetText(NSLOCTEXT("IBBanner", "SlotOpen", "SLOT OPEN"));
-	StatusChip->SetColorAndOpacity(FSlateColor(IBStyle::TextLo()));
+	StatusChip->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 FReply UIBPlayerBannerWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

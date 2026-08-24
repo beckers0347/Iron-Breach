@@ -8,6 +8,7 @@ class APlayerState;
 class UTextBlock;
 class UBorder;
 class USizeBox;
+class UIBHexBorder;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIBBannerInviteClicked, UIBPlayerBannerWidget*, Banner);
 
@@ -52,7 +53,7 @@ private:
 	bool bEmptyInvitable = false;
 
 	UPROPERTY(Transient) TObjectPtr<USizeBox> Frame;
-	UPROPERTY(Transient) TObjectPtr<UBorder> Card;
+	UPROPERTY(Transient) TObjectPtr<UIBHexBorder> Card;
 	UPROPERTY(Transient) TObjectPtr<UBorder> AccentBar;
 	UPROPERTY(Transient) TObjectPtr<UBorder> PortraitBlock;
 	UPROPERTY(Transient) TObjectPtr<UBorder> UnderBar;
