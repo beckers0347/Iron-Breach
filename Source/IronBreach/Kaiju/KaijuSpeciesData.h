@@ -92,7 +92,7 @@ public:
 	TSubclassOf<UAnimInstance> AnimClass;
 
 	/** Height of the source mesh as authored, in metres. Manny/Quinn = 1.8.
-	 *  Custom creature meshes are usually authored at their real size � set this
+	 *  Custom creature meshes are usually authored at their real size — set this
 	 *  to whatever the mesh actually measures so HeightMeters means what it says. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals", meta = (ClampMin = "0.1"))
 	float AuthoredHeightMeters = 2.0f;
