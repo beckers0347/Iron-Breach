@@ -1044,8 +1044,14 @@ void AIBCharacter_Infantry::OnPlayerStateChanged(APlayerState* NewPlayerState, A
 
 void AIBCharacter_Infantry::HandleEquipmentChanged(EIBEquipSlot Slot, const FIBItemInstance& Item)
 {
+	// TEMP DEBUG (Shane): logging both slots to find why bIsArmed never
+	// triggers on rack pickup / inventory switch. Safe to delete once solved.
+	UE_LOG(LogIronBreach, Warning, TEXT("[EquipDebug] HandleEquipmentChanged: Slot=%d ActiveWeaponSlot=%d ItemValid=%d"),
+		(int32)Slot, (int32)ActiveWeaponSlot, Item.Definition != nullptr);
+
 	if (Slot != ActiveWeaponSlot)
 	{
+		UE_LOG(LogIronBreach, Warning, TEXT("[EquipDebug] IGNORED -- Slot != ActiveWeaponSlot"));
 		return; // armor/gear/off-hand wells are stat/cosmetic concerns until they're the active slot
 	}
 
