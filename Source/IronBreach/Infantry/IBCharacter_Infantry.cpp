@@ -57,6 +57,19 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	// the rig's hip anchor — a smaller weapon sits closer to camera).
 	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
 
+	// Third-person weapon mesh -- what everyone else actually sees. Attached to
+	// GetMesh() here (constructor-time SetupAttachment can't target a socket by
+	// name reliably before the skeleton exists) and re-snapped onto
+	// ThirdPersonWeaponSocket in BeginPlay. Hidden from the owner since they
+	// already see WeaponMesh's first-person viewmodel.
+	ThirdPersonWeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ThirdPersonWeaponMesh"));
+	ThirdPersonWeaponMesh->SetupAttachment(GetMesh());
+	ThirdPersonWeaponMesh->SetOwnerNoSee(true);
+	ThirdPersonWeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ThirdPersonWeaponMesh->bCastDynamicShadow = true;
+	ThirdPersonWeaponMesh->CastShadow = true;
+	ThirdPersonWeaponMesh->SetRelativeScale3D(FVector(1.0f));
+
 	// ---- PIP scope ----
 	// Both halves hang off WeaponMesh, so the rig's per-frame viewmodel posing
 	// carries them without any Tick work here. The real socket snap happens in
@@ -101,6 +114,14 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 
 	// The third-person body should NOT render for the owning player (they see the viewmodel instead).
 	GetMesh()->SetOwnerNoSee(true);
+
+	// Snap the third-person weapon onto its carry socket now that the body skeleton
+	// exists -- constructor-time SetupAttachment can't target a socket by name
+	// reliably. From here it rides the hand bone's full animated transform for free.
+	if (ThirdPersonWeaponMesh && GetMesh())
+	{
+		ThirdPersonWeaponMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ThirdPersonWeaponSocket);
+	}
 
 	// Crouch is off by default on UCharacterMovementComponent -- ACharacter::Crouch()
 	// silently no-ops without this flag, which reads exactly like a missing binding.
@@ -159,6 +180,10 @@ void AIBCharacter_Infantry::BeginPlay()
 	if (WeaponMesh && CurrentVisualData)
 	{
 		WeaponMesh->SetRelativeScale3D(CurrentVisualData->ViewmodelScale);
+		if (ThirdPersonWeaponMesh)
+		{
+			ThirdPersonWeaponMesh->SetRelativeScale3D(CurrentVisualData->ViewmodelScale);
+		}
 
 		// TEMP DIAGNOSTIC (scale/location not visibly updating from DA_Visual edits):
 		// confirms which asset BeginPlay actually resolved and what WeaponMesh's scale
@@ -589,6 +614,10 @@ void AIBCharacter_Infantry::SetWeaponMeshScale(FVector NewScale)
 	}
 
 	WeaponMesh->SetRelativeScale3D(NewScale);
+	if (ThirdPersonWeaponMesh)
+	{
+		ThirdPersonWeaponMesh->SetRelativeScale3D(NewScale);
+	}
 
 	// TEMP DIAGNOSTIC (scale/location not visibly updating from DA_Visual edits): this
 	// is the one place scale actually gets set from an equipped weapon (BeginPlay's
@@ -1210,6 +1239,10 @@ void AIBCharacter_Infantry::ApplyWeaponMesh(UWeaponVisualData* VisualData)
 	if (UStaticMesh* NewMesh = VisualData->ViewmodelMesh.LoadSynchronous())
 	{
 		WeaponMesh->SetStaticMesh(NewMesh);
+		if (ThirdPersonWeaponMesh)
+		{
+			ThirdPersonWeaponMesh->SetStaticMesh(NewMesh);
+		}
 	}
 	else
 	{

@@ -61,6 +61,26 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UStaticMeshComponent> WeaponMesh;
 
+	/** Third-person weapon mesh -- what everyone ELSE (and the owner in third-person
+	 *  spectate/cinematics) actually sees. Rigidly attached to ThirdPersonWeaponSocket
+	 *  on the body skeleton (GetMesh()) in BeginPlay, so it inherits that bone's full
+	 *  animated transform every frame -- walk/run sway, aim offsets, everything --
+	 *  automatically, with zero per-frame Blueprint work. Hidden from the owning
+	 *  player (SetOwnerNoSee) since they already see WeaponMesh's first-person
+	 *  viewmodel; visible to every other client by default (no OnlyOwnerSee). Kept
+	 *  in sync with WeaponMesh's static mesh/scale in ApplyWeaponMesh/SetWeaponMeshScale,
+	 *  and picked up on every client automatically via ActiveWeaponSlot's replication
+	 *  -> OnRep_ActiveWeaponSlot -> ApplyWeaponData chain -- no extra networking needed. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UStaticMeshComponent> ThirdPersonWeaponMesh;
+
+	/** Socket on the body skeleton (GetMesh()) ThirdPersonWeaponMesh rigidly attaches
+	 *  to -- author this near/at the weapon's grip bone so the off-hand IK (which
+	 *  reads ThirdPersonWeaponMesh's own Grip/OffHandGrip sockets) has a natural
+	 *  reach to the foregrip. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	FName ThirdPersonWeaponSocket = TEXT("WeaponSocket");
+
 	/** Poses the viewmodel and drives ADS (zoom, spread, move speed). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UWeaponRigComponent> WeaponRig;
