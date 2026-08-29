@@ -1,6 +1,7 @@
 #include "IBAnimInstance_Infantry.h"
 #include "IBCharacter_Infantry.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/StaticMeshComponent.h" // ThirdPersonWeaponMesh->GetSocketLocation/Rotation below
 
 void UIBAnimInstance_Infantry::NativeInitializeAnimation()
 {
@@ -56,4 +57,29 @@ void UIBAnimInstance_Infantry::NativeUpdateAnimation(float DeltaSeconds)
 	bIsAiming = OwningCharacter->IsAiming();
 	ActiveWeaponSlot = OwningCharacter->GetActiveWeaponSlot();
 	bIsDead = OwningCharacter->IsDead();
+
+	UpdateWeaponHandIKTargets();
+}
+
+void UIBAnimInstance_Infantry::UpdateWeaponHandIKTargets()
+{
+	// OwningCharacter is guaranteed non-null here -- NativeUpdateAnimation already
+	// bailed out above if it couldn't resolve one this frame.
+	UStaticMeshComponent* ThirdPersonWeapon = OwningCharacter->GetThirdPersonWeaponMesh();
+	if (!ThirdPersonWeapon)
+	{
+		return;
+	}
+
+	// Matches what the AnimGraph's old (thread-unsafe) GetSocketLocation/Rotation
+	// calls returned: a missing socket falls back to the component's own world
+	// transform rather than asserting, same fallback behavior USceneComponent
+	// already guarantees -- nothing new to handle here.
+	static const FName GripSocket(TEXT("Grip"));
+	static const FName OffHandGripSocket(TEXT("OffHandGrip"));
+
+	RightHandGripLocation = ThirdPersonWeapon->GetSocketLocation(GripSocket);
+	RightHandGripRotation = ThirdPersonWeapon->GetSocketRotation(GripSocket);
+	LeftHandGripLocation = ThirdPersonWeapon->GetSocketLocation(OffHandGripSocket);
+	LeftHandGripRotation = ThirdPersonWeapon->GetSocketRotation(OffHandGripSocket);
 }

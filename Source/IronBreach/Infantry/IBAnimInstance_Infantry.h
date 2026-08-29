@@ -90,7 +90,52 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Health")
 	bool bIsDead = false;
 
+	// --- Weapon hand-IK targets ---
+	//
+	// WHY THESE EXIST: ABP_InfantryTripo3D's LeftHand/RightHand "Transform (Modify)
+	// Bone" nodes used to call ThirdPersonWeaponMesh->GetSocketLocation/Rotation
+	// live inside the AnimGraph (a cross-actor "Get ThirdPersonWeaponMesh" property
+	// access). The compiler flags exactly that as thread-unsafe -- and it's not a
+	// nitpick: with the AnimGraph evaluated on the animation worker thread (this
+	// project's default), that impure call silently fails to evaluate instead of
+	// erroring, so the Modify Bone nodes were fed a stale/zero target every frame.
+	// The hands never actually tracked ThirdPersonWeaponMesh at all; the FPS
+	// viewmodel (WeaponMesh) only *looked* held because WeaponRigComponent poses it
+	// natively in C++ on the game thread every tick, independent of this bug.
+	//
+	// FIX: compute the grip targets here, in NativeUpdateAnimation (game thread,
+	// same place Speed/Direction/etc. above are computed), then have the ABP's
+	// Modify Bone nodes read these BlueprintReadOnly variables directly instead of
+	// calling GetSocketLocation/Rotation themselves. A plain variable Get is a pure
+	// data read the thread-safe AnimGraph can use without restriction -- same
+	// reasoning as every other property on this class.
+	//
+	// World-space, matching what GetSocketLocation/GetSocketRotation returned
+	// before -- set the Modify Bone nodes' Translation/Rotation Space to World
+	// Space when rewiring so the values plug in unchanged.
+
+	/** World location of ThirdPersonWeaponMesh's "Grip" socket (primary/trigger hand). */
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon|HandIK")
+	FVector RightHandGripLocation = FVector::ZeroVector;
+
+	/** World rotation of ThirdPersonWeaponMesh's "Grip" socket (primary/trigger hand). */
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon|HandIK")
+	FRotator RightHandGripRotation = FRotator::ZeroRotator;
+
+	/** World location of ThirdPersonWeaponMesh's "OffHandGrip" socket (support hand). */
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon|HandIK")
+	FVector LeftHandGripLocation = FVector::ZeroVector;
+
+	/** World rotation of ThirdPersonWeaponMesh's "OffHandGrip" socket (support hand). */
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon|HandIK")
+	FRotator LeftHandGripRotation = FRotator::ZeroRotator;
+
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<AIBCharacter_Infantry> OwningCharacter;
+
+	/** Game-thread-safe helper behind RightHandGripLocation/Rotation and
+	 *  LeftHandGripLocation/Rotation above -- see their comments for why this
+	 *  can't just happen inline in the AnimGraph. */
+	void UpdateWeaponHandIKTargets();
 };

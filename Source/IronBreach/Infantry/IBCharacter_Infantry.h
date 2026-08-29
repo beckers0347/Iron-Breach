@@ -331,6 +331,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	bool IsAiming() const { return bIsAiming; }
 
+	/** ThirdPersonWeaponMesh is also declared in a `protected:` block above --
+	 *  same reasoning as IsArmed()/IsSprinting()/IsAiming() just above, but for a
+	 *  component reference instead of a bool. UIBAnimInstance_Infantry reads this
+	 *  once a frame (game thread, NativeUpdateAnimation) to compute the hand-IK
+	 *  grip targets safely -- see that class's UpdateWeaponHandIKTargets(). */
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	UStaticMeshComponent* GetThirdPersonWeaponMesh() const { return ThirdPersonWeaponMesh; }
+
 	/** True once HealthComponent has hit 0. Not inlined: HealthComponent.h is only
 	 *  forward-declared up top, and this needs the full UHealthComponent type to
 	 *  call IsDepleted() -- defined in the .cpp, which already includes it. */

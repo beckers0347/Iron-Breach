@@ -115,12 +115,17 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	// The third-person body should NOT render for the owning player (they see the viewmodel instead).
 	GetMesh()->SetOwnerNoSee(true);
 
-	// Snap the third-person weapon onto its carry socket now that the body skeleton
-	// exists -- constructor-time SetupAttachment can't target a socket by name
-	// reliably. From here it rides the hand bone's full animated transform for free.
+	// Snap the third-person weapon onto its carry socket. SetupAttachment's
+	// (Parent, SocketName) overload is the constructor-safe form here: it only
+	// records the desired parent/socket now and defers the real attach to
+	// RegisterComponent, by which point the skeleton exists and the socket
+	// resolves correctly -- unlike AttachToComponent(), which performs the
+	// attach immediately and trips an engine ensure when called this early
+	// ("AttachToComponent when called from a constructor ... always treated
+	// as KeepRelative. Consider calling SetupAttachment directly instead.").
 	if (ThirdPersonWeaponMesh && GetMesh())
 	{
-		ThirdPersonWeaponMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ThirdPersonWeaponSocket);
+		ThirdPersonWeaponMesh->SetupAttachment(GetMesh(), ThirdPersonWeaponSocket);
 	}
 
 	// Crouch is off by default on UCharacterMovementComponent -- ACharacter::Crouch()
