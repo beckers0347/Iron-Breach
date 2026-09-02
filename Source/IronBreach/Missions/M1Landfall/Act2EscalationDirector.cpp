@@ -3,6 +3,7 @@
 #include "Act2EscalationDirector.h"
 #include "Act1BarracksDirector.h"
 #include "IronBreach.h"
+#include "IBCampaignDebugLibrary.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 
@@ -88,6 +89,12 @@ void AAct2EscalationDirector::BuildDefaultBeats()
 void AAct2EscalationDirector::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (UIBCampaignDebugLibrary::IsCampaignDisabled())
+	{
+		UE_LOG(LogIronBreach, Log, TEXT("[Act II] Campaign disabled (IronBreach.DisableCampaign) -- staying dormant."));
+		return;
+	}
 
 	if (AAct1BarracksDirector* Previous = PreviousActDirector.LoadSynchronous())
 	{

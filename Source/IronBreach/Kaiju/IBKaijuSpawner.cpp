@@ -35,12 +35,38 @@ void AIBKaijuSpawner::BeginPlay()
 
 	if (!HasAuthority()) return;
 
-	// Start the looping check every 'SpawnInterval' seconds
-	GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &AIBKaijuSpawner::ProcessSpawning, SpawnInterval, true);
+	bSpawningEnabled = bStartEnabled;
+
+	if (bSpawningEnabled)
+	{
+		// Start the looping check every 'SpawnInterval' seconds
+		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &AIBKaijuSpawner::ProcessSpawning, SpawnInterval, true);
+	}
+}
+
+void AIBKaijuSpawner::SetSpawningEnabled(bool bEnabled)
+{
+	if (bEnabled == bSpawningEnabled)
+	{
+		return;
+	}
+
+	bSpawningEnabled = bEnabled;
+
+	if (bSpawningEnabled)
+	{
+		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &AIBKaijuSpawner::ProcessSpawning, SpawnInterval, true);
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+	}
 }
 
 void AIBKaijuSpawner::ProcessSpawning()
 {
+	if (!bSpawningEnabled) return;
+
 	// 1. Clean up array in case a Kaiju was destroyed without triggering the delegate
 	ActiveKaijus.RemoveAll([](AIBCharacter_Kaiju* K) { return K == nullptr || K->IsActorBeingDestroyed(); });
 

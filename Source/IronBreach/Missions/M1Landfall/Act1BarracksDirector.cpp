@@ -2,6 +2,7 @@
 
 #include "Act1BarracksDirector.h"
 #include "IronBreach.h"
+#include "IBCampaignDebugLibrary.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 
@@ -70,6 +71,12 @@ void AAct1BarracksDirector::BuildDefaultBeats()
 void AAct1BarracksDirector::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (UIBCampaignDebugLibrary::IsCampaignDisabled())
+	{
+		UE_LOG(LogIronBreach, Log, TEXT("[Act I] Campaign disabled (IronBreach.DisableCampaign) -- staying dormant."));
+		return;
+	}
 
 	if (bAutoStart)
 	{

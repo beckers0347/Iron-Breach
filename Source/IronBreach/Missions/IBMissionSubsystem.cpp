@@ -1,6 +1,7 @@
 #include "Missions/IBMissionSubsystem.h"
 #include "IronBreach.h"
 #include "Missions/IBMissionDirector.h"
+#include "Missions/M1Landfall/IBCampaignDebugLibrary.h"
 #include "Kaiju/IBCharacter_Kaiju.h"
 #include "Kaiju/IBKaijuSpawner.h"
 #include "EngineUtils.h"
@@ -19,6 +20,12 @@ void UIBMissionSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	// Server decides; clients meet the replicated director when it arrives.
 	if (InWorld.GetNetMode() == NM_Client) { return; }
+
+	if (UIBCampaignDebugLibrary::IsCampaignDisabled())
+	{
+		UE_LOG(LogIronBreach, Log, TEXT("[Mission] Campaign disabled (IronBreach.DisableCampaign) -- skipping auto-spawn director for %s"), *InWorld.GetName());
+		return;
+	}
 
 	bool bHasKaijuContent = TActorIterator<AIBCharacter_Kaiju>(&InWorld) ? true : false;
 	if (!bHasKaijuContent)

@@ -16,7 +16,10 @@ enum class EDialogueSpeaker : uint8
 	Rhodes		UMETA(DisplayName = "Lt. Imani Rhodes"),
 	Bricks		UMETA(DisplayName = "Sgt. Adaeze \"Bricks\" Okafor"),
 	Idris		UMETA(DisplayName = "Ms. Idris"),
-	Comms		UMETA(DisplayName = "Garrison Comms / Sirens")
+	Comms		UMETA(DisplayName = "Garrison Comms / Sirens"),
+	// Added for M1 Acts III-V / M2: the garrison mech's two-person crew.
+	Vance		UMETA(DisplayName = "Cpl. Desmond \"Junction\" Vance"),
+	Achterberg	UMETA(DisplayName = "Sgt. Priya \"Ledger\" Achterberg")
 };
 
 // A single scripted line in a mission act. Acts are just ordered arrays of these,
@@ -66,8 +69,10 @@ inline FText GetSpeakerDisplayName(EDialogueSpeaker Speaker)
 	case EDialogueSpeaker::Static:  return FText::FromString(TEXT("SPC. YUN \"STATIC\""));
 	case EDialogueSpeaker::Rhodes:  return FText::FromString(TEXT("LT. RHODES"));
 	case EDialogueSpeaker::Bricks:  return FText::FromString(TEXT("SGT. OKAFOR \"BRICKS\""));
-	case EDialogueSpeaker::Idris:   return FText::FromString(TEXT("MS. IDRIS"));
-	case EDialogueSpeaker::Comms:   return FText::FromString(TEXT("COMMS"));
-	default:                        return FText::GetEmpty();
+	case EDialogueSpeaker::Idris:      return FText::FromString(TEXT("MS. IDRIS"));
+	case EDialogueSpeaker::Comms:      return FText::FromString(TEXT("COMMS"));
+	case EDialogueSpeaker::Vance:      return FText::FromString(TEXT("CPL. VANCE \"JUNCTION\""));
+	case EDialogueSpeaker::Achterberg: return FText::FromString(TEXT("SGT. ACHTERBERG \"LEDGER\""));
+	default:                           return FText::GetEmpty();
 	}
 }
