@@ -16,16 +16,20 @@ Doctrine reminders (bible-locked): species get field designations; **individuals
 
 *Class D fiction floor is 20 m; gameplay uses smaller "juvenile shoal" variants so infantry combat reads — codex logs them as immature instances. The 20–40 m table entries are the ADULTS (mini-boss tier): **SKITTERLING BROODMOTHER** 2,500/800, 3×250, 24 m, 260.
 
+**M1 opening contact:** the garrison's Act III skirmish (see mission doc) uses 3–4 stock SKITTERLING/CARAPACE instances, no new DA needed — infantry plus the one on-base mech hold the line. This is deliberately winnable, so PALAWAN's Class B reveal right after reads as a real step up rather than more of the same.
+
 ## CLASS C — Territorial (40–80 m) · squad + heavy weapons, mech optional
 | Species | Role | HP | Armor | Organs × HP | Ht | Speed | Notes |
 |---|---|---|---|---|---|---|---|
 | **BASE KAIJU → rename RIDGEBACK** | the demo boss | 3,000→12,000 | 800→4,000 | 3×60→3×900 | 5→48 m | 250 | Current `DA_Kaiju_Alpha` IS this species at test values; left column = today, right = real tuning when the mech fight is calibrated |
 | **MAWCROWN** | siege biter | 16,000 | 6,000 | 4×800 | 62 m | 200 | Armor concentrated frontally (place organs flank/rear — forces the squad to split from the mech) |
-| **PALAWAN** *(individual, M1)* | campaign boss | 20,000 | 7,500 | 3×1,200 | 74 m | 230 | The one that made the harbor scar. Its species template doubles as the C-class ceiling |
+
+*(PALAWAN reclassified to Class B — see below. M1's opening skirmish now uses a handful of Class D individuals instead; see that section.)*
 
 ## CLASS B — Aggressive (80–120 m) · Tandem warfare begins
 | Species | Role | HP | Armor | Organs × HP | Ht | Speed | Notes |
 |---|---|---|---|---|---|---|---|
+| **PALAWAN** *(individual, M1)* | first contact | 40,000 | 16,000 | 4×2,200 | 82 m | 210 | RECLASSIFIED from Class C (was: campaign boss, 20,000/7,500/3×1,200/74 m — numbers below are the real tuning, keep the old row out of continuity). The franchise's first confirmed Class B contact — lower end of the tier on purpose, since one under-crewed garrison mech has to survive contact with it, not win. Doctrine still holds: infantry cannot break its armor. Ends M1 by throwing the garrison's mech off the battlefield into the mountains (Act V) — not defeated, disengages/calcifies afterward per the original Aftermath beat, just post-engagement instead of un-engaged. Its species template doubles as the B-class floor. |
 | **BULWARK** | the wall | 45,000 | 20,000 | 4×2,500 | 95 m | 150 | The bible's line: "nothing on treads reliably stops one." Infantry CANNOT break its armor alone (HardenedBodyMultiplier 0.15) — the fight that sells boarding the Caryatid |
 | **TONGA** *(individual, M5)* | bridge-breaker | 55,000 | 24,000 | 4×3,000 | 96 m | 180 | Kills Lt. Rhodes. Faster than BULWARK; its speed IS the horror |
 | **VITYAZ** *(individual, KIA 2035)* | codex-only | — | — | — | 110 m | — | The frame program's stolen anatomy source. Ledger entry, never fought — DATA SEALED until Y1 |

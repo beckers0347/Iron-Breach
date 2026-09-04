@@ -1,0 +1,422 @@
+{
+  "tree": [
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_A/GV_Vol7_Shrub_A_full_type1.GV_Vol7_Shrub_A_full_type1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_A/GV_Vol7_Shrub_A_type1_L1.GV_Vol7_Shrub_A_type1_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_A/GV_Vol7_Shrub_A_type1_L2.GV_Vol7_Shrub_A_type1_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_A/GV_Vol7_Shrub_A_type1_branches.GV_Vol7_Shrub_A_type1_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_A/GV_Vol7_Shrub_A_type2_L1.GV_Vol7_Shrub_A_type2_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_A/GV_Vol7_Shrub_A_type2_L2.GV_Vol7_Shrub_A_type2_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_A/GV_Vol7_Shrub_A_type2_branches.GV_Vol7_Shrub_A_type2_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_B/GV_Vol7_Shrub_B_full_type1.GV_Vol7_Shrub_B_full_type1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_B/GV_Vol7_Shrub_B_type1_L1.GV_Vol7_Shrub_B_type1_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_B/GV_Vol7_Shrub_B_type1_L2.GV_Vol7_Shrub_B_type1_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_B/GV_Vol7_Shrub_B_type1_branches.GV_Vol7_Shrub_B_type1_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_B/GV_Vol7_Shrub_B_type2_L1.GV_Vol7_Shrub_B_type2_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_B/GV_Vol7_Shrub_B_type2_L2.GV_Vol7_Shrub_B_type2_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_B/GV_Vol7_Shrub_B_type2_branches.GV_Vol7_Shrub_B_type2_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_C/GV_Vol7_Shrub_C_full_type1.GV_Vol7_Shrub_C_full_type1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_C/GV_Vol7_Shrub_C_type1_L1.GV_Vol7_Shrub_C_type1_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_C/GV_Vol7_Shrub_C_type1_L2.GV_Vol7_Shrub_C_type1_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_C/GV_Vol7_Shrub_C_type1_branches.GV_Vol7_Shrub_C_type1_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_C/GV_Vol7_Shrub_C_type2_L1.GV_Vol7_Shrub_C_type2_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_C/GV_Vol7_Shrub_C_type2_L2.GV_Vol7_Shrub_C_type2_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_C/GV_Vol7_Shrub_C_type2_branches.GV_Vol7_Shrub_C_type2_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_D/GV_Vol7_Shrub_D_full_type1.GV_Vol7_Shrub_D_full_type1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_D/GV_Vol7_Shrub_D_type1_L1.GV_Vol7_Shrub_D_type1_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_D/GV_Vol7_Shrub_D_type1_L2.GV_Vol7_Shrub_D_type1_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_D/GV_Vol7_Shrub_D_type1_branches.GV_Vol7_Shrub_D_type1_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_D/GV_Vol7_Shrub_D_type2_L1.GV_Vol7_Shrub_D_type2_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_D/GV_Vol7_Shrub_D_type2_L2.GV_Vol7_Shrub_D_type2_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_D/GV_Vol7_Shrub_D_type2_branches.GV_Vol7_Shrub_D_type2_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_E/GV_Vol7_Shrub_E_full_type1_A.GV_Vol7_Shrub_E_full_type1_A",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_E/GV_Vol7_Shrub_E_type1_A_L1.GV_Vol7_Shrub_E_type1_A_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_E/GV_Vol7_Shrub_E_type1_A_L2.GV_Vol7_Shrub_E_type1_A_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_E/GV_Vol7_Shrub_E_type1_A_branches.GV_Vol7_Shrub_E_type1_A_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_E/GV_Vol7_Shrub_E_type2_A_L1.GV_Vol7_Shrub_E_type2_A_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_E/GV_Vol7_Shrub_E_type2_A_L2.GV_Vol7_Shrub_E_type2_A_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_E/GV_Vol7_Shrub_E_type2_A_branches.GV_Vol7_Shrub_E_type2_A_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_F/GV_Vol7_Shrub_F_full_type1_B.GV_Vol7_Shrub_F_full_type1_B",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_F/GV_Vol7_Shrub_F_type1_B_L1.GV_Vol7_Shrub_F_type1_B_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_F/GV_Vol7_Shrub_F_type1_B_L2.GV_Vol7_Shrub_F_type1_B_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_F/GV_Vol7_Shrub_F_type1_B_branches.GV_Vol7_Shrub_F_type1_B_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_F/GV_Vol7_Shrub_F_type2_B_L1.GV_Vol7_Shrub_F_type2_B_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_F/GV_Vol7_Shrub_F_type2_B_L2.GV_Vol7_Shrub_F_type2_B_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_F/GV_Vol7_Shrub_F_type2_B_branches.GV_Vol7_Shrub_F_type2_B_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_G/GV_Vol7_Shrub_G_full_type1_C.GV_Vol7_Shrub_G_full_type1_C",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_G/GV_Vol7_Shrub_G_type1_C_L1.GV_Vol7_Shrub_G_type1_C_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_G/GV_Vol7_Shrub_G_type1_C_L2.GV_Vol7_Shrub_G_type1_C_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_G/GV_Vol7_Shrub_G_type1_C_branches.GV_Vol7_Shrub_G_type1_C_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_G/GV_Vol7_Shrub_G_type2_C_L1.GV_Vol7_Shrub_G_type2_C_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_G/GV_Vol7_Shrub_G_type2_C_L2.GV_Vol7_Shrub_G_type2_C_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_G/GV_Vol7_Shrub_G_type2_C_branches.GV_Vol7_Shrub_G_type2_C_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_H/GV_Vol7_Shrub_H_full_type1_D.GV_Vol7_Shrub_H_full_type1_D",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_H/GV_Vol7_Shrub_H_type1_D_L1.GV_Vol7_Shrub_H_type1_D_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_H/GV_Vol7_Shrub_H_type1_D_L2.GV_Vol7_Shrub_H_type1_D_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_H/GV_Vol7_Shrub_H_type1_D_branches.GV_Vol7_Shrub_H_type1_D_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_H/GV_Vol7_Shrub_H_type2_D_L1.GV_Vol7_Shrub_H_type2_D_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_H/GV_Vol7_Shrub_H_type2_D_L2.GV_Vol7_Shrub_H_type2_D_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_H/GV_Vol7_Shrub_H_type2_D_branches.GV_Vol7_Shrub_H_type2_D_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_I/GV_Vol7_Shrub_I_full_type1.GV_Vol7_Shrub_I_full_type1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_I/GV_Vol7_Shrub_I_type1_L1.GV_Vol7_Shrub_I_type1_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_I/GV_Vol7_Shrub_I_type1_L2.GV_Vol7_Shrub_I_type1_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_I/GV_Vol7_Shrub_I_type1_branches.GV_Vol7_Shrub_I_type1_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_I/GV_Vol7_Shrub_I_type2_L1.GV_Vol7_Shrub_I_type2_L1",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_I/GV_Vol7_Shrub_I_type2_L2.GV_Vol7_Shrub_I_type2_L2",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Shrubs/Meshes/Shrubs/Wind/Shrub_I/GV_Vol7_Shrub_I_type2_branches.GV_Vol7_Shrub_I_type2_branches",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Branch_Black_Alder_Alive_01.Branch_Black_Alder_Alive_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Branch_Black_Alder_Alive_02.Branch_Black_Alder_Alive_02",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Branch_Black_Alder_Alive_03.Branch_Black_Alder_Alive_03",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Branch_Black_Alder_Dead_01.Branch_Black_Alder_Dead_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Branch_Black_Alder_Dead_02.Branch_Black_Alder_Dead_02",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Branch_Black_Alder_Dead_03.Branch_Black_Alder_Dead_03",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Decoration_Black_Alder_01.Decoration_Black_Alder_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Leaf_Black_Alder_01.Leaf_Black_Alder_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Leaf_Black_Alder_02.Leaf_Black_Alder_02",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Leaf_Black_Alder_03.Leaf_Black_Alder_03",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Leaf_Black_Alder_04.Leaf_Black_Alder_04",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Leaf_Black_Alder_05.Leaf_Black_Alder_05",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Leaf_Black_Alder_06.Leaf_Black_Alder_06",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Black_Alder/Instances/Leaf_Black_Alder_07.Leaf_Black_Alder_07",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Dead_01.Branch_Hornbeam_Dead_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Dead_02.Branch_Hornbeam_Dead_02",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Dead_03.Branch_Hornbeam_Dead_03",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Large_01.Branch_Hornbeam_Large_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Large_02.Branch_Hornbeam_Large_02",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Large_03.Branch_Hornbeam_Large_03",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Large_04.Branch_Hornbeam_Large_04",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Medium_01.Branch_Hornbeam_Medium_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Medium_02.Branch_Hornbeam_Medium_02",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Medium_03.Branch_Hornbeam_Medium_03",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Small_01.Branch_Hornbeam_Small_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Small_02.Branch_Hornbeam_Small_02",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Branch_Hornbeam_Small_03.Branch_Hornbeam_Small_03",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Top_Branch_Hornbeam_01.Top_Branch_Hornbeam_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/Tree_Hornbeam/Instances/Top_Branch_Hornbeam_02.Top_Branch_Hornbeam_02",
+      "size_m_xyz": null
+    }
+  ],
+  "mountain": [
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Iceland_Eroded_Mountain.SM_Iceland_Eroded_Mountain",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Iceland_Mountain_02.SM_Iceland_Mountain_02",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_01.SM_Mountain_01",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_02.SM_Mountain_02",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_03.SM_Mountain_03",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_04.SM_Mountain_04",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_05.SM_Mountain_05",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_06.SM_Mountain_06",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_07.SM_Mountain_07",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_08.SM_Mountain_08",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_09.SM_Mountain_09",
+      "size_m_xyz": null
+    },
+    {
+      "path": "/Game/Landscaping/IcelandEnviroment/Static_Meshes/SM_Mountain_Plateu_01.SM_Mountain_Plateu_01",
+      "size_m_xyz": null
+    }
+  ]
+}

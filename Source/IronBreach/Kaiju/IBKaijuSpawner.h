@@ -60,7 +60,27 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning|Rules")
 	float SpawnInterval = 5.0f;
 
+	// If false, this spawner starts BeginPlay dormant -- no timer, no proximity checks,
+	// nothing spawns -- until something calls SetSpawningEnabled(true). Default true
+	// preserves the existing always-on ambient/open-world behavior; set this false on
+	// instances meant to be gated by a scripted story beat instead (e.g. M1 Act III's
+	// Class D contact, which should only start once the Director says so, not whenever
+	// the player happens to wander into range).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning|Rules")
+	bool bStartEnabled = true;
+
+	// Enable/disable spawning at runtime. Starting/stopping the check-timer, not just
+	// gating ProcessSpawning, so a disabled spawner does zero work per tick of its
+	// interval rather than idly checking and bailing. Safe to call repeatedly.
+	UFUNCTION(BlueprintCallable, Category = "Spawning")
+	void SetSpawningEnabled(bool bEnabled);
+
+	UFUNCTION(BlueprintPure, Category = "Spawning")
+	bool IsSpawningEnabled() const { return bSpawningEnabled; }
+
 private:
+	bool bSpawningEnabled = true;
+
 	// Tracks currently living Kaijus spawned by this spawner
 	UPROPERTY()
 	TArray<AIBCharacter_Kaiju*> ActiveKaijus;
