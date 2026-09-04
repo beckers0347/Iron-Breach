@@ -26,8 +26,8 @@
 namespace
 {
 	constexpr int32 MaxCallsignLen = 16;
-	constexpr float ColumnWidth = 460.f;
-	constexpr float PreviewPixels = 1024.f;
+	constexpr float CreateColumnWidth = 460.f;
+	constexpr float CreatePreviewPixels = 1024.f;
 
 	const EIBOperativeClass AllClasses[] =
 	{
@@ -70,7 +70,7 @@ void UIBCharacterCreateScreen::NativeConstruct()
 		{
 			FSlateBrush Brush = PreviewImage->GetBrush();
 			Brush.SetResourceObject(RT);
-			Brush.ImageSize = FVector2D(PreviewPixels, PreviewPixels);
+			Brush.ImageSize = FVector2D(CreatePreviewPixels, CreatePreviewPixels);
 			PreviewImage->SetBrush(Brush);
 		}
 	}
@@ -138,13 +138,13 @@ void UIBCharacterCreateScreen::BuildLayout()
 	{
 		FSlateBrush Brush = PreviewImage->GetBrush();
 		Brush.DrawAs = ESlateBrushDrawType::Image;
-		Brush.ImageSize = FVector2D(PreviewPixels, PreviewPixels);
+		Brush.ImageSize = FVector2D(CreatePreviewPixels, CreatePreviewPixels);
 		Brush.TintColor = FSlateColor(FLinearColor::White);
 		PreviewImage->SetBrush(Brush);
 	}
 	USizeBox* PreviewSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	PreviewSize->SetWidthOverride(PreviewPixels);
-	PreviewSize->SetHeightOverride(PreviewPixels);
+	PreviewSize->SetWidthOverride(CreatePreviewPixels);
+	PreviewSize->SetHeightOverride(CreatePreviewPixels);
 	PreviewSize->SetContent(PreviewImage);
 	UScaleBox* PreviewScale = WidgetTree->ConstructWidget<UScaleBox>(UScaleBox::StaticClass());
 	PreviewScale->SetStretch(EStretch::ScaleToFit);
@@ -309,7 +309,7 @@ void UIBCharacterCreateScreen::BuildLayout()
 	}
 
 	USizeBox* ColumnSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	ColumnSize->SetWidthOverride(ColumnWidth);
+	ColumnSize->SetWidthOverride(CreateColumnWidth);
 	ColumnSize->SetContent(Column);
 	if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(ColumnSize))
 	{

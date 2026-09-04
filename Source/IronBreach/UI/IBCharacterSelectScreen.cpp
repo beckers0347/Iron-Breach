@@ -26,9 +26,9 @@
 
 namespace
 {
-	constexpr float ColumnWidth = 460.f;
+	constexpr float SelColumnWidth = 460.f;
 	constexpr float CardHeight = 112.f;
-	constexpr float PreviewPixels = 1024.f; // native render-target size; ScaleBox fits it to the screen height
+	constexpr float SelPreviewPixels = 1024.f; // native render-target size; ScaleBox fits it to the screen height
 
 	FText LastDeployedText(const FDateTime& Utc)
 	{
@@ -167,13 +167,13 @@ void UIBCharacterSelectScreen::BuildLayout()
 	{
 		FSlateBrush Brush = PreviewImage->GetBrush();
 		Brush.DrawAs = ESlateBrushDrawType::Image;
-		Brush.ImageSize = FVector2D(PreviewPixels, PreviewPixels);
+		Brush.ImageSize = FVector2D(SelPreviewPixels, SelPreviewPixels);
 		Brush.TintColor = FSlateColor(FLinearColor::White);
 		PreviewImage->SetBrush(Brush);
 	}
 	USizeBox* PreviewSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	PreviewSize->SetWidthOverride(PreviewPixels);
-	PreviewSize->SetHeightOverride(PreviewPixels);
+	PreviewSize->SetWidthOverride(SelPreviewPixels);
+	PreviewSize->SetHeightOverride(SelPreviewPixels);
 	PreviewSize->SetContent(PreviewImage);
 	UScaleBox* PreviewScale = WidgetTree->ConstructWidget<UScaleBox>(UScaleBox::StaticClass());
 	PreviewScale->SetStretch(EStretch::ScaleToFit);
@@ -270,7 +270,7 @@ void UIBCharacterSelectScreen::BuildLayout()
 	}
 
 	USizeBox* ColumnSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	ColumnSize->SetWidthOverride(ColumnWidth);
+	ColumnSize->SetWidthOverride(SelColumnWidth);
 	ColumnSize->SetContent(Column);
 	if (UOverlaySlot* ColumnSlot = RootOverlay->AddChildToOverlay(ColumnSize))
 	{
@@ -317,7 +317,7 @@ void UIBCharacterSelectScreen::EnsureStage()
 		{
 			FSlateBrush Brush = PreviewImage->GetBrush();
 			Brush.SetResourceObject(RT);
-			Brush.ImageSize = FVector2D(PreviewPixels, PreviewPixels);
+			Brush.ImageSize = FVector2D(SelPreviewPixels, SelPreviewPixels);
 			PreviewImage->SetBrush(Brush);
 		}
 	}
