@@ -31,11 +31,6 @@ class AIBPlayerState;
  *  entirely"). Generic on purpose -- any future no-HUD beat reuses it. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCarryStateChangedSignature, bool, bIsCarrying);
 
-/** UI binds this to clear/restore the HUD around the M1 LANDFALL carry
- *  (Docs/M1_LANDFALL_Mission_Design.md §4.4/§7: "the carry clears the HUD
- *  entirely"). Generic on purpose -- any future no-HUD beat reuses it. */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCarryStateChangedSignature, bool, bIsCarrying);
-
 UCLASS()
 class IRONBREACH_API AIBCharacter_Infantry : public ACharacter, public IDamageableInterface
 {
@@ -416,66 +411,11 @@ protected:
 	void SelectSpecialSlot()  { SetActiveWeaponSlot(EIBEquipSlot::WeaponSpecial); }
 	void SelectHeavySlot()    { SetActiveWeaponSlot(EIBEquipSlot::WeaponHeavy); }
 
-	// Mouse wheel thunks -- same raw-key grammar as 1/2/3, no IA assets required.
-	void CycleWeaponSlotUp()   { CycleWeaponSlot(-1); }
-	void CycleWeaponSlotDown() { CycleWeaponSlot(1); }
+	/** F thunk: open the Squad tab (friends/invites) via the menu subsystem. */
+	void OpenSquadScreen();
 
-	/** Scrolls to the next/previous OCCUPIED weapon well (Primary/Special/Heavy),
-	 *  skipping empty ones so scrolling never lands on a slot with nothing in it —
-	 *  a one-weapon loadout just doesn't move, same as pressing 2/3 already does
-	 *  nothing when that well is empty. Primary is always a valid landing spot
-	 *  even when empty (matches SetActiveWeaponSlot's existing grammar: an empty
-	 *  Primary means truly unarmed, not "refused"). Direction: -1 = previous
-	 *  (toward Primary), +1 = next (toward Heavy). */
-	void CycleWeaponSlot(int32 Direction);
-
-public:
-	// --- Carry (M1 LANDFALL "Four Hundred Meters" -- Docs/M1_LANDFALL_Mission_Design.md §4.4) ---
-	//
-	// Deliberately a character STATE, not a separate component: no stamina bar,
-	// no timer, no fail state, no score (LOCKED). Reuses the existing
-	// unarmed/re-arm path (SetUnarmed) for "weapon holstered" instead of a
-	// parallel holster system, and folds into Tick()'s existing single-source-
-	// of-truth MaxWalkSpeed calc for the forced walking pace.
-
-	/** Starts carrying Target: attaches it to CarrySocket on the body mesh,
-	 *  holsters the weapon, forces walk pace, and broadcasts OnCarryStateChanged
-	 *  so UI clears the HUD. Returns false if already carrying something. Called
-	 *  by IIBInteractable::Interact on the carryable (see M1Landfall/IBCarryablePawn). */
-	UFUNCTION(BlueprintCallable, Category = "Carry")
-	bool BeginCarry(AActor* Target);
-
-	/** Detaches the carried actor in place (keeping its world transform -- the
-	 *  level places the stretcher, this doesn't teleport her onto it), re-arms
-	 *  the weapon, and restores normal move speed. Called by AIBCarryEndZone at
-	 *  the hospital muster; never by player input (LOCKED: "cannot be skipped"). */
-	UFUNCTION(BlueprintCallable, Category = "Carry")
-	void EndCarry();
-
-	UFUNCTION(BlueprintPure, Category = "Carry")
-	bool IsCarrying() const { return bIsCarrying; }
-
-	UFUNCTION(BlueprintPure, Category = "Carry")
-	AActor* GetCarriedActor() const { return CarriedActor.Get(); }
-
-	UPROPERTY(BlueprintAssignable, Category = "Carry|Events")
-	FOnCarryStateChangedSignature OnCarryStateChanged;
-
-	/** Forced pace while carrying (LOCKED: "walking pace is forced"), independent
-	 *  of NormalWalkSpeed/ADS/sprint -- see Tick(). */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Carry", meta = (ClampMin = "50.0", ClampMax = "400.0"))
-	float CarryWalkSpeed = 220.0f;
-
-	/** Socket on the third-person body mesh (GetMesh()) the carried actor attaches to. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Carry")
-	FName CarrySocket = TEXT("CarrySocket");
-
-protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Carry")
-	bool bIsCarrying = false;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Carry")
-	TWeakObjectPtr<AActor> CarriedActor;
+	/** Push the saved FOV into the rig/camera (BeginPlay + live on settings apply). */
+	void ApplyUserFOV();
 
 	// Mouse wheel thunks -- same raw-key grammar as 1/2/3, no IA assets required.
 	void CycleWeaponSlotUp()   { CycleWeaponSlot(-1); }
