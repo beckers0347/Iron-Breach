@@ -7,6 +7,7 @@
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "Items/IBPlayerState.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/VerticalBox.h"
@@ -107,7 +108,14 @@ void UIBLobbyStripWidget::RefreshBanners(bool bForce)
 	TArray<int32> Roster;
 	for (const APlayerState* PS : GameState->PlayerArray)
 	{
-		if (PS) { Roster.Add(PS->GetPlayerId()); }
+		if (!PS) { continue; }
+		Roster.Add(PS->GetPlayerId());
+		// Operative identity replicates a beat after the PlayerState itself;
+		// fold it into the fingerprint so callsigns land without a roster change.
+		if (const AIBPlayerState* IBPS = Cast<AIBPlayerState>(PS))
+		{
+			Roster.Add(IBPS->HasOperative() ? static_cast<int32>(GetTypeHash(IBPS->GetOperativeCallsign())) : 0);
+		}
 	}
 	if (!bForce && Roster == LastRoster) { return; }
 	LastRoster = Roster;

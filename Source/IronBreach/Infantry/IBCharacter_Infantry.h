@@ -22,6 +22,14 @@ class UStaticMeshComponent;
 class USceneCaptureComponent2D;
 class UTextureRenderTarget2D;
 class UMaterialInterface;
+class UIBOperativeKitComponent;
+class USkeletalMesh;
+class AIBPlayerState;
+
+/** UI binds this to clear/restore the HUD around the M1 LANDFALL carry
+ *  (Docs/M1_LANDFALL_Mission_Design.md §4.4/§7: "the carry clears the HUD
+ *  entirely"). Generic on purpose -- any future no-HUD beat reuses it. */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCarryStateChangedSignature, bool, bIsCarrying);
 
 UCLASS()
 class IRONBREACH_API AIBCharacter_Infantry : public ACharacter, public IDamageableInterface
@@ -56,9 +64,59 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UStaticMeshComponent> WeaponMesh;
 
+	/** Third-person weapon mesh -- what everyone ELSE (and the owner in third-person
+	 *  spectate/cinematics) actually sees. Rigidly attached to ThirdPersonWeaponSocket
+	 *  on the body skeleton (GetMesh()) in BeginPlay, so it inherits that bone's full
+	 *  animated transform every frame -- walk/run sway, aim offsets, everything --
+	 *  automatically, with zero per-frame Blueprint work. Hidden from the owning
+	 *  player (SetOwnerNoSee) since they already see WeaponMesh's first-person
+	 *  viewmodel; visible to every other client by default (no OnlyOwnerSee). Kept
+	 *  in sync with WeaponMesh's static mesh/scale in ApplyWeaponMesh/SetWeaponMeshScale,
+	 *  and picked up on every client automatically via ActiveWeaponSlot's replication
+	 *  -> OnRep_ActiveWeaponSlot -> ApplyWeaponData chain -- no extra networking needed. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UStaticMeshComponent> ThirdPersonWeaponMesh;
+
+	/** Socket on the body skeleton (GetMesh()) ThirdPersonWeaponMesh rigidly attaches
+	 *  to -- author this near/at the weapon's grip bone so the off-hand IK (which
+	 *  reads ThirdPersonWeaponMesh's own Grip/OffHandGrip sockets) has a natural
+	 *  reach to the foregrip. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	FName ThirdPersonWeaponSocket = TEXT("WeaponSocket");
+
 	/** Poses the viewmodel and drives ADS (zoom, spread, move speed). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UWeaponRigComponent> WeaponRig;
+
+	// ---------------------------------------------------------------------
+	// Operative: the class kit (Q / V) and the body the roster picked.
+	// ---------------------------------------------------------------------
+
+	/** Kit ability + movement tool for the operative's trade (data-driven, see Classes/). */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Operative")
+	TObjectPtr<UIBOperativeKitComponent> KitComponent;
+
+	/** Third-person bodies by gender — swapped in from the PlayerState's operative. */
+	UPROPERTY(EditDefaultsOnly, Category = "Operative")
+	TSoftObjectPtr<USkeletalMesh> MaleBody;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Operative")
+	TSoftObjectPtr<USkeletalMesh> FemaleBody;
+
+	/** Optional Input Actions for the kit (raw Q / V work without them). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> KitAbilityAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> MovementToolAction;
+
+	/** PlayerState identity arrived/changed: body + kit follow it. */
+	UFUNCTION()
+	void HandleOperativeIdentityChanged();
+
+	void ApplyOperativeBody();
+
+	TWeakObjectPtr<AIBPlayerState> BoundIdentityPS;
 
 	// ---------------------------------------------------------------------
 	// Picture-in-picture scope (render-target optic)
@@ -181,6 +239,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> AimAction;
 
+	/** World interaction: coffee/log/dry-fire rig in M1's QUIET beat, Ms. Idris in
+	 *  the carry. Bind as Started (press) -- see Interact(). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> InteractAction;
+
 	// Current Weapon Context
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UWeaponCombatData> CurrentCombatData;
@@ -250,6 +313,15 @@ protected:
 	void StartAiming();
 	void StopAiming();
 
+	/** Short trace from the first-person camera; if the hit actor implements
+	 *  IIBInteractable, calls Interact on it. One verb for coffee pots, log
+	 *  books, the dry-fire rig, and Ms. Idris -- see IBInteractableInterface.h. */
+	void Interact();
+
+	/** Trace range for Interact(), in cm. Coffee-pot/log-book distance, not sniping range. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interact", meta = (ClampMin = "50.0", ClampMax = "500.0"))
+	float InteractTraceDistance = 200.0f;
+
 	/** Inventory lives on AIBPlayerState (it must survive pawn churn — death,
 	 *  respawn, infantry<->mech swap). The pawn is a subscriber: whenever the
 	 *  PlayerState arrives/changes, rebind and pull the equipped weapon. This
@@ -273,6 +345,38 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Weapon|Slots")
 	EIBEquipSlot GetActiveWeaponSlot() const { return ActiveWeaponSlot; }
+
+	// --- Read-only state accessors for UIBAnimInstance_Infantry / UI ---
+	//
+	// bIsArmed/bIsSprinting/bIsAiming are all UPROPERTY(BlueprintReadOnly) already
+	// (visible to Blueprint graphs via reflection regardless of C++ access), but
+	// they're declared in a `protected:` block above, so plain C++ code outside
+	// this class -- like the native AnimInstance below -- can't read them
+	// directly. Same situation IsUnarmed() was already in (see its own comment).
+	// Small public wrappers here instead of relocating the underlying fields.
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	bool IsArmed() const { return bIsArmed; }
+
+	UFUNCTION(BlueprintPure, Category = "Movement")
+	bool IsSprinting() const { return bIsSprinting; }
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	bool IsAiming() const { return bIsAiming; }
+
+	/** ThirdPersonWeaponMesh is also declared in a `protected:` block above --
+	 *  same reasoning as IsArmed()/IsSprinting()/IsAiming() just above, but for a
+	 *  component reference instead of a bool. UIBAnimInstance_Infantry reads this
+	 *  once a frame (game thread, NativeUpdateAnimation) to compute the hand-IK
+	 *  grip targets safely -- see that class's UpdateWeaponHandIKTargets(). */
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	UStaticMeshComponent* GetThirdPersonWeaponMesh() const { return ThirdPersonWeaponMesh; }
+
+	/** True once HealthComponent has hit 0. Not inlined: HealthComponent.h is only
+	 *  forward-declared up top, and this needs the full UHealthComponent type to
+	 *  call IsDepleted() -- defined in the .cpp, which already includes it. */
+	UFUNCTION(BlueprintPure, Category = "Health")
+	bool IsDead() const;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -312,6 +416,67 @@ protected:
 
 	/** Push the saved FOV into the rig/camera (BeginPlay + live on settings apply). */
 	void ApplyUserFOV();
+
+	// Mouse wheel thunks -- same raw-key grammar as 1/2/3, no IA assets required.
+	void CycleWeaponSlotUp()   { CycleWeaponSlot(-1); }
+	void CycleWeaponSlotDown() { CycleWeaponSlot(1); }
+
+	/** Scrolls to the next/previous OCCUPIED weapon well (Primary/Special/Heavy),
+	 *  skipping empty ones so scrolling never lands on a slot with nothing in it —
+	 *  a one-weapon loadout just doesn't move, same as pressing 2/3 already does
+	 *  nothing when that well is empty. Primary is always a valid landing spot
+	 *  even when empty (matches SetActiveWeaponSlot's existing grammar: an empty
+	 *  Primary means truly unarmed, not "refused"). Direction: -1 = previous
+	 *  (toward Primary), +1 = next (toward Heavy). */
+	void CycleWeaponSlot(int32 Direction);
+
+public:
+	// --- Carry (M1 LANDFALL "Four Hundred Meters" -- Docs/M1_LANDFALL_Mission_Design.md §4.4) ---
+	//
+	// Deliberately a character STATE, not a separate component: no stamina bar,
+	// no timer, no fail state, no score (LOCKED). Reuses the existing
+	// unarmed/re-arm path (SetUnarmed) for "weapon holstered" instead of a
+	// parallel holster system, and folds into Tick()'s existing single-source-
+	// of-truth MaxWalkSpeed calc for the forced walking pace.
+
+	/** Starts carrying Target: attaches it to CarrySocket on the body mesh,
+	 *  holsters the weapon, forces walk pace, and broadcasts OnCarryStateChanged
+	 *  so UI clears the HUD. Returns false if already carrying something. Called
+	 *  by IIBInteractable::Interact on the carryable (see M1Landfall/IBCarryablePawn). */
+	UFUNCTION(BlueprintCallable, Category = "Carry")
+	bool BeginCarry(AActor* Target);
+
+	/** Detaches the carried actor in place (keeping its world transform -- the
+	 *  level places the stretcher, this doesn't teleport her onto it), re-arms
+	 *  the weapon, and restores normal move speed. Called by AIBCarryEndZone at
+	 *  the hospital muster; never by player input (LOCKED: "cannot be skipped"). */
+	UFUNCTION(BlueprintCallable, Category = "Carry")
+	void EndCarry();
+
+	UFUNCTION(BlueprintPure, Category = "Carry")
+	bool IsCarrying() const { return bIsCarrying; }
+
+	UFUNCTION(BlueprintPure, Category = "Carry")
+	AActor* GetCarriedActor() const { return CarriedActor.Get(); }
+
+	UPROPERTY(BlueprintAssignable, Category = "Carry|Events")
+	FOnCarryStateChangedSignature OnCarryStateChanged;
+
+	/** Forced pace while carrying (LOCKED: "walking pace is forced"), independent
+	 *  of NormalWalkSpeed/ADS/sprint -- see Tick(). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Carry", meta = (ClampMin = "50.0", ClampMax = "400.0"))
+	float CarryWalkSpeed = 220.0f;
+
+	/** Socket on the third-person body mesh (GetMesh()) the carried actor attaches to. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Carry")
+	FName CarrySocket = TEXT("CarrySocket");
+
+protected:
+	UPROPERTY(BlueprintReadOnly, Category = "Carry")
+	bool bIsCarrying = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Carry")
+	TWeakObjectPtr<AActor> CarriedActor;
 
 public:
 	// Implementation of IDamageableInterface

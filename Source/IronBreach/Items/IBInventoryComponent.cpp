@@ -115,6 +115,38 @@ FIBItemInstance UIBInventoryComponent::GrantItem(const UIBItemDefinition* Defini
 	return LastTouched;
 }
 
+FIBItemInstance UIBInventoryComponent::GrantItemInstance(const UIBItemDefinition* Definition, FGuid InstanceId, int32 Count, int32 ClearanceRating)
+{
+	if (!HasAuth() || !Definition || Count <= 0) { return FIBItemInstance(); }
+
+	FIBInventoryEntry& NewEntry = InventoryList.Entries.AddDefaulted_GetRef();
+	NewEntry.Item.InstanceId = InstanceId.IsValid() ? InstanceId : FGuid::NewGuid();
+	NewEntry.Item.Definition = Definition;
+	NewEntry.Item.StackCount = Count;
+	NewEntry.Item.ClearanceRating = ClearanceRating;
+	InventoryList.MarkItemDirty(NewEntry);
+
+	OnInventoryChanged.Broadcast();
+	return NewEntry.Item;
+}
+
+void UIBInventoryComponent::ClearAllItems()
+{
+	if (!HasAuth()) { return; }
+
+	for (uint8 Slot = 1; Slot < static_cast<uint8>(EIBEquipSlot::Count); ++Slot)
+	{
+		FIBItemInstance Equipped;
+		if (GetEquippedItem(static_cast<EIBEquipSlot>(Slot), Equipped) && Equipped.IsValid())
+		{
+			Unequip_OnServer(static_cast<EIBEquipSlot>(Slot));
+		}
+	}
+	InventoryList.Entries.Reset();
+	InventoryList.MarkArrayDirty();
+	OnInventoryChanged.Broadcast();
+}
+
 bool UIBInventoryComponent::RemoveItem(FGuid InstanceId, int32 Count)
 {
 	if (!HasAuth() || Count <= 0) { return false; }
@@ -233,6 +265,9 @@ void UIBInventoryComponent::TakeFromRack_OnServer(AIBWeaponRack* Rack, int32 Ind
 		// seam on AIBCharacter_Infantry) ever fires and the picker feels dead.
 		// Only equip if the definition actually resolves to a weapon slot;
 		// Equip_OnServer already guards None itself, this just avoids the log spam.
+		UE_LOG(LogIronBreach, Warning, TEXT("[EquipDebug] TakeFromRack: GrantedValid=%d EquipSlot=%d"),
+			Granted.IsValid(), (int32)Definition->EquipSlot);
+
 		if (Granted.IsValid() && Definition->EquipSlot != EIBEquipSlot::None)
 		{
 			Equip_OnServer(Granted.InstanceId);
@@ -248,6 +283,7 @@ void UIBInventoryComponent::Equip_OnServer(FGuid InstanceId)
 		UE_LOG(LogIronBreach, Warning, TEXT("[Inventory] Equip rejected — unknown or non-equippable instance."));
 		return;
 	}
+	UE_LOG(LogIronBreach, Warning, TEXT("[EquipDebug] Equip_OnServer: calling SetEquipmentSlot Slot=%d"), (int32)Item.Definition->EquipSlot);
 	SetEquipmentSlot(Item.Definition->EquipSlot, Item);
 }
 

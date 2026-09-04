@@ -1,5 +1,7 @@
 #include "Player/IBPlayerController.h"
 #include "IronBreach.h"
+#include "Player/IBCharacterSubsystem.h"
+#include "Items/IBPlayerState.h"
 #include "UI/IBMenuSubsystem.h"
 #include "UI/IBObjectiveWidget.h"
 #include "UI/IBLootToastWidget.h"
@@ -15,6 +17,10 @@ void AIBPlayerController::BeginPlay()
 
 	// Local players only — a server-side proxy controller has no input stack.
 	if (!IsLocalPlayerController()) { return; }
+
+	// Whoever this player brought through operative select rides along into
+	// every level (menu lobby, Carrow, the raid) via the PlayerState.
+	PushOperativeIdentity();
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
@@ -88,3 +94,31 @@ void AIBPlayerController::OpenInventoryMenu() { ToggleMenuScreen(TEXT("Inventory
 void AIBPlayerController::OpenMapMenu()       { ToggleMenuScreen(TEXT("Map")); }
 void AIBPlayerController::OpenLedgerMenu()    { ToggleMenuScreen(TEXT("Ledger")); }
 void AIBPlayerController::OpenSystemMenu()    { ToggleMenuScreen(TEXT("System")); }
+
+// ---- Operative identity ----
+
+void AIBPlayerController::PushOperativeIdentity()
+{
+	if (!IsLocalPlayerController()) { return; }
+
+	const UGameInstance* GI = GetGameInstance();
+	const UIBCharacterSubsystem* Characters = GI ? GI->GetSubsystem<UIBCharacterSubsystem>() : nullptr;
+
+	FIBCharacterRecord Active;
+	if (!Characters || !Characters->GetActiveCharacter(Active))
+	{
+		return; // nobody on station yet (PIE straight into a level, or pre-select)
+	}
+
+	// The PlayerState owns the wire path (direct on authority, Server RPC on clients).
+	if (AIBPlayerState* PS = GetPlayerState<AIBPlayerState>())
+	{
+		PS->PushOperativeIdentity(Active);
+	}
+}
+
+void AIBPlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	PushOperativeIdentity();
+}

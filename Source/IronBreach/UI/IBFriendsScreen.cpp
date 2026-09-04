@@ -398,7 +398,7 @@ void UIBFriendsScreen::RebuildFriendRows()
 
 	FriendsEmptyText->SetText(bCanInvite
 		? FText::GetEmpty()
-		: NSLOCTEXT("IBSquad", "HostHint", "HOST A LOBBY TO SEND INVITES."));
+		: NSLOCTEXT("IBSquad", "HostHint", "OFF THE NET — THIS WORLD ISN'T HOSTED, SO INVITES ARE UNAVAILABLE."));
 
 	for (const FIBFriendInfo& Info : List)
 	{

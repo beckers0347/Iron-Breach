@@ -20,6 +20,8 @@
 #include "Combat/WeaponVisualData.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h" // GetMesh() target for the carry attach socket
+#include "Components/PrimitiveComponent.h"    // carried actor's collision/physics toggle
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameModeBase.h"
 #include "TimerManager.h"
@@ -30,6 +32,9 @@
 #include "Net/UnrealNetwork.h" // DOREPLIFETIME (ActiveWeaponSlot)
 #include "Player/IBUserSettings.h" // mouse sensitivity in Look()
 #include "UI/IBMenuSubsystem.h"    // F -> Squad tab
+#include "Classes/IBOperativeKitComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Combat/IBInteractableInterface.h" // Interact() trace target
 
 AIBCharacter_Infantry::AIBCharacter_Infantry()
 {
@@ -55,6 +60,19 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	// ViewmodelScale so scale is a per-weapon, designer-facing knob (tune alongside
 	// the rig's hip anchor — a smaller weapon sits closer to camera).
 	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
+
+	// Third-person weapon mesh -- what everyone else actually sees. Attached to
+	// GetMesh() here (constructor-time SetupAttachment can't target a socket by
+	// name reliably before the skeleton exists) and re-snapped onto
+	// ThirdPersonWeaponSocket in BeginPlay. Hidden from the owner since they
+	// already see WeaponMesh's first-person viewmodel.
+	ThirdPersonWeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ThirdPersonWeaponMesh"));
+	ThirdPersonWeaponMesh->SetupAttachment(GetMesh());
+	ThirdPersonWeaponMesh->SetOwnerNoSee(true);
+	ThirdPersonWeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ThirdPersonWeaponMesh->bCastDynamicShadow = true;
+	ThirdPersonWeaponMesh->CastShadow = true;
+	ThirdPersonWeaponMesh->SetRelativeScale3D(FVector(1.0f));
 
 	// ---- PIP scope ----
 	// Both halves hang off WeaponMesh, so the rig's per-frame viewmodel posing
@@ -101,6 +119,19 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 	// The third-person body should NOT render for the owning player (they see the viewmodel instead).
 	GetMesh()->SetOwnerNoSee(true);
 
+	// Snap the third-person weapon onto its carry socket. SetupAttachment's
+	// (Parent, SocketName) overload is the constructor-safe form here: it only
+	// records the desired parent/socket now and defers the real attach to
+	// RegisterComponent, by which point the skeleton exists and the socket
+	// resolves correctly -- unlike AttachToComponent(), which performs the
+	// attach immediately and trips an engine ensure when called this early
+	// ("AttachToComponent when called from a constructor ... always treated
+	// as KeepRelative. Consider calling SetupAttachment directly instead.").
+	if (ThirdPersonWeaponMesh && GetMesh())
+	{
+		ThirdPersonWeaponMesh->SetupAttachment(GetMesh(), ThirdPersonWeaponSocket);
+	}
+
 	// Crouch is off by default on UCharacterMovementComponent -- ACharacter::Crouch()
 	// silently no-ops without this flag, which reads exactly like a missing binding.
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -114,6 +145,13 @@ AIBCharacter_Infantry::AIBCharacter_Infantry()
 
 	// First-person weapon rig (viewmodel posing + ADS blend).
 	WeaponRig = CreateDefaultSubobject<UWeaponRigComponent>(TEXT("WeaponRig"));
+
+	// The operative's class kit (Q / V) — resolves its trade from the PlayerState.
+	KitComponent = CreateDefaultSubobject<UIBOperativeKitComponent>(TEXT("KitComponent"));
+
+	// Bodies: the infantry's Manny, and Quinn for female operatives (shared skeleton, same ABP).
+	MaleBody = TSoftObjectPtr<USkeletalMesh>(FSoftObjectPath(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple")));
+	FemaleBody = TSoftObjectPtr<USkeletalMesh>(FSoftObjectPath(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple")));
 }
 
 void AIBCharacter_Infantry::BeginPlay()
@@ -166,6 +204,10 @@ void AIBCharacter_Infantry::BeginPlay()
 	if (WeaponMesh && CurrentVisualData)
 	{
 		WeaponMesh->SetRelativeScale3D(CurrentVisualData->ViewmodelScale);
+		if (ThirdPersonWeaponMesh)
+		{
+			ThirdPersonWeaponMesh->SetRelativeScale3D(CurrentVisualData->ViewmodelScale);
+		}
 
 		// TEMP DIAGNOSTIC (scale/location not visibly updating from DA_Visual edits):
 		// confirms which asset BeginPlay actually resolved and what WeaponMesh's scale
@@ -596,6 +638,10 @@ void AIBCharacter_Infantry::SetWeaponMeshScale(FVector NewScale)
 	}
 
 	WeaponMesh->SetRelativeScale3D(NewScale);
+	if (ThirdPersonWeaponMesh)
+	{
+		ThirdPersonWeaponMesh->SetRelativeScale3D(NewScale);
+	}
 
 	// TEMP DIAGNOSTIC (scale/location not visibly updating from DA_Visual edits): this
 	// is the one place scale actually gets set from an equipped weapon (BeginPlay's
@@ -659,6 +705,7 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		if (MoveAction) { EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AIBCharacter_Infantry::Move); }
 		if (LookAction) { EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AIBCharacter_Infantry::Look); }
 		if (FireAction) { EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::Fire); }
+		if (InteractAction) { EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AIBCharacter_Infantry::Interact); }
 		if (AimAction)
 		{
 			// Hold to aim: press raises the sights, release lowers them.
@@ -719,6 +766,16 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		PlayerInputComponent->BindKey(EKeys::Three, IE_Pressed, this, &AIBCharacter_Infantry::SelectHeavySlot);
 		// F: the Squad tab (friends/invites), same zero-content floor as 1/2/3.
 		PlayerInputComponent->BindKey(EKeys::F, IE_Pressed, this, &AIBCharacter_Infantry::OpenSquadScreen);
+
+		// Scroll wheel cycles the same three wells. Same raw-key grammar as 1/2/3.
+		PlayerInputComponent->BindKey(EKeys::MouseScrollUp,   IE_Pressed, this, &AIBCharacter_Infantry::CycleWeaponSlotUp);
+		PlayerInputComponent->BindKey(EKeys::MouseScrollDown, IE_Pressed, this, &AIBCharacter_Infantry::CycleWeaponSlotDown);
+
+		// Class kit: Q / V raw floor + optional IAs.
+		if (KitComponent)
+		{
+			KitComponent->BindInput(PlayerInputComponent, KitAbilityAction, MovementToolAction);
+		}
 	}
 }
 
@@ -745,6 +802,44 @@ void AIBCharacter_Infantry::SetActiveWeaponSlot(EIBEquipSlot NewSlot)
 	else
 	{
 		Server_SetActiveWeaponSlot(NewSlot);
+	}
+}
+
+void AIBCharacter_Infantry::CycleWeaponSlot(int32 Direction)
+{
+	static const EIBEquipSlot Wells[] = { EIBEquipSlot::WeaponPrimary, EIBEquipSlot::WeaponSpecial, EIBEquipSlot::WeaponHeavy };
+	constexpr int32 NumWells = UE_ARRAY_COUNT(Wells);
+
+	int32 CurrentIndex = 0;
+	for (int32 i = 0; i < NumWells; ++i)
+	{
+		if (Wells[i] == ActiveWeaponSlot) { CurrentIndex = i; break; }
+	}
+
+	// Walk the wells in Direction, skipping empty ones -- SetActiveWeaponSlot
+	// already refuses to switch INTO an empty non-Primary well, so without this
+	// skip a scroll tick on a one-weapon loadout would just silently do nothing
+	// instead of continuing on to the next occupied well.
+	for (int32 Step = 1; Step <= NumWells; ++Step)
+	{
+		const int32 NextIndex = ((CurrentIndex + Direction * Step) % NumWells + NumWells) % NumWells;
+		const EIBEquipSlot Candidate = Wells[NextIndex];
+		if (Candidate == ActiveWeaponSlot) { break; } // full loop, nothing else occupied
+
+		if (Candidate == EIBEquipSlot::WeaponPrimary)
+		{
+			SetActiveWeaponSlot(Candidate); // Primary is always a valid landing spot, even empty
+			return;
+		}
+		if (BoundInventory.IsValid())
+		{
+			FIBItemInstance Equipped;
+			if (BoundInventory->GetEquippedItem(Candidate, Equipped) && Equipped.Definition)
+			{
+				SetActiveWeaponSlot(Candidate);
+				return;
+			}
+		}
 	}
 }
 
@@ -804,6 +899,13 @@ void AIBCharacter_Infantry::SetUnarmed(bool bNewUnarmed)
 	if (bUnarmed == bNewUnarmed) { return; }
 	bUnarmed = bNewUnarmed;
 
+	// ABP_Infantry's locomotion state machine (BS_Armed_Locomotion vs.
+	// BS_Unarmed_Locomotion) reads bIsArmed off this actor -- NOT bUnarmed --
+	// so it has to be kept in sync here or the anim graph never sees a spawn's
+	// "empty-handed" state or a later pickup at the armory; bUnarmed stays the
+	// one real source of truth, this is just mirroring it out for the ABP.
+	bIsArmed = !bUnarmed;
+
 	if (WeaponMesh)
 	{
 		WeaponMesh->SetVisibility(!bUnarmed, /*bPropagateToChildren=*/true);
@@ -814,6 +916,11 @@ void AIBCharacter_Infantry::SetUnarmed(bool bNewUnarmed)
 	}
 
 	UE_LOG(LogIronBreach, Log, TEXT("%s: %s"), *GetName(), bUnarmed ? TEXT("unarmed (well empty)") : TEXT("re-armed"));
+}
+
+bool AIBCharacter_Infantry::IsDead() const
+{
+	return HealthComponent && HealthComponent->IsDepleted();
 }
 
 void AIBCharacter_Infantry::Move(const FInputActionValue& Value)
@@ -859,11 +966,78 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 	}
 }
 
+void AIBCharacter_Infantry::Interact()
+{
+	if (bIsCarrying || !FirstPersonCamera)
+	{
+		return; // hands are full -- carrying is the only thing they're doing
+	}
+
+	const FVector Start = FirstPersonCamera->GetComponentLocation();
+	const FVector End = Start + FirstPersonCamera->GetForwardVector() * InteractTraceDistance;
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	if (GetWorld() && GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
+	{
+		if (Hit.GetActor() && Hit.GetActor()->Implements<UIBInteractable>())
+		{
+			IIBInteractable::Execute_Interact(Hit.GetActor(), this);
+		}
+	}
+}
+
+bool AIBCharacter_Infantry::BeginCarry(AActor* Target)
+{
+	if (bIsCarrying || !Target) { return false; }
+
+	bIsCarrying = true;
+	CarriedActor = Target;
+
+	SetUnarmed(true); // weapon holstered -- EndCarry() re-arms via ApplyActiveSlot()
+
+	if (USkeletalMeshComponent* BodyMesh = GetMesh())
+	{
+		Target->AttachToComponent(BodyMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, CarrySocket);
+	}
+	if (UPrimitiveComponent* TargetRoot = Cast<UPrimitiveComponent>(Target->GetRootComponent()))
+	{
+		TargetRoot->SetSimulatePhysics(false);
+		TargetRoot->SetCollisionEnabled(ECollisionEnabled::NoCollision); // don't let her collide with the carrier
+	}
+
+	OnCarryStateChanged.Broadcast(true); // UI clears the HUD entirely -- §4.4/§7
+
+	UE_LOG(LogIronBreach, Log, TEXT("%s: begin carry -> %s"), *GetName(), *GetNameSafe(Target));
+	return true;
+}
+
+void AIBCharacter_Infantry::EndCarry()
+{
+	if (!bIsCarrying) { return; }
+
+	if (AActor* Target = CarriedActor.Get())
+	{
+		Target->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform); // level places her on the stretcher, we don't teleport her there
+	}
+
+	bIsCarrying = false;
+	CarriedActor.Reset();
+
+	SetUnarmed(false);
+	ApplyActiveSlot(); // restore whatever's actually equipped, not just visibility
+
+	OnCarryStateChanged.Broadcast(false); // UI restores the HUD
+
+	UE_LOG(LogIronBreach, Log, TEXT("%s: end carry"), *GetName());
+}
+
 void AIBCharacter_Infantry::StartAiming()
 {
-	if (bIsSprinting)
+	if (bIsSprinting || bIsCarrying)
 	{
-		return; // can't start aiming while sprinting
+		return; // can't start aiming while sprinting or carrying
 	}
 
 	// Toggle-ADS mode (Settings): the second press lowers the weapon — the
@@ -910,9 +1084,17 @@ void AIBCharacter_Infantry::Tick(float DeltaSeconds)
 	// after Start/StopSprint and silently overwrote the sprint speed back to walk
 	// speed, since the ADS multiplier is 1.0 while not aiming. bIsSprinting still
 	// flipped correctly (gating Fire/Aim), the character just never sped up.
-	if (BaseWalkSpeed > 0.0f)
+	if (UCharacterMovementComponent* Move = GetCharacterMovement())
 	{
-		if (UCharacterMovementComponent* Move = GetCharacterMovement())
+		if (bIsCarrying)
+		{
+			// Forced pace, LOCKED (§4.4) -- overrides ADS/sprint entirely rather than
+			// composing with them; carrying pre-empts aiming/sprinting anyway (see the
+			// bIsCarrying guards in StartAiming/StartSprint/Fire), so this is never
+			// fighting those multipliers for the same frame.
+			Move->MaxWalkSpeed = CarryWalkSpeed;
+		}
+		else if (BaseWalkSpeed > 0.0f)
 		{
 			const float AdsMultiplier = WeaponRig ? WeaponRig->GetMoveSpeedMultiplier() : 1.0f;
 			const float SprintMultiplier = (bIsSprinting && NormalWalkSpeed > 0.0f) ? (SprintSpeed / NormalWalkSpeed) : 1.0f;
@@ -923,9 +1105,9 @@ void AIBCharacter_Infantry::Tick(float DeltaSeconds)
 
 void AIBCharacter_Infantry::Fire()
 {
-	if (bIsSprinting || bUnarmed)
+	if (bIsSprinting || bUnarmed || bIsCarrying)
 	{
-		return; // empty hands don't shoot
+		return; // empty hands don't shoot -- and carrying is unarmed by construction (BeginCarry), this is belt-and-suspenders
 	}
 	// Consolidated: cosmetics + Server_Fire routing + authoritative trace all live in the
 	// weapon component now (ADR-002 pattern-setter). One fire path for the whole project.
@@ -947,6 +1129,19 @@ void AIBCharacter_Infantry::OnPlayerStateChanged(APlayerState* NewPlayerState, A
 	{
 		BoundInventory->OnEquipmentChanged.RemoveDynamic(this, &AIBCharacter_Infantry::HandleEquipmentChanged);
 		BoundInventory = nullptr;
+	}
+
+	// Operative identity: body + kit follow the PlayerState wherever it goes.
+	if (BoundIdentityPS.IsValid())
+	{
+		BoundIdentityPS->OnOperativeIdentityChanged.RemoveDynamic(this, &AIBCharacter_Infantry::HandleOperativeIdentityChanged);
+		BoundIdentityPS = nullptr;
+	}
+	if (AIBPlayerState* IdentityPS = Cast<AIBPlayerState>(NewPlayerState))
+	{
+		IdentityPS->OnOperativeIdentityChanged.AddDynamic(this, &AIBCharacter_Infantry::HandleOperativeIdentityChanged);
+		BoundIdentityPS = IdentityPS;
+		HandleOperativeIdentityChanged();
 	}
 
 	const AIBPlayerState* IBPS = Cast<AIBPlayerState>(NewPlayerState);
@@ -979,8 +1174,14 @@ void AIBCharacter_Infantry::OnPlayerStateChanged(APlayerState* NewPlayerState, A
 
 void AIBCharacter_Infantry::HandleEquipmentChanged(EIBEquipSlot Slot, const FIBItemInstance& Item)
 {
+	// TEMP DEBUG (Shane): logging both slots to find why bIsArmed never
+	// triggers on rack pickup / inventory switch. Safe to delete once solved.
+	UE_LOG(LogIronBreach, Warning, TEXT("[EquipDebug] HandleEquipmentChanged: Slot=%d ActiveWeaponSlot=%d ItemValid=%d"),
+		(int32)Slot, (int32)ActiveWeaponSlot, Item.Definition != nullptr);
+
 	if (Slot != ActiveWeaponSlot)
 	{
+		UE_LOG(LogIronBreach, Warning, TEXT("[EquipDebug] IGNORED -- Slot != ActiveWeaponSlot"));
 		return; // armor/gear/off-hand wells are stat/cosmetic concerns until they're the active slot
 	}
 
@@ -1139,6 +1340,10 @@ void AIBCharacter_Infantry::ApplyWeaponMesh(UWeaponVisualData* VisualData)
 	if (UStaticMesh* NewMesh = VisualData->ViewmodelMesh.LoadSynchronous())
 	{
 		WeaponMesh->SetStaticMesh(NewMesh);
+		if (ThirdPersonWeaponMesh)
+		{
+			ThirdPersonWeaponMesh->SetStaticMesh(NewMesh);
+		}
 	}
 	else
 	{
@@ -1150,10 +1355,58 @@ void AIBCharacter_Infantry::ApplyWeaponMesh(UWeaponVisualData* VisualData)
 // Interface Implementation handling incoming damage
 void AIBCharacter_Infantry::HandleTakeDamage_Implementation(float DamageAmount, const FHitResult& HitResult, AController* InstigatedBy, AActor* DamageCauser)
 {
+	// Defensive kit windows (Bulwark Dash) scale what gets through — server-side, like all damage.
+	const float Scale = KitComponent ? KitComponent->GetDamageTakenScale() : 1.f;
 	if (HealthComponent)
 	{
-		HealthComponent->ApplyDamage(DamageAmount, HitResult, InstigatedBy, DamageCauser);
+		HealthComponent->ApplyDamage(DamageAmount * Scale, HitResult, InstigatedBy, DamageCauser);
 	}
+}
+
+void AIBCharacter_Infantry::HandleOperativeIdentityChanged()
+{
+	ApplyOperativeBody();
+	if (KitComponent)
+	{
+		KitComponent->RefreshKit();
+	}
+}
+
+void AIBCharacter_Infantry::ApplyOperativeBody()
+{
+	const AIBPlayerState* PS = GetPlayerState<AIBPlayerState>();
+	if (!PS || !PS->HasOperative() || !GetMesh()) { return; }
+
+	const TSoftObjectPtr<USkeletalMesh>& Body = (PS->GetOperativeGender() == EIBOperativeGender::Female) ? FemaleBody : MaleBody;
+	USkeletalMesh* BodyMesh = Body.LoadSynchronous();
+	USkeletalMesh* Current = GetMesh()->GetSkeletalMeshAsset();
+	if (!BodyMesh || Current == BodyMesh) { return; }
+
+	// A body authored on the Blueprint that isn't one of the two gender bodies is
+	// deliberate (a skin pass, a TP rig in progress) — the gender pick never overrides it.
+	if (Current)
+	{
+		const FSoftObjectPath CurrentPath(Current);
+		if (CurrentPath != MaleBody.ToSoftObjectPath() && CurrentPath != FemaleBody.ToSoftObjectPath())
+		{
+			return;
+		}
+	}
+
+	// Same skeleton, same ABP, same sockets — or the swap would break the anim graph
+	// and the third-person weapon/carry attach points.
+	if (Current && BodyMesh->GetSkeleton() != Current->GetSkeleton())
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("%s: operative body %s skipped — skeleton differs from %s"), *GetName(), *BodyMesh->GetName(), *Current->GetName());
+		return;
+	}
+	if (Current && Current->FindSocket(ThirdPersonWeaponSocket) && !BodyMesh->FindSocket(ThirdPersonWeaponSocket))
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("%s: operative body %s skipped — no '%s' socket"), *GetName(), *BodyMesh->GetName(), *ThirdPersonWeaponSocket.ToString());
+		return;
+	}
+
+	GetMesh()->SetSkeletalMeshAsset(BodyMesh);
 }
 
 void AIBCharacter_Infantry::HandleDeath(AActor* Killer)
@@ -1208,9 +1461,9 @@ void AIBCharacter_Infantry::HandleDeath(AActor* Killer)
 
 void AIBCharacter_Infantry::StartSprint()
 {
-	if (bIsAiming || bIsCrouched)
+	if (bIsAiming || bIsCrouched || bIsCarrying)
 	{
-		return; // can't sprint while aiming or crouched
+		return; // can't sprint while aiming, crouched, or carrying -- walking pace is forced (§4.4)
 	}
 
 	bIsSprinting = true;

@@ -57,6 +57,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool RemoveItem(FGuid InstanceId, int32 Count = 1);
 
+	/** Vault restore: add an instance with a KNOWN id/rating (no stacking, no
+	 *  ledger toast — it isn't new loot, it's yours coming back). Authority only. */
+	FIBItemInstance GrantItemInstance(const UIBItemDefinition* Definition, FGuid InstanceId, int32 Count, int32 ClearanceRating);
+
+	/** Vault restore: drop everything (bag + slots). Authority only. */
+	void ClearAllItems();
+
 	// ---- Request API (call from ANY machine; routes to the server itself) ----
 
 	/** Equip an owned instance into its definition's slot. */

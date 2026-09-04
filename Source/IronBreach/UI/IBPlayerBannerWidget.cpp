@@ -3,6 +3,7 @@
 #include "UI/IBStyleKit.h"
 #include "Items/IBPlayerState.h"
 #include "Items/IBInventoryComponent.h"
+#include "Player/IBCharacterTypes.h"
 #include "GameFramework/PlayerState.h"
 #include "Components/SizeBox.h"
 #include "Components/VerticalBox.h"
@@ -128,13 +129,18 @@ void UIBPlayerBannerWidget::SetFromPlayerState(const APlayerState* PS, bool bIsH
 	if (!PS || !MonogramText) { return; }
 	bEmptyInvitable = false;
 
-	const FString Name = PS->GetPlayerName().IsEmpty() ? TEXT("OPERATIVE") : PS->GetPlayerName();
+	// Callsign once the operative identity has replicated; platform name until then.
+	const AIBPlayerState* IBPS = Cast<AIBPlayerState>(PS);
+	FString Name = IBPS ? IBPS->GetDisplayCallsign() : PS->GetPlayerName();
+	if (Name.IsEmpty()) { Name = TEXT("OPERATIVE"); }
 	const FLinearColor Accent = IBStyle::Cyan(); // the fireteam ice-blue; host reads amber on the chip
+	// Top edge takes the combat trade's color when we know it (Breaker red, Picket cyan...).
+	const FLinearColor TradeColor = (IBPS && IBPS->HasOperative()) ? IBCharacter::ClassColor(IBPS->GetOperativeClass()) : Accent;
 
 	Card->SetFillColor(IBStyle::Panel());
 	Card->SetOutlineColor(bFeatured ? Accent : Accent * FLinearColor(1.f, 1.f, 1.f, 0.55f));
 	Card->SetOutlineThickness(bFeatured ? 2.0f : 1.25f);
-	AccentBar->SetBrush(IBStyle::RoundedBrush(Accent, 2.f));
+	AccentBar->SetBrush(IBStyle::RoundedBrush(TradeColor, 2.f));
 
 	// Filled card shows the full plate again (banners are pooled and reused).
 	NameText->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -149,7 +155,7 @@ void UIBPlayerBannerWidget::SetFromPlayerState(const APlayerState* PS, bool bIsH
 	NameText->SetFont([this]{ FSlateFontInfo F = NameText->GetFont(); F.Size = bFeatured ? 14 : 12; return F; }());
 
 	int32 Clearance = 0;
-	if (const AIBPlayerState* IBPS = Cast<AIBPlayerState>(PS))
+	if (IBPS)
 	{
 		if (const UIBInventoryComponent* Inventory = IBPS->GetInventory())
 		{

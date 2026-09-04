@@ -75,6 +75,41 @@ bool UIBSessionSubsystem::IsLANFallback() const
 	return !OSS || OSS->GetSubsystemName() == TEXT("NULL");
 }
 
+void UIBSessionSubsystem::DestroyThen(TFunction<void()> Continuation)
+{
+	IOnlineSessionPtr Sessions = GetSessionInterface();
+	if (!Sessions.IsValid() || !Sessions->GetNamedSession(IBSessionName))
+	{
+		Continuation();
+		return;
+	}
+
+	PostDestroyContinuation = MoveTemp(Continuation);
+	PreDestroyHandle = Sessions->AddOnDestroySessionCompleteDelegate_Handle(
+		FOnDestroySessionCompleteDelegate::CreateUObject(this, &UIBSessionSubsystem::OnPreDestroyComplete));
+
+	UE_LOG(LogIronBreach, Log, TEXT("Session: tearing down the stale local session before the next step"));
+	if (!Sessions->DestroySession(IBSessionName))
+	{
+		// Refused outright: proceed anyway rather than strand the player.
+		Sessions->ClearOnDestroySessionCompleteDelegate_Handle(PreDestroyHandle);
+		TFunction<void()> Next = MoveTemp(PostDestroyContinuation);
+		PostDestroyContinuation = nullptr;
+		if (Next) { Next(); }
+	}
+}
+
+void UIBSessionSubsystem::OnPreDestroyComplete(FName /*SessionName*/, bool /*bWasSuccessful*/)
+{
+	if (IOnlineSessionPtr Sessions = GetSessionInterface())
+	{
+		Sessions->ClearOnDestroySessionCompleteDelegate_Handle(PreDestroyHandle);
+	}
+	TFunction<void()> Next = MoveTemp(PostDestroyContinuation);
+	PostDestroyContinuation = nullptr;
+	if (Next) { Next(); }
+}
+
 void UIBSessionSubsystem::IBHost()
 {
 	IOnlineSessionPtr Sessions = GetSessionInterface();
@@ -85,10 +120,20 @@ void UIBSessionSubsystem::IBHost()
 		return;
 	}
 
-	// Tear down any stale session first (e.g. re-hosting after returning to menu).
-	if (Sessions->GetNamedSession(IBSessionName))
+	ReportStatus(EIBSessionStatus::Hosting, TEXT("STANDING UP SERVER..."));
+
+	// Tear down any stale session first (re-hosting after a return to the
+	// menu, or a client entry left over from a dropped host) — properly, then create.
+	DestroyThen([this]() { CreateSessionNow(); });
+}
+
+void UIBSessionSubsystem::CreateSessionNow()
+{
+	IOnlineSessionPtr Sessions = GetSessionInterface();
+	if (!Sessions.IsValid())
 	{
-		Sessions->DestroySession(IBSessionName);
+		ReportStatus(EIBSessionStatus::Failed, TEXT("ONLINE SERVICE UNAVAILABLE"));
+		return;
 	}
 
 	FOnlineSessionSettings Settings;
@@ -105,7 +150,6 @@ void UIBSessionSubsystem::IBHost()
 
 	UE_LOG(LogIronBreach, Log, TEXT("IBHost: creating session (%s, %d slots)"),
 		Settings.bIsLANMatch ? TEXT("LAN/NULL") : TEXT("online"), Settings.NumPublicConnections);
-	ReportStatus(EIBSessionStatus::Hosting, TEXT("STANDING UP SERVER..."));
 
 	if (!Sessions->CreateSession(0 /*hosting local player*/, IBSessionName, Settings))
 	{
@@ -221,12 +265,19 @@ void UIBSessionSubsystem::JoinSearchResult(const FOnlineSessionSearchResult& Res
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 	if (!Sessions.IsValid()) { return; }
 
-	// A stale local entry blocks JoinSession — clear it first (e.g. accepting
-	// an invite while already hosting your own empty lobby).
-	if (Sessions->GetNamedSession(IBSessionName))
-	{
-		Sessions->DestroySession(IBSessionName);
-	}
+	// Everyone hosts their own world now, so a join almost always starts from
+	// inside a session: tear ours down properly, THEN join theirs.
+	PendingJoinResult = MakeShared<FOnlineSessionSearchResult>(Result);
+	DestroyThen([this]() { JoinPendingNow(); });
+}
+
+void UIBSessionSubsystem::JoinPendingNow()
+{
+	IOnlineSessionPtr Sessions = GetSessionInterface();
+	if (!Sessions.IsValid() || !PendingJoinResult.IsValid()) { return; }
+
+	const FOnlineSessionSearchResult Result = *PendingJoinResult;
+	PendingJoinResult.Reset();
 
 	JoinCompleteHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 		FOnJoinSessionCompleteDelegate::CreateUObject(this, &UIBSessionSubsystem::OnJoinSessionComplete));

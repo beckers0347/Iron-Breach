@@ -136,6 +136,9 @@ private:
 
 	void GrantXP(EXPTrack Track, const FString& Key, int32 Amount);
 
+public:
+	/** Record keys are shared with the vault (per player + operative) — public so
+	 *  AIBPlayerState can key its progression the same way. */
 	static FString MakePlayerKey(const AController* Controller);
 	static FString MakeCrewKey(const AController* SeatA, const AController* SeatB);
 	static FString MakeCrewKeyFromMech(const AIBMech_Base* Mech);

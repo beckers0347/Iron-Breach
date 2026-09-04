@@ -85,9 +85,11 @@ public:
 	FString HostTravelURL = TEXT("/Game/FirstPerson/Lvl_FirstPerson?listen");
 
 	/** Pre-deploy lobby: host dwells in the menu level so the squad assembles
-	 *  in front of the banners before anyone shoots anything. */
+	 *  in front of the banners before anyone shoots anything. OFF by default
+	 *  since the operative flow: you deploy straight into your own hosted
+	 *  world and the squad forms from the in-game Squad tab (drop-in). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
-	bool bLobbyBeforeDeploy = true;
+	bool bLobbyBeforeDeploy = false;
 
 	/** Where the lobby lives (must be ?listen — clients travel into it). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
@@ -114,6 +116,19 @@ private:
 
 	/** The IBLeave landing: travel the first local player to LeaveTravelURL. */
 	void TravelToMainMenu();
+
+	/** Tear down the local named session if one exists, THEN run Continuation.
+	 *  Steam destroys asynchronously — a create/join fired on the same frame
+	 *  fails with "session already exists". Every player now hosts their own
+	 *  world, so joining a friend always starts from "in a session". */
+	void DestroyThen(TFunction<void()> Continuation);
+	void OnPreDestroyComplete(FName SessionName, bool bWasSuccessful);
+	void CreateSessionNow();
+	void JoinPendingNow();
+
+	TFunction<void()> PostDestroyContinuation;
+	FDelegateHandle PreDestroyHandle;
+	TSharedPtr<FOnlineSessionSearchResult> PendingJoinResult;
 
 	IOnlineSessionPtr GetSessionInterface() const;
 	bool IsLANFallback() const;

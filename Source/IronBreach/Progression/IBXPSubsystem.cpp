@@ -2,6 +2,7 @@
 #include "Progression/XPTuningData.h"
 #include "Progression/XPSaveGame.h"
 #include "IronBreach.h"
+#include "Items/IBPlayerState.h"
 #include "Mech/IBMech_Base.h"
 #include "Mech/IBGunnerSeat.h"
 #include "Infantry/IBCharacter_Infantry.h"
@@ -45,13 +46,20 @@ FString UIBXPSubsystem::MakePlayerKey(const AController* Controller)
 	// Stable across sessions when a real online subsystem is present (Steam, per ADR-002).
 	// PIE/LAN (NULL OSS) synthesizes a per-session ID instead -- same caveat
 	// UIBSessionSubsystem already lives with.
-	if (PS->GetUniqueId().IsValid())
-	{
-		return PS->GetUniqueId().ToString();
-	}
+	FString Key = PS->GetUniqueId().IsValid()
+		? PS->GetUniqueId().ToString()
+		: FString::Printf(TEXT("name:%s"), *PS->GetPlayerName()); // dev/PIE fallback
 
-	// Dev/PIE fallback: not cross-session stable, but keeps XP working without a real OSS.
-	return FString::Printf(TEXT("name:%s"), *PS->GetPlayerName());
+	// Per-operative: three billets are three careers. The id rides on the
+	// replicated PlayerState identity, so the host keys it the same for everyone.
+	if (const AIBPlayerState* IBPS = Cast<AIBPlayerState>(PS))
+	{
+		if (IBPS->HasOperative() && IBPS->GetOperativeId().IsValid())
+		{
+			Key += TEXT("#") + IBPS->GetOperativeId().ToString(EGuidFormats::Digits);
+		}
+	}
+	return Key;
 }
 
 FString UIBXPSubsystem::MakeCrewKey(const AController* SeatA, const AController* SeatB)

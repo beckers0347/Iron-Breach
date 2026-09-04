@@ -3,10 +3,12 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Online/IBSessionSubsystem.h" // EIBSessionStatus in a UFUNCTION signature
+#include "Player/IBCharacterTypes.h"
 #include "IBMainMenuWidget.generated.h"
 
 class UButton;
 class UTextBlock;
+class UIBCharacterSelectScreen;
 
 /**
  * C++ brains for the title screen / main menu (demo d1 + d5).
@@ -56,6 +58,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Menu")
 	TObjectPtr<UTextBlock> Txt_Status;
 
+	/** Active operative line ("OPERATIVE — CALLSIGN · CLASS"). Optional bind. */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Menu")
+	TObjectPtr<UTextBlock> Txt_Operative;
+
+	/** Reopens operative select. Optional bind — when absent, a small chip is
+	 *  injected bottom-left (Canvas/Overlay roots) so switching never needs a
+	 *  relaunch. */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "Menu")
+	TObjectPtr<UButton> Btn_Operative;
+
 	/** House pass over whatever buttons the WBP bound: service-console chip
 	 *  background + label font/color, so the title buttons match the in-game
 	 *  screens without Shane restyling each one. Untick to keep WBP art. */
@@ -71,12 +83,43 @@ protected:
 	UFUNCTION() void HandleJoin();
 	UFUNCTION() void HandleQuit();
 	UFUNCTION() void HandleSettings();
+	UFUNCTION() void HandleSwitchOperative();
+	UFUNCTION() void HandleOperativeFlowFinished();
 
 	UFUNCTION()
 	void HandleSessionStatus(EIBSessionStatus Status, const FText& Message);
 
 private:
 	UIBSessionSubsystem* GetSessions() const;
+	class UIBCharacterSubsystem* GetCharacters() const;
+
+	// ---- Operative flow (select / create / switch) ----
+
+	/** The door law: a standalone menu with nobody on station opens select. */
+	void MaybeOpenCharacterGate();
+
+	/** Operative chosen: stand up this player's own listen-hosted world and
+	 *  travel into it (friends drop in from the in-game Squad tab). Falls back
+	 *  to a solo world when the online service is unreachable. */
+	void DeployToWorld(const FIBCharacterRecord& Operative);
+	void DeploySoloFallback(const FText& Why);
+	bool bDeployPending = false;
+	void OpenOperativeSelect();
+	void CloseOperativeSelect();
+	void RefreshOperativeLine();
+
+	/** Travel guard: no deploy without an operative on station. */
+	bool EnsureOperativeReady();
+
+	/** Fallback chip when Btn_Operative isn't bound in the WBP. */
+	void InjectOperativeChip();
+
+	/** Mirror the active operative onto this player's PlayerState (every menu
+	 *  spawn: fresh boot, quit-to-menu, host lobby, client lobby). Clients get
+	 *  their PlayerState a beat after the widget exists, so this retries briefly. */
+	void PushIdentityToPlayerState();
+	FTimerHandle IdentityRetryHandle;
+	int32 IdentityRetries = 0;
 
 	/** Commit to leaving the menu: buttons off, input to game, cursor away. */
 	void LockForTravel();
@@ -98,4 +141,15 @@ private:
 	TObjectPtr<class UIBLobbyStripWidget> LobbyStrip;
 
 	bool bHostingLobby = false;
+
+	/** The select/create sheet, viewport-anchored over the whole menu. */
+	UPROPERTY(Transient)
+	TObjectPtr<UIBCharacterSelectScreen> OperativeSelect;
+
+	/** Injected fallback chip (hidden in lobby states). */
+	UPROPERTY(Transient)
+	TObjectPtr<class UBorder> InjectedOperativeChip;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> InjectedOperativeText;
 };

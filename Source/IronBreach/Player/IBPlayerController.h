@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Player/IBCharacterTypes.h"
 #include "IBPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -30,9 +31,22 @@ class IRONBREACH_API AIBPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+public:
+	/**
+	 * Send the local operative (UIBCharacterSubsystem's active character) to
+	 * the server so this player's PlayerState carries callsign/class/gender for
+	 * everyone. Runs on BeginPlay for every level; the main menu calls it again
+	 * the moment an operative is chosen or switched. Safe with no character.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Operative")
+	void PushOperativeIdentity();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+
+	/** Clients receive their PlayerState after BeginPlay — push again when it lands. */
+	virtual void OnRep_PlayerState() override;
 
 	/** Added at priority 1 (pawn contexts sit at 0) for every local player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Menus")
