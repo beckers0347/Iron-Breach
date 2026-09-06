@@ -1,0 +1,243 @@
+"""
+RETUNE THE COBBLESTONE PATH -- bigger blocks, wider spacing, neutral stone
+color instead of the raw reddish-brown mossy photoscan tint
+================================================================
+IRON BREACH / Unreal Engine 5.8
+
+WHY
+---
+The stone color was coming straight from T_MossyCreekStones_A's own photo-
+scanned color (a warm reddish-brown), and the 35cm cell grid reads as too
+fine/dense from the camera distances these screenshots are shot at. This
+version:
+  - Tints the sampled stone texture toward a neutral cool grey (real
+    cobblestone/paver grey, not creek-stone red-brown) while still keeping
+    the texture's own light/dark variation for detail.
+  - Roughly doubles the paver size (35cm -> 70cm) and widens the grout
+    lines so the block pattern reads clearly from further away.
+
+All 4 knobs are constants at the top -- CELL_SIZE_CM, GROUT_WIDTH,
+GROUT_COLOR, STONE_TINT -- re-run with different numbers as many times as
+you want, this always rebuilds from scratch.
+
+HOW TO RUN IT
+-------------
+    py "X:/IronBreach/Content/Python/tune_cobblestone_path.py"
+"""
+
+import unreal
+
+MEL = unreal.MaterialEditingLibrary
+AL = unreal.EditorAssetLibrary
+
+PATH_MATERIAL_PATH = "/Game/LevelPrototyping/AITextures/Landmass/M_AI_CobblestonePath"
+MOSS_ALBEDO = "/Game/Landscaping/IcelandEnviroment/Textures/T_MossyCreekStones/T_MossyCreekStones_A"
+MOSS_ROUGH = "/Game/Landscaping/IcelandEnviroment/Textures/T_MossyCreekStones/T_MossyCreekStones_R"
+
+TILE_WORLD_SIZE = 100.0
+CELL_SIZE_CM = 70.0          # was 35 -- bigger, more visible individual pavers
+GROUT_WIDTH = 0.14           # was 0.09 -- wider, more visible grout lines
+GROUT_SOFTNESS = 0.05
+GROUT_COLOR = (0.05, 0.05, 0.055)          # near-black grout, unchanged
+STONE_TINT = (0.62, 0.60, 0.56)            # neutral warm-grey paver tone (was raw reddish-brown texture color)
+
+
+def log(msg):
+    print("[TuneCobblestone] %s" % msg)
+
+
+def build_cobblestone(material, basecolor_tex, roughness_tex):
+    log("Rebuilding %s -- cell=%.0fcm grout_width=%.2f tint=%s..." % (
+        material.get_name(), CELL_SIZE_CM, GROUT_WIDTH, STONE_TINT))
+    MEL.delete_all_material_expressions(material)
+
+    world_pos = MEL.create_material_expression(material, unreal.MaterialExpressionWorldPosition, -1800, 0)
+    tile_scale = MEL.create_material_expression(material, unreal.MaterialExpressionConstant, -1800, 150)
+    tile_scale.set_editor_property("R", 1.0 / TILE_WORLD_SIZE)
+    scaled_pos = MEL.create_material_expression(material, unreal.MaterialExpressionMultiply, -1600, 0)
+    MEL.connect_material_expressions(world_pos, "", scaled_pos, "A")
+    MEL.connect_material_expressions(tile_scale, "", scaled_pos, "B")
+
+    mask_yz = MEL.create_material_expression(material, unreal.MaterialExpressionComponentMask, -1400, -300)
+    mask_yz.set_editor_property("R", False); mask_yz.set_editor_property("G", True)
+    mask_yz.set_editor_property("B", True);  mask_yz.set_editor_property("A", False)
+    MEL.connect_material_expressions(scaled_pos, "", mask_yz, "")
+
+    mask_xz = MEL.create_material_expression(material, unreal.MaterialExpressionComponentMask, -1400, 0)
+    mask_xz.set_editor_property("R", True);  mask_xz.set_editor_property("G", False)
+    mask_xz.set_editor_property("B", True);  mask_xz.set_editor_property("A", False)
+    MEL.connect_material_expressions(scaled_pos, "", mask_xz, "")
+
+    mask_xy = MEL.create_material_expression(material, unreal.MaterialExpressionComponentMask, -1400, 300)
+    mask_xy.set_editor_property("R", True);  mask_xy.set_editor_property("G", True)
+    mask_xy.set_editor_property("B", False); mask_xy.set_editor_property("A", False)
+    MEL.connect_material_expressions(scaled_pos, "", mask_xy, "")
+
+    world_normal = MEL.create_material_expression(material, unreal.MaterialExpressionVertexNormalWS, -1400, 600)
+    abs_normal = MEL.create_material_expression(material, unreal.MaterialExpressionAbs, -1200, 600)
+    MEL.connect_material_expressions(world_normal, "", abs_normal, "")
+    sharpness_const = MEL.create_material_expression(material, unreal.MaterialExpressionConstant, -1200, 750)
+    sharpness_const.set_editor_property("R", 4.0)
+    weight_pow = MEL.create_material_expression(material, unreal.MaterialExpressionPower, -1000, 600)
+    MEL.connect_material_expressions(abs_normal, "", weight_pow, "Base")
+    MEL.connect_material_expressions(sharpness_const, "", weight_pow, "Exp")
+
+    w_x = MEL.create_material_expression(material, unreal.MaterialExpressionComponentMask, -800, 520)
+    w_x.set_editor_property("R", True); w_x.set_editor_property("G", False)
+    w_x.set_editor_property("B", False); w_x.set_editor_property("A", False)
+    MEL.connect_material_expressions(weight_pow, "", w_x, "")
+    w_y = MEL.create_material_expression(material, unreal.MaterialExpressionComponentMask, -800, 600)
+    w_y.set_editor_property("R", False); w_y.set_editor_property("G", True)
+    w_y.set_editor_property("B", False); w_y.set_editor_property("A", False)
+    MEL.connect_material_expressions(weight_pow, "", w_y, "")
+    w_z = MEL.create_material_expression(material, unreal.MaterialExpressionComponentMask, -800, 680)
+    w_z.set_editor_property("R", False); w_z.set_editor_property("G", False)
+    w_z.set_editor_property("B", True); w_z.set_editor_property("A", False)
+    MEL.connect_material_expressions(weight_pow, "", w_z, "")
+
+    sum_xy = MEL.create_material_expression(material, unreal.MaterialExpressionAdd, -620, 560)
+    MEL.connect_material_expressions(w_x, "", sum_xy, "A")
+    MEL.connect_material_expressions(w_y, "", sum_xy, "B")
+    sum_xyz = MEL.create_material_expression(material, unreal.MaterialExpressionAdd, -480, 600)
+    MEL.connect_material_expressions(sum_xy, "", sum_xyz, "A")
+    MEL.connect_material_expressions(w_z, "", sum_xyz, "B")
+
+    norm_x = MEL.create_material_expression(material, unreal.MaterialExpressionDivide, -320, 480)
+    MEL.connect_material_expressions(w_x, "", norm_x, "A")
+    MEL.connect_material_expressions(sum_xyz, "", norm_x, "B")
+    norm_y = MEL.create_material_expression(material, unreal.MaterialExpressionDivide, -320, 600)
+    MEL.connect_material_expressions(w_y, "", norm_y, "A")
+    MEL.connect_material_expressions(sum_xyz, "", norm_y, "B")
+    norm_z = MEL.create_material_expression(material, unreal.MaterialExpressionDivide, -320, 720)
+    MEL.connect_material_expressions(w_z, "", norm_z, "A")
+    MEL.connect_material_expressions(sum_xyz, "", norm_z, "B")
+
+    def sample_and_blend(tex, out_y, channel="RGB"):
+        tx = MEL.create_material_expression(material, unreal.MaterialExpressionTextureSample, 0, out_y - 200)
+        tx.set_editor_property("texture", tex)
+        MEL.connect_material_expressions(mask_yz, "", tx, "Coordinates")
+
+        ty = MEL.create_material_expression(material, unreal.MaterialExpressionTextureSample, 0, out_y)
+        ty.set_editor_property("texture", tex)
+        MEL.connect_material_expressions(mask_xz, "", ty, "Coordinates")
+
+        tz = MEL.create_material_expression(material, unreal.MaterialExpressionTextureSample, 0, out_y + 200)
+        tz.set_editor_property("texture", tex)
+        MEL.connect_material_expressions(mask_xy, "", tz, "Coordinates")
+
+        mul_x = MEL.create_material_expression(material, unreal.MaterialExpressionMultiply, 260, out_y - 200)
+        MEL.connect_material_expressions(tx, channel, mul_x, "A")
+        MEL.connect_material_expressions(norm_x, "", mul_x, "B")
+        mul_y = MEL.create_material_expression(material, unreal.MaterialExpressionMultiply, 260, out_y)
+        MEL.connect_material_expressions(ty, channel, mul_y, "A")
+        MEL.connect_material_expressions(norm_y, "", mul_y, "B")
+        mul_z = MEL.create_material_expression(material, unreal.MaterialExpressionMultiply, 260, out_y + 200)
+        MEL.connect_material_expressions(tz, channel, mul_z, "A")
+        MEL.connect_material_expressions(norm_z, "", mul_z, "B")
+
+        add_xy = MEL.create_material_expression(material, unreal.MaterialExpressionAdd, 480, out_y - 100)
+        MEL.connect_material_expressions(mul_x, "", add_xy, "A")
+        MEL.connect_material_expressions(mul_y, "", add_xy, "B")
+        add_xyz = MEL.create_material_expression(material, unreal.MaterialExpressionAdd, 640, out_y)
+        MEL.connect_material_expressions(add_xy, "", add_xyz, "A")
+        MEL.connect_material_expressions(mul_z, "", add_xyz, "B")
+        return add_xyz
+
+    raw_stone_color = sample_and_blend(basecolor_tex, 0)
+    tint_const = MEL.create_material_expression(material, unreal.MaterialExpressionConstant3Vector, 780, -100)
+    tint_const.set_editor_property("constant", unreal.LinearColor(STONE_TINT[0], STONE_TINT[1], STONE_TINT[2], 1.0))
+    stone_color = MEL.create_material_expression(material, unreal.MaterialExpressionMultiply, 900, 0)
+    MEL.connect_material_expressions(raw_stone_color, "", stone_color, "A")
+    MEL.connect_material_expressions(tint_const, "", stone_color, "B")
+
+    stone_rough = sample_and_blend(roughness_tex, 1500, channel="R") if roughness_tex else None
+
+    # ---- procedural paver grid / grout lines (world XY, independent of tile scale) ----
+    grid_xy = MEL.create_material_expression(material, unreal.MaterialExpressionComponentMask, -1600, 1000)
+    grid_xy.set_editor_property("R", True); grid_xy.set_editor_property("G", True)
+    grid_xy.set_editor_property("B", False); grid_xy.set_editor_property("A", False)
+    MEL.connect_material_expressions(world_pos, "", grid_xy, "")
+
+    cell_scale = MEL.create_material_expression(material, unreal.MaterialExpressionConstant, -1600, 1150)
+    cell_scale.set_editor_property("R", 1.0 / CELL_SIZE_CM)
+    grid_pos = MEL.create_material_expression(material, unreal.MaterialExpressionMultiply, -1400, 1000)
+    MEL.connect_material_expressions(grid_xy, "", grid_pos, "A")
+    MEL.connect_material_expressions(cell_scale, "", grid_pos, "B")
+
+    frac_grid = MEL.create_material_expression(material, unreal.MaterialExpressionFrac, -1200, 1000)
+    MEL.connect_material_expressions(grid_pos, "", frac_grid, "")
+    one_minus = MEL.create_material_expression(material, unreal.MaterialExpressionOneMinus, -1200, 1120)
+    MEL.connect_material_expressions(frac_grid, "", one_minus, "")
+    edge_vec = MEL.create_material_expression(material, unreal.MaterialExpressionMin, -1000, 1060)
+    MEL.connect_material_expressions(frac_grid, "", edge_vec, "A")
+    MEL.connect_material_expressions(one_minus, "", edge_vec, "B")
+
+    edge_r = MEL.create_material_expression(material, unreal.MaterialExpressionComponentMask, -800, 1000)
+    edge_r.set_editor_property("R", True); edge_r.set_editor_property("G", False)
+    edge_r.set_editor_property("B", False); edge_r.set_editor_property("A", False)
+    MEL.connect_material_expressions(edge_vec, "", edge_r, "")
+    edge_g = MEL.create_material_expression(material, unreal.MaterialExpressionComponentMask, -800, 1120)
+    edge_g.set_editor_property("R", False); edge_g.set_editor_property("G", True)
+    edge_g.set_editor_property("B", False); edge_g.set_editor_property("A", False)
+    MEL.connect_material_expressions(edge_vec, "", edge_g, "")
+    edge_dist = MEL.create_material_expression(material, unreal.MaterialExpressionMin, -600, 1060)
+    MEL.connect_material_expressions(edge_r, "", edge_dist, "A")
+    MEL.connect_material_expressions(edge_g, "", edge_dist, "B")
+
+    grout_width_const = MEL.create_material_expression(material, unreal.MaterialExpressionConstant, -600, 1200)
+    grout_width_const.set_editor_property("R", GROUT_WIDTH)
+    sub = MEL.create_material_expression(material, unreal.MaterialExpressionSubtract, -400, 1060)
+    MEL.connect_material_expressions(edge_dist, "", sub, "A")
+    MEL.connect_material_expressions(grout_width_const, "", sub, "B")
+
+    softness_const = MEL.create_material_expression(material, unreal.MaterialExpressionConstant, -400, 1200)
+    softness_const.set_editor_property("R", GROUT_SOFTNESS)
+    div = MEL.create_material_expression(material, unreal.MaterialExpressionDivide, -200, 1060)
+    MEL.connect_material_expressions(sub, "", div, "A")
+    MEL.connect_material_expressions(softness_const, "", div, "B")
+
+    grout_mask = MEL.create_material_expression(material, unreal.MaterialExpressionClamp, 0, 1060)
+    grout_mask.set_editor_property("min_default", 0.0)
+    grout_mask.set_editor_property("max_default", 1.0)
+    MEL.connect_material_expressions(div, "", grout_mask, "")
+
+    grout_color_const = MEL.create_material_expression(material, unreal.MaterialExpressionConstant3Vector, 900, 1200)
+    grout_color_const.set_editor_property("constant", unreal.LinearColor(GROUT_COLOR[0], GROUT_COLOR[1], GROUT_COLOR[2], 1.0))
+
+    final_color = MEL.create_material_expression(material, unreal.MaterialExpressionLinearInterpolate, 1100, 0)
+    MEL.connect_material_expressions(grout_color_const, "", final_color, "A")
+    MEL.connect_material_expressions(stone_color, "", final_color, "B")
+    MEL.connect_material_expressions(grout_mask, "", final_color, "Alpha")
+    MEL.connect_material_property(final_color, "", unreal.MaterialProperty.MP_BASE_COLOR)
+
+    grout_rough_const = MEL.create_material_expression(material, unreal.MaterialExpressionConstant, 1100, 1350)
+    grout_rough_const.set_editor_property("R", 1.0)
+    if stone_rough is not None:
+        final_rough = MEL.create_material_expression(material, unreal.MaterialExpressionLinearInterpolate, 1100, 1500)
+        MEL.connect_material_expressions(grout_rough_const, "", final_rough, "A")
+        MEL.connect_material_expressions(stone_rough, "", final_rough, "B")
+        MEL.connect_material_expressions(grout_mask, "", final_rough, "Alpha")
+        MEL.connect_material_property(final_rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    else:
+        MEL.connect_material_property(grout_rough_const, "", unreal.MaterialProperty.MP_ROUGHNESS)
+
+    MEL.recompile_material(material)
+    log("  done -- %s recompiled." % material.get_name())
+
+
+def run():
+    if not AL.does_asset_exist(PATH_MATERIAL_PATH):
+        log("SKIPPED -- %s doesn't exist." % PATH_MATERIAL_PATH)
+        return
+    path_mat = AL.load_asset(PATH_MATERIAL_PATH)
+    albedo = AL.load_asset(MOSS_ALBEDO)
+    rough = AL.load_asset(MOSS_ROUGH)
+    if not albedo:
+        log("SKIPPED -- could not load %s" % MOSS_ALBEDO)
+        return
+    build_cobblestone(path_mat, albedo, rough)
+    log("Path actors already point at this material -- no re-assignment needed. "
+        "Save and check the viewport / re-run PIE.")
+
+
+run()
