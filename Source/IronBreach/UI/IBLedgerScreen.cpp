@@ -1,5 +1,9 @@
 #include "UI/IBLedgerScreen.h"
 #include "UI/IBStyleKit.h"
+#include "UI/IBMenuLayout.h"
+#include "UI/IBUISettings.h"
+#include "Components/ProgressBar.h"
+#include "Components/ScrollBoxSlot.h"
 #include "Items/IBLedgerSubsystem.h"
 #include "Items/IBItemDefinition.h"
 #include "UI/IBItemTileWidget.h"
@@ -20,55 +24,83 @@ void UIBLedgerScreen::NativeOnInitialized()
 
 	if (!GridTileClass) { GridTileClass = UIBItemTileWidget::StaticClass(); }
 
-	// Bare WBP: dim sheet, title, progress line, catalog grid — the chase board.
 	if (!ItemGrid && WidgetTree)
 	{
-		UOverlay* Root = Cast<UOverlay>(WidgetTree->RootWidget);
-		if (!WidgetTree->RootWidget)
+		const auto Page = IBMenuLayout::Begin(WidgetTree,
+			NSLOCTEXT("IBLedger", "Title", "THE LEDGER"),
+			NSLOCTEXT("IBLedger", "Kicker", "BREAKWATER / COLLECTION ARCHIVE"),
+			NSLOCTEXT("IBLedger", "Controls", "HOVER / INSPECT ENTRY     Q E / SWITCH MENU     ESC / RETURN"));
+		if (!Page.Body) { return; }
+		ProgressText = IBMenuLayout::Heading(WidgetTree, FText::GetEmpty(), 20);
+		Page.HeaderRight->AddChildToVerticalBox(ProgressText);
+		CollectionProgress = WidgetTree->ConstructWidget<UProgressBar>();
+		CollectionProgress->SetFillColorAndOpacity(IBStyle::Amber());
+		FProgressBarStyle ProgressStyle = CollectionProgress->GetWidgetStyle();
+		ProgressStyle.BackgroundImage = IBStyle::RoundedBrush(FLinearColor(.025f, .06f, .065f), 0);
+		ProgressStyle.FillImage = IBStyle::RoundedBrush(FLinearColor::White, 0);
+		CollectionProgress->SetWidgetStyle(ProgressStyle);
+		USizeBox* ProgressSize = IBMenuLayout::Width(WidgetTree, CollectionProgress, 260);
+		ProgressSize->SetHeightOverride(4);
+		Page.HeaderRight->AddChildToVerticalBox(ProgressSize)->SetPadding(FMargin(0, 10, 0, 0));
+		UHorizontalBox* Columns = WidgetTree->ConstructWidget<UHorizontalBox>();
+		Page.Body->AddChildToVerticalBox(Columns)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		UVerticalBox* Catalog = WidgetTree->ConstructWidget<UVerticalBox>();
+		IBMenuLayout::Section(WidgetTree, Catalog, NSLOCTEXT("IBLedger", "Catalog", "01 / FIELD DISCOVERIES"));
+		UHorizontalBox* Filters = WidgetTree->ConstructWidget<UHorizontalBox>();
+		const FText Labels[] = { NSLOCTEXT("IBLedger", "All", "ALL"), NSLOCTEXT("IBLedger", "Weapons", "WEAPONS"),
+			NSLOCTEXT("IBLedger", "Armor", "ARMOR"), NSLOCTEXT("IBLedger", "Materials", "MATERIALS") };
+		for (const FText& Label : Labels)
 		{
-			Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-			WidgetTree->RootWidget = Root;
+			UButton* Button = IBMenuLayout::Button(WidgetTree, Label);
+			Filters->AddChildToHorizontalBox(Button)->SetPadding(FMargin(0, 0, 8, 0));
+			FilterButtons.Add(Button);
 		}
-		if (!Root) { return; }
-
-		UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-		Dim->SetBrushColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.78f));
-		if (UOverlaySlot* DimSlot = Root->AddChildToOverlay(Dim))
-		{
-			DimSlot->SetHorizontalAlignment(HAlign_Fill);
-			DimSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-
-		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-
-		UTextBlock* Title = IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBLedger", "Title", "THE LEDGER"));
-		Column->AddChildToVerticalBox(Title);
-
-		UBorder* Accent = IBStyle::MakeAccentBar(WidgetTree, IBStyle::Amber());
-		Accent->SetPadding(FMargin(0.f, 1.5f));
-		if (UVerticalBoxSlot* AccentSlot = Column->AddChildToVerticalBox(Accent))
-		{
-			AccentSlot->SetPadding(FMargin(0.f, 6.f, 200.f, 0.f));
-		}
-
-		UTextBlock* Progress = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 12, IBStyle::TextLo(), 300);
-		if (UVerticalBoxSlot* ProgSlot = Column->AddChildToVerticalBox(Progress))
-		{
-			ProgSlot->SetPadding(FMargin(0.f, 8.f, 0.f, 14.f));
-		}
-		ProgressText = Progress;
-
-		UUniformGridPanel* Grid = WidgetTree->ConstructWidget<UUniformGridPanel>(UUniformGridPanel::StaticClass());
-		Grid->SetSlotPadding(FMargin(4.f));
-		Column->AddChildToVerticalBox(Grid);
-		ItemGrid = Grid;
-
-		if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(Column))
-		{
-			ColumnSlot->SetHorizontalAlignment(HAlign_Center);
-			ColumnSlot->SetVerticalAlignment(VAlign_Center);
-		}
+		FilterButtons[0]->OnClicked.AddDynamic(this, &UIBLedgerScreen::HandleAll);
+		FilterButtons[1]->OnClicked.AddDynamic(this, &UIBLedgerScreen::HandleWeapons);
+		FilterButtons[2]->OnClicked.AddDynamic(this, &UIBLedgerScreen::HandleArmor);
+		FilterButtons[3]->OnClicked.AddDynamic(this, &UIBLedgerScreen::HandleMaterials);
+		Catalog->AddChildToVerticalBox(Filters)->SetPadding(FMargin(0, 0, 0, 18));
+		ItemGrid = WidgetTree->ConstructWidget<UUniformGridPanel>();
+		ItemGrid->SetSlotPadding(FMargin(4));
+		GridColumns = 8;
+		IBMenuLayout::Scroll(WidgetTree, Catalog, ItemGrid);
+		CastChecked<UScrollBoxSlot>(ItemGrid->Slot)->SetHorizontalAlignment(HAlign_Left);
+		Catalog->AddChildToVerticalBox(IBMenuLayout::Text(WidgetTree,
+			NSLOCTEXT("IBLedger", "CatalogHint", "SEALED ENTRIES ARE REVEALED THROUGH DISCOVERY."), 11))->SetPadding(FMargin(0, 14, 0, 0));
+		UHorizontalBoxSlot* CatalogSlot = Columns->AddChildToHorizontalBox(IBMenuLayout::Card(WidgetTree, Catalog));
+		CatalogSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		CatalogSlot->SetPadding(FMargin(0, 0, 16, 0));
+		UVerticalBox* Details = WidgetTree->ConstructWidget<UVerticalBox>();
+		IBMenuLayout::Section(WidgetTree, Details, NSLOCTEXT("IBLedger", "Record", "02 / ARCHIVE RECORD"));
+		DetailName = IBMenuLayout::Heading(WidgetTree, FText::GetEmpty(), 25);
+		DetailName->SetAutoWrapText(true);
+		Details->AddChildToVerticalBox(DetailName)->SetPadding(FMargin(0, 8, 0, 18));
+		DetailInfo = IBMenuLayout::Text(WidgetTree, FText::GetEmpty(), 14);
+		DetailInfo->SetAutoWrapText(true);
+		IBMenuLayout::Scroll(WidgetTree, Details, DetailInfo);
+		Columns->AddChildToHorizontalBox(IBMenuLayout::Width(WidgetTree, IBMenuLayout::Card(WidgetTree, Details), 350));
+		ResetDetails();
+		RefreshFilters();
 	}
+}
+
+void UIBLedgerScreen::ResetDetails()
+{
+	if (DetailName) { DetailName->SetText(NSLOCTEXT("IBLedger", "Idle", "BUILD THE ARCHIVE")); DetailName->SetColorAndOpacity(IBStyle::TextHi()); }
+	if (DetailInfo) { DetailInfo->SetText(NSLOCTEXT("IBLedger", "IdleHint", "Every discovery becomes part of the record.\n\nHover over an entry to inspect its recovered data.")); }
+}
+
+void UIBLedgerScreen::HandleAll()
+{
+	bFilterAll = true;
+	RebuildGrid();
+}
+
+void UIBLedgerScreen::RefreshFilters()
+{
+	const EIBItemCategory Categories[] = { EIBItemCategory::None, EIBItemCategory::Weapon, EIBItemCategory::Armor, EIBItemCategory::KaijuMaterial };
+	for (int32 i = 0; i < FilterButtons.Num(); ++i)
+		IBMenuLayout::StyleButton(FilterButtons[i], i == 0 ? bFilterAll : (!bFilterAll && CategoryFilter == Categories[i]));
 }
 
 UIBLedgerSubsystem* UIBLedgerScreen::GetLedger() const
@@ -110,6 +142,8 @@ void UIBLedgerScreen::RebuildGrid()
 {
 	if (!ItemGrid) { return; }
 	ItemGrid->ClearChildren();
+	ResetDetails();
+	RefreshFilters();
 
 	UIBLedgerSubsystem* Ledger = GetLedger();
 	if (!Ledger || !GridTileClass) { return; }
@@ -162,6 +196,7 @@ void UIBLedgerScreen::RebuildGrid()
 		++CellIndex;
 	}
 
+	if (CollectionProgress) { CollectionProgress->SetPercent(TotalInCategory > 0 ? float(DiscoveredInCategory) / TotalInCategory : 0.f); }
 	if (ProgressText)
 	{
 		ProgressText->SetText(FText::Format(
@@ -176,10 +211,24 @@ void UIBLedgerScreen::HandleTileHoverChanged(UIBItemTileWidget* Tile, bool bHove
 
 	if (bHovered && Tile->GetDefinition())
 	{
-		BP_OnEntryFocused(Tile->GetDefinition(), !Tile->IsLockedEntry());
+		const UIBItemDefinition* Def = Tile->GetDefinition();
+		const bool bLocked = Tile->IsLockedEntry();
+		if (DetailName)
+		{
+			DetailName->SetText(bLocked ? NSLOCTEXT("IBLedger", "Sealed", "DATA SEALED") : Def->DisplayName);
+			DetailName->SetColorAndOpacity(bLocked ? IBStyle::TextLo() : UIBUISettings::Get()->GetRarityColor(Def->Rarity));
+		}
+		if (DetailInfo)
+		{
+			DetailInfo->SetText(bLocked ? NSLOCTEXT("IBLedger", "SealedHint", "This entry has not been discovered. Recover the item in the field to reveal its record.")
+				: FText::FromString(UEnum::GetDisplayValueAsText(Def->Category).ToString() + TEXT("\n\n") + Def->Description.ToString()
+					+ (Def->Flavor.IsEmpty() ? FString() : TEXT("\n\n") + Def->Flavor.ToString())));
+		}
+		BP_OnEntryFocused(Def, !bLocked);
 	}
 	else
 	{
+		ResetDetails();
 		BP_OnEntryUnfocused();
 	}
 }

@@ -122,6 +122,10 @@ private:
 	FIBClassKit ActiveKit;
 	EIBOperativeClass ResolvedClass = EIBOperativeClass::Breaker;
 	bool bResolvedFromIdentity = false;
+	/** A kit (identity-resolved or defaults) has been applied at least once. Lets the
+	 *  identity-less tick path (AI pawns, previews, pre-PlayerState clients) skip the
+	 *  re-resolve + asset load + log every frame -- it only re-runs when something changed. */
+	bool bKitApplied = false;
 
 	double KitReadyTime = 0.0;
 	double MoveReadyTime = 0.0;

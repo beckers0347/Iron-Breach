@@ -66,6 +66,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
 	TObjectPtr<UButton> Btn_Settings;
 
+	/** Opens the Watch (registry id "Watch"): breach board, next destination, return to the Bastion. */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
+	TObjectPtr<UButton> Btn_Watch;
+
 	/** Session context line: map · mode · player count. Fallback builds one. */
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "System")
 	TObjectPtr<UTextBlock> Txt_SessionInfo;
@@ -83,6 +87,7 @@ protected:
 	UFUNCTION() void HandleLeaveClicked();
 	UFUNCTION() void HandleQuitClicked();
 	UFUNCTION() void HandleSettingsClicked();
+	UFUNCTION() void HandleWatchClicked();
 
 	virtual void NativeScreenOpened() override;
 

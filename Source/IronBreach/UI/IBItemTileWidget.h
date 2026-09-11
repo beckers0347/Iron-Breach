@@ -31,6 +31,9 @@ class IRONBREACH_API UIBItemTileWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	/** Compact equipment wells use the same item view and click delegates. */
+	void SetPresentationSize(FVector2D Size);
+	void SetSelected(bool bInSelected);
 	UPROPERTY(BlueprintAssignable, Category = "Tile")
 	FOnItemTileClicked OnTileClicked;
 
@@ -88,6 +91,9 @@ protected:
 private:
 	void RefreshVisuals();
 
+	UPROPERTY(Transient)
+	TObjectPtr<class UBorder> TileSurface;
+
 	FIBItemInstance Item;
 
 	UPROPERTY()
@@ -95,4 +101,5 @@ private:
 
 	EIBEquipSlot RepresentedSlot = EIBEquipSlot::None;
 	bool bLocked = false;
+	bool bSelected = false;
 };

@@ -193,3 +193,34 @@ void AIBOperativePreviewStage::ShowNothing()
 		Mesh->SetVisibility(false);
 	}
 }
+
+void AIBOperativePreviewStage::ConfigureForInventory(const USkeletalMeshComponent* SourceBody)
+{
+	if (Capture)
+	{
+		Capture->SetRelativeLocation(FVector(-440.f, 0.f, 105.f));
+		Capture->SetRelativeRotation(LookAt(FVector(-440.f, 0.f, 105.f), LookTarget));
+		Capture->FOVAngle = 26.f;
+		// Inventory uses inverse-opacity capture; the UI material composites the body over the hangar.
+		Capture->CaptureSource = ESceneCaptureSource::SCS_SceneColorHDR;
+		if (RenderTarget && RenderTarget->RenderTargetFormat != ETextureRenderTargetFormat::RTF_RGBA16f)
+		{
+			RenderTarget->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA16f;
+			RenderTarget->ClearColor = FLinearColor(0,0,0,1);
+			RenderTarget->InitAutoFormat(RenderTargetSize,RenderTargetSize);
+			RenderTarget->UpdateResourceImmediate(true);
+		}
+	}
+	if (Mesh && SourceBody && SourceBody->GetSkeletalMeshAsset())
+	{
+		if (Mesh->GetSkeletalMeshAsset() != SourceBody->GetSkeletalMeshAsset())
+		{
+			Mesh->SetSkeletalMeshAsset(SourceBody->GetSkeletalMeshAsset());
+			if (UAnimationAsset* Idle = IdleAnimation.LoadSynchronous()) { Mesh->PlayAnimation(Idle, true); }
+		}
+		for (int32 Index = 0; Index < SourceBody->GetNumMaterials(); ++Index)
+		{
+			Mesh->SetMaterial(Index, SourceBody->GetMaterial(Index));
+		}
+	}
+}

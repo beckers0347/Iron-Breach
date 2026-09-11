@@ -142,6 +142,14 @@ private:
 
 	bool bHostingLobby = false;
 
+	/** THE WATCH — the breach board. Opens over the menu in both lobby states
+	 *  (host and client) and, offline, in the standalone menu as the solo
+	 *  destination picker. Viewport-anchored like the operative sheet. */
+	void OpenWatch();
+	void CloseWatch();
+	UPROPERTY(Transient)
+	TObjectPtr<class UIBWatchScreen> Watch;
+
 	/** The select/create sheet, viewport-anchored over the whole menu. */
 	UPROPERTY(Transient)
 	TObjectPtr<UIBCharacterSelectScreen> OperativeSelect;

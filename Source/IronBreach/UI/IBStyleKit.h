@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Styling/SlateBrush.h"
 #include "Styling/SlateTypes.h"
+#include "Styling/CoreStyle.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/Border.h"
@@ -62,6 +63,16 @@ namespace IBStyle
 		Label->SetShadowOffset(FVector2D(1.f, 1.f));
 		Label->SetShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.7f));
 		return Label;
+	}
+
+	/** Optional condensed display face, reusing the engine font already shipped with the game. */
+	inline void UseDisplayFace(UTextBlock* Label)
+	{
+		if (!Label) { return; }
+		const FSlateFontInfo Current = Label->GetFont();
+		FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle(TEXT("BoldCondensed"), Current.Size);
+		Font.LetterSpacing = Current.LetterSpacing;
+		Label->SetFont(Font);
 	}
 
 	/** Screen title: big, tracked-out, service-steel. */

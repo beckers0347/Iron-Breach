@@ -31,6 +31,15 @@ class IRONBREACH_API UIBInventoryScreen : public UIBMenuScreen
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void ShowCharacterTab();
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void ShowBackpackTab();
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	bool IsBackpackTab() const { return bBackpackSelected; }
+
 	/** Grid filter (wire category tab buttons to this in the WBP). */
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void SetCategoryFilter(EIBItemCategory Category);
@@ -53,6 +62,8 @@ protected:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeScreenOpened() override;
 	virtual void NativeScreenClosed() override;
+	virtual void NativeDestruct() override;
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 	/** Shane's details-pane feed. bEquipped distinguishes well vs backpack. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Inventory", meta = (DisplayName = "On Item Focused"))
@@ -129,9 +140,40 @@ protected:
 	int32 GridColumns = 6;
 
 private:
-	/** Bare-WBP fallback: the full Destiny layout in code — weapon wells left,
-	 *  armor right, clearance top-right, backpack grid bottom, details pane. */
+	/** Character: equipment around a centered body. Backpack: grid and details. */
 	void BuildFallbackLayout();
+	void RefreshSubtabs();
+	UFUNCTION() void RefreshCharacterPreview();
+	void ReleaseCharacterPreview();
+	UFUNCTION() void HandleSearchChanged(const FText& Text);
+	UFUNCTION() void CycleSort();
+	UFUNCTION() void EquipSelected();
+	UPROPERTY(Transient) TObjectPtr<class UImage> DetailIcon;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailRarity;
+	UPROPERTY(Transient) TObjectPtr<class UVerticalBox> DetailStats;
+	UPROPERTY(Transient) TObjectPtr<class UButton> EquipButton;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> EquipLabel;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> SortLabel;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> CharacterStats;
+	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> PortraitMaterial;
+	UPROPERTY(Transient) TWeakObjectPtr<UIBItemTileWidget> SelectedTile;
+	FGuid SelectedItemId;
+	FString SearchText;
+	int32 SortMode = 0;
+	TArray<EIBItemCategory> FilterCategories;
+	UPROPERTY(Transient) TObjectPtr<class UWidgetSwitcher> InventoryPages;
+	UPROPERTY(Transient) TObjectPtr<class UButton> CharacterTabButton;
+	UPROPERTY(Transient) TObjectPtr<class UButton> BackpackTabButton;
+	UPROPERTY(Transient) TObjectPtr<class UImage> CharacterImage;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> CharacterName;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> CharacterRole;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> CharacterDetailName;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> CharacterDetailInfo;
+	UPROPERTY(Transient) TObjectPtr<class USizeBox> CharacterDetailPanel;
+	UPROPERTY(Transient) TObjectPtr<class AIBOperativePreviewStage> PreviewStage;
+	UPROPERTY(Transient) TObjectPtr<class AIBPlayerState> PreviewIdentity;
+	bool bBackpackSelected = false;
+	bool bScreenOpen = false;
 	UIBItemTileWidget* MakeWell(class UVerticalBox* Column, EIBEquipSlot ForSlot);
 	void SetDetails(const class UIBItemTileWidget* Tile);
 	class UButton* MakeFilterTab(class UHorizontalBox* Row, const FText& Label);
@@ -151,6 +193,9 @@ private:
 	/** Fallback details card container (so hover can show/hide it cleanly). */
 	UPROPERTY(Transient)
 	TObjectPtr<class USizeBox> DetailPanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> PackStatus;
 
 	EIBItemCategory CategoryFilter = EIBItemCategory::Weapon;
 

@@ -1,5 +1,6 @@
 #include "UI/IBMapScreen.h"
 #include "IronBreach.h"
+#include "UI/IBMenuLayout.h"
 #include "World/IBMapSubsystem.h"
 #include "World/IBMapPOIComponent.h"
 #include "UI/IBMapMarkerWidget.h"
@@ -20,52 +21,46 @@ void UIBMapScreen::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	// Bare WBP: no pan/zoom canvas to build blind — give M a dressed holding
-	// screen (dim + title + status) instead of a void, until Shane authors the
-	// real map layout per MENUS_UI_WIRING §5 and a zone capture exists (§7).
+	// An authored map keeps its pan/zoom tree. The bare-WBP view explains the
+	// missing cartography without exposing asset names to the player.
 	if (!MapCanvas && !MapImage && WidgetTree)
 	{
-		UOverlay* Root = Cast<UOverlay>(WidgetTree->RootWidget);
-		if (!WidgetTree->RootWidget)
-		{
-			Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-			WidgetTree->RootWidget = Root;
-		}
-		if (!Root) { return; }
-
-		UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-		Dim->SetBrushColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.78f));
-		if (UOverlaySlot* DimSlot = Root->AddChildToOverlay(Dim))
-		{
-			DimSlot->SetHorizontalAlignment(HAlign_Fill);
-			DimSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-
-		UTextBlock* Zone = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-		Zone->SetText(NSLOCTEXT("IBMap", "NoUplink", "ZONE UPLINK PENDING"));
-		FSlateFontInfo ZoneFont = Zone->GetFont();
-		ZoneFont.Size = 24;
-		Zone->SetFont(ZoneFont);
-		Zone->SetColorAndOpacity(FSlateColor(FLinearColor(0.6f, 0.68f, 0.8f)));
-		if (UOverlaySlot* ZoneSlot = Root->AddChildToOverlay(Zone))
-		{
-			ZoneSlot->SetHorizontalAlignment(HAlign_Center);
-			ZoneSlot->SetVerticalAlignment(VAlign_Center);
-		}
-		ZoneNameText = Zone; // real zone data overwrites this line when it lands
-
-		UTextBlock* Hint = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-		Hint->SetText(NSLOCTEXT("IBMap", "NoUplinkHint", "No cartography for this area yet. Place an IBMapZoneInfo + DA_Map asset to bring the uplink online."));
-		FSlateFontInfo HintFont = Hint->GetFont();
-		HintFont.Size = 11;
-		Hint->SetFont(HintFont);
-		Hint->SetColorAndOpacity(FSlateColor(FLinearColor(0.4f, 0.45f, 0.55f)));
-		if (UOverlaySlot* HintSlot = Root->AddChildToOverlay(Hint))
-		{
-			HintSlot->SetHorizontalAlignment(HAlign_Center);
-			HintSlot->SetVerticalAlignment(VAlign_Center);
-			HintSlot->SetPadding(FMargin(0.f, 70.f, 0.f, 0.f));
-		}
+		const auto Page = IBMenuLayout::Begin(WidgetTree,
+			NSLOCTEXT("IBMap", "Title", "TACTICAL MAP"),
+			NSLOCTEXT("IBMap", "Kicker", "BREAKWATER / LOCAL RECONNAISSANCE"),
+			NSLOCTEXT("IBMap", "Controls", "B / THE WATCH     Q E / SWITCH MENU     ESC / RETURN"));
+		if (!Page.Body) { return; }
+		Page.HeaderRight->AddChildToVerticalBox(IBMenuLayout::Text(WidgetTree,
+			NSLOCTEXT("IBMap", "Uplink", "LOCAL CARTOGRAPHY / UNAVAILABLE"), 12, IBStyle::Amber(), 80));
+		UHorizontalBox* Columns = WidgetTree->ConstructWidget<UHorizontalBox>();
+		Page.Body->AddChildToVerticalBox(Columns)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		UOverlay* Chart = WidgetTree->ConstructWidget<UOverlay>();
+		UVerticalBox* Message = WidgetTree->ConstructWidget<UVerticalBox>();
+		UTextBlock* Symbol = IBMenuLayout::Heading(WidgetTree, NSLOCTEXT("IBMap", "Signal", "[  /  ]"), 64);
+		Symbol->SetColorAndOpacity(FLinearColor(.17f, .34f, .36f));
+		Message->AddChildToVerticalBox(Symbol)->SetHorizontalAlignment(HAlign_Center);
+		ZoneNameText = IBMenuLayout::Heading(WidgetTree, FText::GetEmpty(), 28);
+		ZoneNameText->SetJustification(ETextJustify::Center);
+		Message->AddChildToVerticalBox(ZoneNameText)->SetPadding(FMargin(0, 18, 0, 12));
+		UTextBlock* Hint = IBMenuLayout::Text(WidgetTree,
+			NSLOCTEXT("IBMap", "MissingChart", "No local survey is available for this area."), 14);
+		Hint->SetJustification(ETextJustify::Center);
+		Message->AddChildToVerticalBox(Hint);
+		UOverlaySlot* MessageSlot = Chart->AddChildToOverlay(Message);
+		MessageSlot->SetHorizontalAlignment(HAlign_Center);
+		MessageSlot->SetVerticalAlignment(VAlign_Center);
+		UHorizontalBoxSlot* ChartSlot = Columns->AddChildToHorizontalBox(IBMenuLayout::Card(WidgetTree, Chart));
+		ChartSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		ChartSlot->SetPadding(FMargin(0, 0, 16, 0));
+		UVerticalBox* Intel = WidgetTree->ConstructWidget<UVerticalBox>();
+		IBMenuLayout::Section(WidgetTree, Intel, NSLOCTEXT("IBMap", "Brief", "RECON BRIEF"));
+		Intel->AddChildToVerticalBox(IBMenuLayout::Heading(WidgetTree,
+			NSLOCTEXT("IBMap", "Awaiting", "AWAITING\nSURVEY DATA"), 28))->SetPadding(FMargin(0, 12, 0, 22));
+		UTextBlock* Brief = IBMenuLayout::Text(WidgetTree,
+			NSLOCTEXT("IBMap", "BriefBody", "Terrain and points of interest will appear here when local cartography is available.\n\nFor destinations and deployment, open the Watch with B."), 14);
+		Brief->SetAutoWrapText(true);
+		Intel->AddChildToVerticalBox(Brief);
+		Columns->AddChildToHorizontalBox(IBMenuLayout::Width(WidgetTree, IBMenuLayout::Card(WidgetTree, Intel), 350));
 	}
 }
 
@@ -114,7 +109,7 @@ void UIBMapScreen::RebuildMap()
 
 	if (ZoneNameText)
 	{
-		ZoneNameText->SetText(Zone ? Zone->ZoneName : NSLOCTEXT("IBMap", "NoZone", "NO ZONE DATA"));
+		ZoneNameText->SetText(Zone ? Zone->ZoneName : NSLOCTEXT("IBMap", "NoSurvey", "AREA NOT SURVEYED"));
 	}
 
 	if (MapImage)

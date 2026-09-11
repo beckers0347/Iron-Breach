@@ -2,6 +2,7 @@
 #include "UI/IBMenuSubsystem.h"
 #include "UI/IBLobbyStripWidget.h"
 #include "UI/IBCharacterSelectScreen.h"
+#include "UI/IBWatchScreen.h"
 #include "UI/IBStyleKit.h"
 #include "Player/IBCharacterSubsystem.h"
 #include "Player/IBCharacterTypes.h"
@@ -101,7 +102,7 @@ void UIBMainMenuWidget::EnterHostLobbyState()
 	if (Btn_Join) { Btn_Join->SetIsEnabled(false); }
 	if (Btn_Solo) { Btn_Solo->SetIsEnabled(false); }
 
-	SetStatus(FText::FromString(TEXT("LOBBY LIVE — INVITE YOUR SQUAD, THEN DEPLOY")));
+	SetStatus(FText::FromString(TEXT("THE WATCH IS LIVE — INVITE YOUR SQUAD, PICK A BREACH")));
 
 	// The lobby is a mouse place; make sure the cursor survived the travel.
 	if (APlayerController* PC = GetOwningPlayer())
@@ -111,6 +112,8 @@ void UIBMainMenuWidget::EnterHostLobbyState()
 		PC->SetInputMode(Mode);
 		PC->SetShowMouseCursor(true);
 	}
+
+	OpenWatch();
 }
 
 void UIBMainMenuWidget::EnterClientLobbyState()
@@ -121,7 +124,7 @@ void UIBMainMenuWidget::EnterClientLobbyState()
 	if (Btn_Join) { Btn_Join->SetIsEnabled(false); }
 	if (Btn_Solo) { Btn_Solo->SetIsEnabled(false); }
 
-	SetStatus(FText::FromString(TEXT("LINKED — WAITING FOR HOST TO DEPLOY")));
+	SetStatus(FText::FromString(TEXT("LINKED — THE HOST HOLDS THE TRIGGER")));
 
 	if (APlayerController* PC = GetOwningPlayer())
 	{
@@ -129,6 +132,26 @@ void UIBMainMenuWidget::EnterClientLobbyState()
 		Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		PC->SetInputMode(Mode);
 		PC->SetShowMouseCursor(true);
+	}
+
+	OpenWatch();
+}
+
+void UIBMainMenuWidget::OpenWatch()
+{
+	if (Watch) { return; }
+	Watch = CreateWidget<UIBWatchScreen>(GetOwningPlayer(), UIBWatchScreen::StaticClass());
+	if (!Watch) { return; }
+	Watch->AddToViewport(40); // over the menu and the lobby strip, like the operative sheet
+	UE_LOG(LogIronBreach, Log, TEXT("MainMenu: the Watch is open"));
+}
+
+void UIBMainMenuWidget::CloseWatch()
+{
+	if (Watch)
+	{
+		Watch->RemoveFromParent();
+		Watch = nullptr;
 	}
 }
 
@@ -180,6 +203,7 @@ void UIBMainMenuWidget::NativeDestruct()
 		World->GetTimerManager().ClearTimer(IdentityRetryHandle);
 	}
 	CloseOperativeSelect();
+	CloseWatch();
 	// The subsystem outlives every widget — leave no bindings behind.
 	if (UIBSessionSubsystem* Sessions = GetSessions())
 	{
@@ -247,6 +271,12 @@ void UIBMainMenuWidget::HandleSessionStatus(EIBSessionStatus Status, const FText
 {
 	SetStatus(Message);
 	BP_OnSessionStatus(Status, Message);
+
+	// The Watch armed and fired (host side): input-mode law before the travel lands.
+	if (Status == EIBSessionStatus::Deploying)
+	{
+		LockForTravel();
+	}
 
 	// Deploy-from-the-sheet: the sheet narrates every beat; the travel is
 	// committed on HostLive; a dead online service still puts you in a world.
@@ -435,18 +465,28 @@ void UIBMainMenuWidget::DeployToWorld(const FIBCharacterRecord& Operative)
 		return;
 	}
 
-	// Listen-host the mission map straight away (bLobbyBeforeDeploy is off):
-	// HostLive commits the travel, Failed falls back to solo — see HandleSessionStatus.
+	// Stand the session up. With bLobbyBeforeDeploy (the default now) LobbyLive
+	// commits a travel into the menu map as a live lobby, where the Watch opens;
+	// Failed opens the Watch offline right here — see HandleSessionStatus.
 	Sessions->IBHost();
 }
 
 void UIBMainMenuWidget::DeploySoloFallback(const FText& Why)
 {
+	// No online service: the Watch still opens — here, in the standalone menu —
+	// and DEPLOY takes this player alone to whatever pin they pick.
 	UE_LOG(LogIronBreach, Warning, TEXT("Deploy: %s"), *Why.ToString());
-	if (OperativeSelect) { OperativeSelect->SetDeploying(Why); }
+	bDeployPending = false;
 	SetStatus(Why);
-	LockForTravel();
-	UGameplayStatics::OpenLevel(this, FName(*SoloTravelURL));
+	CloseOperativeSelect();
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		FInputModeUIOnly Mode;
+		Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PC->SetInputMode(Mode);
+		PC->SetShowMouseCursor(true);
+	}
+	OpenWatch();
 }
 
 void UIBMainMenuWidget::HandleSwitchOperative()

@@ -1,5 +1,6 @@
 #include "UI/IBSettingsScreen.h"
 #include "UI/IBStyleKit.h"
+#include "UI/IBMenuLayout.h"
 #include "IronBreach.h"
 #include "Player/IBUserSettings.h"
 #include "Components/TextBlock.h"
@@ -68,7 +69,7 @@ void UIBSettingsScreen::NativeScreenOpened()
 
 void UIBSettingsScreen::AddSection(UVerticalBox* Column, const FText& Label)
 {
-	UTextBlock* Section = IBStyle::MakeSection(WidgetTree, Label);
+	UTextBlock* Section = IBMenuLayout::Heading(WidgetTree, Label, 18);
 	if (UVerticalBoxSlot* SectionSlot = Column->AddChildToVerticalBox(Section))
 	{
 		SectionSlot->SetPadding(FMargin(0.f, 12.f, 0.f, 2.f));
@@ -85,9 +86,9 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 {
 	UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 
-	UTextBlock* RowLabel = IBStyle::MakeText(WidgetTree, Label, 12, IBStyle::TextLo(), 300);
+	UTextBlock* RowLabel = IBMenuLayout::Text(WidgetTree, Label, 13, IBStyle::TextLo(), 30);
 	USizeBox* LabelSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	LabelSize->SetWidthOverride(190.f);
+	LabelSize->SetWidthOverride(250.f);
 	LabelSize->AddChild(RowLabel);
 	if (UHorizontalBoxSlot* LabelSlot = Row->AddChildToHorizontalBox(LabelSize))
 	{
@@ -96,7 +97,12 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 
 	auto MakeArrow = [this](const FText& Glyph)
 	{
-		return IBStyle::MakeButton(WidgetTree, Glyph, 12);
+		UButton* Button = IBMenuLayout::Button(WidgetTree, Glyph);
+		FButtonStyle Style = Button->GetStyle();
+		Style.NormalPadding = FMargin(12, 5);
+		Style.PressedPadding = FMargin(12, 6, 12, 4);
+		Button->SetStyle(Style);
+		return Button;
 	};
 
 	OutPrev = MakeArrow(NSLOCTEXT("IBSettings", "Prev", "<"));
@@ -108,7 +114,7 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 	UTextBlock* Value = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 13, IBStyle::Amber(), 150);
 	Value->SetJustification(ETextJustify::Center);
 	USizeBox* ValueSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	ValueSize->SetWidthOverride(150.f);
+	ValueSize->SetWidthOverride(190.f);
 	ValueSize->AddChild(Value);
 	if (UHorizontalBoxSlot* ValueSlot = Row->AddChildToHorizontalBox(ValueSize))
 	{
@@ -130,45 +136,25 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 
 void UIBSettingsScreen::BuildFallbackLayout()
 {
-	if (!WidgetTree) { return; }
-
-	UOverlay* Root = Cast<UOverlay>(WidgetTree->RootWidget);
-	if (!WidgetTree->RootWidget)
-	{
-		Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-		WidgetTree->RootWidget = Root;
-	}
-	if (!Root) { return; }
-
-	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	Dim->SetBrushColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.82f));
-	if (UOverlaySlot* DimSlot = Root->AddChildToOverlay(Dim))
-	{
-		DimSlot->SetHorizontalAlignment(HAlign_Fill);
-		DimSlot->SetVerticalAlignment(VAlign_Fill);
-	}
-
-	UVerticalBox* Outer = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-
-	UTextBlock* Title = IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBSettings", "Title", "SETTINGS"));
-	Outer->AddChildToVerticalBox(Title);
-	UBorder* Accent = IBStyle::MakeAccentBar(WidgetTree, IBStyle::Amber());
-	Accent->SetPadding(FMargin(0.f, 1.5f));
-	if (UVerticalBoxSlot* AccentSlot = Outer->AddChildToVerticalBox(Accent))
-	{
-		AccentSlot->SetPadding(FMargin(0.f, 6.f, 760.f, 12.f));
-	}
-
+	const auto Page = IBMenuLayout::Begin(WidgetTree,
+		NSLOCTEXT("IBSettings", "Title", "SETTINGS"),
+		NSLOCTEXT("IBSettings", "Kicker", "OPERATIVE / TERMINAL PREFERENCES"),
+		NSLOCTEXT("IBSettings", "ControlsHint", "CHANGES APPLY AND SAVE IMMEDIATELY     ESC / RETURN TO GAME"));
+	if (!Page.Body) { return; }
+	UVerticalBox* Outer = Page.Body;
 	// Two columns: VIDEO left; AUDIO + CONTROLS right.
 	UHorizontalBox* Columns = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 	UVerticalBox* Left = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	UVerticalBox* Right = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	if (UHorizontalBoxSlot* LeftSlot = Columns->AddChildToHorizontalBox(Left))
-	{
-		LeftSlot->SetPadding(FMargin(0.f, 0.f, 26.f, 0.f));
-	}
-	Columns->AddChildToHorizontalBox(Right);
-	Outer->AddChildToVerticalBox(Columns);
+	UVerticalBox* LeftPanel = WidgetTree->ConstructWidget<UVerticalBox>();
+	UVerticalBox* RightPanel = WidgetTree->ConstructWidget<UVerticalBox>();
+	IBMenuLayout::Scroll(WidgetTree, LeftPanel, Left);
+	IBMenuLayout::Scroll(WidgetTree, RightPanel, Right);
+	UHorizontalBoxSlot* LeftSlot = Columns->AddChildToHorizontalBox(IBMenuLayout::Card(WidgetTree, LeftPanel));
+	LeftSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+	LeftSlot->SetPadding(FMargin(0, 0, 20, 0));
+	Columns->AddChildToHorizontalBox(IBMenuLayout::Card(WidgetTree, RightPanel))->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+	Outer->AddChildToVerticalBox(Columns)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 
 	UButton *Prev = nullptr, *Next = nullptr;
 
@@ -247,7 +233,7 @@ void UIBSettingsScreen::BuildFallbackLayout()
 
 	// ---- Footer: reset + hint ----
 	UHorizontalBox* Footer = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	UButton* Reset = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBSettings", "Reset", "RESET TO DEFAULTS"), 11);
+	UButton* Reset = IBMenuLayout::Button(WidgetTree, NSLOCTEXT("IBSettings", "Reset", "RESET TO DEFAULTS"));
 	Reset->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleResetClicked);
 	if (UHorizontalBoxSlot* ResetSlot = Footer->AddChildToHorizontalBox(Reset))
 	{
@@ -255,7 +241,7 @@ void UIBSettingsScreen::BuildFallbackLayout()
 		ResetSlot->SetPadding(FMargin(0.f, 0.f, 18.f, 0.f));
 	}
 	UTextBlock* Hint = IBStyle::MakeText(WidgetTree,
-		NSLOCTEXT("IBSettings", "Hint", "CHANGES APPLY AND SAVE IMMEDIATELY  ·  ESC TO CLOSE"),
+		NSLOCTEXT("IBSettings", "ResetHint", "RESTORES VIDEO, AUDIO AND CONTROL PREFERENCES"),
 		10, IBStyle::TextLo(), 300);
 	if (UHorizontalBoxSlot* HintSlot = Footer->AddChildToHorizontalBox(Hint))
 	{
@@ -267,15 +253,6 @@ void UIBSettingsScreen::BuildFallbackLayout()
 		FooterSlot->SetHorizontalAlignment(HAlign_Center);
 	}
 
-	// Card chrome, same sheet as the System screen.
-	UBorder* Card = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.96f), 14.f);
-	Card->SetPadding(FMargin(34.f, 26.f));
-	Card->SetContent(Outer);
-	if (UOverlaySlot* CardSlot = Root->AddChildToOverlay(Card))
-	{
-		CardSlot->SetHorizontalAlignment(HAlign_Center);
-		CardSlot->SetVerticalAlignment(VAlign_Center);
-	}
 }
 
 void UIBSettingsScreen::RefreshValues()

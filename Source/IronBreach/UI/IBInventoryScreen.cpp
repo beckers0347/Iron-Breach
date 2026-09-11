@@ -6,6 +6,19 @@
 #include "UI/IBItemTileWidget.h"
 #include "UI/IBUISettings.h"
 #include "UI/IBStyleKit.h"
+#include "UI/IBMenuLayout.h"
+#include "UI/IBHangarStyle.h"
+#include "UI/IBMenuActionButton.h"
+#include "Components/EditableTextBox.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
+#include "Components/ScrollBoxSlot.h"
+#include "Components/WidgetSwitcher.h"
+#include "Components/Image.h"
+#include "Player/IBOperativePreviewStage.h"
+#include "Player/IBCharacterTypes.h"
+#include "Infantry/IBCharacter_Infantry.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/TextBlock.h"
@@ -42,201 +55,321 @@ void UIBInventoryScreen::NativeOnInitialized()
 	}
 }
 
-static UTextBlock* IBMakeLabel(UWidgetTree* Tree, const FText& Text, int32 FontSize, FLinearColor Color)
-{
-	UTextBlock* Label = Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-	Label->SetText(Text);
-	FSlateFontInfo Font = Label->GetFont();
-	Font.Size = FontSize;
-	Label->SetFont(Font);
-	Label->SetColorAndOpacity(FSlateColor(Color));
-	Label->SetShadowOffset(FVector2D(1.f, 1.f));
-	Label->SetShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.7f));
-	return Label;
-}
-
 UIBItemTileWidget* UIBInventoryScreen::MakeWell(UVerticalBox* Column, EIBEquipSlot ForSlot)
 {
 	UIBItemTileWidget* Tile = CreateWidget<UIBItemTileWidget>(GetOwningPlayer(), *GridTileClass);
 	if (!Tile) { return nullptr; }
+	Column->AddChildToVerticalBox(IBMenuLayout::Text(WidgetTree,
+		UEnum::GetDisplayValueAsText(ForSlot).ToUpper(), 10, IBStyle::TextLo(), 60))->SetPadding(FMargin(0, 0, 0, 4));
 	Tile->SetEmptySlot(ForSlot);
-	if (UVerticalBoxSlot* WellSlot = Column->AddChildToVerticalBox(Tile))
-	{
-		WellSlot->SetPadding(FMargin(0.f, 5.f));
-		WellSlot->SetHorizontalAlignment(HAlign_Center);
-	}
+	Tile->SetPresentationSize(FVector2D(110, 110));
+	UVerticalBoxSlot* WellSlot = Column->AddChildToVerticalBox(Tile);
+	WellSlot->SetHorizontalAlignment(HAlign_Left);
+	WellSlot->SetPadding(FMargin(0, 0, 0, 10));
 	return Tile;
 }
 
 void UIBInventoryScreen::BuildFallbackLayout()
 {
-	if (!WidgetTree) { return; }
+    UVerticalBox* Body = BuildHangarPage(NSLOCTEXT("IBInv", "HangarControls", "LEFT / RIGHT  CHARACTER & INVENTORY     CLICK  SELECT ITEM     EQUIP  APPLY SELECTION     Q E  SWITCH MENU     ESC  RETURN"));
+    InventoryPages = WidgetTree->ConstructWidget<UWidgetSwitcher>();
+    Body->AddChildToVerticalBox(InventoryPages)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 
-	UOverlay* Root = Cast<UOverlay>(WidgetTree->RootWidget);
-	if (!WidgetTree->RootWidget)
-	{
-		Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-		WidgetTree->RootWidget = Root;
-	}
-	if (!Root) { return; }
+    UOverlay* Character = WidgetTree->ConstructWidget<UOverlay>();
+    InventoryPages->AddChild(Character);
+    UHorizontalBox* Equipment = WidgetTree->ConstructWidget<UHorizontalBox>();
+    Character->AddChildToOverlay(Equipment);
+    UVerticalBox* Weapons = WidgetTree->ConstructWidget<UVerticalBox>();
+    Weapons->AddChildToVerticalBox(IBHangar::Label(WidgetTree,TEXT("WEAPONS / FIELD GEAR"),12,IBHangar::Cyan()))->SetPadding(FMargin(0,0,0,16));
+    Tile_WeaponPrimary = MakeWell(Weapons, EIBEquipSlot::WeaponPrimary);
+    Tile_WeaponSpecial = MakeWell(Weapons, EIBEquipSlot::WeaponSpecial);
+    Tile_WeaponHeavy = MakeWell(Weapons, EIBEquipSlot::WeaponHeavy);
+    Tile_GearAntiKaiju = MakeWell(Weapons, EIBEquipSlot::GearAntiKaiju);
+    auto* Left = Equipment->AddChildToHorizontalBox(IBMenuLayout::Width(WidgetTree,Weapons,200));
+    Left->SetPadding(FMargin(170,0,0,0)); Left->SetVerticalAlignment(VAlign_Center);
 
-	// Menu, not blackout: the world stays faintly alive behind the screen.
-	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	Dim->SetBrushColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.78f));
-	if (UOverlaySlot* DimSlot = Root->AddChildToOverlay(Dim))
-	{
-		DimSlot->SetHorizontalAlignment(HAlign_Fill);
-		DimSlot->SetVerticalAlignment(VAlign_Fill);
-	}
+    UVerticalBox* Portrait = WidgetTree->ConstructWidget<UVerticalBox>();
+    CharacterName = IBMenuLayout::Heading(WidgetTree,FText::GetEmpty(),28);
+    CharacterName->SetJustification(ETextJustify::Center);
+    CharacterName->SetTextOverflowPolicy(ETextOverflowPolicy::Ellipsis);
+    Portrait->AddChildToVerticalBox(CharacterName);
+    CharacterRole = IBHangar::Label(WidgetTree,TEXT(""),12,IBHangar::Cyan());
+    CharacterRole->SetJustification(ETextJustify::Center);
+    Portrait->AddChildToVerticalBox(CharacterRole)->SetPadding(FMargin(0,4,0,0));
+    CharacterImage = WidgetTree->ConstructWidget<UImage>();
+    CharacterImage->SetVisibility(ESlateVisibility::HitTestInvisible);
+    USizeBox* PortraitSize = IBMenuLayout::Width(WidgetTree,CharacterImage,1024); PortraitSize->SetHeightOverride(1024);
+    UScaleBox* Fit = WidgetTree->ConstructWidget<UScaleBox>(); Fit->SetStretch(EStretch::ScaleToFit); Fit->SetContent(PortraitSize);
+    Portrait->AddChildToVerticalBox(Fit)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+    CharacterStats = IBHangar::Label(WidgetTree,TEXT(""),14,IBHangar::Cyan());
+    CharacterStats->SetJustification(ETextJustify::Center);
+    Portrait->AddChildToVerticalBox(IBHangar::Panel(WidgetTree,CharacterStats,FMargin(18,14)));
+    Equipment->AddChildToHorizontalBox(Portrait)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 
-	// Header: title left, Clearance Rating right (the POWER number).
-	UTextBlock* Title = IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBInv", "Title", "CHARACTER"));
-	if (UOverlaySlot* TitleSlot = Root->AddChildToOverlay(Title))
-	{
-		TitleSlot->SetHorizontalAlignment(HAlign_Left);
-		TitleSlot->SetVerticalAlignment(VAlign_Top);
-		TitleSlot->SetPadding(FMargin(90.f, 50.f, 0.f, 0.f));
-	}
+    UVerticalBox* Armor = WidgetTree->ConstructWidget<UVerticalBox>();
+    Armor->AddChildToVerticalBox(IBHangar::Label(WidgetTree,TEXT("ARMOR"),12,IBHangar::Cyan()))->SetPadding(FMargin(0,0,0,16));
+    Tile_ArmorHead = MakeWell(Armor,EIBEquipSlot::ArmorHead);
+    Tile_ArmorChest = MakeWell(Armor,EIBEquipSlot::ArmorChest);
+    Tile_ArmorArms = MakeWell(Armor,EIBEquipSlot::ArmorArms);
+    Tile_ArmorLegs = MakeWell(Armor,EIBEquipSlot::ArmorLegs);
+    auto* Right = Equipment->AddChildToHorizontalBox(IBMenuLayout::Width(WidgetTree,Armor,200));
+    Right->SetPadding(FMargin(0,0,170,0)); Right->SetVerticalAlignment(VAlign_Center);
+    for (UVerticalBox* Column : { Weapons, Armor })
+        for (UWidget* Child : Column->GetAllChildren())
+            CastChecked<UVerticalBoxSlot>(Child->Slot)->SetHorizontalAlignment(HAlign_Center);
 
-	UVerticalBox* ClearanceBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	UTextBlock* ClearanceLabel = IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBInv", "Clearance", "CLEARANCE"));
-	UTextBlock* ClearanceNum = IBStyle::MakeText(WidgetTree, FText::AsNumber(0), 44, IBStyle::Amber(), 0);
-	ClearanceBox->AddChildToVerticalBox(ClearanceLabel);
-	ClearanceBox->AddChildToVerticalBox(ClearanceNum);
-	if (UOverlaySlot* ClearSlot = Root->AddChildToOverlay(ClearanceBox))
-	{
-		ClearSlot->SetHorizontalAlignment(HAlign_Right);
-		ClearSlot->SetVerticalAlignment(VAlign_Top);
-		ClearSlot->SetPadding(FMargin(0.f, 44.f, 100.f, 0.f));
-	}
-	ClearanceText = ClearanceNum;
+    UVerticalBox* GearDetails = WidgetTree->ConstructWidget<UVerticalBox>();
+    CharacterDetailName = IBMenuLayout::Heading(WidgetTree,FText::GetEmpty(),22); CharacterDetailName->SetAutoWrapText(true);
+    CharacterDetailInfo = IBHangar::Label(WidgetTree,TEXT(""),13); CharacterDetailInfo->SetAutoWrapText(true);
+    GearDetails->AddChildToVerticalBox(CharacterDetailName); IBHangar::Rule(WidgetTree,GearDetails);
+    IBMenuLayout::Scroll(WidgetTree,GearDetails,CharacterDetailInfo);
+    CharacterDetailPanel = IBMenuLayout::Width(WidgetTree,IBHangar::Panel(WidgetTree,GearDetails),300);
+    CharacterDetailPanel->SetHeightOverride(260);
+    auto* Popup = Character->AddChildToOverlay(CharacterDetailPanel);
+    Popup->SetHorizontalAlignment(HAlign_Left); Popup->SetVerticalAlignment(VAlign_Bottom);
+    CharacterDetailPanel->SetVisibility(ESlateVisibility::Collapsed);
 
-	// Left column: the three weapon wells.
-	UVerticalBox* Weapons = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	Weapons->AddChildToVerticalBox(IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBInv", "Weapons", "WEAPONS")));
-	Tile_WeaponPrimary = MakeWell(Weapons, EIBEquipSlot::WeaponPrimary);
-	Tile_WeaponSpecial = MakeWell(Weapons, EIBEquipSlot::WeaponSpecial);
-	Tile_WeaponHeavy   = MakeWell(Weapons, EIBEquipSlot::WeaponHeavy);
-	if (UOverlaySlot* WeaponSlot = Root->AddChildToOverlay(Weapons))
-	{
-		WeaponSlot->SetHorizontalAlignment(HAlign_Left);
-		WeaponSlot->SetVerticalAlignment(VAlign_Center);
-		WeaponSlot->SetPadding(FMargin(120.f, 0.f, 0.f, 60.f));
-	}
+    UVerticalBox* BackpackPage = WidgetTree->ConstructWidget<UVerticalBox>(); InventoryPages->AddChild(BackpackPage);
+    BackpackPage->AddChildToVerticalBox(IBMenuLayout::Heading(WidgetTree,NSLOCTEXT("IBInv","PackTitle","INVENTORY"),36))->SetPadding(FMargin(0,0,0,20));
+    UHorizontalBox* PackColumns = WidgetTree->ConstructWidget<UHorizontalBox>();
+    BackpackPage->AddChildToVerticalBox(PackColumns)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+    UVerticalBox* Categories = WidgetTree->ConstructWidget<UVerticalBox>();
+    Categories->AddChildToVerticalBox(IBHangar::Label(WidgetTree,TEXT("CATEGORIES"),11,IBHangar::Cyan()))->SetPadding(FMargin(4,0,0,20));
+    FilterTabLabels.Reset(); FilterCategories.Reset();
+    const TPair<EIBItemCategory,const TCHAR*> Filters[] = {
+        {EIBItemCategory::None,TEXT("ALL ITEMS")}, {EIBItemCategory::Weapon,TEXT("WEAPONS")},
+        {EIBItemCategory::Armor,TEXT("ARMOR")}, {EIBItemCategory::KaijuMaterial,TEXT("MATERIALS")},
+        {EIBItemCategory::Consumable,TEXT("CONSUMABLES")}, {EIBItemCategory::Splice,TEXT("SPLICES")},
+        {EIBItemCategory::Doctrine,TEXT("DOCTRINES")}, {EIBItemCategory::Collectible,TEXT("COLLECTIBLES")},
+        {EIBItemCategory::Cosmetic,TEXT("COSMETICS")}};
+    for (const auto& Entry : Filters)
+    {
+        UIBMenuActionButton* Filter = WidgetTree->ConstructWidget<UIBMenuActionButton>();
+        UTextBlock* Label = IBHangar::Label(WidgetTree,Entry.Value,12);
+        Filter->SetContent(Label); IBHangar::StyleButton(Filter);
+        const EIBItemCategory Category = Entry.Key;
+        Filter->BindAction(FSimpleDelegate::CreateWeakLambda(this,[this,Category] { if (Category == EIBItemCategory::None) { SetFilterAll(); } else { SetCategoryFilter(Category); } }));
+        Categories->AddChildToVerticalBox(Filter)->SetPadding(FMargin(0,0,0,7));
+        FilterTabLabels.Add(Label); FilterCategories.Add(Category);
+    }
+    PackColumns->AddChildToHorizontalBox(IBMenuLayout::Width(WidgetTree,IBHangar::Panel(WidgetTree,Categories,FMargin(14,20)),200))->SetPadding(FMargin(0,0,18,0));
 
-	// Right column: armor + anti-kaiju gear.
-	UVerticalBox* Armor = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	Armor->AddChildToVerticalBox(IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBInv", "Armor", "ARMOR")));
-	Tile_ArmorHead     = MakeWell(Armor, EIBEquipSlot::ArmorHead);
-	Tile_ArmorChest    = MakeWell(Armor, EIBEquipSlot::ArmorChest);
-	Tile_ArmorArms     = MakeWell(Armor, EIBEquipSlot::ArmorArms);
-	Tile_ArmorLegs     = MakeWell(Armor, EIBEquipSlot::ArmorLegs);
-	Tile_GearAntiKaiju = MakeWell(Armor, EIBEquipSlot::GearAntiKaiju);
-	if (UOverlaySlot* ArmorSlot = Root->AddChildToOverlay(Armor))
-	{
-		ArmorSlot->SetHorizontalAlignment(HAlign_Right);
-		ArmorSlot->SetVerticalAlignment(VAlign_Center);
-		ArmorSlot->SetPadding(FMargin(0.f, 0.f, 120.f, 60.f));
-	}
+    UVerticalBox* Backpack = WidgetTree->ConstructWidget<UVerticalBox>();
+    UHorizontalBox* Tools = WidgetTree->ConstructWidget<UHorizontalBox>();
+    UEditableTextBox* Search = WidgetTree->ConstructWidget<UEditableTextBox>(UEditableTextBox::StaticClass(),TEXT("InventorySearch"));
+    Search->SetHintText(NSLOCTEXT("IBInv","Search","Search inventory..."));
+    FEditableTextBoxStyle SearchStyle = Search->GetWidgetStyle();
+    SearchStyle.SetBackgroundImageNormal(IBStyle::RoundedBrush(IBHangar::Ink(),0,IBHangar::Cyan(),1));
+    SearchStyle.SetBackgroundImageHovered(SearchStyle.BackgroundImageNormal); SearchStyle.SetBackgroundImageFocused(SearchStyle.BackgroundImageNormal);
+    SearchStyle.SetForegroundColor(IBStyle::TextHi()); SearchStyle.SetPadding(FMargin(14,10));
+    Search->SetWidgetStyle(SearchStyle); Search->OnTextChanged.AddDynamic(this,&UIBInventoryScreen::HandleSearchChanged);
+    Tools->AddChildToHorizontalBox(Search)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+    UTextBlock* SortText = nullptr;
+    UButton* Sort = IBHangar::Button(WidgetTree,TEXT("SORT: RARITY"),&SortText); SortLabel = SortText;
+    Sort->OnClicked.AddDynamic(this,&UIBInventoryScreen::CycleSort);
+    Tools->AddChildToHorizontalBox(Sort)->SetPadding(FMargin(12,0,0,0));
+    Backpack->AddChildToVerticalBox(Tools)->SetPadding(FMargin(0,0,0,16));
+    ItemGrid = WidgetTree->ConstructWidget<UUniformGridPanel>(); ItemGrid->SetSlotPadding(FMargin(5)); GridColumns = 6;
+    IBMenuLayout::Scroll(WidgetTree,Backpack,ItemGrid);
+    CastChecked<UScrollBoxSlot>(ItemGrid->Slot)->SetHorizontalAlignment(HAlign_Left);
+    PackStatus = IBHangar::Label(WidgetTree,TEXT(""),12);
+    Backpack->AddChildToVerticalBox(PackStatus)->SetPadding(FMargin(4,14,0,0));
+    auto* GridArea = PackColumns->AddChildToHorizontalBox(IBHangar::Panel(WidgetTree,Backpack,FMargin(16)));
+    GridArea->SetSize(FSlateChildSize(ESlateSizeRule::Fill)); GridArea->SetPadding(FMargin(0,0,18,0));
 
-	// Bottom center: the backpack grid, with the category tab row above it.
-	UVerticalBox* GridBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	GridBox->AddChildToVerticalBox(IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBInv", "Backpack", "BACKPACK")));
+    UVerticalBox* Details = WidgetTree->ConstructWidget<UVerticalBox>();
+    DetailRarity = IBHangar::Label(WidgetTree,TEXT("EQUIPMENT INSPECTION"),11,IBHangar::Cyan()); Details->AddChildToVerticalBox(DetailRarity);
+    Txt_DetailName = IBMenuLayout::Heading(WidgetTree,FText::GetEmpty(),28); Txt_DetailName->SetAutoWrapText(true);
+    Details->AddChildToVerticalBox(Txt_DetailName)->SetPadding(FMargin(0,8,0,0));
+    IBHangar::Rule(WidgetTree,Details,10);
+    DetailIcon = WidgetTree->ConstructWidget<UImage>();
+    USizeBox* IconSize = IBMenuLayout::Width(WidgetTree,DetailIcon,200); IconSize->SetHeightOverride(164);
+    UScaleBox* IconFit = WidgetTree->ConstructWidget<UScaleBox>(); IconFit->SetStretch(EStretch::ScaleToFit); IconFit->SetContent(IconSize);
+    Details->AddChildToVerticalBox(IconFit)->SetHorizontalAlignment(HAlign_Center);
+    UVerticalBox* DetailContent = WidgetTree->ConstructWidget<UVerticalBox>();
+    Txt_DetailInfo = IBHangar::Label(WidgetTree,TEXT(""),14); Txt_DetailInfo->SetAutoWrapText(true);
+    DetailContent->AddChildToVerticalBox(Txt_DetailInfo)->SetPadding(FMargin(0,14,0,18));
+    DetailStats = WidgetTree->ConstructWidget<UVerticalBox>(); DetailContent->AddChildToVerticalBox(DetailStats);
+    IBMenuLayout::Scroll(WidgetTree,Details,DetailContent);
+    UTextBlock* ActionText = nullptr; EquipButton = IBHangar::Button(WidgetTree,TEXT("EQUIP"),&ActionText); EquipLabel = ActionText;
+    EquipButton->OnClicked.AddDynamic(this,&UIBInventoryScreen::EquipSelected);
+    Details->AddChildToVerticalBox(EquipButton)->SetPadding(FMargin(0,16,0,0));
+    DetailPanel = IBMenuLayout::Width(WidgetTree,IBHangar::Panel(WidgetTree,Details,FMargin(24)),390);
+    PackColumns->AddChildToHorizontalBox(DetailPanel);
+    RefreshFilterTabs(); RefreshSubtabs(); SetDetails(nullptr);
+}
 
-	UHorizontalBox* TabRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	FilterTabLabels.Reset();
-	UButton* TabAll       = MakeFilterTab(TabRow, NSLOCTEXT("IBInv", "TabAll", "ALL"));
-	UButton* TabWeapons   = MakeFilterTab(TabRow, NSLOCTEXT("IBInv", "TabWeapons", "WEAPONS"));
-	UButton* TabArmor     = MakeFilterTab(TabRow, NSLOCTEXT("IBInv", "TabArmor", "ARMOR"));
-	UButton* TabMaterials = MakeFilterTab(TabRow, NSLOCTEXT("IBInv", "TabMaterials", "MATERIALS"));
-	if (TabAll)       { TabAll->OnClicked.AddDynamic(this, &UIBInventoryScreen::HandleFilterAllClicked); }
-	if (TabWeapons)   { TabWeapons->OnClicked.AddDynamic(this, &UIBInventoryScreen::HandleFilterWeaponsClicked); }
-	if (TabArmor)     { TabArmor->OnClicked.AddDynamic(this, &UIBInventoryScreen::HandleFilterArmorClicked); }
-	if (TabMaterials) { TabMaterials->OnClicked.AddDynamic(this, &UIBInventoryScreen::HandleFilterMaterialsClicked); }
-	if (UVerticalBoxSlot* TabSlot = GridBox->AddChildToVerticalBox(TabRow))
-	{
-		TabSlot->SetPadding(FMargin(0.f, 4.f, 0.f, 6.f));
-	}
-	RefreshFilterTabs();
-	UUniformGridPanel* Grid = WidgetTree->ConstructWidget<UUniformGridPanel>(UUniformGridPanel::StaticClass());
-	Grid->SetSlotPadding(FMargin(4.f));
-	GridBox->AddChildToVerticalBox(Grid);
-	if (UOverlaySlot* GridSlot = Root->AddChildToOverlay(GridBox))
-	{
-		GridSlot->SetHorizontalAlignment(HAlign_Center);
-		GridSlot->SetVerticalAlignment(VAlign_Bottom);
-		GridSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 60.f));
-	}
-	ItemGrid = Grid;
+void UIBInventoryScreen::ShowCharacterTab()
+{
+	bBackpackSelected = false;
+	RefreshSubtabs();
+}
 
-	// Details pane: bottom-left card, filled on hover.
-	UBorder* DetailCard = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.95f), 10.f);
-	DetailCard->SetPadding(FMargin(16.f, 14.f));
-	UVerticalBox* DetailBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	DetailCard->SetContent(DetailBox);
-	Txt_DetailName = IBMakeLabel(WidgetTree, FText::GetEmpty(), 18, FLinearColor::White);
-	Txt_DetailInfo = IBMakeLabel(WidgetTree, FText::GetEmpty(), 11, FLinearColor(0.75f, 0.8f, 0.9f));
-	Txt_DetailInfo->SetAutoWrapText(true);
-	DetailBox->AddChildToVerticalBox(Txt_DetailName);
-	DetailBox->AddChildToVerticalBox(Txt_DetailInfo);
-	USizeBox* DetailSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	DetailSize->SetWidthOverride(340.f);
-	DetailSize->AddChild(DetailCard);
-	if (UOverlaySlot* DetailSlot = Root->AddChildToOverlay(DetailSize))
+void UIBInventoryScreen::ShowBackpackTab()
+{
+	bBackpackSelected = true;
+	RefreshSubtabs();
+}
+
+void UIBInventoryScreen::RefreshSubtabs()
+{
+	if (!InventoryPages) { return; }
+	InventoryPages->SetActiveWidgetIndex(bBackpackSelected ? 1 : 0);
+	RefreshTabBanner();
+	SetDetails(SelectedTile.Get());
+	if (bScreenOpen && !bBackpackSelected) { RefreshCharacterPreview(); }
+	else { ReleaseCharacterPreview(); }
+}
+
+void UIBInventoryScreen::RefreshCharacterPreview()
+{
+	if (!bScreenOpen || bBackpackSelected || !CharacterImage) { return; }
+	const APlayerController* PC = GetOwningPlayer();
+	const AIBPlayerState* PS = PC ? PC->GetPlayerState<AIBPlayerState>() : nullptr;
+	const FLinearColor Accent = PS && PS->HasOperative() ? IBCharacter::ClassColor(PS->GetOperativeClass()) : IBStyle::Cyan();
+	if (CharacterName) { CharacterName->SetText(PS && PS->HasOperative() ? FText::FromString(PS->GetDisplayCallsign().ToUpper()) : NSLOCTEXT("IBInv", "Operative", "OPERATIVE")); }
+	if (CharacterRole)
 	{
-		DetailSlot->SetHorizontalAlignment(HAlign_Left);
-		DetailSlot->SetVerticalAlignment(VAlign_Bottom);
-		DetailSlot->SetPadding(FMargin(90.f, 0.f, 0.f, 60.f));
+		CharacterRole->SetText(PS && PS->HasOperative() ? FText::Format(NSLOCTEXT("IBInv", "ClassLevel", "{0} / LEVEL {1}"),
+			IBCharacter::ClassName(PS->GetOperativeClass()), PS->GetOperativeLevel()) : NSLOCTEXT("IBInv", "FieldOperative", "FIELD OPERATIVE"));
+		CharacterRole->SetColorAndOpacity(Accent);
 	}
-	DetailSize->SetVisibility(ESlateVisibility::Hidden);
-	DetailPanel = DetailSize;
+	if (!IsValid(PreviewStage))
+	{
+		PreviewStage = AIBOperativePreviewStage::Spawn(GetWorld());
+		// Isolate this studio's lights from any open front-end portrait stage.
+		if (PreviewStage) { PreviewStage->SetActorLocation(FVector(185000, 185000, -60000)); }
+	}
+	if (!PreviewStage) { return; }
+	PreviewStage->ShowOperative(PS ? PS->GetOperativeGender() : EIBOperativeGender::Male, Accent);
+	const AIBCharacter_Infantry* Infantry = PC ? Cast<AIBCharacter_Infantry>(PC->GetPawn()) : nullptr;
+	PreviewStage->ConfigureForInventory(Infantry ? Infantry->GetMesh() : nullptr);
+	FSlateBrush Brush = CharacterImage->GetBrush();
+	if (!PortraitMaterial)
+	{
+		if (UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/IronBreach/UI/Hangar/M_OperativePortrait.M_OperativePortrait")))
+			PortraitMaterial = UMaterialInstanceDynamic::Create(Base,this);
+	}
+	if (PortraitMaterial)
+	{
+		PortraitMaterial->SetTextureParameterValue(TEXT("Portrait"),PreviewStage->GetRenderTarget());
+		Brush.SetResourceObject(PortraitMaterial);
+	}
+	else { Brush.SetResourceObject(PreviewStage->GetRenderTarget()); }
+	Brush.ImageSize = FVector2D(1024, 1024);
+	CharacterImage->SetBrush(Brush);
+}
+
+void UIBInventoryScreen::ReleaseCharacterPreview()
+{
+	if (CharacterImage)
+	{
+		FSlateBrush Brush = CharacterImage->GetBrush();
+		Brush.SetResourceObject(nullptr);
+		CharacterImage->SetBrush(Brush);
+	}
+	if (IsValid(PreviewStage)) { PreviewStage->Destroy(); }
+	PreviewStage = nullptr;
+	PortraitMaterial = nullptr;
+}
+
+FReply UIBInventoryScreen::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	if (InventoryPages)
+	{
+		if (InKeyEvent.GetKey() == EKeys::Left || InKeyEvent.GetKey() == EKeys::Gamepad_DPad_Left)
+		{ ShowCharacterTab(); return FReply::Handled(); }
+		if (InKeyEvent.GetKey() == EKeys::Right || InKeyEvent.GetKey() == EKeys::Gamepad_DPad_Right)
+		{ ShowBackpackTab(); return FReply::Handled(); }
+	}
+	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
 void UIBInventoryScreen::SetDetails(const UIBItemTileWidget* Tile)
 {
-	const UIBItemDefinition* Def = Tile ? Tile->GetDefinition() : nullptr;
+    const UIBItemDefinition* Def = Tile ? Tile->GetDefinition() : nullptr;
+    if (DetailStats) { DetailStats->ClearChildren(); }
+    if (DetailIcon) { DetailIcon->SetBrushFromTexture(Def ? Def->Icon.LoadSynchronous() : nullptr); DetailIcon->SetVisibility(Def && !Def->Icon.IsNull() ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed); }
+    if (EquipButton)
+    {
+        FIBItemInstance Selected;
+        const bool bCanEquip = BoundInventory && BoundInventory->FindItem(SelectedItemId,Selected) && Selected.IsValid() && Selected.Definition->EquipSlot != EIBEquipSlot::None;
+        EquipButton->SetIsEnabled(bCanEquip);
+        EquipLabel->SetText(bCanEquip ? NSLOCTEXT("IBInv","EquipSelection","EQUIP SELECTED ITEM") : NSLOCTEXT("IBInv","NoEquip","NOT EQUIPPABLE"));
+    }
+    if (!Def)
+    {
+        if (Txt_DetailName) { Txt_DetailName->SetText(NSLOCTEXT("IBInv","ChooseItem","SELECT AN ITEM")); Txt_DetailName->SetColorAndOpacity(IBStyle::TextHi()); }
+        if (Txt_DetailInfo) { Txt_DetailInfo->SetText(NSLOCTEXT("IBInv","SelectHint","Select equipment from your backpack to inspect its stats and equip it.\n\nLoot collected in the field appears here.")); }
+        if (DetailRarity) { DetailRarity->SetText(NSLOCTEXT("IBInv","EquipmentInspection","EQUIPMENT INSPECTION")); }
+        if (CharacterDetailPanel) { CharacterDetailPanel->SetVisibility(ESlateVisibility::Collapsed); }
+        return;
+    }
+    const FLinearColor Rarity = UIBUISettings::Get()->GetRarityColor(Def->Rarity);
+    if (DetailRarity) { DetailRarity->SetText(FText::Format(NSLOCTEXT("IBInv","TypeRarity","{0}  /  {1}"),UEnum::GetDisplayValueAsText(Def->Rarity).ToUpper(),UEnum::GetDisplayValueAsText(Def->Category).ToUpper())); DetailRarity->SetColorAndOpacity(Rarity); }
+    if (Txt_DetailName) { Txt_DetailName->SetText(Def->DisplayName); Txt_DetailName->SetColorAndOpacity(Rarity); }
+    FString Info = Def->EquipSlot != EIBEquipSlot::None ? FString::Printf(TEXT("CLEARANCE  %d\n\n"), Tile->GetItem().ClearanceRating) : FString();
+    if (Tile->GetItem().StackCount > 1) { Info += FString::Printf(TEXT("QUANTITY  %d\n\n"),Tile->GetItem().StackCount); }
+    Info += Def->Description.ToString();
+    if (!Def->Flavor.IsEmpty()) { Info += TEXT("\n\n") + Def->Flavor.ToString(); }
+    if (Txt_DetailInfo) { Txt_DetailInfo->SetText(FText::FromString(Info)); }
+    if (DetailStats) { for (const FIBItemStat& Stat : Def->Stats) { IBHangar::Stat(WidgetTree,DetailStats,Stat.StatName,Stat.Value); } }
+    if (CharacterDetailName) { CharacterDetailName->SetText(Def->DisplayName); CharacterDetailName->SetColorAndOpacity(Rarity); }
+    if (CharacterDetailInfo) { CharacterDetailInfo->SetText(FText::FromString(Info)); }
+    if (CharacterDetailPanel) { CharacterDetailPanel->SetVisibility(!bBackpackSelected ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed); }
+}
 
-	if (!Def || !Txt_DetailName || !Txt_DetailInfo)
-	{
-		if (Txt_DetailName) { Txt_DetailName->SetText(FText::GetEmpty()); }
-		if (Txt_DetailInfo) { Txt_DetailInfo->SetText(FText::GetEmpty()); }
-		if (DetailPanel)    { DetailPanel->SetVisibility(ESlateVisibility::Hidden); }
-		return;
-	}
+void UIBInventoryScreen::HandleSearchChanged(const FText& Text)
+{
+    SearchText = Text.ToString().TrimStartAndEnd(); RebuildGrid();
+}
 
-	Txt_DetailName->SetText(Def->DisplayName);
-	Txt_DetailName->SetColorAndOpacity(FSlateColor(UIBUISettings::Get()->GetRarityColor(Def->Rarity)));
+void UIBInventoryScreen::CycleSort()
+{
+    SortMode = (SortMode + 1) % 3;
+    const TCHAR* Labels[] = { TEXT("SORT: RARITY"), TEXT("SORT: NAME"), TEXT("SORT: CLEARANCE") };
+    if (SortLabel) { SortLabel->SetText(FText::FromString(Labels[SortMode])); }
+    RebuildGrid();
+}
 
-	FString Info = FString::Printf(TEXT("%s  ·  Clearance %d"),
-		*UEnum::GetDisplayValueAsText(Def->Category).ToString(),
-		Def->BaseClearanceRating);
-	if (Tile->GetItem().StackCount > 1)
-	{
-		Info += FString::Printf(TEXT("  ·  x%d"), Tile->GetItem().StackCount);
-	}
-	if (!Def->Description.IsEmpty())
-	{
-		Info += TEXT("\n\n") + Def->Description.ToString();
-	}
-	if (!Def->Flavor.IsEmpty())
-	{
-		Info += TEXT("\n\n“") + Def->Flavor.ToString() + TEXT("”");
-	}
-	Txt_DetailInfo->SetText(FText::FromString(Info));
-
-	if (DetailPanel) { DetailPanel->SetVisibility(ESlateVisibility::HitTestInvisible); }
+void UIBInventoryScreen::EquipSelected()
+{
+    FIBItemInstance Selected;
+    if (BoundInventory && BoundInventory->FindItem(SelectedItemId,Selected) && Selected.IsValid() && Selected.Definition->EquipSlot != EIBEquipSlot::None)
+    { BoundInventory->RequestEquip(SelectedItemId); }
 }
 
 void UIBInventoryScreen::NativeScreenOpened()
 {
+	bScreenOpen = true;
 	BindInventory();
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		PreviewIdentity = PC->GetPlayerState<AIBPlayerState>();
+		if (PreviewIdentity) { PreviewIdentity->OnOperativeIdentityChanged.AddUniqueDynamic(this, &UIBInventoryScreen::RefreshCharacterPreview); }
+	}
 	RebuildAll();
+	RefreshSubtabs();
 }
 
 void UIBInventoryScreen::NativeScreenClosed()
 {
+	bScreenOpen = false;
+	ReleaseCharacterPreview();
+	if (PreviewIdentity) { PreviewIdentity->OnOperativeIdentityChanged.RemoveDynamic(this, &UIBInventoryScreen::RefreshCharacterPreview); }
+	PreviewIdentity = nullptr;
 	UnbindInventory();
 	BP_OnItemUnfocused();
+}
+
+void UIBInventoryScreen::NativeDestruct()
+{
+	bScreenOpen = false;
+	ReleaseCharacterPreview();
+	if (PreviewIdentity) { PreviewIdentity->OnOperativeIdentityChanged.RemoveDynamic(this, &UIBInventoryScreen::RefreshCharacterPreview); }
+	PreviewIdentity = nullptr;
+	UnbindInventory();
+	Super::NativeDestruct();
 }
 
 void UIBInventoryScreen::BindInventory()
@@ -275,7 +408,8 @@ UButton* UIBInventoryScreen::MakeFilterTab(UHorizontalBox* Row, const FText& Lab
 	if (!WidgetTree || !Row) { return nullptr; }
 
 	UTextBlock* TabLabel = nullptr;
-	UButton* Tab = IBStyle::MakeButton(WidgetTree, Label, 11, false, &TabLabel);
+	UButton* Tab = IBMenuLayout::Button(WidgetTree, Label, &TabLabel);
+	FSlateFontInfo TabFont = TabLabel->GetFont(); TabFont.Size = 13; TabLabel->SetFont(TabFont);
 	TabLabel->SetColorAndOpacity(FSlateColor(IBStyle::TextLo()));
 	if (UHorizontalBoxSlot* TabSlot = Row->AddChildToHorizontalBox(Tab))
 	{
@@ -287,18 +421,13 @@ UButton* UIBInventoryScreen::MakeFilterTab(UHorizontalBox* Row, const FText& Lab
 
 void UIBInventoryScreen::RefreshFilterTabs()
 {
-	// Index -> mode mapping mirrors build order: ALL, Weapon, Armor, KaijuMaterial.
-	const EIBItemCategory TabCategories[] = { EIBItemCategory::None, EIBItemCategory::Weapon, EIBItemCategory::Armor, EIBItemCategory::KaijuMaterial };
-	for (int32 i = 0; i < FilterTabLabels.Num() && i < 4; ++i)
-	{
-		if (UTextBlock* Label = FilterTabLabels[i])
-		{
-			const bool bActive = (i == 0) ? bFilterAll : (!bFilterAll && CategoryFilter == TabCategories[i]);
-			Label->SetColorAndOpacity(FSlateColor(bActive
-				? FLinearColor(0.85f, 0.62f, 0.18f)     // Relic amber: current filter
-				: FLinearColor(0.5f, 0.56f, 0.68f)));
-		}
-	}
+    for (int32 Index=0; Index<FilterTabLabels.Num() && Index<FilterCategories.Num(); ++Index)
+    {
+        const bool bActive = FilterCategories[Index] == EIBItemCategory::None ? bFilterAll : (!bFilterAll && CategoryFilter == FilterCategories[Index]);
+        UTextBlock* Label = FilterTabLabels[Index];
+        IBHangar::StyleButton(Cast<UButton>(Label->GetParent()),bActive);
+        Label->SetColorAndOpacity(bActive ? IBHangar::Cyan() : IBStyle::TextLo());
+    }
 }
 
 void UIBInventoryScreen::SetCategoryFilter(EIBItemCategory Category)
@@ -330,6 +459,7 @@ void UIBInventoryScreen::HandleInventoryChanged()
 
 void UIBInventoryScreen::HandleEquipmentChanged(EIBEquipSlot /*ChangedSlot*/, const FIBItemInstance& /*ChangedItem*/)
 {
+	RebuildGrid();
 	RefreshEquipmentWells();
 }
 
@@ -342,7 +472,10 @@ void UIBInventoryScreen::RebuildAll()
 void UIBInventoryScreen::RebuildGrid()
 {
 	if (!ItemGrid) { return; }
+	SelectedTile.Reset();
 	ItemGrid->ClearChildren();
+	SetDetails(nullptr);
+	if (PackStatus) { PackStatus->SetText(NSLOCTEXT("IBInv", "PackUnavailable", "EQUIPMENT DATA UNAVAILABLE")); }
 
 	if (!BoundInventory || !GridTileClass) { return; }
 
@@ -358,17 +491,28 @@ void UIBInventoryScreen::RebuildGrid()
 	}
 
 	int32 CellIndex = 0;
-	const TArray<FIBItemInstance> Items = bFilterAll
+	TArray<FIBItemInstance> Items = bFilterAll
 		? BoundInventory->GetAllItems()
 		: BoundInventory->GetItemsByCategory(CategoryFilter);
+	Items.RemoveAll([&](const FIBItemInstance& Item)
+	{
+		return !Item.IsValid() || EquippedIds.Contains(Item.InstanceId) || (!SearchText.IsEmpty() && !Item.Definition->DisplayName.ToString().Contains(SearchText,ESearchCase::IgnoreCase));
+	});
+	Items.StableSort([this](const FIBItemInstance& A, const FIBItemInstance& B)
+	{
+		if (SortMode == 0 && A.Definition->Rarity != B.Definition->Rarity) { return A.Definition->Rarity > B.Definition->Rarity; }
+		if (SortMode == 2 && A.ClearanceRating != B.ClearanceRating) { return A.ClearanceRating > B.ClearanceRating; }
+		return A.Definition->DisplayName.CompareTo(B.Definition->DisplayName) < 0;
+	});
 	for (const FIBItemInstance& Item : Items)
 	{
 		if (EquippedIds.Contains(Item.InstanceId)) { continue; }
 
 		UIBItemTileWidget* Tile = CreateWidget<UIBItemTileWidget>(this, GridTileClass);
 		if (!Tile) { continue; }
-		Tile->SetItem(Item);
+		Tile->SetItem(Item); Tile->SetPresentationSize(FVector2D(108,108));
 		WireTile(Tile);
+		if (Item.InstanceId == SelectedItemId) { SelectedTile = Tile; }
 
 		UUniformGridSlot* GridSlot = ItemGrid->AddChildToUniformGrid(Tile, CellIndex / GridColumns, CellIndex % GridColumns);
 		if (GridSlot)
@@ -377,6 +521,30 @@ void UIBInventoryScreen::RebuildGrid()
 			GridSlot->SetVerticalAlignment(VAlign_Fill);
 		}
 		++CellIndex;
+	}
+	if (!SelectedTile.IsValid() && ItemGrid->GetChildrenCount() > 0)
+	{
+		SelectedTile = Cast<UIBItemTileWidget>(ItemGrid->GetChildAt(0));
+		if (SelectedTile.IsValid()) { SelectedItemId = SelectedTile->GetItem().InstanceId; }
+	}
+	if (!SelectedTile.IsValid()) { SelectedItemId.Invalidate(); }
+	if (SelectedTile.IsValid()) { SelectedTile->SetSelected(true); }
+	SetDetails(SelectedTile.Get());
+	// Decorative empty cells describe the grid, not an invented capacity limit.
+	if (bHangarLayout)
+	{
+		for (int32 Index=CellIndex; Index<FMath::Max(24, FMath::DivideAndRoundUp(CellIndex,GridColumns)*GridColumns); ++Index)
+		{
+			UBorder* Empty = IBHangar::Panel(WidgetTree,nullptr,FMargin(0));
+			Empty->SetVisibility(ESlateVisibility::HitTestInvisible);
+			USizeBox* Cell = IBMenuLayout::Width(WidgetTree,Empty,108); Cell->SetHeightOverride(108);
+			ItemGrid->AddChildToUniformGrid(Cell,Index/GridColumns,Index%GridColumns);
+		}
+	}
+	if (PackStatus)
+	{
+		PackStatus->SetText(CellIndex > 0 ? FText::Format(NSLOCTEXT("IBInv", "PackCountPlural", "{0} {0}|plural(one=ITEM,other=ITEMS) / IN BACKPACK"), CellIndex)
+			: NSLOCTEXT("IBInv", "PackEmpty", "NO ITEMS IN THIS VIEW"));
 	}
 }
 
@@ -405,6 +573,15 @@ void UIBInventoryScreen::RefreshEquipmentWells()
 			Well->SetEmptySlot(EquipSlot);
 		}
 	}
+	if (CharacterStats && BoundInventory)
+	{
+		int32 EquippedCount = 0;
+		for (uint8 Index=1; Index<static_cast<uint8>(EIBEquipSlot::Count); ++Index)
+		{ FIBItemInstance Item; if (BoundInventory->GetEquippedItem(static_cast<EIBEquipSlot>(Index),Item)) { ++EquippedCount; } }
+		CharacterStats->SetText(FText::Format(NSLOCTEXT("IBInv","EquipmentSummary","CLEARANCE  {0}     /     EQUIPPED  {1} / 8"),BoundInventory->GetTotalClearanceRating(),EquippedCount));
+	}
+	RefreshTabBanner();
+	RefreshCharacterPreview();
 }
 
 void UIBInventoryScreen::WireTile(UIBItemTileWidget* Tile)
@@ -441,6 +618,12 @@ void UIBInventoryScreen::HandleTileClicked(UIBItemTileWidget* Tile)
 	const bool bIsWell = (GetWellForSlot(Tile->GetRepresentedSlot()) == Tile);
 	const FIBItemInstance& Item = Tile->GetItem();
 
+	if (bHangarLayout && !bIsWell && Item.IsValid())
+	{
+		if (SelectedTile.IsValid()) { SelectedTile->SetSelected(false); }
+		SelectedItemId = Item.InstanceId; SelectedTile = Tile; Tile->SetSelected(true); SetDetails(Tile); return;
+	}
+
 	if (bIsWell && Item.IsValid())
 	{
 		BoundInventory->RequestUnequip(Tile->GetRepresentedSlot());
@@ -458,12 +641,12 @@ void UIBInventoryScreen::HandleTileHoverChanged(UIBItemTileWidget* Tile, bool bH
 	if (bHovered && Tile->GetItem().IsValid())
 	{
 		const bool bIsWell = (GetWellForSlot(Tile->GetRepresentedSlot()) == Tile);
-		SetDetails(Tile); // native details card (fallback layout / Txt_Detail binds)
+		if (!bHangarLayout || !bBackpackSelected) { SetDetails(Tile); }
 		BP_OnItemFocused(Tile->GetItem(), bIsWell);
 	}
 	else
 	{
-		SetDetails(nullptr);
+		SetDetails(bBackpackSelected ? SelectedTile.Get() : nullptr);
 		BP_OnItemUnfocused();
 	}
 }

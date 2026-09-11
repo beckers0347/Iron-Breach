@@ -20,19 +20,19 @@ void UIBItemTileWidget::NativeOnInitialized()
 	if (!RarityBorder && !IconImage && WidgetTree)
 	{
 		USizeBox* Size = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-		Size->SetWidthOverride(88.f);
-		Size->SetHeightOverride(88.f);
+		Size->SetWidthOverride(112.f);
+		Size->SetHeightOverride(96.f);
 		WidgetTree->RootWidget = Size;
 
 		UBorder* Frame = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-		Frame->SetBrush(IBStyle::RoundedBrush(FLinearColor::White, 7.f)); // rounded; SetBrushColor tints it
-		Frame->SetPadding(FMargin(3.f));
+		Frame->SetBrush(IBStyle::RoundedBrush(FLinearColor::White, 2.f)); // rounded; SetBrushColor tints it
+		Frame->SetPadding(FMargin(1.f));
 		Frame->SetBrushColor(FLinearColor(0.45f, 0.48f, 0.44f)); // Common; RefreshVisuals recolors
 		Size->AddChild(Frame);
 
 		UBorder* Inner = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-		Inner->SetBrush(IBStyle::RoundedBrush(FLinearColor::White, 6.f));
-		Inner->SetBrushColor(FLinearColor(0.03f, 0.035f, 0.05f, 0.95f));
+		Inner->SetBrush(IBStyle::RoundedBrush(FLinearColor::White, 1.f));
+		Inner->SetBrushColor(FLinearColor(0.014f, 0.027f, 0.034f, 0.98f));
 		Inner->SetPadding(FMargin(0.f));
 		Frame->SetContent(Inner);
 
@@ -48,7 +48,7 @@ void UIBItemTileWidget::NativeOnInitialized()
 
 		UTextBlock* Name = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
 		FSlateFontInfo NameFont = Name->GetFont();
-		NameFont.Size = 9;
+		NameFont.Size = 12;
 		Name->SetFont(NameFont);
 		Name->SetJustification(ETextJustify::Center);
 		Name->SetAutoWrapText(true);
@@ -57,7 +57,7 @@ void UIBItemTileWidget::NativeOnInitialized()
 		{
 			NameSlot->SetHorizontalAlignment(HAlign_Center);
 			NameSlot->SetVerticalAlignment(VAlign_Center);
-			NameSlot->SetPadding(FMargin(4.f));
+			NameSlot->SetPadding(FMargin(8.f));
 		}
 
 		UTextBlock* Count = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
@@ -73,6 +73,7 @@ void UIBItemTileWidget::NativeOnInitialized()
 			CountSlot->SetPadding(FMargin(0.f, 0.f, 5.f, 3.f));
 		}
 
+		TileSurface = Inner;
 		RarityBorder = Frame;
 		IconImage = Icon;
 		NameText = Name;
@@ -88,6 +89,26 @@ void UIBItemTileWidget::SetItem(const FIBItemInstance& InItem)
 	Definition = InItem.Definition;
 	RepresentedSlot = Definition ? Definition->EquipSlot : EIBEquipSlot::None;
 	bLocked = false;
+	RefreshVisuals();
+}
+
+void UIBItemTileWidget::SetPresentationSize(FVector2D Size)
+{
+	// Only the native fallback owns a SizeBox; leave authored WBP trees alone.
+	if (TileSurface && WidgetTree)
+	{
+		if (USizeBox* Frame = Cast<USizeBox>(WidgetTree->RootWidget))
+		{
+			Frame->SetWidthOverride(FMath::Max(48.f, Size.X));
+			Frame->SetHeightOverride(FMath::Max(48.f, Size.Y));
+		}
+	}
+}
+
+void UIBItemTileWidget::SetSelected(bool bInSelected)
+{
+	if (bSelected == bInSelected) { return; }
+	bSelected = bInSelected;
 	RefreshVisuals();
 }
 
@@ -146,9 +167,10 @@ void UIBItemTileWidget::RefreshVisuals()
 		}
 		else
 		{
-			NameText->SetText(FText::GetEmpty());
+			NameText->SetText(NSLOCTEXT("IBTile", "Empty", "EMPTY"));
 		}
-		NameText->SetVisibility((!bHasIcon && Definition)
+		NameText->SetColorAndOpacity(Definition && !bLocked ? IBStyle::TextHi() : IBStyle::TextLo());
+		NameText->SetVisibility((!bHasIcon)
 			? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
@@ -164,7 +186,8 @@ void UIBItemTileWidget::RefreshVisuals()
 				Frame.A = 1.0f;
 			}
 		}
-		RarityBorder->SetBrushColor(Frame);
+		RarityBorder->SetBrushColor(bSelected ? FLinearColor(.3f,.85f,1.f) : Frame);
+		if (TileSurface) { RarityBorder->SetPadding(FMargin(bSelected ? 3.f : 1.f)); }
 	}
 
 	BP_OnTileUpdated();
@@ -183,11 +206,13 @@ FReply UIBItemTileWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, c
 void UIBItemTileWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+	if (TileSurface) { TileSurface->SetBrushColor(FLinearColor(.055f, .085f, .10f)); }
 	OnTileHoverChanged.Broadcast(this, true);
 }
 
 void UIBItemTileWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseLeave(InMouseEvent);
+	if (TileSurface) { TileSurface->SetBrushColor(FLinearColor(.014f, .027f, .034f, .98f)); }
 	OnTileHoverChanged.Broadcast(this, false);
 }

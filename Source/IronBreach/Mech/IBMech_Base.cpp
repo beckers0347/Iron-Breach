@@ -11,6 +11,8 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
+#include "GameFramework/GameModeBase.h"
+#include "Player/IBPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -135,7 +137,19 @@ void AIBMech_Base::BeginPlay()
 
 		UE_LOG(LogIronBreach, Display, TEXT("[Mech] AI CoPilot %s."),
 			CoPilotController ? TEXT("spawned, awaiting seat assignment") : TEXT("FAILED to spawn"));
+
+		GameModeLogoutHandle = FGameModeEvents::GameModeLogoutEvent.AddUObject(this, &AIBMech_Base::OnGameModeLogout);
 	}
+}
+
+void AIBMech_Base::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GameModeLogoutHandle.IsValid())
+	{
+		FGameModeEvents::GameModeLogoutEvent.Remove(GameModeLogoutHandle);
+		GameModeLogoutHandle.Reset();
+	}
+	Super::EndPlay(EndPlayReason);
 }
 
 void AIBMech_Base::SpawnGunnerSeat()
@@ -412,6 +426,12 @@ bool AIBMech_Base::ServerBoard(AController* BoardingController, AIBCharacter_Inf
 	APlayerController* PC = Cast<APlayerController>(BoardingController);
 	if (!PC) return false;
 
+	if (!PC->IsA<AIBPlayerController>())
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("[Mech] %s is a %s, not an AIBPlayerController — if this player disconnects while crewed, the engine will destroy their pawn (the HULL if they drive). Reparent the GameMode's PlayerController BP to IBPlayerController (MENUS_UI_WIRING.md §3)."),
+			*DescribeCrewName(PC), *PC->GetClass()->GetName());
+	}
+
 	APlayerController* CurrentDriverPC = Cast<APlayerController>(GetController());
 	APlayerController* CurrentGunnerPC = GunnerSeat ? Cast<APlayerController>(GunnerSeat->GetController()) : nullptr;
 	const bool bHullHeldByHuman = (CurrentDriverPC != nullptr && CurrentDriverPC != PC);
@@ -560,6 +580,88 @@ void AIBMech_Base::ServerDisembark(AController* LeavingController)
 	BackfillSeatWithAI();
 
 	UE_LOG(LogIronBreach, Display, TEXT("[Mech] %s dismounted."), *DescribeCrewName(PC));
+}
+
+void AIBMech_Base::ServerHandleCrewLogout(APlayerController* LeavingPC)
+{
+	if (!HasAuthority() || !LeavingPC) return;
+
+	const bool bWasDriver = (LeavingPC == GetController());
+	const bool bWasGunner = (GunnerSeat && LeavingPC == GunnerSeat->GetController());
+	if (!bWasDriver && !bWasGunner) return;
+
+	const FString LeaverName = DescribeCrewName(LeavingPC);
+
+	// Navigator dropping with a human gunner aboard: promote the gunner into the hull
+	// FIRST — the same pawn exchange as a crew swap — so the mech never spends a frame
+	// without an owning client. The leaver ends up in the seat and dismounts from there.
+	if (bWasDriver)
+	{
+		if (APlayerController* GunnerPC = GunnerSeat ? Cast<APlayerController>(GunnerSeat->GetController()) : nullptr)
+		{
+			PerformPossessionSwap(LeavingPC, GunnerPC);
+			UE_LOG(LogIronBreach, Display, TEXT("[Mech] %s lost connection at the helm — %s promoted to NAVIGATOR."),
+				*LeaverName, *DescribeCrewName(GunnerPC));
+		}
+	}
+
+	// Hand the leaver back to their parked infantry pawn. The engine's PawnLeavingGame
+	// then destroys THAT pawn — the one that should die with the player — not the mech.
+	ServerDisembark(LeavingPC);
+
+	// Boarded without a parked pawn (spawn/BP path): just release the station.
+	if (LeavingPC->GetPawn() == this || (GunnerSeat && LeavingPC->GetPawn() == GunnerSeat))
+	{
+		VacateSeat(LeavingPC);
+		LeavingPC->UnPossess();
+		BackfillSeatWithAI();
+	}
+
+	// The link is cut, not gracefully unclasped: the meter takes the partner-down hit.
+	if (Concord)
+	{
+		Concord->RegisterLoss(EConcordLossReason::PilotDowned);
+	}
+
+	UE_LOG(LogIronBreach, Display, TEXT("[Mech] %s disconnected while crewed (%s). Hull %s, seat %s."),
+		*LeaverName, bWasDriver ? TEXT("navigator") : TEXT("gunner"),
+		GetController() ? *DescribeCrewName(GetController()) : TEXT("EMPTY"),
+		(GunnerSeat && GunnerSeat->GetController()) ? *DescribeCrewName(GunnerSeat->GetController()) : TEXT("EMPTY"));
+}
+
+void AIBMech_Base::OnGameModeLogout(AGameModeBase* GameMode, AController* Exiting)
+{
+	if (!HasAuthority() || !Exiting) return;
+
+	// Were they on our crew records? (ServerHandleCrewLogout already cleared these when
+	// it ran; this path only matters when it could not — e.g. a plain PlayerController.)
+	const bool bOnRecord = (LeftSeatController == Exiting || RightSeatController == Exiting);
+	const bool bWasDriver = (CurrentDriver == Exiting);
+	const bool bWasGunner = (CurrentGunner == Exiting);
+
+	if (bOnRecord)
+	{
+		// Their parked infantry pawn would otherwise sit hidden in the level forever.
+		TObjectPtr<APawn>& Parked = bWasDriver ? ParkedDriverPawn : ParkedGunnerPawn;
+		if (Parked)
+		{
+			Parked->Destroy();
+			Parked = nullptr;
+		}
+		VacateSeat(Exiting);
+		UE_LOG(LogIronBreach, Warning, TEXT("[Mech] %s left as %s without the PawnLeavingGame guard — cleaned up after the fact."),
+			*DescribeCrewName(Exiting), bWasDriver ? TEXT("navigator") : (bWasGunner ? TEXT("gunner") : TEXT("crew")));
+	}
+
+	// The engine may have destroyed the seat pawn with the leaver. Grow a new one.
+	if (!IsValid(GunnerSeat))
+	{
+		GunnerSeat = nullptr;
+		SpawnGunnerSeat();
+		UE_LOG(LogIronBreach, Warning, TEXT("[Mech] Gunner seat was destroyed with a departing player — respawned."));
+	}
+
+	BackfillSeatWithAI();
 }
 
 void AIBMech_Base::ServerRequestCrewSwap(AController* Requester)

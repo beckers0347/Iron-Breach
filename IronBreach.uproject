@@ -35,6 +35,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "SocketSubsystemSteamIP",
+			"Enabled": true
+		},
+		{
 			"Name": "ProceduralVegetationEditor",
 			"Enabled": true
 		},
