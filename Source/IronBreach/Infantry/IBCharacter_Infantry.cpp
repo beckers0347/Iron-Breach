@@ -694,6 +694,20 @@ void AIBCharacter_Infantry::OpenSquadScreen()
 	}
 }
 
+void AIBCharacter_Infantry::OpenWatchScreen()
+{
+	if (const APlayerController* PC = Cast<APlayerController>(Controller))
+	{
+		if (const ULocalPlayer* LP = PC->GetLocalPlayer())
+		{
+			if (UIBMenuSubsystem* Menu = LP->GetSubsystem<UIBMenuSubsystem>())
+			{
+				Menu->ToggleScreen(FName(TEXT("Watch")));
+			}
+		}
+	}
+}
+
 void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -766,6 +780,8 @@ void AIBCharacter_Infantry::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		PlayerInputComponent->BindKey(EKeys::Three, IE_Pressed, this, &AIBCharacter_Infantry::SelectHeavySlot);
 		// F: the Squad tab (friends/invites), same zero-content floor as 1/2/3.
 		PlayerInputComponent->BindKey(EKeys::F, IE_Pressed, this, &AIBCharacter_Infantry::OpenSquadScreen);
+		// B: the Watch (breach board) — propose the next destination / return to the Bastion.
+		PlayerInputComponent->BindKey(EKeys::B, IE_Pressed, this, &AIBCharacter_Infantry::OpenWatchScreen);
 
 		// Scroll wheel cycles the same three wells. Same raw-key grammar as 1/2/3.
 		PlayerInputComponent->BindKey(EKeys::MouseScrollUp,   IE_Pressed, this, &AIBCharacter_Infantry::CycleWeaponSlotUp);

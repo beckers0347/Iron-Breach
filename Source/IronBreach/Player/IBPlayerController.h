@@ -48,6 +48,15 @@ protected:
 	/** Clients receive their PlayerState after BeginPlay — push again when it lands. */
 	virtual void OnRep_PlayerState() override;
 
+	/**
+	 * SERVER. Runs when this player's connection is torn down, before the engine's
+	 * default behaviour — which destroys whatever pawn we possess. Inside a Caryatid
+	 * that would be the HULL (navigator) or the gunner seat. Hand the crew station back
+	 * to the mech first; what remains possessed afterwards (the parked infantry pawn)
+	 * is what Super destroys, as it should.
+	 */
+	virtual void PawnLeavingGame() override;
+
 	/** Added at priority 1 (pawn contexts sit at 0) for every local player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Menus")
 	TObjectPtr<UInputMappingContext> MenuMappingContext;

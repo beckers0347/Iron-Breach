@@ -124,9 +124,9 @@ void UIBOperativeKitComponent::RefreshKit()
 	const bool bHasIdentity = PS && PS->HasOperative();
 	const EIBOperativeClass Class = bHasIdentity ? PS->GetOperativeClass() : EIBOperativeClass::Breaker;
 
-	if (bResolvedFromIdentity && Class == ResolvedClass)
+	if (bKitApplied && Class == ResolvedClass && bHasIdentity == bResolvedFromIdentity)
 	{
-		return; // nothing changed
+		return; // nothing changed (also stops the per-tick re-resolve + log spam on identity-less pawns)
 	}
 
 	UIBClassKitData* Data = nullptr;
@@ -137,6 +137,7 @@ void UIBOperativeKitComponent::RefreshKit()
 	ActiveKit = Data ? Data->Kit : DefaultKitFor(Class);
 	ResolvedClass = Class;
 	bResolvedFromIdentity = bHasIdentity;
+	bKitApplied = true;
 
 	UE_LOG(LogIronBreach, Log, TEXT("Kit: %s -> %s / %s (%s)"),
 		*IBCharacter::ClassName(Class).ToString(),

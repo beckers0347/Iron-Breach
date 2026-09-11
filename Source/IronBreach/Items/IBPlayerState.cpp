@@ -5,6 +5,7 @@
 #include "Player/IBCharacterSubsystem.h"
 #include "Progression/IBVaultSubsystem.h"
 #include "Progression/IBXPSubsystem.h"
+#include "Online/IBWatchBoard.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
@@ -260,4 +261,57 @@ void AIBPlayerState::Server_SetOperativeIdentity_Implementation(const FString& C
 	EIBOperativeClass Class, EIBOperativeGender Gender, const FGuid& CharacterId)
 {
 	SetOperativeIdentity(Callsign, Class, Gender, CharacterId);
+}
+
+// ---- The Watch --------------------------------------------------------------
+
+void AIBPlayerState::WatchPropose(FName DestinationId)
+{
+	if (HasAuthority())
+	{
+		if (AIBWatchBoard* Board = AIBWatchBoard::Get(GetWorld())) { Board->ServerPropose(this, DestinationId); }
+	}
+	else
+	{
+		Server_WatchPropose(DestinationId);
+	}
+}
+
+void AIBPlayerState::WatchConfirm()
+{
+	if (HasAuthority())
+	{
+		if (AIBWatchBoard* Board = AIBWatchBoard::Get(GetWorld())) { Board->ServerConfirm(this); }
+	}
+	else
+	{
+		Server_WatchConfirm();
+	}
+}
+
+void AIBPlayerState::WatchCancel()
+{
+	if (HasAuthority())
+	{
+		if (AIBWatchBoard* Board = AIBWatchBoard::Get(GetWorld())) { Board->ServerCancel(this); }
+	}
+	else
+	{
+		Server_WatchCancel();
+	}
+}
+
+void AIBPlayerState::Server_WatchPropose_Implementation(FName DestinationId)
+{
+	if (AIBWatchBoard* Board = AIBWatchBoard::Get(GetWorld())) { Board->ServerPropose(this, DestinationId); }
+}
+
+void AIBPlayerState::Server_WatchConfirm_Implementation()
+{
+	if (AIBWatchBoard* Board = AIBWatchBoard::Get(GetWorld())) { Board->ServerConfirm(this); }
+}
+
+void AIBPlayerState::Server_WatchCancel_Implementation()
+{
+	if (AIBWatchBoard* Board = AIBWatchBoard::Get(GetWorld())) { Board->ServerCancel(this); }
 }

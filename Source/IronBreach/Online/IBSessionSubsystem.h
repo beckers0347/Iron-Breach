@@ -58,6 +58,18 @@ public:
 	UFUNCTION(BlueprintCallable, Exec, Category = "IronBreach|Online")
 	void IBDeploy();
 
+	/** Host-only: ServerTravel the whole squad to a specific map — the Watch's
+	 *  breach board calls this with the armed destination. The session survives
+	 *  the map change (?listen is appended while one is live); standalone just
+	 *  travels. */
+	UFUNCTION(BlueprintCallable, Exec, Category = "IronBreach|Online")
+	void IBDeployTo(const FString& MapPath);
+
+	/** Host-only: bring the squad back to the Watch (the lobby map) without
+	 *  tearing the session down — the mid-mission "return to orbit". */
+	UFUNCTION(BlueprintCallable, Exec, Category = "IronBreach|Online")
+	void IBReturnToWatch();
+
 	/** Join a specific search result (friend join / accepted invite / picked
 	 *  row). Native-only: FOnlineSessionSearchResult isn't a BP type. */
 	void JoinSearchResult(const FOnlineSessionSearchResult& Result);
@@ -84,12 +96,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
 	FString HostTravelURL = TEXT("/Game/FirstPerson/Lvl_FirstPerson?listen");
 
-	/** Pre-deploy lobby: host dwells in the menu level so the squad assembles
-	 *  in front of the banners before anyone shoots anything. OFF by default
-	 *  since the operative flow: you deploy straight into your own hosted
-	 *  world and the squad forms from the in-game Squad tab (drop-in). */
+	/** Pre-deploy lobby — THE WATCH. ON: deploying from the operative sheet
+	 *  stands up the session and lands the host in the menu map as a live
+	 *  lobby where the breach board (UIBWatchScreen) opens; friends join
+	 *  there, anyone proposes a destination, the host confirms, the board
+	 *  counts down and IBDeployTo takes the whole squad. OFF = legacy: straight
+	 *  into HostTravelURL, squad forms from the in-game Squad tab. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
-	bool bLobbyBeforeDeploy = false;
+	bool bLobbyBeforeDeploy = true;
 
 	/** Where the lobby lives (must be ?listen — clients travel into it). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
@@ -107,6 +121,13 @@ public:
 	FOnIBSessionStatusChanged OnSessionStatusChanged;
 
 private:
+	/** Input-mode law, enforced globally: UIOnly survives map travel and
+	 *  bricks the next level, so every travel (host ServerTravel, client
+	 *  follow, solo OpenLevel) resets the local player to GameOnly first.
+	 *  Front-end widgets re-take UIOnly when they spawn. */
+	void HandlePreLoadMap(const FString& MapName);
+	FDelegateHandle PreLoadMapHandle;
+
 	/** Log + broadcast in one move so the two can never drift apart. */
 	void ReportStatus(EIBSessionStatus Status, const FString& Message);
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
@@ -132,6 +153,9 @@ private:
 
 	IOnlineSessionPtr GetSessionInterface() const;
 	bool IsLANFallback() const;
+	/** Match every listen URL to the active session transport, including when
+	 *  Steam loaded its socket plugin but failed to initialize its online service. */
+	FString BuildListenTravelURL(const FString& MapURL) const;
 
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 

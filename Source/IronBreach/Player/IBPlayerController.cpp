@@ -2,6 +2,8 @@
 #include "IronBreach.h"
 #include "Player/IBCharacterSubsystem.h"
 #include "Items/IBPlayerState.h"
+#include "Mech/IBMech_Base.h"
+#include "Mech/IBGunnerSeat.h"
 #include "UI/IBMenuSubsystem.h"
 #include "UI/IBObjectiveWidget.h"
 #include "UI/IBLootToastWidget.h"
@@ -121,4 +123,25 @@ void AIBPlayerController::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 	PushOperativeIdentity();
+}
+
+void AIBPlayerController::PawnLeavingGame()
+{
+	if (HasAuthority())
+	{
+		AIBMech_Base* Mech = Cast<AIBMech_Base>(GetPawn());
+		if (!Mech)
+		{
+			if (const AIBGunnerSeat* Seat = Cast<AIBGunnerSeat>(GetPawn()))
+			{
+				Mech = Seat->OwningMech;
+			}
+		}
+		if (Mech)
+		{
+			Mech->ServerHandleCrewLogout(this);
+		}
+	}
+
+	Super::PawnLeavingGame();
 }

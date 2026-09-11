@@ -414,6 +414,9 @@ protected:
 	/** F thunk: open the Squad tab (friends/invites) via the menu subsystem. */
 	void OpenSquadScreen();
 
+	/** B thunk: the Watch — breach board / destination select — via the menu subsystem. */
+	void OpenWatchScreen();
+
 	/** Push the saved FOV into the rig/camera (BeginPlay + live on settings apply). */
 	void ApplyUserFOV();
 

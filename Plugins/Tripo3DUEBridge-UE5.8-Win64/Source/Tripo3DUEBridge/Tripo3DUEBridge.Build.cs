@@ -77,7 +77,13 @@ public class Tripo3DUEBridge : ModuleRules
 
 		if (!File.Exists(IXWebSocketLibFile))
 		{
-			throw new BuildException("[Tripo3DUEBridge] IXWebSocket.lib not found: " + IXWebSocketLibFile);
+			// Iron Breach (2026-09-07): the vendor's ThirdParty/IXWebSocket folder is not in the repo -- only the
+			// prebuilt plugin binaries are. A machine without it (Connor's) must not fail the whole project build,
+			// so use the committed UnrealEditor-Tripo3DUEBridge.dll as-is instead of compiling this module.
+			// Machines with the ThirdParty folder (Shane's) still compile from source exactly as before.
+			System.Console.WriteLine("[Tripo3DUEBridge] IXWebSocket.lib not found (" + IXWebSocketLibFile + ") -- using the precompiled plugin binaries.");
+			bUsePrecompiled = true;
+			return;
 		}
 
 		PublicAdditionalLibraries.Add(IXWebSocketLibFile);

@@ -35,6 +35,33 @@ The damage loop, kaiju, and enemy AI are now multiplayer-correct, and the projec
 
 **Two machines (Steam):** Steam running on both, *different accounts*. Console (`~`): `IBHost` on one, `IBJoin` on the other. AppID 480 is shared by every dev on Earth — `IBJoin` grabs the first result, so join promptly. If Steam misbehaves, both on one LAN will still work in `-nosteam`/PIE via the NULL fallback.
 
+## Net driver fix (2026-09-09) — why remote joins were failing
+
+Symptom: Steam API initialized fine, but the log showed `IpNetDriver_0 listening on port 7777`. A remote `IBJoin`
+gets the connect string `steam.<hostid>:7777`, which a plain IpNetDriver cannot resolve — internet joins died at
+ClientTravel.
+
+Two causes, both fixed (config only, no rebuild):
+
+1. **`OnlineSubsystemSteam.SteamNetDriver` does not exist in UE 5.8.** The legacy Steam P2P driver moved to the
+   `SocketSubsystemSteamIP` engine plugin (`/Script/SocketSubsystemSteamIP.SteamNetDriver`). The old class name
+   failed to load and the engine silently used the fallback. Plugin is now enabled in `IronBreach.uproject`
+   (prebuilt engine DLL). It still uses Steam's relay (`bAllowP2PPacketRelay`), so NAT is handled.
+2. **`NetDriverDefinitions` are declared on UEngine → `[/Script/Engine.Engine]`**, and `BaseEngine.ini` already
+   defines `GameNetDriver` → IpNetDriver there. `UEngine::FindNetDriverDefinition` returns the FIRST match, so the
+   project's `+` line (which was also in the wrong section, `GameEngine`) was never consulted. Now:
+   `!NetDriverDefinitions=ClearArray` then Game/Beacon/Demo re-declared, plus
+   `[/Script/SocketSubsystemSteamIP.SteamNetDriver] NetConnectionClassName=...SteamNetConnection` and
+   `[SocketSubsystemSteamIP] bAllowP2PPacketRelay/P2PConnectionTimeout/P2PCleanupTimeout`.
+
+Verify (host a real session — `-IBWatch` alone doesn't create a net driver; the `-IBWatchShots` tour does, at
+DEPLOY): the log must show `SteamNetDriver_0 bound to port 7777` instead of `IpNetDriver_0 listening on port 7777`.
+Startup log should show `Mounting Engine plugin SocketSubsystemSteamIP` with no `LogSockets` errors.
+
+Test ladder impact: the plugin is `RuntimeNoCommandlet` and disabled in the editor, so PIE falls back to IpNetDriver
+via `DriverClassNameFallback`. Rung 2 (two `-game` instances, `open 127.0.0.1`) must run both with `-nosteam` — with
+Steam live the host listens on a Steam P2P socket, not UDP 7777 (`-forcepassthrough` on the host is the other option).
+
 ## Known gaps (deliberate, next passes)
 
 1. **Remote fire cosmetics** — other players don't hear/see your shots yet (needs a NetMulticast cosmetic + tracer Niagara). Next PR, small.

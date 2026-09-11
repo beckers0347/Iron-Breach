@@ -81,6 +81,16 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Operative")
 	FOnIBOperativeIdentityChanged OnOperativeIdentityChanged;
 
+	// ---- The Watch (breach board): anyone proposes, the host confirms ----
+	// Owning-client entry points: authority applies directly, clients Server-RPC.
+	// The state itself lives on AIBWatchBoard (replicated) — Online/IBWatchBoard.h.
+	UFUNCTION(BlueprintCallable, Category = "Watch")
+	void WatchPropose(FName DestinationId);
+	UFUNCTION(BlueprintCallable, Category = "Watch")
+	void WatchConfirm();
+	UFUNCTION(BlueprintCallable, Category = "Watch")
+	void WatchCancel();
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void CopyProperties(APlayerState* PlayerState) override;
 
@@ -96,6 +106,10 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetOperativeIdentity(const FString& Callsign, EIBOperativeClass Class, EIBOperativeGender Gender, const FGuid& CharacterId);
+
+	UFUNCTION(Server, Reliable) void Server_WatchPropose(FName DestinationId);
+	UFUNCTION(Server, Reliable) void Server_WatchConfirm();
+	UFUNCTION(Server, Reliable) void Server_WatchCancel();
 
 	// ---- Per-operative progression (host-side truth, ADR-002) ----
 

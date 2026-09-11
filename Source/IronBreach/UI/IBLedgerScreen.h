@@ -66,6 +66,16 @@ protected:
 
 private:
 	void RebuildGrid();
+	void ResetDetails();
+	void RefreshFilters();
+	UFUNCTION() void HandleAll();
+	UFUNCTION() void HandleWeapons() { SetCategoryFilter(EIBItemCategory::Weapon); }
+	UFUNCTION() void HandleArmor() { SetCategoryFilter(EIBItemCategory::Armor); }
+	UFUNCTION() void HandleMaterials() { SetCategoryFilter(EIBItemCategory::KaijuMaterial); }
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailName;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailInfo;
+	UPROPERTY(Transient) TObjectPtr<class UProgressBar> CollectionProgress;
+	UPROPERTY(Transient) TArray<TObjectPtr<class UButton>> FilterButtons;
 	UIBLedgerSubsystem* GetLedger() const;
 
 	EIBItemCategory CategoryFilter = EIBItemCategory::Weapon;

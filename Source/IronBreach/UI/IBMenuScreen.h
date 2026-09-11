@@ -66,6 +66,13 @@ protected:
 	void EnsureTabBanner();
 	void RefreshTabBanner();
 
+	/** 1600 x 900 reference sheet, scaled as a unit; the scene fills any aspect ratio. */
+	class UVerticalBox* BuildHangarPage(const FText& Hint);
+	bool bHangarLayout = false;
+	UPROPERTY(Transient) TObjectPtr<class UTextBlock> HangarCallsign;
+	UPROPERTY(Transient) TObjectPtr<class UTextBlock> HangarRank;
+	UPROPERTY(Transient) TObjectPtr<class UTextBlock> HangarClearance;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Menu|Keys")
 	TArray<FKey> CloseKeys;
 

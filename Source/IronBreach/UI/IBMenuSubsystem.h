@@ -59,6 +59,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Menu")
 	FName GetActiveScreenId() const { return ActiveScreenId; }
 
+	/** Local presentation routing; does not change inventory or deployment state. */
+	UIBMenuScreen* GetActiveScreen() const { return ActiveScreen; }
+
 private:
 	APlayerController* GetOwningPC() const;
 	UIBMenuScreen* GetOrCreateScreen(FName ScreenId);

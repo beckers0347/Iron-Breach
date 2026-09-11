@@ -46,6 +46,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Operative")
 	void ShowNothing();
 
+	/** Inventory-only framing and the live infantry body's mesh/materials.
+	 *  Does not modify the pawn or the front-end preview's default framing. */
+	void ConfigureForInventory(const USkeletalMeshComponent* SourceBody);
+
 protected:
 	virtual void BeginPlay() override;
 

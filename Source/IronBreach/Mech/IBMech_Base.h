@@ -55,6 +55,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PawnClientRestart() override;
@@ -133,6 +134,16 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_RequestExit();
+
+	/** SERVER ONLY. A crewed pilot's connection is going away (called from
+	 *  AIBPlayerController::PawnLeavingGame, BEFORE the engine destroys their pawn).
+	 *  Unreal's default is to destroy whatever pawn the leaver possesses — for the
+	 *  navigator that is the entire hull, gunner and all. Instead: a human gunner is
+	 *  promoted into the hull, the leaver is dismounted into their parked infantry pawn
+	 *  (which the engine then destroys, as it should), and the AI co-pilot takes the
+	 *  empty seat. Safe to call for any controller; no-op if they are not crew. */
+	UFUNCTION(BlueprintCallable, Category = "Mech|Boarding")
+	void ServerHandleCrewLogout(APlayerController* LeavingPC);
 
 	/** SERVER ONLY. Seat swap: human+AI uses the legacy role swap; human+human arms a
 	 *  confirm handshake — when the partner also presses swap within the window, the two
@@ -319,6 +330,13 @@ private:
 
 	/** Server: spawn + attach the gunner seat pawn. */
 	void SpawnGunnerSeat();
+
+	/** GameMode Logout fallback (fires AFTER the engine destroyed the leaver's pawn, so it
+	 *  can only tidy up): respawns a destroyed gunner seat, vacates stale seat records,
+	 *  destroys the leaker's parked pawn. The real save is ServerHandleCrewLogout, which
+	 *  needs the player controller to be an AIBPlayerController. */
+	void OnGameModeLogout(AGameModeBase* GameMode, AController* Exiting);
+	FDelegateHandle GameModeLogoutHandle;
 
 	/** Server: AI co-pilot possesses the seat when no human holds it. */
 	void BackfillSeatWithAI();

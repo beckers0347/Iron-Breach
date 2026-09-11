@@ -4,7 +4,9 @@
 #include "OnlineSubsystemUtils.h"   // Online::GetSubsystem / session helpers
 #include "OnlineSessionSettings.h"  // FOnlineSessionSettings, FOnlineSessionSearch
 #include "Engine/World.h"
+#include "Engine/GameInstance.h"
 #include "GameFramework/PlayerController.h"
+#include "UObject/UObjectGlobals.h"
 
 namespace
 {
@@ -22,6 +24,20 @@ void UIBSessionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		InviteAcceptedHandle = Sessions->AddOnSessionUserInviteAcceptedDelegate_Handle(
 			FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UIBSessionSubsystem::OnInviteAccepted));
 	}
+
+	PreLoadMapHandle = FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UIBSessionSubsystem::HandlePreLoadMap);
+}
+
+void UIBSessionSubsystem::HandlePreLoadMap(const FString& MapName)
+{
+	UGameInstance* GI = GetGameInstance();
+	APlayerController* PC = GI ? GI->GetFirstLocalPlayerController() : nullptr;
+	if (PC && PC->IsLocalController())
+	{
+		PC->SetInputMode(FInputModeGameOnly());
+		PC->SetShowMouseCursor(false);
+		UE_LOG(LogIronBreach, Verbose, TEXT("Session: input mode reset to GameOnly ahead of %s"), *MapName);
+	}
 }
 
 void UIBSessionSubsystem::Deinitialize()
@@ -30,6 +46,7 @@ void UIBSessionSubsystem::Deinitialize()
 	{
 		Sessions->ClearOnSessionUserInviteAcceptedDelegate_Handle(InviteAcceptedHandle);
 	}
+	FCoreUObjectDelegates::PreLoadMap.Remove(PreLoadMapHandle);
 	Super::Deinitialize();
 }
 
@@ -73,6 +90,21 @@ bool UIBSessionSubsystem::IsLANFallback() const
 	// PIE and machines without Steam running fall back to the NULL subsystem -> treat as LAN.
 	const IOnlineSubsystem* OSS = Online::GetSubsystem(GetWorld());
 	return !OSS || OSS->GetSubsystemName() == TEXT("NULL");
+}
+
+FString UIBSessionSubsystem::BuildListenTravelURL(const FString& MapURL) const
+{
+	FURL URL(nullptr, *MapURL, TRAVEL_Absolute);
+	URL.AddOption(TEXT("listen"));
+	URL.RemoveOption(TEXT("bIsLanMatch"));
+	if (IsLANFallback())
+	{
+		// UE 5.8 can report SteamNetDriver available even after Steam OSS fails.
+		// This option makes InitListen use its supported IP passthrough instead
+		// of attempting to create a Steam socket without an initialized Steam API.
+		URL.AddOption(TEXT("bIsLanMatch"));
+	}
+	return URL.ToString();
 }
 
 void UIBSessionSubsystem::DestroyThen(TFunction<void()> Continuation)
@@ -177,21 +209,23 @@ void UIBSessionSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSu
 	{
 		// Dwell in the menu as a live lobby: the squad assembles in front of
 		// the banners, then the host pulls the trigger (IBDeploy).
-		UE_LOG(LogIronBreach, Log, TEXT("IBHost: session live - lobby-hosting %s"), *LobbyTravelURL);
+		const FString URL = BuildListenTravelURL(LobbyTravelURL);
+		UE_LOG(LogIronBreach, Log, TEXT("IBHost: session live - lobby-hosting %s"), *URL);
 		ReportStatus(EIBSessionStatus::LobbyLive, TEXT("LOBBY LIVE - SQUAD CAN JOIN"));
 		if (UWorld* World = GetWorld())
 		{
-			World->ServerTravel(LobbyTravelURL);
+			World->ServerTravel(URL);
 		}
 		return;
 	}
 
-	UE_LOG(LogIronBreach, Log, TEXT("IBHost: session live - listen-hosting %s"), *HostTravelURL);
+	const FString URL = BuildListenTravelURL(HostTravelURL);
+	UE_LOG(LogIronBreach, Log, TEXT("IBHost: session live - listen-hosting %s"), *URL);
 	ReportStatus(EIBSessionStatus::HostLive, TEXT("SERVER LIVE - DEPLOYING..."));
 
 	if (UWorld* World = GetWorld())
 	{
-		World->ServerTravel(HostTravelURL);
+		World->ServerTravel(URL);
 	}
 }
 
@@ -203,9 +237,43 @@ void UIBSessionSubsystem::IBDeploy()
 		UE_LOG(LogIronBreach, Warning, TEXT("IBDeploy: only the host can deploy the squad"));
 		return;
 	}
-	UE_LOG(LogIronBreach, Log, TEXT("IBDeploy: taking the squad to %s"), *HostTravelURL);
+	const FString URL = BuildListenTravelURL(HostTravelURL);
+	UE_LOG(LogIronBreach, Log, TEXT("IBDeploy: taking the squad to %s"), *URL);
 	ReportStatus(EIBSessionStatus::Deploying, TEXT("DEPLOYING SQUAD..."));
-	World->ServerTravel(HostTravelURL);
+	World->ServerTravel(URL);
+}
+
+void UIBSessionSubsystem::IBDeployTo(const FString& MapPath)
+{
+	UWorld* World = GetWorld();
+	if (!World || World->GetNetMode() == NM_Client)
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("IBDeployTo: only the host can move the squad"));
+		return;
+	}
+	if (MapPath.IsEmpty())
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("IBDeployTo: no map"));
+		return;
+	}
+
+	// Base map, then re-decide the options: a live session (or an existing
+	// listen server) must keep listening or the squad falls off; standalone
+	// must NOT listen or it becomes a session-less server nobody can reach.
+	FString URL = MapPath;
+	int32 Query = INDEX_NONE;
+	if (URL.FindChar(TEXT('?'), Query)) { URL.LeftInline(Query); }
+	const bool bListen = World->GetNetMode() == NM_ListenServer || IsInSession();
+	if (bListen) { URL = BuildListenTravelURL(URL); }
+
+	UE_LOG(LogIronBreach, Log, TEXT("IBDeployTo: taking the squad to %s"), *URL);
+	ReportStatus(EIBSessionStatus::Deploying, TEXT("DEPLOYING SQUAD..."));
+	World->ServerTravel(URL);
+}
+
+void UIBSessionSubsystem::IBReturnToWatch()
+{
+	IBDeployTo(LobbyTravelURL);
 }
 
 void UIBSessionSubsystem::IBJoin()
