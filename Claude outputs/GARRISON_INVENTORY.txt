@@ -1,0 +1,3655 @@
+IRON BREACH -- CarrowGateGarrison inventory
+Total actors: 3285
+
+=== ACTOR CLASS COUNTS (top 40) ===
+   3236  StaticMeshActor
+     19  PointLight
+      7  BP_DoorFrame_C
+      3  PostProcessVolume
+      2  NavMeshBoundsVolume
+      2  ExponentialHeightFog
+      1  RecastNavMesh
+      1  PlayerStart
+      1  DirectionalLight
+      1  SkyAtmosphere
+      1  SkyLight
+      1  Act1BarracksDirector
+      1  Act2EscalationDirector
+      1  Act3ContactDirector
+      1  Act4DeepWaterDirector
+      1  Act5RetreatDirector
+      1  BP_M1_KaijuSpawner_C
+      1  SkeletalMeshActor
+      1  DatasmithSceneActor
+      1  VolumetricCloud
+      1  Actor
+      1  BP_WeaponRack_C
+
+=== FLAGGED AS LIKELY PLACEHOLDER/MISSING ART (1741) ===
+  [StaticMeshActor] 01_Main Gate_Pylon_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 01_Main Gate_Pylon_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 01_Main Gate_Lintel
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 02_Vehicle Bay
+      - mesh looks like a primitive/blockout (/Game/LevelPrototyping/Meshes/SM_ChamferCube.SM_ChamferCube)
+  [StaticMeshActor] 03_Parade Yard
+      - mesh looks like a primitive/blockout (/Game/LevelPrototyping/Meshes/SM_ChamferCube.SM_ChamferCube)
+  [StaticMeshActor] 04_Watch Tower_Wall_N_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_N_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_N_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_N_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_N_Fill1
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_N_Glass1
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_N_Fill2
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_N_Glass2
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_N_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_S_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_S_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_S_Lintel
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_E_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_E_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_E_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_E_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_E_Fill1
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_E_Glass1
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_E_Fill2
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_E_Glass2
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_E_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_W_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_W_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_W_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_W_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_W_Fill1
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_W_Glass1
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_W_Fill2
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_W_Glass2
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_Watch Tower_Wall_W_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_N_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_N_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_N_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_N_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_N_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_S_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_S_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_S_Lintel
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_E_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_E_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_E_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_E_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_E_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_W_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_W_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_W_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_W_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Wall_W_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_Barracks_Ceiling
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_N_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_N_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_N_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_N_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_N_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_S_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_S_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_S_Lintel
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_E_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_E_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_E_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_E_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_E_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_W_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_W_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_W_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_W_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Wall_W_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_Mess Hall_Ceiling
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_N_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_N_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_N_Lintel
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_S_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_S_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_S_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_S_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_S_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_E_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_E_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_E_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_E_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_E_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_W_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_W_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_W_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_W_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Wall_W_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_Armory_Ceiling
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_N_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_N_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_N_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_N_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_N_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_S_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_S_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_S_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_S_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_S_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_E_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_E_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_E_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_E_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_E_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_W_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_W_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Wall_W_Lintel
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_Command & Comms_Ceiling
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_N_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_N_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_N_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_N_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_N_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_S_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_S_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_S_Lintel
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_E_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_E_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_E_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_E_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_E_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_W_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_W_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_W_Fill0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_W_Glass0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Wall_W_FillTop
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_Sensor Array_Ceiling
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 12_Civic Route (Streets)
+      - mesh looks like a primitive/blockout (/Game/LevelPrototyping/Meshes/SM_ChamferCube.SM_ChamferCube)
+  [StaticMeshActor] Water_Placeholder
+      - label suggests placeholder
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_SensorConsole
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_LadderMarker
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 05_NoticeBoard
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 06_ServingCounter
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 07_CheckoutCounter
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 08_MapTable
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_SensorConsole
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_EquipmentRack
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 09_LogStand
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_000
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_001
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_002
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_003
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_004
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_005
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_006
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_007
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_008
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_009
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_010
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_011
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_012
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_013
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_014
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_015
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_016
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_017
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_018
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_019
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_020
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_021
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_022
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_023
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_024
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_025
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_026
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_027
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_028
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_029
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_030
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_031
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_032
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_033
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_034
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_035
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_036
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_037
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_038
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_039
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_040
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_041
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_042
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_043
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_044
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_045
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_046
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_047
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_048
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_049
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_050
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_051
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_052
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_053
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_054
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_055
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_056
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_057
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_058
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_059
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_060
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_061
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_062
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_063
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_064
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_065
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_066
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_067
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_068
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_069
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_070
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_071
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_072
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_073
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_074
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_075
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_076
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_077
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_078
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_079
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_080
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_081
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_082
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_083
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_084
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_085
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_086
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_087
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_088
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_089
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_090
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_091
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_092
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_093
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Stair_094
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Landing_1
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Landing_2
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Landing_3
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Landing_4
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_Landing_5
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_RoofDeck
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] 04_WatchTower_RoofLanding
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_00
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_01
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_02
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_03
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_04
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_05
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_06
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_07
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_08
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_09
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_10
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_11
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_12
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_13
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_14
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_15
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_16
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_17
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_18
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_19
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_20
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_21
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_22
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_23
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_24
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_25
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_26
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_27
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_28
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_29
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_30
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_31
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_32
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_33
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_34
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_35
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_36
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_37
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_38
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_39
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_40
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_41
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_42
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] CityGround_43
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] MountainGroundPad
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_000
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_001
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_002
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_003
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_004
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_005
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_006
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_007
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_008
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_009
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_010
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_011
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_012
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_013
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_014
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_015
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_016
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_017
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_018
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_019
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_020
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_021
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_022
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_023
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_024
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_025
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_026
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_027
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_028
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_029
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_030
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_031
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_032
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_033
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_034
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_035
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_036
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_037
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_038
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_039
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_040
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_041
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_042
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_043
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_044
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_045
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_046
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_047
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_048
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_049
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_050
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_051
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_052
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_053
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_054
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_055
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_056
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_057
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_058
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_059
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_060
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_061
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_062
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_063
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_064
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_065
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_066
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_067
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_068
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_069
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_070
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_071
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_072
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_073
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_074
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_075
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_076
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_077
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_078
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_079
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_080
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_081
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_082
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_083
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_084
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_085
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_086
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_087
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_088
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_089
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_090
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_091
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_092
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_093
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_094
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_095
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_096
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_097
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_098
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_099
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_100
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_101
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_102
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_103
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_104
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_105
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_106
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_107
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_108
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_109
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_110
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_111
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_112
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_113
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_114
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_115
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_116
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_117
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_118
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_119
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_120
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_121
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_122
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_123
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_124
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_125
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_126
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_127
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_128
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_129
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_130
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_131
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_132
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_133
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_134
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_135
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_136
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_137
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_138
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_139
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_140
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_141
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_142
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_143
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Wall_144
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_North_H_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_North_H_R
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_North_H_Bar
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_North_Light_0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_North_Light_1
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_North_Light_2
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_North_Light_3
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_H_L
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_Light_3
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_Debris_0
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_Debris_1
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_Debris_2
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_Debris_3
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_Debris_4
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_Debris_5
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_Debris_6
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Helipad_South_Overgrowth_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Helipad_South_Overgrowth_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Helipad_South_Overgrowth_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Helipad_South_Overgrowth_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Helipad_South_Overgrowth_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Helipad_South_Overgrowth_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_004_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_006_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_006_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_009_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_012_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_013_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_013_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_014_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_019_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Gap_022_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_023_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_023_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_029_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_030_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Gap_030_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_032_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_032_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_033_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_035_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_037_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_047_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_048_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_050_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_051_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_051_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_052_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_056_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Gap_056_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_058_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_060_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_061_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_062_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_063_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_063_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_065_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_065_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_066_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_069_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_069_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_069_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_074_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_074_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_074_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_075_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_076_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_081_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_081_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_085_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_086_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_086_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_090_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_090_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Gap_090_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_090_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_091_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_091_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_091_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_092_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_092_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_094_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_098_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_101_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_101_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_104_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_106_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_109_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_109_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_111_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_114_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_114_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_114_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_114_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_115_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_116_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Gap_119_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_122_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_123_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_123_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_123_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_124_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_133_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_133_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_134_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_140_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_143_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Gap_143_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_148_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Gap_153_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_154_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_156_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_158_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_162_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_163_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_169_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_173_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_175_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_175_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_175_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_176_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_176_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_176_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_177_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_179_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_179_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_181_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_181_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_182_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_185_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_186_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_186_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_189_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_190_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_190_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_190_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_190_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_190_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_194_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_194_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_196_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_196_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_196_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Gap_196_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_202_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_202_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_204_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_207_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_211_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_213_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_217_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Gap_218_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_218_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Gap_218_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_00_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_00_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_00_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_00_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_00_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_00_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_00_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_00_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_01_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_01_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_01_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_02_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_02_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_02_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_02_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_02_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_02_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_02_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_02_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_03_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_03_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_03_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_03_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_03_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_03_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_04_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_04_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_04_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_04_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_04_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_05_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_05_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_05_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_05_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_05_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_05_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_05_10
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_05_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_06_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_06_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_06_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_06_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_06_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_06_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_07_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_07_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_07_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_07_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_07_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_07_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_07_12
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_08_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_08_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_08_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_08_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_09_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_09_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_09_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_09_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_09_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_09_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_09_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_09_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_10_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_10_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_10_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_10_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_10_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_10_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_10_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_10_10
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_10_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_10_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_11_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_11_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_11_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_11_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_11_09
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_11_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_11_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_12_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_12_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_12_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_12_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_12_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_12_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_12_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_12_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_12_11
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_13_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_13_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_13_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_13_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_13_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_14_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_14_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_14_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_14_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_14_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_14_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_14_10
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_15_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_15_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_15_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_15_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_15_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_15_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_15_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_15_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_15_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_15_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_16_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_16_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_16_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_16_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_16_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_16_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_17_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_17_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_17_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_17_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_17_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_17_12
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_18_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_18_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_18_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_19_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_19_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_19_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_20_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_20_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_20_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_20_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_20_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_20_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_20_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_20_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_21_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_21_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_21_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_21_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_22_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_22_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_22_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_22_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_22_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_23_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_23_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_23_10
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_23_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_23_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_24_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_24_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_24_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_24_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_24_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_24_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_24_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_25_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_25_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_25_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_25_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_25_10
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_26_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_26_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_26_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_26_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_26_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_26_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_27_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_27_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_27_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_27_07
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_27_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_28_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_28_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Fringe_28_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_28_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_28_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_28_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_28_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_28_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_29_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_29_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_29_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_29_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_29_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_29_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Fringe_29_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_000_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_000_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_000_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_000_10
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_000_12
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_001_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_001_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_002_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_002_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_002_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_002_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_003_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_003_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_003_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_003_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_003_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_003_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_004_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_004_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_004_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_005_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_006_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_006_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_006_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_006_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_006_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_007_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_007_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_009_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_009_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_009_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_009_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_009_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_009_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_009_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_010_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_010_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_010_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_010_12
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_011_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_011_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_012_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_012_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_012_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_012_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_013_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_013_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_013_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_013_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_013_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_013_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_014_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_014_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_014_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_014_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_016_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_017_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_017_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_017_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_018_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_018_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_018_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_020_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_020_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_020_09
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_021_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_021_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_021_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_021_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_021_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_021_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_021_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_024_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_024_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_024_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_024_06
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_025_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_025_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_025_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_025_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_025_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_025_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_025_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_025_12
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_026_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_026_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_026_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_027_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_027_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_027_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_027_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_027_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_027_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_027_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_027_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_027_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_031_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_031_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_031_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_032_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_032_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_032_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_032_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_032_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_033_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_033_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_033_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_033_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_033_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_033_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_034_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_034_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_034_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_035_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_035_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_035_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_035_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_035_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_036_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_036_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_036_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_036_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_038_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_038_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_038_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_038_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_039_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_039_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_039_11
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_039_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_042_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_042_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_042_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_042_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_043_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_043_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_043_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_043_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_043_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_043_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_043_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_044_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_044_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_044_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_044_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_045_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_045_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_045_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_047_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_047_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_047_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_048_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_049_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_049_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_049_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_049_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_049_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_052_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_052_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_052_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_052_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_052_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_053_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_053_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_053_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_053_07
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_053_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_053_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_053_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_054_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_054_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_054_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_054_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_054_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_054_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_054_11
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_056_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_056_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_057_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_057_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_057_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_057_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_057_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_058_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_058_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_058_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_058_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_058_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_058_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_058_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_058_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_059_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_059_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_059_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_059_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_059_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_059_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_059_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_059_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_060_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_060_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_060_05
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_060_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_061_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_061_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_061_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_061_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_061_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_062_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_062_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_062_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_062_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_062_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_063_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_063_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_063_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_063_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_065_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_065_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_066_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_066_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_066_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_066_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_066_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_066_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_067_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_067_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_067_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_067_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_068_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_068_09
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_068_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_069_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_069_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_069_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_069_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_069_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_069_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_069_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_069_11
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_070_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_070_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_072_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_072_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_073_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_073_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_073_12
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_073_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_074_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_075_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_075_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_075_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_075_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_075_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_077_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_077_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_077_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_077_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_078_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_078_06
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_078_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_079_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_079_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_079_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_079_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_079_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_080_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_080_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_080_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_080_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_080_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_080_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_082_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_082_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_082_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_082_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_083_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_083_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_083_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_084_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_084_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_084_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_084_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_085_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_085_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_085_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_085_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_086_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_086_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_086_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_086_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_086_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_086_09
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_087_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_087_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_087_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_087_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_088_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_088_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_088_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_088_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_088_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_088_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_088_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_090_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_090_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_091_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_091_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_091_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_091_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_091_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_091_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_096_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_096_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_096_05
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_096_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_097_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_097_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_097_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_097_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_097_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_097_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_097_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_097_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_098_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_098_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_098_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_098_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_098_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_098_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_098_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_100_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_100_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_102_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_102_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_102_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_102_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_102_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_102_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_102_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_103_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_103_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_103_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_104_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_104_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_104_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_104_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_104_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_104_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_105_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_105_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_105_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_105_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_105_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_106_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_106_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_109_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_109_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_110_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_110_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_110_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_110_09
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_111_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_111_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_111_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_112_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_112_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_112_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_112_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_112_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_112_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_112_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_113_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_113_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_113_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_113_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_114_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_114_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_114_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_114_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_115_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_115_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_115_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_115_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_116_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_116_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_116_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_118_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_118_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_118_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_118_07
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_119_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_119_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_119_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_119_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_120_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_120_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_120_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_122_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_122_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_122_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_122_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_122_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_123_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_123_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_123_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_124_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_124_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_124_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_124_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_125_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_125_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_125_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_125_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_125_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_125_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_125_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_127_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_129_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_129_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_129_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_129_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_130_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_130_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_131_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_131_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_131_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_132_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_132_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_132_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_132_06
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_134_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_134_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_134_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_134_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_134_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_135_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_135_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_135_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_135_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_135_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_136_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_136_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_136_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_137_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_137_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_137_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_137_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_138_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_138_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_138_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_138_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_138_09
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_139_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_139_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_139_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_139_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_139_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_140_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_140_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_140_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_140_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_143_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_143_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_143_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_143_10
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_144_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_144_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_144_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_144_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_144_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_144_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_144_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_144_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_146_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_146_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_146_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_146_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_146_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_146_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_146_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_148_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_148_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_148_05
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_148_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_148_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_148_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_149_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_149_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_150_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_150_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_150_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_151_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_151_05
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_151_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_151_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_152_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_153_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_153_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_153_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_153_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_153_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_156_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_156_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_156_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_156_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_156_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_158_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_158_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_158_05
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_160_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_160_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_160_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_161_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_161_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_161_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_161_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_161_05
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_161_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_162_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_162_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_162_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_163_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_163_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_163_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_163_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_163_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_164_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_165_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_165_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_165_08
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_165_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_165_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_166_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_166_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_166_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_166_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_166_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_166_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_167_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_167_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_168_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_168_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_168_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_168_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_168_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_168_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_169_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_169_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_169_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_170_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_171_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_171_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_171_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_172_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_172_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_173_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_173_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_173_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_173_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_174_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_174_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_176_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_176_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_176_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_177_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_177_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_177_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_178_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_178_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_178_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_178_07
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_178_09
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_179_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_179_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_179_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_179_06
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_180_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_181_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_181_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_183_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_183_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_183_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_184_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_184_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_184_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_184_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_184_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_184_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_184_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_184_13
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_185_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_185_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_185_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_186_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_186_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_186_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_186_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_187_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_187_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_187_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_187_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_188_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_188_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_188_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_188_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_188_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_189_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_189_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_189_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_189_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_189_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_190_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_190_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_190_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_190_06
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_190_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_190_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_191_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_191_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_191_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_191_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_191_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_194_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_194_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_194_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_194_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_194_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_194_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_194_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_195_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_195_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_196_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_196_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_196_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_197_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_197_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_197_11
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_197_12
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_198_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_198_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_198_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_198_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_198_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_198_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_199_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_199_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_199_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_199_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_199_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_199_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_199_10
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_200_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_200_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_200_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_200_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_201_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_201_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_201_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_201_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_201_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_202_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_202_04
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_204_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_204_05
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_205_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_205_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_206_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_206_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_206_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_206_07
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_206_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_207_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_207_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_207_06
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_207_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_207_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_209_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_209_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_209_05
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_210_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_210_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_210_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_210_08
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_210_11
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_211_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_212_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_212_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_212_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_212_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_213_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_213_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_213_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_215_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_215_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_215_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_216_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_216_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_216_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_216_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_217_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_217_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_217_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_217_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_217_07
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_218_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_218_06
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_219_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Belt_219_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_219_09
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Belt_219_10
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_001_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_002_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_004_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_004_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_004_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_004_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_006_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_006_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_007_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_007_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_009_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_010_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_010_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_012_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_014_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_014_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_015_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_015_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_015_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_016_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_017_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_021_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_021_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_021_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_023_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_023_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_024_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_024_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_026_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_026_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_028_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_028_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_030_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_032_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_033_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_033_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_033_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_034_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_035_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_037_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_037_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_038_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_039_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_042_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_042_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_043_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_043_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_044_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_045_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_047_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_047_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_047_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_048_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_048_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_048_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_051_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_053_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_056_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_056_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_057_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_059_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_065_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_067_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_068_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_070_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_070_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_072_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_073_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_073_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_074_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_074_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_075_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_077_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_078_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_079_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_080_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_081_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_082_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_083_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_085_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_086_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_086_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_086_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_087_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_087_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_089_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_090_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_093_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_094_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_094_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_094_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_095_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_095_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_096_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_097_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_097_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_098_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_098_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_099_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_099_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_101_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_101_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_102_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_102_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_102_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_103_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_105_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_105_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_107_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_107_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_107_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_108_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_108_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_109_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_109_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_110_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_112_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_113_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_114_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_114_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_117_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_117_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_117_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_118_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_118_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_121_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_125_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_125_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_126_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_126_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_127_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_127_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_127_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_127_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_127_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_128_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_131_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_132_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_132_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_135_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_135_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_135_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_135_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_136_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_137_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_137_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_137_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_139_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_140_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_140_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_142_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_144_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_144_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_144_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_145_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_147_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_148_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_149_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_149_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_150_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_154_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_154_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_158_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_159_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_161_00
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_161_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_162_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_162_05
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_165_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_166_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_166_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_168_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_168_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_168_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_168_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_173_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_174_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_174_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_175_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_175_01
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_176_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_176_02
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_176_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_180_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_180_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_180_05
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_182_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_183_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_184_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_186_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_187_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_187_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_187_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_187_04
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_188_01
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_189_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_192_03
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_193_00
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Understory_196_03
+      - placeholder/flat material(s): [None, None, None]
+  [StaticMeshActor] Understory_197_02
+      - placeholder/flat material(s): [None, None]
+  [StaticMeshActor] Beach
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Water_Shallow
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Water_Deep
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_A
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_B
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_C
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_W_000
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_W_001
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_W_002
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_E_003
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_W_004
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_W_005
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_W_006
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_E_007
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_E_008
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_W_009
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_E_010
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_W_011
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_E_012
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_E_013
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_S_014
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_S_015
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_N_016
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_N_017
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_N_018
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_S_019
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_S_020
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_N_021
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_N_022
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_S_023
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_S_024
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_N_025
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_N_026
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_S_027
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] Surf_S_028
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonShallow_GateApproach
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonSurf_GateApproach
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonShallow_WestConnector
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonSurf_WestConnector
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonShallow_NW_Yard
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonSurf_NW_Yard
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonShallow_NorthSpur_WatchTower
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonSurf_NorthSpur_WatchTower
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonShallow_CentralBody_Barracks
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonSurf_CentralBody_Barracks
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonShallow_EastWing_MessHallArmory
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonSurf_EastWing_MessHallArmory
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonShallow_SouthWing_Command
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonSurf_SouthWing_Command
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonShallow_SE_CoastalReach_Helipad
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonSurf_SE_CoastalReach_Helipad
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonShallow_SouthTaper_CivicRoute
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] GarrisonSurf_SouthTaper_CivicRoute
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+  [StaticMeshActor] TownSquare
+      - mesh looks like a primitive/blockout (/Engine/BasicShapes/Cube.Cube)
+
+=== KNOWN GARRISON BUILDINGS: current material per mesh piece ===
+-- 04_Watch Tower --
+    04_Watch Tower_Wall_N_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_N_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_N_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_N_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    04_Watch Tower_Wall_N_Fill1  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_N_Glass1  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    04_Watch Tower_Wall_N_Fill2  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_N_Glass2  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    04_Watch Tower_Wall_N_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_S_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_S_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_S_Lintel  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_E_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_E_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_E_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_E_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    04_Watch Tower_Wall_E_Fill1  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_E_Glass1  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    04_Watch Tower_Wall_E_Fill2  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_E_Glass2  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    04_Watch Tower_Wall_E_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_W_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_W_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_W_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_W_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    04_Watch Tower_Wall_W_Fill1  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_W_Glass1  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    04_Watch Tower_Wall_W_Fill2  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_Wall_W_Glass2  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    04_Watch Tower_Wall_W_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    04_Watch Tower_DoorFrame  mesh=/Game/LevelPrototyping/Interactable/Door/Meshes/SM_DoorFrame_Corner.SM_DoorFrame_Corner  mats=['/Game/LevelPrototyping/Materials/MI_DefaultColorway.MI_DefaultColorway']
+
+-- 05_Barracks --
+    05_Barracks_Wall_N_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_N_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_N_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_N_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    05_Barracks_Wall_N_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_S_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_S_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_S_Lintel  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_E_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_E_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_E_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_E_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    05_Barracks_Wall_E_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_W_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_W_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_W_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Wall_W_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    05_Barracks_Wall_W_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    05_Barracks_Ceiling  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/IronBreach/Environment/Bastion/M_Bastion_Concrete.M_Bastion_Concrete']
+    05_Barracks_DoorFrame  mesh=/Game/LevelPrototyping/Interactable/Door/Meshes/SM_DoorFrame_Corner.SM_DoorFrame_Corner  mats=['/Game/LevelPrototyping/Materials/MI_DefaultColorway.MI_DefaultColorway']
+
+-- 06_Mess Hall --
+    06_Mess Hall_Wall_N_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_N_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_N_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_N_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    06_Mess Hall_Wall_N_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_S_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_S_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_S_Lintel  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_E_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_E_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_E_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_E_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    06_Mess Hall_Wall_E_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_W_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_W_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_W_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Wall_W_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    06_Mess Hall_Wall_W_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    06_Mess Hall_Ceiling  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/IronBreach/Environment/Bastion/M_Bastion_Concrete.M_Bastion_Concrete']
+    06_Mess Hall_DoorFrame  mesh=/Game/LevelPrototyping/Interactable/Door/Meshes/SM_DoorFrame_Corner.SM_DoorFrame_Corner  mats=['/Game/LevelPrototyping/Materials/MI_DefaultColorway.MI_DefaultColorway']
+
+-- 07_Armory --
+    07_Armory_Wall_N_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_N_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_N_Lintel  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_S_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_S_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_S_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_S_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    07_Armory_Wall_S_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_E_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_E_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_E_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_E_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    07_Armory_Wall_E_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_W_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_W_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_W_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Wall_W_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    07_Armory_Wall_W_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    07_Armory_Ceiling  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/IronBreach/Environment/Bastion/M_Bastion_Concrete.M_Bastion_Concrete']
+    07_Armory_DoorFrame  mesh=/Game/LevelPrototyping/Interactable/Door/Meshes/SM_DoorFrame_Corner.SM_DoorFrame_Corner  mats=['/Game/LevelPrototyping/Materials/MI_DefaultColorway.MI_DefaultColorway']
+
+-- 08_Command & Comms --
+    08_Command & Comms_Wall_N_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_N_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_N_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_N_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    08_Command & Comms_Wall_N_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_S_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_S_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_S_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_S_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    08_Command & Comms_Wall_S_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_E_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_E_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_E_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_E_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    08_Command & Comms_Wall_E_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_W_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_W_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Wall_W_Lintel  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    08_Command & Comms_Ceiling  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/IronBreach/Environment/Bastion/M_Bastion_Concrete.M_Bastion_Concrete']
+    08_Command & Comms_DoorFrame  mesh=/Game/LevelPrototyping/Interactable/Door/Meshes/SM_DoorFrame_Corner.SM_DoorFrame_Corner  mats=['/Game/LevelPrototyping/Materials/MI_DefaultColorway.MI_DefaultColorway']
+
+-- 09_Sensor Array --
+    09_Sensor Array_Wall_N_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_N_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_N_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_N_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    09_Sensor Array_Wall_N_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_S_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_S_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_S_Lintel  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_E_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_E_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_E_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_E_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    09_Sensor Array_Wall_E_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_W_L  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_W_R  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_W_Fill0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Wall_W_Glass0  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Glass.M_AI_Glass']
+    09_Sensor Array_Wall_W_FillTop  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/LevelPrototyping/AITextures/M_AI_Wall.M_AI_Wall']
+    09_Sensor Array_Ceiling  mesh=/Engine/BasicShapes/Cube.Cube  mats=['/Game/IronBreach/Environment/Bastion/M_Bastion_Concrete.M_Bastion_Concrete']
+    09_Sensor Array_DoorFrame  mesh=/Game/LevelPrototyping/Interactable/Door/Meshes/SM_DoorFrame_Corner.SM_DoorFrame_Corner  mats=['/Game/LevelPrototyping/Materials/MI_DefaultColorway.MI_DefaultColorway']

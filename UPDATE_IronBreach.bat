@@ -5,7 +5,7 @@ set "ROOT=%~dp0"
 set "PROJ=%ROOT%IronBreach.uproject"
 set "PACK=%ROOT%_SyncPack"
 rem The compiled code in _SyncPack was built from this commit (no C++ has changed since).
-set "PREBUILT_COMMIT=57324df"
+set "PREBUILT_COMMIT=1434fee"
 
 echo.
 echo  ==========================================================

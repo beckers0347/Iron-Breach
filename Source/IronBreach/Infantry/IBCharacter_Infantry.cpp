@@ -1116,6 +1116,27 @@ void AIBCharacter_Infantry::Tick(float DeltaSeconds)
 			const float SprintMultiplier = (bIsSprinting && NormalWalkSpeed > 0.0f) ? (SprintSpeed / NormalWalkSpeed) : 1.0f;
 			Move->MaxWalkSpeed = BaseWalkSpeed * AdsMultiplier * SprintMultiplier;
 		}
+
+		// Cheap "last dry ground" cache -- no per-frame trace, just a location/rotation
+		// snapshot taken whenever we're actually walking on ground. Drown() reads this
+		// so falling in water snaps the player back to where they fell in instead of at
+		// a generic PlayerStart. Stops updating once dead so a corpse mid-ragdoll into
+		// the water doesn't overwrite the fall-off point it's meant to remember.
+		if (!bDead && Move->IsMovingOnGround())
+		{
+			LastSafeLocation = GetActorLocation();
+			LastSafeRotation = GetActorRotation();
+		}
+
+		// Automatic drowning: no trigger volume or Level Blueprint wiring needed --
+		// once you sink below DrownWaterZ, snap straight back. Guarded on
+		// LastSafeLocation being non-zero so a character that somehow spawns already
+		// underwater (never had a grounded tick yet) doesn't get teleported to the
+		// world origin instead of somewhere sane.
+		if (!bDead && !LastSafeLocation.IsZero() && GetActorLocation().Z < DrownWaterZ)
+		{
+			Drown();
+		}
 	}
 }
 
@@ -1423,6 +1444,37 @@ void AIBCharacter_Infantry::ApplyOperativeBody()
 	}
 
 	GetMesh()->SetSkeletalMeshAsset(BodyMesh);
+}
+
+void AIBCharacter_Infantry::Drown()
+{
+	if (!HasAuthority())
+	{
+		Server_Drown();
+		return;
+	}
+
+	if (bDead)
+	{
+		return; // already dying/dead from something else -- don't fight HandleDeath's ragdoll
+	}
+
+	UE_LOG(LogIronBreach, Verbose, TEXT("%s drowned at %s - snapping back to last safe location %s"),
+		*GetNameSafe(this), *GetActorLocation().ToString(), *LastSafeLocation.ToString());
+
+	// Instant snap-back, not a death: stop whatever velocity carried it into the water
+	// (falling/swimming momentum would otherwise carry straight through on teleport)
+	// then move it. No ragdoll, no respawn timer, no controller detach.
+	if (UCharacterMovementComponent* Move = GetCharacterMovement())
+	{
+		Move->StopMovementImmediately();
+	}
+	TeleportTo(LastSafeLocation, LastSafeRotation, false, true);
+}
+
+void AIBCharacter_Infantry::Server_Drown_Implementation()
+{
+	Drown();
 }
 
 void AIBCharacter_Infantry::HandleDeath(AActor* Killer)

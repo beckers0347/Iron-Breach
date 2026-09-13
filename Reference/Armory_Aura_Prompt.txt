@@ -1,0 +1,19 @@
+Rebuild the Armory into a walkable, functional building using the reference image at Reference/Armory_RefImage.png as the exact visual target.
+
+GEOMETRY:
+Replace the current Armory blockout with a low, squat rectangular structure matching the existing Armory footprint dimensions and location. Build these as distinct separate geometry pieces, not one flat box:
+- An angular hip-style armored roof cap that overhangs the walls, with raised panel seams and bolt/rivet details visible along the seams, matching the reference image roofline.
+- Thick reinforced corner armor plating pillars at all four corners, running from foundation to roofline.
+- Two narrow vertical reinforced windows recessed into the front-facing wall.
+- Exposed conduit and cable pipe details running horizontally along the upper wall band toward the door frame, matching the reference image.
+- A recessed door alcove on the front wall, inset slightly from the main wall face, sized to fit a standard door frame (reuse existing door frame dimensions from Content/LevelPrototyping/Interactable/Door/BP_DoorFrame).
+
+Keep the existing weathered concrete material (M_AI_Wall or the project's current world-scale concrete material) on the walls. Add hazard-stripe (yellow/black) trim detail around the door alcove to match the reference image.
+
+INTERIOR:
+Hollow out the interior — this building needs to be walkable. Ensure the interior volume has floor collision and no solid fill blocking the doorway, with enough headroom and floor space for a player character to walk inside.
+
+DOOR FUNCTIONALITY:
+Place an instance of the existing BP_DoorFrame blueprint (already used for the main gate door, BP_MainGateDoor, in this level) at the Armory's door alcove. Scale and position it to fit the alcove opening built above. Do not build new door logic — reuse this existing blueprint's trigger volume and open/close behavior exactly as configured on the main gate, just resized/repositioned for this smaller doorway. Rename the placed instance to BP_ArmoryDoor for clarity.
+
+Do not use plain box primitives for any visible exterior element — every piece described above (roof cap, corner pillars, window recesses, door alcove) should be its own distinct mesh piece matching the reference image's silhouette.

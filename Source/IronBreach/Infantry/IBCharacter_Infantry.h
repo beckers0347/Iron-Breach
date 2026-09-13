@@ -271,6 +271,23 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Health", meta = (ClampMin = "0.5"))
 	float RespawnDelay = 5.0f;
 
+	/** Continuously refreshed in Tick() while grounded (and not already dead) so
+	 *  Drown() can snap the player back to where they fell in instead of a
+	 *  generic PlayerStart. Zero until the first grounded tick -- Drown() checks
+	 *  for that so it can't teleport someone to the world origin. */
+	UPROPERTY(BlueprintReadOnly, Category = "Water")
+	FVector LastSafeLocation = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Water")
+	FRotator LastSafeRotation = FRotator::ZeroRotator;
+
+	/** World Z below which Tick() calls Drown() automatically -- no trigger volume
+	 *  or Level Blueprint wiring needed. Default matches CarrowGateGarrison's
+	 *  harbor waterline (Z = -35cm, see Docs/BASTION_ENVIRONMENT_POLISH.md);
+	 *  override per-instance for a level with a different waterline. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Water")
+	float DrownWaterZ = -35.0f;
+
 	/** Blueprint hook for death FX/UI (mirrors the enemy's BP_OnDied). */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
 	void BP_OnDied(AActor* Killer);
@@ -377,6 +394,15 @@ public:
 	 *  call IsDepleted() -- defined in the .cpp, which already includes it. */
 	UFUNCTION(BlueprintPure, Category = "Health")
 	bool IsDead() const;
+
+	/** Instantly teleports this character back to LastSafeLocation -- the last
+	 *  dry-ground position it stood on. Called automatically from Tick() once
+	 *  the actor drops below DrownWaterZ; no trigger volume or death/ragdoll
+	 *  flow involved, this is a snap-back, not a death. Safe to call from a
+	 *  client; routes to the server. Also BlueprintCallable in case a level
+	 *  wants to trigger it manually (e.g. a bottomless-pit volume). */
+	UFUNCTION(BlueprintCallable, Category = "Water")
+	void Drown();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -550,6 +576,9 @@ private:
 
 	FTimerHandle RespawnTimerHandle;
 	bool bDead = false;
+
+	UFUNCTION(Server, Reliable)
+	void Server_Drown();
 
 	/** Weak: the PlayerState (and its inventory) outlives this pawn, not the
 	 *  other way round — never keep it alive from a corpse. */
