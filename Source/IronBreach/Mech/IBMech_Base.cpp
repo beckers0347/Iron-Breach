@@ -13,6 +13,8 @@
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/GameModeBase.h"
 #include "Player/IBPlayerController.h"
+#include "EnhancedInputComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -22,7 +24,6 @@
 #include "Combat/DamageableInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 
 AIBMech_Base::AIBMech_Base()
@@ -245,11 +246,22 @@ void AIBMech_Base::PawnClientRestart()
 void AIBMech_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	// Two controllers feed this pawn, so movement/fire don't bind here —
-	// AIBMechPlayerController reads Enhanced Input and calls RouteMoveInput()/FireWeapon().
-	// Exit-seat is the exception: a raw key bind so dismounting works even with
-	// zero IMC wiring (packaged build one had no way out of the hull).
+
+	// The navigator possesses this pawn, so the hull binds its OWN input. It used to
+	// bind nothing but the exit key, on the assumption that AIBMechPlayerController
+	// would read Enhanced Input and call RouteMoveInput() -- but no GameMode ever sets
+	// that controller class, so nothing drove the hull and the mech could not move.
+	//
+	// Raw axis-key fallbacks first: they need no IMC, no Input Actions, no content pass,
+	// and they are the same guarantee the E key already gave dismounting.
 	PlayerInputComponent->BindKey(EKeys::E, IE_Pressed, this, &AIBMech_Base::RequestExit);
+	// ONE binding per axis: an axis-key binding fires every frame whether or not its key
+	// is down, and each handler reads both of its keys -- binding S and A as well would
+	// run each handler twice per frame and quadruple the drive-report RPCs.
+	PlayerInputComponent->BindAxisKey(EKeys::W, this, &AIBMech_Base::RawMoveForward);
+	PlayerInputComponent->BindAxisKey(EKeys::D, this, &AIBMech_Base::RawMoveRight);
+	PlayerInputComponent->BindAxisKey(EKeys::MouseX, this, &AIBMech_Base::RawTurn);
+	PlayerInputComponent->BindAxisKey(EKeys::MouseY, this, &AIBMech_Base::RawLookUp);
 }
 
 void AIBMech_Base::RequestExit()
@@ -635,22 +647,25 @@ void AIBMech_Base::OnGameModeLogout(AGameModeBase* GameMode, AController* Exitin
 
 	// Were they on our crew records? (ServerHandleCrewLogout already cleared these when
 	// it ran; this path only matters when it could not — e.g. a plain PlayerController.)
-	const bool bOnRecord = (LeftSeatController == Exiting || RightSeatController == Exiting);
-	const bool bWasDriver = (CurrentDriver == Exiting);
-	const bool bWasGunner = (CurrentGunner == Exiting);
+	// Key off the SEAT, never the role: ServerBoard stores the parked pawns by station
+	// (Left <-> hull <-> ParkedDriverPawn, Right <-> GunnerSeat <-> ParkedGunnerPawn) and
+	// PerformRoleSwap moves CurrentDriver/CurrentGunner WITHOUT moving the parked pawns.
+	// Picking by role after a swap destroys the REMAINING pilot's pawn and strands them.
+	const bool bLeftSeat  = (LeftSeatController == Exiting);
+	const bool bRightSeat = (RightSeatController == Exiting);
 
-	if (bOnRecord)
+	if (bLeftSeat || bRightSeat)
 	{
 		// Their parked infantry pawn would otherwise sit hidden in the level forever.
-		TObjectPtr<APawn>& Parked = bWasDriver ? ParkedDriverPawn : ParkedGunnerPawn;
+		TObjectPtr<APawn>& Parked = bLeftSeat ? ParkedDriverPawn : ParkedGunnerPawn;
 		if (Parked)
 		{
 			Parked->Destroy();
 			Parked = nullptr;
 		}
 		VacateSeat(Exiting);
-		UE_LOG(LogIronBreach, Warning, TEXT("[Mech] %s left as %s without the PawnLeavingGame guard — cleaned up after the fact."),
-			*DescribeCrewName(Exiting), bWasDriver ? TEXT("navigator") : (bWasGunner ? TEXT("gunner") : TEXT("crew")));
+		UE_LOG(LogIronBreach, Warning, TEXT("[Mech] %s left the %s station without the PawnLeavingGame guard — cleaned up after the fact."),
+			*DescribeCrewName(Exiting), bLeftSeat ? TEXT("hull") : TEXT("gunner seat"));
 	}
 
 	// The engine may have destroyed the seat pawn with the leaver. Grow a new one.
@@ -753,6 +768,112 @@ void AIBMech_Base::SendRitualInput(EConcordRitualStep Step)
 void AIBMech_Base::Server_SendRitualInput_Implementation(EConcordRitualStep Step)
 {
 	if (Concord) { Concord->RegisterRitualInput(/*bFromDriver=*/true, Step); }
+}
+
+// --- NAVIGATOR INPUT (hull; the live path) ---
+
+void AIBMech_Base::RawMoveForward(float Value)
+{
+	// BindAxisKey reports 1.0 while the key is held. S/A are bound to the same handlers
+	// as W/D, so read them here rather than binding four separate one-line lambdas.
+	if (const APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		const float Fwd = (PC->IsInputKeyDown(EKeys::W) ? 1.f : 0.f) - (PC->IsInputKeyDown(EKeys::S) ? 1.f : 0.f);
+		if (!FMath::IsNearlyZero(Fwd)) { ApplyNavigatorMove(FVector2D(0.f, Fwd)); }
+	}
+}
+
+void AIBMech_Base::RawMoveRight(float Value)
+{
+	if (const APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		const float Right = (PC->IsInputKeyDown(EKeys::D) ? 1.f : 0.f) - (PC->IsInputKeyDown(EKeys::A) ? 1.f : 0.f);
+		if (!FMath::IsNearlyZero(Right)) { ApplyNavigatorMove(FVector2D(Right, 0.f)); }
+	}
+}
+
+void AIBMech_Base::RawTurn(float Value)
+{
+	if (!FMath::IsNearlyZero(Value)) { AddControllerYawInput(Value); }
+}
+
+void AIBMech_Base::RawLookUp(float Value)
+{
+	// Negated: raw MouseY is inverted relative to every other look path in the project
+	// (the infantry IMC applies Negate-Y). Without this the mech pitches the wrong way.
+	if (!FMath::IsNearlyZero(Value)) { AddControllerPitchInput(-Value); }
+}
+
+void AIBMech_Base::ApplyNavigatorMove(const FVector2D& InputValue)
+{
+	// CMC replicates and predicts this for the owning client for free (uq4 Option B --
+	// owning the hull is exactly why the navigator gets prediction).
+	if (InputValue.Y != 0.0f) { AddMovementInput(GetActorForwardVector(), InputValue.Y); }
+	if (InputValue.X != 0.0f) { AddMovementInput(GetActorRightVector(), InputValue.X); }
+
+	// Tell the server the hull is under power, for CONCORD's coordinated-action test.
+	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+	if (HasAuthority())
+	{
+		LastNavigatorMoveTime = Now;
+	}
+	else if (Now - LastDriveReportTime > DriveReportInterval)
+	{
+		// Throttled: this runs per frame while moving, and the server only needs to know
+		// inside IsNavigatorDriving's window (0.6 s) -- not 60 times a second.
+		LastDriveReportTime = Now;
+		Server_ReportDriving();
+	}
+}
+
+void AIBMech_Base::Server_ReportDriving_Implementation()
+{
+	LastNavigatorMoveTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+}
+
+bool AIBMech_Base::IsNavigatorDriving(float WindowSeconds) const
+{
+	const UWorld* World = GetWorld();
+	if (!World) { return false; }
+	return (World->GetTimeSeconds() - LastNavigatorMoveTime) <= WindowSeconds;
+}
+
+// --- BOARDING BY INTERACT ---
+
+bool AIBMech_Base::HasFreeStation() const
+{
+	// PlayerState, not Controller: AController is bOnlyRelevantToOwner, so on a remote
+	// client GetController() is null for everyone else's pawn and every mech would look
+	// empty. APawn replicates PlayerState to all, and an AAIController creates none --
+	// so "AI in the seat still counts as free" survives the change.
+	const bool bHullTaken = GetPlayerState() != nullptr;
+	const bool bSeatTaken = GunnerSeat && GunnerSeat->GetPlayerState() != nullptr;
+	return !bHullTaken || !bSeatTaken;
+}
+
+void AIBMech_Base::Interact_Implementation(AActor* Interactor)
+{
+	// Runs on the interacting client. We cannot RPC on the hull (it is not owned by
+	// them), so the boarder's own pawn carries the request to the server -- this is the
+	// Server_RequestBoard that ServerBoard's warning has always named.
+	if (AIBCharacter_Infantry* Boarder = Cast<AIBCharacter_Infantry>(Interactor))
+	{
+		// Ask for the helm: ServerBoard's own correction logic then does the right thing in
+		// every case -- first boarder drives, a second boarder is pushed to the free gunner
+		// seat, and a third is refused. Asking for the SEAT instead strands a solo player in
+		// the gun of a mech with no driver (BackfillSeatWithAI only fills the seat, never
+		// the hull), which is the opposite of "a solo occupant always drives".
+		Boarder->Server_RequestBoard(this, /*bWantLeftSeat=*/true);
+	}
+}
+
+FText AIBMech_Base::GetInteractPrompt_Implementation() const
+{
+	// Empty prompt = not interactable right now (IBInteractableInterface contract).
+	if (!HasFreeStation()) { return FText(); }
+	return (GetPlayerState() != nullptr)
+		? NSLOCTEXT("IronBreach", "BoardGunner", "Take the gunner seat")
+		: NSLOCTEXT("IronBreach", "BoardHull", "Take the helm");
 }
 
 // --- INPUT ROUTING (legacy single-machine gatekeeper) ---

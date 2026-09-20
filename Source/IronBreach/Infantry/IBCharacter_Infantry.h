@@ -318,6 +318,24 @@ protected:
 	 *  books, the dry-fire rig, and Ms. Idris -- see IBInteractableInterface.h. */
 	void Interact();
 
+public:
+	/** SERVER. Board the Caryatid this pawn is standing at. The hull is not owned by
+	 *  this client, so the boarding request rides the boarder's OWN pawn to the server
+	 *  and is validated there (authority, range, a free station) before reaching
+	 *  AIBMech_Base::ServerBoard. This is the function that ServerBoard's off-authority
+	 *  warning has always pointed at; until now it did not exist, so nothing in a
+	 *  shipping build could ever get into a mech. */
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_RequestBoard(class AIBMech_Base* Mech, bool bWantLeftSeat);
+
+	/** How far from the hull a boarding request is still honoured, in cm. Generous:
+	 *  the client already had to hit it with the interact trace. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interact", meta = (ClampMin = "100.0"))
+	float BoardMaxDistance = 1200.0f;
+
+protected:
+
+
 	/** Trace range for Interact(), in cm. Coffee-pot/log-book distance, not sniping range. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interact", meta = (ClampMin = "50.0", ClampMax = "500.0"))
 	float InteractTraceDistance = 200.0f;

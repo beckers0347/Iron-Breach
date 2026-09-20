@@ -8,6 +8,12 @@
 class UWeaponCombatData;
 class UWeaponVisualData;
 
+/** SERVER. A shot from this weapon landed on HitActor and damage was applied.
+ *  CONCORD listens to this from the gunner seat: a hit landing while the navigator
+ *  drives is the two pilots acting as one, which is the only thing that raises sync.
+ *  Cosmetic-only misses never broadcast. */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FIBOnWeaponServerHit, AActor*, HitActor);
+
 /**
  * Drop-in hitscan gun for any pawn. Fire() may be called from anywhere (Enhanced Input,
  * legacy BindKey, Blueprints); it plays cosmetics immediately on the firing client and
@@ -21,6 +27,9 @@ class IRONBREACH_API UHitscanWeaponComponent : public UActorComponent
 
 public:
 	UHitscanWeaponComponent();
+
+	UPROPERTY(BlueprintAssignable, Category = "Weapon")
+	FIBOnWeaponServerHit OnServerHit;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Fire();

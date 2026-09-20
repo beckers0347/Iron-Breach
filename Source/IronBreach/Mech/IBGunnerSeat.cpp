@@ -46,6 +46,12 @@ void AIBGunnerSeat::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 void AIBGunnerSeat::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Server owns CONCORD; only it needs the hit feed.
+	if (HasAuthority() && WeaponComponent)
+	{
+		WeaponComponent->OnServerHit.AddDynamic(this, &AIBGunnerSeat::HandleWeaponServerHit);
+	}
 	SyncWeaponFromMech();
 }
 
@@ -123,6 +129,11 @@ void AIBGunnerSeat::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	// Raw exit key, matching the hull's: dismounting must never depend on content wiring.
 	PlayerInputComponent->BindKey(EKeys::E, IE_Pressed, this, &AIBGunnerSeat::RequestExit);
+	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &AIBGunnerSeat::RawFirePressed);
+	PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &AIBGunnerSeat::RawAdsPressed);
+	PlayerInputComponent->BindKey(EKeys::RightMouseButton, IE_Released, this, &AIBGunnerSeat::RawAdsReleased);
+	PlayerInputComponent->BindAxisKey(EKeys::MouseX, this, &AIBGunnerSeat::RawTurn);
+	PlayerInputComponent->BindAxisKey(EKeys::MouseY, this, &AIBGunnerSeat::RawLookUp);
 
 	// Optional own bindings (IMC_Gunner path). Guarded — unassigned actions are fine
 	// because AIBMechPlayerController routes its bindings here anyway.
@@ -141,6 +152,46 @@ void AIBGunnerSeat::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void AIBGunnerSeat::OnLookInput(const FInputActionValue& Value) { ProcessLook(Value.Get<FVector2D>()); }
 void AIBGunnerSeat::OnFireInput(const FInputActionValue& Value) { HandleFirePressed(); }
+
+void AIBGunnerSeat::RawFirePressed()  { HandleFirePressed(); }
+void AIBGunnerSeat::RawAdsPressed()   { SetAiming(true); }
+void AIBGunnerSeat::RawAdsReleased()  { SetAiming(false); }
+// MouseX and MouseY arrive as two separate axis bindings in the same frame. ProcessLook
+// ends by calling SetLookDelta(LookVector), so calling it twice makes the second call
+// overwrite the first and weapon sway only ever sees one axis. Accumulate, then apply
+// once: MouseX lands first, MouseY closes the frame out.
+void AIBGunnerSeat::RawTurn(float Value)
+{
+	PendingLook.X = Value;
+}
+
+void AIBGunnerSeat::RawLookUp(float Value)
+{
+	// Negated to match every other look path in the project (the infantry IMC negates Y).
+	PendingLook.Y = -Value;
+	if (!PendingLook.IsNearlyZero())
+	{
+		ProcessLook(PendingLook);
+	}
+	PendingLook = FVector2D::ZeroVector;
+}
+
+void AIBGunnerSeat::HandleWeaponServerHit(AActor* HitActor)
+{
+	// Server-only (the delegate is broadcast from the authoritative fire path).
+	if (!OwningMech || !HitActor) { return; }
+
+	// CONCORD v1: a landed shot counts as coordinated only while the navigator has the
+	// hull under power. Shooting from a parked mech is one pilot working; shooting while
+	// your partner repositions is the pair working. Tune the window, or widen the rule to
+	// dodges/abilities, in AIBMech_Base::IsNavigatorDriving.
+	if (!OwningMech->IsNavigatorDriving()) { return; }
+
+	if (UConcordComponent* Concord = OwningMech->GetConcord())
+	{
+		Concord->RegisterCoordinatedAction();
+	}
+}
 void AIBGunnerSeat::OnAdsInput(const FInputActionValue& Value)  { SetAiming(Value.Get<bool>()); }
 void AIBGunnerSeat::OnSwapInput(const FInputActionValue& Value) { RequestSwap(); }
 

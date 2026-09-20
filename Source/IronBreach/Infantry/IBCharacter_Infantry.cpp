@@ -1,5 +1,6 @@
 #include "IBCharacter_Infantry.h"
 #include "IronBreach.h"
+#include "Mech/IBMech_Base.h" // Server_RequestBoard hands the boarder to AIBMech_Base::ServerBoard
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -982,6 +983,29 @@ void AIBCharacter_Infantry::Look(const FInputActionValue& Value)
 	}
 }
 
+bool AIBCharacter_Infantry::Server_RequestBoard_Validate(AIBMech_Base* Mech, bool bWantLeftSeat)
+{
+	return true; // range/occupancy are judged in the implementation, where we can log why
+}
+
+void AIBCharacter_Infantry::Server_RequestBoard_Implementation(AIBMech_Base* Mech, bool bWantLeftSeat)
+{
+	if (!HasAuthority() || !IsValid(Mech)) { return; }
+
+	AController* Boarder = GetController();
+	if (!Boarder) { return; }
+
+	const float DistSq = FVector::DistSquared(GetActorLocation(), Mech->GetActorLocation());
+	if (DistSq > FMath::Square(BoardMaxDistance))
+	{
+		UE_LOG(LogIronBreach, Warning, TEXT("[Mech] %s asked to board from %.0f cm away (max %.0f) - refused."),
+			*GetName(), FMath::Sqrt(DistSq), BoardMaxDistance);
+		return;
+	}
+
+	Mech->ServerBoard(Boarder, this, bWantLeftSeat);
+}
+
 void AIBCharacter_Infantry::Interact()
 {
 	if (bIsCarrying || !FirstPersonCamera)
@@ -1373,6 +1397,7 @@ void AIBCharacter_Infantry::HandleTakeDamage_Implementation(float DamageAmount, 
 {
 	// Defensive kit windows (Bulwark Dash) scale what gets through — server-side, like all damage.
 	const float Scale = KitComponent ? KitComponent->GetDamageTakenScale() : 1.f;
+	if (KitComponent) { KitComponent->RecordGuardedDamage(DamageAmount); }
 	if (HealthComponent)
 	{
 		HealthComponent->ApplyDamage(DamageAmount * Scale, HitResult, InstigatedBy, DamageCauser);

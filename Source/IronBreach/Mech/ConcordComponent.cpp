@@ -112,6 +112,11 @@ void UConcordComponent::SetSyncInternal(float NewValue)
 
 void UConcordComponent::RegisterCoordinatedAction()
 {
+	// Tuning is EditAnywhere-only and nothing in C++ assigns it, so an unset
+	// DA_ConcordTuning on the BP would null-deref here the first time a mech landed
+	// a coordinated hit. No tuning means no meter movement, not a crash.
+	if (!Tuning) { return; }
+
 	if (!HasConcordAuthority() || bDesynced) return;
 
 	float Mult = 1.0f;
@@ -132,6 +137,10 @@ void UConcordComponent::RegisterCoordinatedAction()
 
 void UConcordComponent::RegisterLoss(EConcordLossReason Reason)
 {
+	// Tuning is EditAnywhere-only and nothing in C++ assigns it; LossMagnitude reads it
+	// unguarded. No tuning means no meter movement, not a crash.
+	if (!Tuning) { return; }
+
 	if (!HasConcordAuthority()) return;
 
 	// T0 guard (spec §3.2/§5.3): you cannot dig deeper than the bottom, and the ritual

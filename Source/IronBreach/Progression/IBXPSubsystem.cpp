@@ -22,6 +22,19 @@ void UIBXPSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		SaveData = Cast<UXPSaveGame>(UGameplayStatics::CreateSaveGameObject(UXPSaveGame::StaticClass()));
 	}
+
+	// Tuning has to be loaded here or it is never loaded at all: SetTuning() has no
+	// caller anywhere in C++ or Blueprint, so Tuning stayed null, ReportDamage computed
+	// a zero rate, ReportKaijuArmorDamage early-returned, LevelForXP read empty
+	// thresholds and OnXPLevelUp never fired -- every operative pinned at level 1 while
+	// both damage call sites fed it correctly. Same content-override idiom the Watch
+	// registry uses (IBWatch::Registry): a known asset path, loaded once, no hard ref.
+	if (!Tuning)
+	{
+		Tuning = LoadObject<UXPTuningData>(nullptr, TEXT("/Game/Characters/Infantry/DA_XPTuning.DA_XPTuning"));
+	}
+	UE_LOG(LogIronBreach, Log, TEXT("[XP] Tuning %s."),
+		Tuning ? TEXT("loaded") : TEXT("MISSING - XP will not accrue and levels stay at 1"));
 }
 
 void UIBXPSubsystem::Deinitialize()
@@ -220,6 +233,42 @@ int32 UIBXPSubsystem::GetPilotXP(AController* Pilot) const
 	if (Key.IsEmpty() || !SaveData) return 0;
 	const FXPRecord* Record = SaveData->PilotRecords.Find(Key);
 	return Record ? Record->TotalXP : 0;
+}
+
+void UIBXPSubsystem::GetLevelBounds(EXPTrack Track, int32 TotalXP, int32& OutLevelFloorXP, int32& OutNextLevelXP) const
+{
+	OutLevelFloorXP = 0;
+	OutNextLevelXP = 0;
+	if (!Tuning) return;
+	const TArray<int32>& Thresholds = (Track == EXPTrack::Pilot) ? Tuning->PilotLevelThresholds : Tuning->CrewLevelThresholds;
+	if (Thresholds.IsEmpty()) return;
+
+	TotalXP = FMath::Max(0, TotalXP);
+	const int32 Level = UXPTuningData::LevelForXP(TotalXP, Thresholds);
+
+	// The ladder's top, whether thresholds are cumulative or per-level steps: no level lies above their sum.
+	int64 Ceiling = TotalXP;
+	for (const int32 Threshold : Thresholds) { Ceiling += FMath::Max(0, Threshold); }
+	const int32 Top = static_cast<int32>(FMath::Min<int64>(Ceiling, MAX_int32 - 1));
+
+	// Floor: the smallest XP that already counts as this level.
+	int32 Lo = 0, Hi = TotalXP;
+	while (Lo < Hi)
+	{
+		const int32 Mid = Lo + (Hi - Lo) / 2;
+		if (UXPTuningData::LevelForXP(Mid, Thresholds) >= Level) { Hi = Mid; } else { Lo = Mid + 1; }
+	}
+	OutLevelFloorXP = Lo;
+
+	// Next: the smallest XP that counts as a higher level, when the ladder still goes up.
+	if (UXPTuningData::LevelForXP(Top, Thresholds) <= Level) return;
+	Lo = TotalXP + 1; Hi = Top;
+	while (Lo < Hi)
+	{
+		const int32 Mid = Lo + (Hi - Lo) / 2;
+		if (UXPTuningData::LevelForXP(Mid, Thresholds) > Level) { Hi = Mid; } else { Lo = Mid + 1; }
+	}
+	OutNextLevelXP = Lo;
 }
 
 int32 UIBXPSubsystem::GetCrewLevel(AController* SeatA, AController* SeatB) const

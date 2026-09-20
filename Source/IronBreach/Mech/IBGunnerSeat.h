@@ -131,6 +131,24 @@ protected:
 	void OnAdsInput(const FInputActionValue& Value);
 	void OnSwapInput(const FInputActionValue& Value);
 
+	// Raw fallbacks. The Enhanced Input actions above are optional and, in practice,
+	// unassigned: the comment that said AIBMechPlayerController "routes its bindings
+	// here" described a controller no GameMode instantiates, so the gunner could not
+	// aim or fire at all. These need no content wiring, like the E exit key.
+	void RawFirePressed();
+	void RawAdsPressed();
+	void RawAdsReleased();
+	void RawTurn(float Value);
+	void RawLookUp(float Value);
+
+	/** Accumulates MouseX/MouseY within a frame so ProcessLook runs once (see .cpp). */
+	FVector2D PendingLook = FVector2D::ZeroVector;
+
+	/** SERVER. A shot from this seat landed. Raises CONCORD when the navigator is
+	 *  simultaneously driving -- see AIBMech_Base::IsNavigatorDriving. */
+	UFUNCTION()
+	void HandleWeaponServerHit(AActor* HitActor);
+
 private:
 	/** Server-set, replicated to proxies. The hull poses the arm from this. */
 	UPROPERTY(Replicated)

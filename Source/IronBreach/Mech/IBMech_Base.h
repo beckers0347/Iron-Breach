@@ -7,6 +7,7 @@
 #include "Combat/WeaponVisualData.h"
 #include "Combat/WeaponRigComponent.h"
 #include "Mech/ConcordComponent.h"
+#include "Combat/IBInteractableInterface.h"
 #include "IBMech_Base.generated.h"
 
 class AController;
@@ -44,7 +45,7 @@ class AIBCharacter_Infantry;
  * networked path activates automatically when a second human boards.
  */
 UCLASS()
-class IRONBREACH_API AIBMech_Base : public ACharacter
+class IRONBREACH_API AIBMech_Base : public ACharacter, public IIBInteractable
 {
 	GENERATED_BODY()
 
@@ -58,6 +59,26 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	// --- IIBInteractable: walking up and pressing Interact is how you get in.
+	//     Runs on the interacting client; the request is relayed to the server by
+	//     AIBCharacter_Infantry::Server_RequestBoard (the hull is not theirs to RPC on). ---
+	virtual void Interact_Implementation(AActor* Interactor) override;
+	virtual FText GetInteractPrompt_Implementation() const override;
+
+public:
+	/** True when a crewed station is free for a boarder. */
+	UFUNCTION(BlueprintPure, Category = "Mech|Boarding")
+	bool HasFreeStation() const;
+
+	/** SERVER. Has the navigator fed the hull movement input within WindowSeconds?
+	 *  CONCORD's coordinated-action test reads this: the gunner landing a hit while
+	 *  the hull is being driven is two pilots acting together, which is the whole point. */
+	UFUNCTION(BlueprintPure, Category = "Mech|Concord")
+	bool IsNavigatorDriving(float WindowSeconds = 0.6f) const;
+
+protected:
+
 	virtual void PawnClientRestart() override;
 
 	/** Clears stale crew pointers when a new controller takes the hull (e.g. player boards
@@ -330,6 +351,29 @@ private:
 
 	/** Server: spawn + attach the gunner seat pawn. */
 	void SpawnGunnerSeat();
+
+	// --- Navigator input (hull) ---
+	// The hull is possessed by the navigator, so it binds its own input rather than
+	// waiting to be driven from outside. Enhanced Input is used when a BP subclass
+	// assigns the actions below; the raw axis-key fallbacks mean the mech is drivable
+	// with ZERO content wiring, exactly like the E exit key already is. Without either,
+	// nothing moved the hull at all -- AIBMechPlayerController, which the old comment
+	// here said would call RouteMoveInput(), is never instantiated by any GameMode.
+	void RawMoveForward(float Value);
+	void RawMoveRight(float Value);
+	void RawTurn(float Value);
+	void RawLookUp(float Value);
+	void ApplyNavigatorMove(const FVector2D& InputValue);
+
+	/** Server clock at the navigator's last non-zero move input. */
+	float LastNavigatorMoveTime = -1000.0f;
+
+	/** Client-side throttle for Server_ReportDriving (see ApplyNavigatorMove). */
+	float LastDriveReportTime = -1000.0f;
+	static constexpr float DriveReportInterval = 0.2f;
+
+	UFUNCTION(Server, Unreliable)
+	void Server_ReportDriving();
 
 	/** GameMode Logout fallback (fires AFTER the engine destroyed the leaver's pawn, so it
 	 *  can only tidy up): respawns a destroyed gunner seat, vacates stale seat records,
