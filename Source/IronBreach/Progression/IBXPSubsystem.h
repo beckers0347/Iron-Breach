@@ -101,6 +101,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "XP")
 	int32 GetCrewXP(AController* SeatA, AController* SeatB) const;
 
+	/** XP bounds of the level that contains TotalXP on a track: where that level starts and where
+	 *  the next one begins (OutNextLevelXP = 0 at the top of the ladder or without tuning). Walks
+	 *  the same LevelForXP the ledger uses, so it is right whatever the threshold convention. */
+	UFUNCTION(BlueprintPure, Category = "XP")
+	void GetLevelBounds(EXPTrack Track, int32 TotalXP, int32& OutLevelFloorXP, int32& OutNextLevelXP) const;
+
 	/** Flattened list of every weapon item unlocked at or below UpToLevel on the given track. */
 	UFUNCTION(BlueprintCallable, Category = "XP")
 	TArray<UIBItemDefinition*> GetUnlockedWeapons(EXPTrack Track, int32 UpToLevel) const;
