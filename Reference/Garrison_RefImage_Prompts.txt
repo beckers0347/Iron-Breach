@@ -1,0 +1,50 @@
+CARROWGATE GARRISON — REFERENCE IMAGE PROMPTS
+Shared style block (append to every prompt below, same as the Armory reference image):
+"Weathered world-scale concrete texture with visible staining and cracking, industrial military sci-fi aesthetic, overcast harbor/dam environment in the background with muted neutral desaturated color grading (no strong orange or warm cast), soft diffused lighting, minimal bloom, realistic game-environment concept art style, three-quarter exterior view, clean readable silhouette, suitable for use as a building reference sheet."
+
+Buildings found in the level (from actor prefixes 01-09), Armory (07) already done:
+
+---
+WATCH TOWER (04)
+Subject: A tall vertical watchtower structure at a coastal military garrison, four-story reinforced concrete shaft narrowing slightly toward the top.
+Detail: Angled peaked roof cap over an open observation platform with a railed perimeter walkway, narrow vertical viewing windows stacked up the shaft, an exterior ladder or stairwell attached to one side leading up, exposed conduit running the height of the tower toward a sensor console mount at the top, corner armor plating at the base.
+[+ shared style block]
+
+---
+BARRACKS (05)
+Subject: A long, low rectangular barracks building at a coastal military garrison, single-story concrete structure with a row of evenly spaced entrances.
+Detail: Row of small rectangular windows along the length of the building, flat-to-slightly-angled roof with vent stacks, a covered walkway or awning running the length of the front facade, reinforced corner plating, exposed conduit along the roofline, single steel entry doors with small number placards.
+[+ shared style block]
+
+---
+MESS HALL (06)
+Subject: A larger single-story mess hall building at a coastal military garrison, wider footprint than the barracks with a peaked or vaulted roof for a communal interior.
+Detail: Large angled roof with visible seams and a row of roof vents/chimney stacks, wide double-door entrance with hazard-stripe trim, a serving-window hatch on one side wall, larger windows than the barracks to suggest an open interior, exposed conduit along the upper wall band, corner armor plating.
+[+ shared style block]
+
+---
+COMMAND & COMMS (08)
+Subject: A command and communications building at a coastal military garrison, slightly taller and more reinforced-looking than the barracks, functioning as the garrison's nerve center.
+Detail: Angular armored roof cap with satellite dish mounts and antenna masts on top, exposed conduit and cable runs feeding down from the roof antennas into the walls, reinforced corner armor pillars, a bank of narrow reinforced windows suggesting a map/comms room inside, heavy steel door with hazard-stripe trim.
+[+ shared style block]
+
+---
+SENSOR ARRAY (09)
+Subject: A small technical outbuilding at a coastal military garrison topped with a large radome and sensor mast.
+Detail: Compact reinforced concrete base structure with a tall central mast rising from the roof topped by a radome or dish, scaffold framework supporting the mast, exposed conduit running from the base up to the mast, small reinforced glass panels on the base structure, corner armor plating, warning/hazard markings near the base access door.
+[+ shared style block]
+
+---
+VEHICLE BAY (02)
+Subject: A large vehicle bay / motor pool garage building at a coastal military garrison, wide footprint sized to fit ground vehicles.
+Detail: One or two large roll-up or sliding armored garage doors on the front facade with hazard-stripe trim, angular roof cap with raised panel seams, exposed conduit and overhead lighting fixtures visible near the door, reinforced corner armor pillars, a smaller personnel door beside the main vehicle doors.
+[+ shared style block]
+
+---
+MAIN GATE (01) — optional cosmetic pass, functional door already built
+Subject: A fortified checkpoint gatehouse structure flanking the garrison's main entrance road at a coastal military garrison.
+Detail: Twin reinforced concrete guard structures on either side of a vehicle checkpoint lane, angular roof caps matching the other garrison buildings, a heavy automatic armored gate door across the lane with hazard-stripe trim, exposed conduit feeding the gate mechanism, small reinforced viewing windows in each guard structure facing the checkpoint lane, corner armor plating.
+[+ shared style block]
+
+---
+NOTE: Parade Yard (03) is an open area, not a building — no reference image needed unless you want ground detailing reference.

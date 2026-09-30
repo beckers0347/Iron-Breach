@@ -356,6 +356,10 @@
 			"Type": "DynamicLibrary"
 		},
 		{
+			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-CADKernel.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-CEF3Utils.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -544,6 +548,10 @@
 			"Type": "DynamicLibrary"
 		},
 		{
+			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-DatasmithCore.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-DerivedDataCache.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -589,6 +597,10 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-DeviceProfileServices.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-DirectLink.dll",
 			"Type": "DynamicLibrary"
 		},
 		{
@@ -1964,6 +1976,10 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(EngineDir)/Binaries/Win64/libfbxsdk.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/Win64/oo2tex_win64_2.9.10.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -3016,6 +3032,114 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DataprepEditor/Binaries/Win64/UnrealEditor-DataprepCore.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DataprepEditor/Binaries/Win64/UnrealEditor-DataprepEditor.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DataprepEditor/Binaries/Win64/UnrealEditor-DataprepEditorScriptingUtilities.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DataprepEditor/Binaries/Win64/UnrealEditor-DataprepLibraries.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DataprepEditor/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-CADInterfaces.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-CADKernelSurface.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-CADLibrary.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-CADTools.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-DatasmithCADTranslator.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-DatasmithDispatcher.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-DatasmithOpenNurbsTranslator.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-DatasmithPLMXMLTranslator.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-DatasmithWireTranslator.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-ParametricSurface.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-ParametricSurfaceExtension.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2020.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2021_3.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2022.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2022_1.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2022_2.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2023_0.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2023_1.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2024_1.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2025_0.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor-WireInterface2026_0.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
 			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithContent/Binaries/Win64/UnrealEditor-DatasmithContent.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -3025,6 +3149,42 @@
 		},
 		{
 			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithContent/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/Binaries/Win64/UnrealEditor-DatasmithExternalSource.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/Binaries/Win64/UnrealEditor-DatasmithImporter.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/Binaries/Win64/UnrealEditor-DatasmithNativeTranslator.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/Binaries/Win64/UnrealEditor-DatasmithTranslator.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/Binaries/Win64/UnrealEditor-DirectLinkExtension.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/Binaries/Win64/UnrealEditor-DirectLinkExtensionEditor.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/Binaries/Win64/UnrealEditor-DirectLinkTest.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/Binaries/Win64/UnrealEditor-ExternalSource.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -4188,6 +4348,14 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(EngineDir)/Plugins/Online/SocketSubsystemSteamIP/Binaries/Win64/UnrealEditor-SocketSubsystemSteamIP.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Online/SocketSubsystemSteamIP/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
 			"Path": "$(EngineDir)/Plugins/PCG/Binaries/Win64/UnrealEditor-PCG.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -4941,6 +5109,18 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Tripo3DUEBridge-UE5.8-Win64/Binaries/Win64/UnrealEditor-Tripo3DUEBridge.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Tripo3DUEBridge-UE5.8-Win64/Binaries/Win64/UnrealEditor-Tripo3DUEBridge.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Tripo3DUEBridge-UE5.8-Win64/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		}
 	],
@@ -25618,6 +25798,10 @@
 			"Type": "NonUFS"
 		},
 		{
+			"Path": "$(EngineDir)/Binaries/Win64/libfbxsdk.dll",
+			"Type": "NonUFS"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/Win64/oo2tex_win64_2.9.10.dll",
 			"Type": "NonUFS"
 		},
@@ -29246,7 +29430,19 @@
 			"Type": "UFS"
 		},
 		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DataprepEditor/DataprepEditor.uplugin",
+			"Type": "UFS"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithCADImporter/DatasmithCADImporter.uplugin",
+			"Type": "UFS"
+		},
+		{
 			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithContent/DatasmithContent.uplugin",
+			"Type": "UFS"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Enterprise/DatasmithImporter/DatasmithImporter.uplugin",
 			"Type": "UFS"
 		},
 		{
@@ -29610,6 +29806,10 @@
 			"Type": "UFS"
 		},
 		{
+			"Path": "$(EngineDir)/Plugins/Online/SocketSubsystemSteamIP/SocketSubsystemSteamIP.uplugin",
+			"Type": "UFS"
+		},
+		{
 			"Path": "$(EngineDir)/Plugins/PCG/PCG.uplugin",
 			"Type": "UFS"
 		},
@@ -29844,6 +30044,10 @@
 		{
 			"Path": "$(ProjectDir)/IronBreach.uproject",
 			"Type": "UFS"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Tripo3DUEBridge-UE5.8-Win64/Tripo3DUEBridge.uplugin",
+			"Type": "UFS"
 		}
 	],
 	"BuildPlugins": [
@@ -29923,7 +30127,10 @@
 		"CustomMeshComponent",
 		"DataValidation",
 		"Dataflow",
+		"DataprepEditor",
+		"DatasmithCADImporter",
 		"DatasmithContent",
+		"DatasmithImporter",
 		"DeformerGraph",
 		"DerivedDataBuildController",
 		"DumpGPUServices",
@@ -30066,6 +30273,7 @@
 		"SkeletalMerging",
 		"SkeletalMeshModelingTools",
 		"SkeletalReduction",
+		"SocketSubsystemSteamIP",
 		"SoundFields",
 		"SpeedTreeImporter",
 		"StateTree",
@@ -30079,6 +30287,7 @@
 		"TmvMedia",
 		"ToolPresets",
 		"TraceUtilities",
+		"Tripo3DUEBridge",
 		"TweeningUtils",
 		"UMGWidgetPreview",
 		"UObjectPlugin",
