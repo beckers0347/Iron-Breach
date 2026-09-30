@@ -1418,7 +1418,6 @@ void AIBCharacter_Infantry::HandleTakeDamage_Implementation(float DamageAmount, 
 {
 	// Defensive kit windows (Bulwark Dash) scale what gets through — server-side, like all damage.
 	const float Scale = KitComponent ? KitComponent->GetDamageTakenScale() : 1.f;
-	if (KitComponent) { KitComponent->RecordGuardedDamage(DamageAmount); }
 	if (HealthComponent)
 	{
 		HealthComponent->ApplyDamage(DamageAmount * Scale, HitResult, InstigatedBy, DamageCauser);
