@@ -1019,12 +1019,36 @@ void AIBCharacter_Infantry::Interact()
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
-	if (GetWorld() && GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
+	UWorld* World = GetWorld();
+	if (!World)
 	{
-		if (Hit.GetActor() && Hit.GetActor()->Implements<UIBInteractable>())
+		return;
+	}
+
+	AActor* Target = nullptr;
+	if (World->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params)
+		&& Hit.GetActor() && Hit.GetActor()->Implements<UIBInteractable>())
+	{
+		Target = Hit.GetActor();
+	}
+	else
+	{
+		// Pawn-based interactables -- the Caryatid hull -- are invisible to that trace: a capsule
+		// on the Pawn profile ignores ECC_Visibility, and a skeletal mesh without a physics asset
+		// has no query shape at all. The capsule does block ECC_Pawn (the channel the mech's own
+		// weapon trace uses), so look once more on that channel. World geometry blocks ECC_Pawn
+		// too, so this cannot reach through walls.
+		FHitResult PawnHit;
+		if (World->LineTraceSingleByChannel(PawnHit, Start, End, ECC_Pawn, Params)
+			&& PawnHit.GetActor() && PawnHit.GetActor()->Implements<UIBInteractable>())
 		{
-			IIBInteractable::Execute_Interact(Hit.GetActor(), this);
+			Target = PawnHit.GetActor();
 		}
+	}
+
+	if (Target)
+	{
+		IIBInteractable::Execute_Interact(Target, this);
 	}
 }
 
