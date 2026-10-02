@@ -7,6 +7,7 @@
 #include "UI/IBMenuSubsystem.h"
 #include "UI/IBObjectiveWidget.h"
 #include "UI/IBLootToastWidget.h"
+#include "UI/IBSkillMarkerWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -51,6 +52,8 @@ void AIBPlayerController::BeginPlay()
 		UClass* ToastClass = LootToastWidgetClass ? *LootToastWidgetClass : UIBLootToastWidget::StaticClass();
 		LootToastWidget = CreateWidget<UIBLootToastWidget>(this, ToastClass);
 		if (LootToastWidget) { LootToastWidget->AddToViewport(6); }
+		UIBSkillMarkerWidget* Marks=CreateWidget<UIBSkillMarkerWidget>(this);
+		if (Marks) { Marks->AddToViewport(4); }
 	}
 }
 
@@ -80,6 +83,7 @@ void AIBPlayerController::SetupInputComponent()
 	// NB: through the BASE UInputComponent pointer — UEnhancedInputComponent
 	// deletes BindKey on the derived type (the infantry's raw binds work the
 	// same way).
+	InputComponent->BindKey(EKeys::K, IE_Pressed, this, &AIBPlayerController::OpenSkillsMenu);
 	InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &AIBPlayerController::OpenSystemMenu);
 }
 
@@ -92,8 +96,9 @@ void AIBPlayerController::ToggleMenuScreen(FName ScreenId) const
 	}
 }
 
-void AIBPlayerController::OpenInventoryMenu() { ToggleMenuScreen(TEXT("Inventory")); }
+void AIBPlayerController::OpenInventoryMenu() { ToggleMenuScreen(TEXT("Character")); }
 void AIBPlayerController::OpenMapMenu()       { ToggleMenuScreen(TEXT("Map")); }
+void AIBPlayerController::OpenSkillsMenu() { ToggleMenuScreen(TEXT("Skills")); }
 void AIBPlayerController::OpenLedgerMenu()    { ToggleMenuScreen(TEXT("Ledger")); }
 void AIBPlayerController::OpenSystemMenu()    { ToggleMenuScreen(TEXT("System")); }
 

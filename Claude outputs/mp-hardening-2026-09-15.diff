@@ -1,0 +1,492 @@
+diff -ru ibpatch_orig/Items/IBPlayerState.cpp ibpatch/Source/IronBreach/Items/IBPlayerState.cpp
+--- ibpatch_orig/Items/IBPlayerState.cpp	2026-09-15 18:50:53.907755346 +0000
++++ ibpatch/Source/IronBreach/Items/IBPlayerState.cpp	2026-09-15 18:46:03.123624884 +0000
+@@ -67,6 +67,14 @@
+ 				XP->OnXPLevelUp.RemoveDynamic(this, &AIBPlayerState::HandleXPLevelUp);
+ 			}
+ 		}
++
++		// A real departure (logout / kick destroys the PlayerState) takes any unarmed Watch
++		// proposal of theirs off the board. Map travel tears everything down together, so
++		// only the Destroyed reason counts — never LevelTransition / RemovedFromWorld.
++		if (EndPlayReason == EEndPlayReason::Destroyed)
++		{
++			if (AIBWatchBoard* Board = AIBWatchBoard::Get(GetWorld())) { Board->ServerPlayerLeft(this); }
++		}
+ 	}
+ 	if (UWorld* World = GetWorld())
+ 	{
+diff -ru ibpatch_orig/Missions/IBMissionDirector.cpp ibpatch/Source/IronBreach/Missions/IBMissionDirector.cpp
+--- ibpatch_orig/Missions/IBMissionDirector.cpp	2026-09-15 18:50:53.929857763 +0000
++++ ibpatch/Source/IronBreach/Missions/IBMissionDirector.cpp	2026-09-15 18:47:35.194653162 +0000
+@@ -44,6 +44,7 @@
+ 	if (UWorld* World = GetWorld())
+ 	{
+ 		World->RemoveOnActorSpawnedHandler(ActorSpawnedHandle);
++		World->GetTimerManager().ClearTimer(EmergenceTimer);
+ 	}
+ 	Super::EndPlay(EndPlayReason);
+ }
+@@ -58,12 +59,16 @@
+ 
+ void AIBMissionDirector::TrackKaiju(AIBCharacter_Kaiju* Kaiju)
+ {
+-	if (!Kaiju) { return; }
++	if (!Kaiju || !HasAuthority()) { return; }
++	if (Kaiju->GetFightPhase() == EKaijuFightPhase::Dead) { return; } // a corpse is not a threat
++	const TWeakObjectPtr<AIBCharacter_Kaiju> Key(Kaiju);
++	if (LiveKaiju.Contains(Key)) { return; }                          // placed AND spawned-handler, or re-entry
+ 
+-	++LiveKaiju;
++	LiveKaiju.Add(Key);
+ 	Kaiju->OnPhaseChanged.AddDynamic(this, &AIBMissionDirector::HandleKaijuFightPhase);
++	Kaiju->OnDestroyed.AddDynamic(this, &AIBMissionDirector::HandleKaijuDestroyed);
+ 
+-	UE_LOG(LogIronBreach, Log, TEXT("[Mission] Tracking kaiju %s (%d live)"), *Kaiju->GetName(), LiveKaiju);
++	UE_LOG(LogIronBreach, Log, TEXT("[Mission] Tracking kaiju %s (%d live)"), *Kaiju->GetName(), LiveKaiju.Num());
+ 
+ 	// First contact: the emergence beat, then kill orders.
+ 	if (MissionPhase == EIBMissionPhase::Patrol || MissionPhase == EIBMissionPhase::Standby)
+@@ -88,10 +93,59 @@
+ {
+ 	if (!HasAuthority() || NewPhase != EKaijuFightPhase::Dead) { return; }
+ 
+-	LiveKaiju = FMath::Max(LiveKaiju - 1, 0);
+-	UE_LOG(LogIronBreach, Log, TEXT("[Mission] Kaiju down (%d remain)"), LiveKaiju);
++	// A dynamic delegate does not say WHICH kaiju fired; whichever tracked beast now reads
++	// Dead is the one (SetFightPhase writes the phase before it broadcasts, and they die one
++	// broadcast at a time). Stale entries met on the way are dropped.
++	AIBCharacter_Kaiju* Fallen = nullptr;
++	for (auto It = LiveKaiju.CreateIterator(); It; ++It)
++	{
++		AIBCharacter_Kaiju* Kaiju = It->Get();
++		if (!Kaiju) { It.RemoveCurrent(); continue; }
++		if (Kaiju->GetFightPhase() == EKaijuFightPhase::Dead)
++		{
++			Fallen = Kaiju;
++			It.RemoveCurrent();
++			break;
++		}
++	}
++
++	if (Fallen) { ReleaseKaiju(Fallen, TEXT("down")); }
++	EvaluateSecured();
++}
++
++void AIBMissionDirector::HandleKaijuDestroyed(AActor* DestroyedActor)
++{
++	if (!HasAuthority()) { return; }
++	AIBCharacter_Kaiju* Kaiju = Cast<AIBCharacter_Kaiju>(DestroyedActor);
++	if (!Kaiju) { return; }
++
++	const TWeakObjectPtr<AIBCharacter_Kaiju> Key(Kaiju);
++	if (!LiveKaiju.Contains(Key)) { return; } // already released by its death
++
++	LiveKaiju.Remove(Key);
++	ReleaseKaiju(Kaiju, TEXT("removed from the world without dying"));
++	EvaluateSecured();
++}
++
++void AIBMissionDirector::ReleaseKaiju(AIBCharacter_Kaiju* Kaiju, const TCHAR* Why)
++{
++	if (!Kaiju) { return; }
++	Kaiju->OnPhaseChanged.RemoveDynamic(this, &AIBMissionDirector::HandleKaijuFightPhase);
++	Kaiju->OnDestroyed.RemoveDynamic(this, &AIBMissionDirector::HandleKaijuDestroyed);
++	UE_LOG(LogIronBreach, Log, TEXT("[Mission] Kaiju %s %s (%d remain)"), *Kaiju->GetName(), Why, LiveKaiju.Num());
++}
++
++void AIBMissionDirector::EvaluateSecured()
++{
++	if (!HasAuthority()) { return; }
++
++	// Anything GC'd without either delegate firing falls out here.
++	for (auto It = LiveKaiju.CreateIterator(); It; ++It)
++	{
++		if (!It->IsValid()) { It.RemoveCurrent(); }
++	}
+ 
+-	if (LiveKaiju == 0 &&
++	if (LiveKaiju.Num() == 0 &&
+ 		(MissionPhase == EIBMissionPhase::Engaged || MissionPhase == EIBMissionPhase::Emergence))
+ 	{
+ 		GetWorldTimerManager().ClearTimer(EmergenceTimer);
+diff -ru ibpatch_orig/Missions/IBMissionDirector.h ibpatch/Source/IronBreach/Missions/IBMissionDirector.h
+--- ibpatch_orig/Missions/IBMissionDirector.h	2026-09-15 18:50:53.924909446 +0000
++++ ibpatch/Source/IronBreach/Missions/IBMissionDirector.h	2026-09-15 18:47:35.194790890 +0000
+@@ -74,14 +74,30 @@
+ 	UFUNCTION()
+ 	void HandleKaijuFightPhase(EKaijuFightPhase NewPhase);
+ 
++	/** A tracked kaiju left the world WITHOUT dying (spawner reset, level script, dev
++	 *  command). Without this the live count never reached zero and ZONE SECURED could
++	 *  never fire again for that mission. Corpses that already reported Dead are ignored. */
++	UFUNCTION()
++	void HandleKaijuDestroyed(AActor* DestroyedActor);
++
++public:
++	/** Server-side truth; clients only ever see the phase. */
++	UFUNCTION(BlueprintPure, Category = "Mission")
++	int32 GetLiveKaijuCount() const { return LiveKaiju.Num(); }
++
+ private:
+ 	void SetMissionPhase(EIBMissionPhase NewPhase); // server only
+ 	void TrackKaiju(AIBCharacter_Kaiju* Kaiju);     // server only
+ 	void OnWorldActorSpawned(AActor* Actor);        // server only
++	/** Server only: unbind a kaiju we no longer track (dead or destroyed) and log it. */
++	void ReleaseKaiju(AIBCharacter_Kaiju* Kaiju, const TCHAR* Why);
++	/** Server only: no live kaiju left mid-fight -> ZONE SECURED. Also sheds stale entries. */
++	void EvaluateSecured();
+ 
+ 	FDelegateHandle ActorSpawnedHandle;
+ 	FTimerHandle EmergenceTimer;
+ 
+-	/** Live tracked kaiju count; Secured when it returns to zero. */
+-	int32 LiveKaiju = 0;
++	/** Live tracked kaiju (server only); Secured when it empties. A set, not a counter, so
++	 *  death + destruction of the same beast can never double-count. */
++	TSet<TWeakObjectPtr<AIBCharacter_Kaiju>> LiveKaiju;
+ };
+diff -ru ibpatch_orig/Missions/IBMissionSubsystem.cpp ibpatch/Source/IronBreach/Missions/IBMissionSubsystem.cpp
+--- ibpatch_orig/Missions/IBMissionSubsystem.cpp	2026-09-15 18:50:53.915642170 +0000
++++ ibpatch/Source/IronBreach/Missions/IBMissionSubsystem.cpp	2026-09-15 18:46:21.307625965 +0000
+@@ -41,3 +41,20 @@
+ 
+ 	UE_LOG(LogIronBreach, Log, TEXT("[Mission] Auto-spawned director for %s"), *InWorld.GetName());
+ }
++
++AIBMissionDirector* UIBMissionSubsystem::GetDirector() const
++{
++	if (Director.IsValid()) { return Director.Get(); }
++
++	// Clients (and anyone asking before OnWorldBeginPlay): the replicated actor does not go
++	// through this subsystem, so look for it — same trick AIBWatchBoard::Get uses.
++	if (UWorld* World = GetWorld())
++	{
++		for (TActorIterator<AIBMissionDirector> It(World); It; ++It)
++		{
++			Director = *It;
++			return *It;
++		}
++	}
++	return nullptr;
++}
+diff -ru ibpatch_orig/Missions/IBMissionSubsystem.h ibpatch/Source/IronBreach/Missions/IBMissionSubsystem.h
+--- ibpatch_orig/Missions/IBMissionSubsystem.h	2026-09-15 18:50:53.913699061 +0000
++++ ibpatch/Source/IronBreach/Missions/IBMissionSubsystem.h	2026-09-15 18:46:17.551625742 +0000
+@@ -20,10 +20,13 @@
+ public:
+ 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+ 
+-	/** The world's director, if any (placed or auto-spawned). */
++	/** The world's director, if any (placed or auto-spawned). On clients the auto-spawned
++	 *  director arrives by replication some time after world begin, so this resolves lazily:
++	 *  the first call after it lands finds and caches it. Null until then (and in menu worlds). */
+ 	UFUNCTION(BlueprintPure, Category = "Mission")
+-	AIBMissionDirector* GetDirector() const { return Director.Get(); }
++	AIBMissionDirector* GetDirector() const;
+ 
+ private:
+-	TWeakObjectPtr<AIBMissionDirector> Director;
++	/** Cache — filled on the server at spawn, on clients by the first successful lookup. */
++	mutable TWeakObjectPtr<AIBMissionDirector> Director;
+ };
+diff -ru ibpatch_orig/Online/IBSessionSubsystem.cpp ibpatch/Source/IronBreach/Online/IBSessionSubsystem.cpp
+--- ibpatch_orig/Online/IBSessionSubsystem.cpp	2026-09-15 18:50:53.887642168 +0000
++++ ibpatch/Source/IronBreach/Online/IBSessionSubsystem.cpp	2026-09-15 18:45:33.047623097 +0000
+@@ -5,13 +5,22 @@
+ #include "OnlineSessionSettings.h"  // FOnlineSessionSettings, FOnlineSessionSearch
+ #include "Engine/World.h"
+ #include "Engine/GameInstance.h"
++#include "Engine/Engine.h"          // GEngine->OnNetworkFailure / OnTravelFailure
++#include "Engine/NetDriver.h"       // UNetDriver::GetNetMode in the failure handler
+ #include "GameFramework/PlayerController.h"
++#include "TimerManager.h"
+ #include "UObject/UObjectGlobals.h"
+ 
+ namespace
+ {
+ 	// One project-wide session name; we only ever run one session at a time.
+ 	const FName IBSessionName(NAME_GameSession);
++
++	// How long after the title map loads before the link-failure banner goes out
++	// (the front end needs a beat to construct and bind OnSessionStatusChanged).
++	constexpr float LinkFailureAnnounceDelay = 1.5f;
++	// If no map load follows a failure (the engine decided not to travel), say it anyway.
++	constexpr float LinkFailureFallbackDelay = 4.0f;
+ }
+ 
+ void UIBSessionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+@@ -26,6 +35,15 @@
+ 	}
+ 
+ 	PreLoadMapHandle = FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UIBSessionSubsystem::HandlePreLoadMap);
++	PostLoadMapHandle = FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UIBSessionSubsystem::HandlePostLoadMap);
++
++	// Link failures: the engine's default already drops a client back to GameDefaultMap;
++	// these hooks add the WHY (status + remembered message) and the local session cleanup.
++	if (GEngine)
++	{
++		GEngine->OnNetworkFailure().AddUObject(this, &UIBSessionSubsystem::HandleNetworkFailure);
++		GEngine->OnTravelFailure().AddUObject(this, &UIBSessionSubsystem::HandleTravelFailure);
++	}
+ }
+ 
+ void UIBSessionSubsystem::HandlePreLoadMap(const FString& MapName)
+@@ -47,9 +65,168 @@
+ 		Sessions->ClearOnSessionUserInviteAcceptedDelegate_Handle(InviteAcceptedHandle);
+ 	}
+ 	FCoreUObjectDelegates::PreLoadMap.Remove(PreLoadMapHandle);
++	FCoreUObjectDelegates::PostLoadMapWithWorld.Remove(PostLoadMapHandle);
++	if (GEngine)
++	{
++		GEngine->OnNetworkFailure().RemoveAll(this);
++		GEngine->OnTravelFailure().RemoveAll(this);
++	}
++	if (UGameInstance* GI = GetGameInstance())
++	{
++		GI->GetTimerManager().ClearTimer(LinkFailureAnnounceHandle);
++	}
+ 	Super::Deinitialize();
+ }
+ 
++// ---- Link failures ---------------------------------------------------------
++
++void UIBSessionSubsystem::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
++{
++	// GEngine's delegates are global: in PIE every game instance hears every failure.
++	// Only act on our own world's.
++	if (World && World->GetGameInstance() != GetGameInstance()) { return; }
++
++	const bool bClientSide = NetDriver ? (NetDriver->GetNetMode() == NM_Client)
++	                                   : (World && World->GetNetMode() == NM_Client);
++	UE_LOG(LogIronBreach, Warning, TEXT("Session: network failure %s on the %s — %s"),
++		ENetworkFailure::ToString(FailureType), bClientSide ? TEXT("client") : TEXT("host"), *ErrorString);
++
++	if (!bClientSide)
++	{
++		// Listen host. A client dropping is routine — THEIR connection is what failed, the
++		// engine already told the GameMode (Logout -> PawnLeavingGame -> crew/vault cleanup).
++		// The one host-side failure worth shouting about is the listen socket itself: if it
++		// never opened (Steam driver / port), nobody can ever join and the host would not know.
++		if (FailureType == ENetworkFailure::NetDriverListenFailure ||
++			FailureType == ENetworkFailure::NetDriverCreateFailure ||
++			FailureType == ENetworkFailure::NetDriverAlreadyExists)
++		{
++			ReportStatus(EIBSessionStatus::Failed, TEXT("LISTEN SOCKET FAILED - SQUAD CANNOT JOIN (see log)"));
++		}
++		return;
++	}
++
++	// Client side: the engine is about to send us home (Browse to GameDefaultMap). Say why.
++	FString Message;
++	switch (FailureType)
++	{
++	case ENetworkFailure::ConnectionLost:
++	case ENetworkFailure::ConnectionTimeout:
++		Message = TEXT("SQUAD LINK LOST - THE HOST WENT DARK");
++		break;
++	case ENetworkFailure::FailureReceived:            // the server closed the connection on purpose
++		Message = TEXT("THE HOST CLOSED THE LINK");
++		break;
++	case ENetworkFailure::PendingConnectionFailure:   // join never completed the handshake
++		Message = TEXT("COULD NOT REACH THE HOST");
++		break;
++	case ENetworkFailure::OutdatedClient:
++	case ENetworkFailure::OutdatedServer:
++	case ENetworkFailure::NetGuidMismatch:
++	case ENetworkFailure::NetChecksumMismatch:
++		Message = TEXT("BUILD MISMATCH - RUN UPDATE_IronBreach.bat AND RETRY");
++		break;
++	default:
++		Message = FString::Printf(TEXT("SQUAD LINK FAILED (%s)"), ENetworkFailure::ToString(FailureType));
++		break;
++	}
++	QueueLinkFailure(Message);
++
++	// Our local session entry still points at the dead host. DestroyThen would clear it before
++	// the next host/join anyway, but leaving it registered keeps the Steam overlay advertising
++	// a lobby that no longer exists. Tear it down now; nobody waits on the callback.
++	if (IOnlineSessionPtr Sessions = GetSessionInterface())
++	{
++		if (Sessions->GetNamedSession(IBSessionName))
++		{
++			UE_LOG(LogIronBreach, Log, TEXT("Session: dropping the stale local session entry after the link failure"));
++			Sessions->DestroySession(IBSessionName);
++		}
++	}
++}
++
++void UIBSessionSubsystem::HandleTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString)
++{
++	if (World && World->GetGameInstance() != GetGameInstance()) { return; }
++
++	UE_LOG(LogIronBreach, Warning, TEXT("Session: travel failure %s — %s"), ETravelFailure::ToString(FailureType), *ErrorString);
++
++	FString Message;
++	switch (FailureType)
++	{
++	case ETravelFailure::PackageMissing:
++	case ETravelFailure::PackageVersion:
++	case ETravelFailure::NoDownload:
++		Message = TEXT("MAP MISSING OR OUTDATED - RUN UPDATE_IronBreach.bat");
++		break;
++	case ETravelFailure::ServerTravelFailure:
++	case ETravelFailure::ClientTravelFailure:
++	case ETravelFailure::LoadMapFailure:
++	case ETravelFailure::InvalidURL:
++	case ETravelFailure::PendingNetGameCreateFailure:
++	case ETravelFailure::CheatCommands:
++	case ETravelFailure::CloudSaveFailure:
++	default:
++		Message = FString::Printf(TEXT("DEPLOYMENT FAILED (%s)"), ETravelFailure::ToString(FailureType));
++		break;
++	}
++	QueueLinkFailure(Message);
++}
++
++void UIBSessionSubsystem::QueueLinkFailure(const FString& Message)
++{
++	PendingLinkFailure = FText::FromString(Message);
++	bLinkFailurePending = true;
++	LastLinkFailure = PendingLinkFailure;
++	bHasUnreadLinkFailure = true;
++
++	// The GameInstance timer manager outlives the world that just died, unlike a world timer.
++	if (UGameInstance* GI = GetGameInstance())
++	{
++		GI->GetTimerManager().SetTimer(LinkFailureAnnounceHandle, this,
++			&UIBSessionSubsystem::AnnouncePendingLinkFailure, LinkFailureFallbackDelay, false);
++	}
++}
++
++void UIBSessionSubsystem::HandlePostLoadMap(UWorld* LoadedWorld)
++{
++	if (!bLinkFailurePending) { return; }
++	if (LoadedWorld && LoadedWorld->GetGameInstance() != GetGameInstance()) { return; }
++
++	// We landed somewhere (normally GameDefaultMap). Give the front end a beat to construct
++	// and bind, then say what happened.
++	if (UGameInstance* GI = GetGameInstance())
++	{
++		GI->GetTimerManager().SetTimer(LinkFailureAnnounceHandle, this,
++			&UIBSessionSubsystem::AnnouncePendingLinkFailure, LinkFailureAnnounceDelay, false);
++	}
++}
++
++void UIBSessionSubsystem::AnnouncePendingLinkFailure()
++{
++	if (!bLinkFailurePending) { return; }
++	bLinkFailurePending = false;
++
++	const FString Message = PendingLinkFailure.ToString();
++	ReportStatus(EIBSessionStatus::Failed, Message);
++
++#if !UE_BUILD_SHIPPING
++	// Zero-content floor: even with no widget listening yet, the player sees a line.
++	if (GEngine)
++	{
++		GEngine->AddOnScreenDebugMessage(-1, 8.0f, FColor::Red, Message);
++	}
++#endif
++}
++
++bool UIBSessionSubsystem::ConsumeLastLinkFailure(FText& OutMessage)
++{
++	if (!bHasUnreadLinkFailure) { return false; }
++	bHasUnreadLinkFailure = false;
++	OutMessage = LastLinkFailure;
++	return true;
++}
++
+ void UIBSessionSubsystem::OnInviteAccepted(const bool bWasSuccessful, const int32 /*ControllerId*/,
+ 	FUniqueNetIdPtr /*UserId*/, const FOnlineSessionSearchResult& InviteResult)
+ {
+diff -ru ibpatch_orig/Online/IBSessionSubsystem.h ibpatch/Source/IronBreach/Online/IBSessionSubsystem.h
+--- ibpatch_orig/Online/IBSessionSubsystem.h	2026-09-15 18:50:53.885356920 +0000
++++ ibpatch/Source/IronBreach/Online/IBSessionSubsystem.h	2026-09-15 18:45:34.899623207 +0000
+@@ -3,9 +3,12 @@
+ #include "CoreMinimal.h"
+ #include "Subsystems/GameInstanceSubsystem.h"
+ #include "Interfaces/OnlineSessionInterface.h" // IOnlineSessionPtr + completion delegate types
++#include "Engine/EngineBaseTypes.h"            // ENetworkFailure / ETravelFailure (link-failure handlers)
++#include "Engine/EngineTypes.h"                // FTimerHandle
+ #include "IBSessionSubsystem.generated.h"
+ 
+ class FOnlineSessionSearch;
++class UNetDriver;
+ 
+ /** Every beat of the host/join flow, for front-end feedback. A silent menu
+  *  reads as a broken menu — the demo build cannot afford that. */
+@@ -120,7 +123,35 @@
+ 	UPROPERTY(BlueprintAssignable, Category = "IronBreach|Online")
+ 	FOnIBSessionStatusChanged OnSessionStatusChanged;
+ 
++	/**
++	 * The last LINK failure this machine suffered — the host went dark, the connection timed
++	 * out, a build mismatch, a travel that never landed. The engine handles the mechanics
++	 * (a client is dropped back onto GameDefaultMap); this remembers WHY so the front end can
++	 * say it instead of reading as a silent crash-to-title. One-shot: returns true and clears
++	 * the message the first time it is read after a failure. Call it from the operative sheet /
++	 * main menu on construct.
++	 */
++	UFUNCTION(BlueprintCallable, Category = "IronBreach|Online")
++	bool ConsumeLastLinkFailure(FText& OutMessage);
++
+ private:
++	// ---- Link failures (2026-09-15, MP_HARDENING_2026-09-15.md) ----
++	// Before this, a host dropping out dumped clients on the title screen with no word and a
++	// stale Steam session entry still registered locally. Now: log it, remember it, tear the
++	// local session entry down, and announce it once the title map is up.
++	void HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
++	void HandleTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString);
++	void HandlePostLoadMap(UWorld* LoadedWorld);
++	/** Remember a failure and arm the announcement (after the next map load, or on a fallback timer). */
++	void QueueLinkFailure(const FString& Message);
++	void AnnouncePendingLinkFailure();
++	FDelegateHandle PostLoadMapHandle;
++	FTimerHandle LinkFailureAnnounceHandle;
++	FText PendingLinkFailure;
++	bool bLinkFailurePending = false;
++	FText LastLinkFailure;
++	bool bHasUnreadLinkFailure = false;
++
+ 	/** Input-mode law, enforced globally: UIOnly survives map travel and
+ 	 *  bricks the next level, so every travel (host ServerTravel, client
+ 	 *  follow, solo OpenLevel) resets the local player to GameOnly first.
+diff -ru ibpatch_orig/Online/IBWatchBoard.cpp ibpatch/Source/IronBreach/Online/IBWatchBoard.cpp
+--- ibpatch_orig/Online/IBWatchBoard.cpp	2026-09-15 18:50:53.899642169 +0000
++++ ibpatch/Source/IronBreach/Online/IBWatchBoard.cpp	2026-09-15 18:45:51.015624165 +0000
+@@ -173,6 +173,17 @@
+ 	ClearAll();
+ }
+ 
++void AIBWatchBoard::ServerPlayerLeft(const APlayerState* Leaver)
++{
++	if (!HasAuthority() || !Leaver || !IsValid(this)) { return; }
++	if (ProposedId.IsNone() || IsArmed()) { return; }                 // nothing pending, or the host already owns it
++	if (Leaver->GetPlayerId() != ProposedByPlayerId) { return; }       // someone else's proposal
++
++	UE_LOG(LogIronBreach, Log, TEXT("[Watch] %s left the net with '%s' proposed and unarmed — standing the board down"),
++		*ProposedByName, *ProposedId.ToString());
++	ClearAll();
++}
++
+ void AIBWatchBoard::Arm(FName Id)
+ {
+ 	ArmedId = Id;
+diff -ru ibpatch_orig/Online/IBWatchBoard.h ibpatch/Source/IronBreach/Online/IBWatchBoard.h
+--- ibpatch_orig/Online/IBWatchBoard.h	2026-09-15 18:50:53.896576290 +0000
++++ ibpatch/Source/IronBreach/Online/IBWatchBoard.h	2026-09-15 18:45:47.283623943 +0000
+@@ -41,6 +41,12 @@
+ 	void ServerConfirm(APlayerState* By);
+ 	void ServerCancel(APlayerState* By);
+ 
++	/** SERVER. A player's PlayerState is going away (logout / kick). A proposal they made
++	 *  that the host never armed dies with them — otherwise the card keeps offering a drop
++	 *  "proposed by" someone who is no longer on the net. An ARMED drop is the host's call
++	 *  and proceeds regardless. Called from AIBPlayerState::EndPlay; safe for anyone. */
++	void ServerPlayerLeft(const APlayerState* Leaver);
++
+ 	/** Listen-server host (or the standalone player): the local controller on the authority. */
+ 	bool IsHostPlayer(const APlayerState* PS) const;
+ 

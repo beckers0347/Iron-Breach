@@ -149,12 +149,19 @@ private:
 	UFUNCTION() void CycleSort();
 	UFUNCTION() void EquipSelected();
 	UPROPERTY(Transient) TObjectPtr<class UImage> DetailIcon;
+	UPROPERTY(Transient) TObjectPtr<class UIBItemGlyphWidget> DetailGlyph;
+	UPROPERTY(Transient) TObjectPtr<class UBorder> DetailFrame;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailRating;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailRatingLabel;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailRarity;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailCategory;
 	UPROPERTY(Transient) TObjectPtr<class UVerticalBox> DetailStats;
 	UPROPERTY(Transient) TObjectPtr<class UButton> EquipButton;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> EquipLabel;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> SortLabel;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> CharacterStats;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> CharacterEquipmentValue;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> CharacterBackpackValue;
 	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> PortraitMaterial;
 	UPROPERTY(Transient) TWeakObjectPtr<UIBItemTileWidget> SelectedTile;
 	FGuid SelectedItemId;
@@ -206,4 +213,10 @@ private:
 	 *  Active renders amber, rest service-gray (same grammar as the tab banner). */
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UTextBlock>> FilterTabLabels;
+	UPROPERTY(Transient) TArray<TObjectPtr<UTextBlock>> FilterCounts;
+	UPROPERTY(Transient) TArray<TObjectPtr<class UButton>> FilterButtons;
+	/** Lit left edge of the active category row. */
+	UPROPERTY(Transient) TArray<TObjectPtr<class UBorder>> FilterAccents;
+	/** Slot captions over the equipment wells; equipped gear speaks for itself, so they hide once filled. */
+	UPROPERTY(Transient) TMap<EIBEquipSlot, TObjectPtr<UTextBlock>> WellLabels;
 };

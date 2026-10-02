@@ -2,6 +2,7 @@
 
 #include "UI/IBStyleKit.h"
 #include "UI/IBMenuBackdrop.h"
+#include "UI/IBGlassBorder.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/VerticalBox.h"
@@ -32,11 +33,13 @@ namespace IBMenuLayout
 		IBStyle::UseDisplayFace(Result);
 		return Result;
 	}
+	/** Content panel: chamfered glass (UIBGlassBorder). Fill/edge follow SetBrush like any border. */
 	inline UBorder* Card(UWidgetTree* Tree, UWidget* Child, FMargin Padding = FMargin(20.f))
 	{
-		UBorder* Result = IBStyle::MakePanel(Tree, FLinearColor(.012f, .025f, .031f, .96f), 2.f);
+		UIBGlassBorder* Result = Tree->ConstructWidget<UIBGlassBorder>();
+		Result->SetBrush(IBStyle::RoundedBrush(FLinearColor(.008f, .019f, .028f, .83f), 0.f, IBStyle::Line(), 1.f));
 		Result->SetPadding(Padding);
-		Result->SetContent(Child);
+		if (Child) { Result->SetContent(Child); }
 		return Result;
 	}
 	inline USizeBox* Width(UWidgetTree* Tree, UWidget* Child, float Value)
@@ -61,19 +64,13 @@ namespace IBMenuLayout
 	}
 	inline void StyleButton(UButton* Button, bool bAccent = false)
 	{
-		IBStyle::StyleButton(Button, bAccent, 2.f);
-		FButtonStyle Style = Button->GetStyle();
-		Style.Normal = IBStyle::RoundedBrush(bAccent ? FLinearColor(.31f, .21f, .065f) : FLinearColor(.025f, .045f, .052f),
-			2.f, bAccent ? IBStyle::Amber() : FLinearColor(.11f, .20f, .23f), 1.f);
-		Style.NormalPadding = FMargin(16, 10);
-		Style.PressedPadding = FMargin(16, 11, 16, 9);
-		Button->SetStyle(Style);
+		IBStyle::StyleButton(Button, bAccent);
 	}
 	inline UButton* Button(UWidgetTree* Tree, const FText& Value, UTextBlock** OutLabel = nullptr, bool bAccent = false)
 	{
 		UButton* Result = Tree->ConstructWidget<UButton>();
 		StyleButton(Result, bAccent);
-		UTextBlock* Label = Heading(Tree, Value, 16);
+		UTextBlock* Label = Text(Tree, Value, 14, IBStyle::TextHi(), 80);
 		Result->SetContent(Label);
 		if (OutLabel) { *OutLabel = Label; }
 		return Result;

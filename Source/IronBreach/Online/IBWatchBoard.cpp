@@ -173,6 +173,17 @@ void AIBWatchBoard::ServerCancel(APlayerState* By)
 	ClearAll();
 }
 
+void AIBWatchBoard::ServerPlayerLeft(const APlayerState* Leaver)
+{
+	if (!HasAuthority() || !Leaver || !IsValid(this)) { return; }
+	if (ProposedId.IsNone() || IsArmed()) { return; }                 // nothing pending, or the host already owns it
+	if (Leaver->GetPlayerId() != ProposedByPlayerId) { return; }       // someone else's proposal
+
+	UE_LOG(LogIronBreach, Log, TEXT("[Watch] %s left the net with '%s' proposed and unarmed — standing the board down"),
+		*ProposedByName, *ProposedId.ToString());
+	ClearAll();
+}
+
 void AIBWatchBoard::Arm(FName Id)
 {
 	ArmedId = Id;

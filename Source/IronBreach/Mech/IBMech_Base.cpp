@@ -97,6 +97,8 @@ void AIBMech_Base::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AIBMech_Base, CurrentAmmo);
 	DOREPLIFETIME(AIBMech_Base, WeaponCooldownRemaining);
 	DOREPLIFETIME(AIBMech_Base, PartnerName);
+	DOREPLIFETIME(AIBMech_Base, HullOccupancy);
+	DOREPLIFETIME(AIBMech_Base, SeatOccupancy);
 }
 
 void AIBMech_Base::BeginPlay()
@@ -207,6 +209,10 @@ void AIBMech_Base::Tick(float DeltaSeconds)
 		{
 			PartnerCooldownRemaining = FMath::Max(0.0f, PartnerCooldownRemaining - DeltaSeconds);
 		}
+
+		// Crew occupancy for remote machines. Here rather than in the seating functions so no
+		// boarding path changes: this catches possession, AI backfill, swaps and logout alike.
+		RefreshCrewView();
 	}
 
 	// Desync control profile (spec §3.2): weak, not helpless. Concord state replicates,
@@ -218,6 +224,27 @@ void AIBMech_Base::Tick(float DeltaSeconds)
 			Move->MaxWalkSpeed = BaseMaxWalkSpeed * Concord->GetMoveSpeedFactor();
 		}
 	}
+}
+
+namespace IBMechCrewView
+{
+	/** What a machine that cannot see controllers should be told about one station. */
+	static EIBMechStationOccupancy Occupancy(const APawn* StationPawn)
+	{
+		if (!StationPawn) { return EIBMechStationOccupancy::Vacant; }
+		const AController* Seated = StationPawn->GetController();
+		if (!Seated) { return EIBMechStationOccupancy::Vacant; }
+		return Seated->IsA<APlayerController>() ? EIBMechStationOccupancy::Operative : EIBMechStationOccupancy::Copilot;
+	}
+}
+
+void AIBMech_Base::RefreshCrewView()
+{
+	if (!HasAuthority()) { return; }
+	// Possession is the physical truth of a station: ServerBoard seats a pilot and then
+	// possesses them into the hull (left) or the gunner seat pawn (right).
+	HullOccupancy = IBMechCrewView::Occupancy(this);
+	SeatOccupancy = IBMechCrewView::Occupancy(GunnerSeat);
 }
 
 void AIBMech_Base::PossessedBy(AController* NewController)

@@ -1,4 +1,7 @@
 #include "Classes/IBKitZone.h"
+#include "Classes/IBOperativeKitComponent.h"
+#include "Enemy/IBEnemyAIController.h"
+#include "EngineUtils.h"
 #include "IronBreach.h"
 #include "Infantry/IBCharacter_Infantry.h"
 #include "Components/PointLightComponent.h"
@@ -57,6 +60,7 @@ void AIBKitZone::InitZone(const FIBKitAbilitySpec& Spec, const FLinearColor& InA
 	Accent = InAccent;
 	SlowFactor = FMath::Clamp(Spec.SlowFactor, 0.05f, 1.f);
 	bMarksTargets = Spec.bMarksTargets;
+	FriendlyDamageScale = FMath::Clamp(Spec.DamageTakenScale,0.f,1.f);
 	Lifetime = FMath::Max(0.5f, Spec.Duration);
 	OwnerPawn = InOwnerPawn;
 	ApplyLook();
@@ -105,6 +109,7 @@ void AIBKitZone::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AIBKitZone, Accent);
 	DOREPLIFETIME(AIBKitZone, SlowFactor);
 	DOREPLIFETIME(AIBKitZone, bMarksTargets);
+	DOREPLIFETIME(AIBKitZone, FriendlyDamageScale);
 }
 
 void AIBKitZone::OnRep_Look()
@@ -172,6 +177,16 @@ bool AIBKitZone::IsHostile(const ACharacter* Character) const
 	return !Character->IsA<AIBCharacter_Infantry>();
 }
 
+float AIBKitZone::GetActiveSlowScale(const ACharacter* Character)
+{
+	if (!Character || !Character->GetWorld()) { return 1.f; }
+	float Scale=1.f;
+	for (TActorIterator<AIBKitZone> It(Character->GetWorld()); It; ++It)
+		if (It->IsHostile(Character) && FVector::DistSquared(It->GetActorLocation(),Character->GetActorLocation())<=FMath::Square(It->Radius))
+		{ Scale=FMath::Min(Scale,It->SlowFactor); }
+	return Scale;
+}
+
 void AIBKitZone::Pulse()
 {
 	UWorld* World = GetWorld();
@@ -180,41 +195,45 @@ void AIBKitZone::Pulse()
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	TArray<AActor*> Ignore;
-	if (OwnerPawn.IsValid()) { Ignore.Add(OwnerPawn.Get()); }
+	if (OwnerPawn.IsValid() && FriendlyDamageScale>=1.f) { Ignore.Add(OwnerPawn.Get()); }
 	TArray<AActor*> Overlaps;
 	UKismetSystemLibrary::SphereOverlapActors(this, GetActorLocation(), Radius, ObjectTypes, ACharacter::StaticClass(), Ignore, Overlaps);
 
 	TSet<ACharacter*> Inside;
+    MarkedTargets.Reset();
 	for (AActor* Actor : Overlaps)
 	{
 		ACharacter* Character = Cast<ACharacter>(Actor);
+		if (AIBCharacter_Infantry* Friendly = Cast<AIBCharacter_Infantry>(Character))
+		{
+			if (UIBOperativeKitComponent* Kit=Friendly->FindComponentByClass<UIBOperativeKitComponent>(); HasAuthority() && FriendlyDamageScale<1.f && Kit && !Friendly->IsDead())
+			{ Kit->ApplyWardDefense(FriendlyDamageScale,.4f); }
+			continue;
+		}
 		if (!IsHostile(Character)) { continue; }
 		Inside.Add(Character);
 
-		if (HasAuthority() && SlowFactor < 1.f && !SlowedOriginalSpeeds.Contains(Character))
+		// Ordinary AI reapplies its desired walk/run speed each tick. It reads the
+		// strongest active zone there, so neither chasing nor overlapping zones erase a slow.
+		if (HasAuthority() && SlowFactor < 1.f && !Cast<AIBEnemyAIController>(Character->GetController()) )
 		{
 			if (UCharacterMovementComponent* Move = Character->GetCharacterMovement())
 			{
-				SlowedOriginalSpeeds.Add(Character, Move->MaxWalkSpeed);
-				Move->MaxWalkSpeed *= SlowFactor;
+				if (!SlowedOriginalSpeeds.Contains(Character))
+                {
+                    float Base=Move->MaxWalkSpeed;
+                    for (TActorIterator<AIBKitZone> Other(World); Other; ++Other)
+                        if (*Other!=this) if (const float* Original=Other->SlowedOriginalSpeeds.Find(Character)) { Base=*Original; break; }
+                    SlowedOriginalSpeeds.Add(Character,Base);
+                }
+                Move->MaxWalkSpeed=SlowedOriginalSpeeds[Character]*GetActiveSlowScale(Character);
 			}
 		}
 
-		if (bMarksTargets)
-		{
-			if (USkeletalMeshComponent* Mesh = Character->GetMesh())
-			{
-				if (!Mesh->bRenderCustomDepth)
-				{
-					Mesh->SetRenderCustomDepth(true);
-					Mesh->SetCustomDepthStencilValue(1);
-					MarkedComponents.Add(Mesh);
-				}
-			}
-		}
+		if (bMarksTargets) { MarkedTargets.Add(Character); }
 	}
 
-	// Anyone who walked out gets their speed back (marks fade with the zone).
+	// Leaving one field retains any other active slowing field.
 	for (auto It = SlowedOriginalSpeeds.CreateIterator(); It; ++It)
 	{
 		ACharacter* Character = It.Key().Get();
@@ -224,7 +243,7 @@ void AIBKitZone::Pulse()
 			{
 				if (UCharacterMovementComponent* Move = Character->GetCharacterMovement())
 				{
-					Move->MaxWalkSpeed = It.Value();
+					Move->MaxWalkSpeed = It.Value()*GetActiveSlowScale(Character);
 				}
 			}
 			It.RemoveCurrent();
@@ -234,24 +253,18 @@ void AIBKitZone::Pulse()
 
 void AIBKitZone::ReleaseAll()
 {
+    SlowFactor=1.f; // exclude this expired source before restoring overlapping effects
 	for (auto& Pair : SlowedOriginalSpeeds)
 	{
 		if (ACharacter* Character = Pair.Key.Get())
 		{
 			if (UCharacterMovementComponent* Move = Character->GetCharacterMovement())
 			{
-				Move->MaxWalkSpeed = Pair.Value;
+				Move->MaxWalkSpeed = Pair.Value*GetActiveSlowScale(Character);
 			}
 		}
 	}
 	SlowedOriginalSpeeds.Empty();
 
-	for (const TWeakObjectPtr<UPrimitiveComponent>& Weak : MarkedComponents)
-	{
-		if (UPrimitiveComponent* Prim = Weak.Get())
-		{
-			Prim->SetRenderCustomDepth(false);
-		}
-	}
-	MarkedComponents.Empty();
+	MarkedTargets.Empty();
 }

@@ -15,6 +15,7 @@
 #include "Components/TextBlock.h"
 #include "Components/EditableTextBox.h"
 #include "Components/Button.h"
+#include "Components/PanelWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "Engine/GameViewportClient.h"
@@ -33,11 +34,14 @@ static void Check(bool bOK, const TCHAR* Name)
 }
 static UButton* FindButton(UIBMenuScreen* Screen,const FString& Label)
 {
+    // The label may sit inside a row (glyph + text + count), so walk up from the
+    // text to its nearest button — same rule as IB.MenuConsistencyCheck.
     UButton* Found=nullptr;
     if (Screen && Screen->WidgetTree) Screen->WidgetTree->ForEachWidget([&](UWidget* Widget)
     {
-        if (UButton* Button=Cast<UButton>(Widget))
-            if (UTextBlock* Text=Cast<UTextBlock>(Button->GetContent()); Text && Text->GetText().ToString()==Label) { Found=Button; }
+        if (UTextBlock* Text=Cast<UTextBlock>(Widget); Text && Text->GetText().ToString()==Label)
+            for (UPanelWidget* Parent=Text->GetParent(); Parent; Parent=Parent->GetParent())
+                if (UButton* Button=Cast<UButton>(Parent)) { Found=Button; break; }
     });
     return Found;
 }
@@ -73,7 +77,7 @@ FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
     {
         if (WeakWorld.IsValid()) { FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/TEXT("ReferenceMenus/after")/Name,true,false); }
     };
-    At(2,[WeakMenu] { if (WeakMenu.IsValid()) { WeakMenu->OpenScreen(TEXT("Inventory")); } });
+    At(2,[WeakMenu] { if (WeakMenu.IsValid()) { WeakMenu->OpenScreen(TEXT("Character")); } });
     At(5,[WeakMenu,WeakWorld,Shot]
     {
         if (!WeakMenu.IsValid() || !WeakWorld.IsValid()) { return; }
@@ -116,6 +120,7 @@ FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
         Click(WeakMenu.Get(),TEXT("SORT: NAME"));
         Check(FindButton(WeakMenu->GetActiveScreen(),TEXT("SORT: CLEARANCE"))!=nullptr,TEXT("clearance sorting"));
     });
+    At(14,[WeakMenu] { Click(WeakMenu.Get(),TEXT("DIRECTOR  [B]")); });
     At(15,[WeakMenu] { Click(WeakMenu.Get(),TEXT("MISSIONS")); });
     At(17,[WeakMenu,Shot]
     {
@@ -152,7 +157,7 @@ FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
         Check(!Board || !Board->IsArmed(),TEXT("browsing did not deploy")); Shot(TEXT("watch-from-missions.png"));
         WeakMenu->OpenScreen(TEXT("Missions"));
     });
-    At(25,[WeakMenu] { Click(WeakMenu.Get(),TEXT("CHARACTER")); });
+    At(25,[WeakMenu] { Click(WeakMenu.Get(),TEXT("CHARACTER  [I]")); });
     At(27,[WeakMenu,WeakWorld]
     {
         if (!WeakMenu.IsValid() || !WeakWorld.IsValid()) { return; }
@@ -167,7 +172,7 @@ FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
         Check(PreviewCount(WeakWorld.Get())==0,TEXT("close releases character capture"));
         UE_LOG(LogIronBreach,Display,TEXT("[ReferenceMenus] COMPLETE"));
     });
-    At(30,[WeakMenu] { if (WeakMenu.IsValid()) { WeakMenu->OpenScreen(TEXT("Inventory")); } });
+    At(30,[WeakMenu] { if (WeakMenu.IsValid()) { WeakMenu->OpenScreen(TEXT("Character")); } });
 }));
 }
 #endif

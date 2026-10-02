@@ -26,11 +26,11 @@ texture.set_editor_property('mip_gen_settings', unreal.TextureMipGenSettings.TMG
 texture.set_editor_property('srgb', True)
 EAL.save_loaded_asset(texture)
 
-target = EAL.load_asset(ROOT + '/RT_PortraitDefault') if EAL.does_asset_exist(ROOT + '/RT_PortraitDefault') else AT.create_asset('RT_PortraitDefault',ROOT,unreal.TextureRenderTarget2D,unreal.TextureRenderTargetFactoryNew())
-target.set_editor_property('render_target_format',unreal.TextureRenderTargetFormat.RTF_RGBA16F)
-target.set_editor_property('force_linear_gamma',True)
+# A linear black texture supplies the editor default. The runtime MID replaces it
+# with the transient HDR capture. Avoid the factory render target's format override.
+target = EAL.load_asset(ROOT + '/T_PortraitDefault') if EAL.does_asset_exist(ROOT + '/T_PortraitDefault') else EAL.duplicate_asset('/Engine/EngineResources/Black',ROOT + '/T_PortraitDefault')
+assert target, 'Portrait default texture missing'
 target.set_editor_property('srgb',False)
-target.set_editor_property('clear_color',unreal.LinearColor(0,0,0,1))
 EAL.save_loaded_asset(target)
 material = EAL.load_asset(ROOT+'/M_OperativePortrait') if EAL.does_asset_exist(ROOT+'/M_OperativePortrait') else AT.create_asset('M_OperativePortrait',ROOT,unreal.Material,unreal.MaterialFactoryNew())
 MEL.delete_all_material_expressions(material)

@@ -11,6 +11,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/IBStyleKit.h"
 #include "UI/IBMenuLayout.h"
+#include "UI/IBHangarStyle.h"
 #include "Online/IBWatchTypes.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
@@ -132,16 +133,34 @@ UButton* UIBSystemScreen::MakeFallbackButton(UVerticalBox* Box, const FText& Lab
 	UButton* Button = IBMenuLayout::Button(WidgetTree, Label, &Text);
 	if (UVerticalBoxSlot* ButtonSlot = Box->AddChildToVerticalBox(Button))
 	{
-		ButtonSlot->SetPadding(FMargin(0.f, 5.f));
+		ButtonSlot->SetPadding(FMargin(0.f, 6.f));
 		ButtonSlot->SetHorizontalAlignment(HAlign_Fill);
 	}
 	if (OutLabel) { *OutLabel = Text; }
 	return Button;
 }
 
+namespace IBSystemPaint
+{
+	/** The exit control, marked as one. Same geometry and the same four states
+	 *  as every other button on the page — only the edge changes, so it reads
+	 *  as the end of the list rather than as a different kind of thing. */
+	static void StyleExit(UButton* Button)
+	{
+		if (!Button) { return; }
+		const FLinearColor Edge = IBStyle::Danger() * FLinearColor(1.f, 1.f, 1.f, 0.55f);
+		FButtonStyle Style = Button->GetStyle();
+		Style.Normal   = IBStyle::RoundedBrush(FLinearColor(.020f, .010f, .012f, .55f), 0.f, Edge, 1.f);
+		Style.Hovered  = IBStyle::RoundedBrush(FLinearColor(.140f, .040f, .035f, .90f), 0.f, IBStyle::Danger(), 1.f);
+		Style.Pressed  = IBStyle::RoundedBrush(FLinearColor(.200f, .060f, .050f, .95f), 0.f, IBStyle::Danger(), 1.f);
+		Style.Disabled = IBStyle::RoundedBrush(FLinearColor(.020f, .010f, .012f, .45f), 0.f, IBStyle::Line(), 1.f);
+		Button->SetStyle(Style);
+	}
+}
+
 void UIBSystemScreen::ConstructFallbackLayout()
 {
-	const auto Page = IBMenuLayout::Begin(WidgetTree,
+	const auto Page = BuildHangarSection(
 		NSLOCTEXT("IBSystem", "Title", "SYSTEM"),
 		NSLOCTEXT("IBSystem", "Kicker", "OPERATIVE / SESSION CONTROLS"),
 		NSLOCTEXT("IBSystem", "Controls", "ESC / RETURN TO GAME"));
@@ -152,31 +171,47 @@ void UIBSystemScreen::ConstructFallbackLayout()
 	Context->AddChildToVerticalBox(IBMenuLayout::Text(WidgetTree,
 		NSLOCTEXT("IBSystem", "BrandKicker", "BREAKWATER / OPERATIVE TERMINAL"), 12, IBStyle::Cyan(), 160));
 	UTextBlock* Brand = IBMenuLayout::Heading(WidgetTree, NSLOCTEXT("IBSystem", "Brand", "IRON\nBREACH"), 96);
-	Context->AddChildToVerticalBox(Brand)->SetPadding(FMargin(0, 16, 0, 28));
+	Context->AddChildToVerticalBox(Brand)->SetPadding(FMargin(0, 14, 0, 20));
+	// A rule between the mark and the live session line, so the brand reads as a
+	// masthead and the state below it reads as state.
+	UBorder* ContextRule = IBStyle::MakeAccentBar(WidgetTree, FLinearColor(.13f, .33f, .40f, .6f));
+	ContextRule->SetPadding(FMargin(0.f, 0.5f));
+	Context->AddChildToVerticalBox(ContextRule)->SetPadding(FMargin(0, 0, 120, 18));
 	Txt_SessionInfo = IBMenuLayout::Heading(WidgetTree, FText::GetEmpty(), 20);
 	Txt_SessionInfo->SetAutoWrapText(true);
-	Context->AddChildToVerticalBox(Txt_SessionInfo)->SetPadding(FMargin(0, 0, 0, 18));
+	Context->AddChildToVerticalBox(Txt_SessionInfo)->SetPadding(FMargin(0, 0, 0, 14));
 	UTextBlock* ContextHint = IBMenuLayout::Text(WidgetTree,
 		NSLOCTEXT("IBSystem", "SessionHint", "Your operation remains active while this menu is open."), 14);
 	ContextHint->SetAutoWrapText(true);
 	Context->AddChildToVerticalBox(ContextHint);
 	UHorizontalBoxSlot* ContextSlot = Columns->AddChildToHorizontalBox(Context);
 	ContextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-	ContextSlot->SetPadding(FMargin(12, 34, 100, 0));
+	ContextSlot->SetPadding(FMargin(12, 30, 96, 0));
+
+	// Commands, in two bands. Everything above the second heading keeps you in
+	// the session; everything below it takes you out of one. The destinations
+	// and their order are unchanged — only the grouping is new.
 	UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>();
-	IBMenuLayout::Section(WidgetTree, Column, NSLOCTEXT("IBSystem", "Commands", "SESSION COMMANDS"));
+	// The shared helper takes an FString, so the label is resolved through
+	// NSLOCTEXT first and stays a localized source string.
+	IBHangar::SectionTitle(WidgetTree, Column,
+		NSLOCTEXT("IBSystem", "Commands", "SESSION COMMANDS").ToString(), 0.f, 14.f);
 	Btn_Resume = MakeFallbackButton(Column, NSLOCTEXT("IBSystem", "Resume", "RESUME"), &Txt_Resume);
 	IBMenuLayout::StyleButton(Btn_Resume, true);
 	Btn_Settings = MakeFallbackButton(Column, NSLOCTEXT("IBSystem", "Settings", "SETTINGS"));
 	Btn_Watch = MakeFallbackButton(Column, NSLOCTEXT("IBSystem", "Watch", "THE WATCH"));
 	Column->AddChildToVerticalBox(IBMenuLayout::Text(WidgetTree,
-		NSLOCTEXT("IBSystem", "TravelHint", "Plan your next deployment from orbit."), 12))->SetPadding(FMargin(0, 4, 0, 26));
+		NSLOCTEXT("IBSystem", "TravelHint", "Plan your next deployment from orbit."), 12))->SetPadding(FMargin(0, 6, 0, 0));
+
+	IBHangar::SectionTitle(WidgetTree, Column,
+		NSLOCTEXT("IBSystem", "ExitBand", "EXIT").ToString(), 26.f, 14.f);
 	Btn_Leave = MakeFallbackButton(Column, NSLOCTEXT("IBSystem", "MainMenu", "MAIN MENU"), &Txt_Leave);
 	Btn_Quit = MakeFallbackButton(Column, NSLOCTEXT("IBSystem", "Quit", "QUIT TO DESKTOP"), &Txt_Quit);
+	IBSystemPaint::StyleExit(Btn_Quit);
 	Column->AddChildToVerticalBox(IBMenuLayout::Text(WidgetTree,
 		NSLOCTEXT("IBSystem", "QuitHint", "Quit requires a second click to confirm."), 12))->SetPadding(FMargin(0, 10, 0, 0));
 	UHorizontalBoxSlot* CommandsSlot = Columns->AddChildToHorizontalBox(IBMenuLayout::Width(WidgetTree,
-		IBMenuLayout::Card(WidgetTree, Column, FMargin(30)), 480));
+		IBMenuLayout::Card(WidgetTree, Column, FMargin(30, 28, 30, 26)), 480));
 	CommandsSlot->SetVerticalAlignment(VAlign_Center);
 }
 

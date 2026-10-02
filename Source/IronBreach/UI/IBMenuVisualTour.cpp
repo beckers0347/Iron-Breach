@@ -133,7 +133,7 @@ namespace IBMenuVisualTour
 				}
 				Key(EKeys::E);
 			});
-			At(23, [WeakMenu] { Check(WeakMenu.Get(), TEXT("Ledger"), TEXT("E cycles to Ledger")); Key(EKeys::Q); });
+			At(23, [WeakMenu] { Check(WeakMenu.Get(), TEXT("Mech"), TEXT("E cycles to Mech")); Key(EKeys::Q); });
 			At(24, [WeakMenu] { Check(WeakMenu.Get(), TEXT("Inventory"), TEXT("Q cycles to Inventory")); Key(EKeys::Escape); });
 			At(25, [WeakMenu] { Check(WeakMenu.Get(), NAME_None, TEXT("Escape closes menu")); });
 			At(26, [Open] { Open(TEXT("System")); });

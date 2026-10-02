@@ -4,8 +4,12 @@
 #include "Components/PointLightComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/Skeleton.h"
 #include "Engine/SkeletalMesh.h"
+#include "Engine/StaticMesh.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/World.h"
 #include "Kismet/KismetRenderingLibrary.h"
@@ -167,10 +171,7 @@ void AIBOperativePreviewStage::ShowOperative(EIBOperativeGender Gender, FLinearC
 		}
 
 		Mesh->SetSkeletalMeshAsset(Body);
-		if (UAnimationAsset* Idle = IdleAnimation.LoadSynchronous())
-		{
-			Mesh->PlayAnimation(Idle, /*bLooping=*/true);
-		}
+		ApplyIdlePose(nullptr);
 		bHasBody = true;
 		LoadedGender = Gender;
 	}
@@ -194,12 +195,16 @@ void AIBOperativePreviewStage::ShowNothing()
 	}
 }
 
-void AIBOperativePreviewStage::ConfigureForInventory(const USkeletalMeshComponent* SourceBody)
+void AIBOperativePreviewStage::ConfigureForInventory(const USkeletalMeshComponent* SourceBody, const UStaticMeshComponent* SourceWeapon)
 {
 	if (Capture)
 	{
-		Capture->SetRelativeLocation(FVector(-440.f, 0.f, 105.f));
-		Capture->SetRelativeRotation(LookAt(FVector(-440.f, 0.f, 105.f), LookTarget));
+		// Full-body framing: the lens sits closer and dead center so the operative
+		// fills most of the square instead of standing small in a wide shot.
+		const FVector Lens(-424.f, 0.f, 104.f);
+		const FVector Target(0.f, 0.f, 95.f);
+		Capture->SetRelativeLocation(Lens);
+		Capture->SetRelativeRotation(LookAt(Lens, Target));
 		Capture->FOVAngle = 26.f;
 		// Inventory uses inverse-opacity capture; the UI material composites the body over the hangar.
 		Capture->CaptureSource = ESceneCaptureSource::SCS_SceneColorHDR;
@@ -216,11 +221,88 @@ void AIBOperativePreviewStage::ConfigureForInventory(const USkeletalMeshComponen
 		if (Mesh->GetSkeletalMeshAsset() != SourceBody->GetSkeletalMeshAsset())
 		{
 			Mesh->SetSkeletalMeshAsset(SourceBody->GetSkeletalMeshAsset());
-			if (UAnimationAsset* Idle = IdleAnimation.LoadSynchronous()) { Mesh->PlayAnimation(Idle, true); }
+			ApplyIdlePose(SourceBody);
 		}
 		for (int32 Index = 0; Index < SourceBody->GetNumMaterials(); ++Index)
 		{
 			Mesh->SetMaterial(Index, SourceBody->GetMaterial(Index));
 		}
 	}
+	SyncWeapon(SourceWeapon);
+}
+
+void AIBOperativePreviewStage::ApplyIdlePose(const USkeletalMeshComponent* SourceBody)
+{
+	USkeletalMesh* Body = Mesh ? Mesh->GetSkeletalMeshAsset() : nullptr;
+	if (!Body) { return; }
+
+	// 1. The mannequin idle clip, when it fits this body's skeleton (the front-end
+	//    Manny / Quinn bodies and the stock infantry mesh).
+	UAnimationAsset* Idle = IdleAnimation.LoadSynchronous();
+	USkeleton* ClipSkeleton = Idle ? Idle->GetSkeleton() : nullptr;
+	const bool bCompatible = ClipSkeleton && Body->GetSkeleton()
+		&& (ClipSkeleton == Body->GetSkeleton() || ClipSkeleton->IsCompatibleMesh(Body));
+	if (bCompatible)
+	{
+		Mesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+		Mesh->PlayAnimation(Idle, /*bLooping=*/true);
+		return;
+	}
+
+	// 2. A body with its own skeleton (StarterArmor / Chaos_Armor): run the pawn's
+	//    own animation class on the copied mesh. It is compatible by construction
+	//    (it already drives that exact mesh on the pawn) and UIBAnimInstance_Infantry
+	//    returns early without a pawn owner, so the stage gets its idle state.
+	const UAnimInstance* LiveInstance = SourceBody ? SourceBody->GetAnimInstance() : nullptr;
+	UClass* PawnAnimClass = LiveInstance ? LiveInstance->GetClass() : nullptr;
+	if (PawnAnimClass && SourceBody->GetSkeletalMeshAsset() == Body)
+	{
+		Mesh->SetAnimInstanceClass(PawnAnimClass);
+		UE_LOG(LogIronBreach, Log, TEXT("PreviewStage: idle clip does not fit %s; running the pawn's %s instead"),
+			*Body->GetName(), *PawnAnimClass->GetName());
+		return;
+	}
+
+	// 3. Nothing compatible: hold the reference pose rather than play a foreign clip.
+	Mesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+	Mesh->Stop();
+	Mesh->SetAnimation(nullptr);
+	UE_LOG(LogIronBreach, Log, TEXT("PreviewStage: idle clip does not fit %s and no pawn animation is available; holding the reference pose"),
+		*Body->GetName());
+}
+
+void AIBOperativePreviewStage::SyncWeapon(const UStaticMeshComponent* SourceWeapon)
+{
+	UStaticMesh* Prop = SourceWeapon ? SourceWeapon->GetStaticMesh() : nullptr;
+	const bool bCarried = Prop && SourceWeapon->IsVisible() && !SourceWeapon->bHiddenInGame;
+	if (!bCarried || !Mesh || !Mesh->GetSkeletalMeshAsset())
+	{
+		if (WeaponProp) { WeaponProp->SetVisibility(false); }
+		return;
+	}
+	if (!WeaponProp)
+	{
+		WeaponProp = NewObject<UStaticMeshComponent>(this, TEXT("WeaponProp"));
+		WeaponProp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		WeaponProp->SetGenerateOverlapEvents(false);
+		WeaponProp->SetCastShadow(true);
+		WeaponProp->SetVisibleInSceneCaptureOnly(true);
+		WeaponProp->RegisterComponent();
+		if (Capture) { Capture->ShowOnlyComponent(WeaponProp); }
+	}
+	// Same socket, same relative offset and scale as on the pawn: a mirror, not a re-rig.
+	const FName Socket = SourceWeapon->GetAttachSocketName();
+	if (Socket.IsNone() || !Mesh->DoesSocketExist(Socket))
+	{
+		WeaponProp->SetVisibility(false);
+		return;
+	}
+	if (WeaponProp->GetStaticMesh() != Prop) { WeaponProp->SetStaticMesh(Prop); }
+	for (int32 Index = 0; Index < SourceWeapon->GetNumMaterials(); ++Index)
+	{
+		WeaponProp->SetMaterial(Index, SourceWeapon->GetMaterial(Index));
+	}
+	WeaponProp->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, Socket);
+	WeaponProp->SetRelativeTransform(SourceWeapon->GetRelativeTransform());
+	WeaponProp->SetVisibility(true);
 }

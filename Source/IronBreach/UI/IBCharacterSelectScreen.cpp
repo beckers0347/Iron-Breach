@@ -1,6 +1,8 @@
 #include "UI/IBCharacterSelectScreen.h"
 #include "UI/IBCharacterCreateScreen.h"
 #include "UI/IBStyleKit.h"
+#include "UI/IBHangarStyle.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "UI/IBSheetDismissProcessor.h"
 #include "Player/IBCharacterSubsystem.h"
 #include "Player/IBOperativePreviewStage.h"
@@ -26,7 +28,7 @@
 
 namespace
 {
-	constexpr float SelColumnWidth = 460.f;
+	constexpr float SelColumnWidth = 520.f;
 	constexpr float CardHeight = 112.f;
 	constexpr float SelPreviewPixels = 1024.f; // native render-target size; ScaleBox fits it to the screen height
 
@@ -47,10 +49,10 @@ namespace
 		if (!Card) { return; }
 		FButtonStyle Style = Card->GetStyle();
 		Style.Normal = bSelected
-			? IBStyle::RoundedBrush(IBStyle::ChipHot(), 8.f, IBStyle::Amber(), 2.f)
-			: IBStyle::RoundedBrush(IBStyle::Panel(), 8.f, IBStyle::Line(), 1.f);
-		Style.Hovered = IBStyle::RoundedBrush(IBStyle::ChipHot(), 8.f, bSelected ? IBStyle::Amber() : Accent, 1.5f);
-		Style.Pressed = IBStyle::RoundedBrush(IBStyle::Ink(), 8.f, IBStyle::Amber(), 1.5f);
+			? IBStyle::RoundedBrush(FLinearColor(.025f,.12f,.16f,.88f), 0.f, IBStyle::Cyan(), 1.f)
+			: IBStyle::RoundedBrush(IBHangar::Ink(), 0.f, IBStyle::Line(), 1.f);
+		Style.Hovered = IBStyle::RoundedBrush(IBStyle::ChipHot(), 0.f, bSelected ? IBStyle::Cyan() : Accent, 1.5f);
+		Style.Pressed = IBStyle::RoundedBrush(IBStyle::Ink(), 0.f, IBStyle::Cyan(), 1.5f);
 		Style.NormalPadding = FMargin(0.f);
 		Style.PressedPadding = FMargin(0.f);
 		Card->SetStyle(Style);
@@ -148,18 +150,7 @@ void UIBCharacterSelectScreen::BuildLayout()
 {
 	if (!WidgetTree || RootOverlay) { return; }
 
-	RootOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-	WidgetTree->RootWidget = RootOverlay;
-
-	// Opaque stage-black sheet: the title art stays behind the door. Black (not
-	// Ink) so the preview capture's empty background is seamless with the sheet.
-	UBorder* Sheet = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	Sheet->SetBrush(IBStyle::RoundedBrush(FLinearColor::Black, 0.f));
-	if (UOverlaySlot* SheetSlot = RootOverlay->AddChildToOverlay(Sheet))
-	{
-		SheetSlot->SetHorizontalAlignment(HAlign_Fill);
-		SheetSlot->SetVerticalAlignment(VAlign_Fill);
-	}
+	RootOverlay = IBHangar::Frontend(WidgetTree);
 
 	// ---- The body: render target, left, full height, square ----
 	PreviewImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass());
@@ -182,6 +173,7 @@ void UIBCharacterSelectScreen::BuildLayout()
 	{
 		PreviewSlot->SetHorizontalAlignment(HAlign_Left);
 		PreviewSlot->SetVerticalAlignment(VAlign_Fill);
+		PreviewSlot->SetPadding(FMargin(0,110,0,80));
 	}
 
 	// ---- Title, top-left over the stage ----
@@ -189,7 +181,7 @@ void UIBCharacterSelectScreen::BuildLayout()
 	TitleBox->AddChildToVerticalBox(IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBCharSelect", "Title", "SELECT OPERATIVE")));
 	UTextBlock* Sub = IBStyle::MakeText(WidgetTree,
 		NSLOCTEXT("IBCharSelect", "Sub", "BREAKWATER SERVICE RECORD — THREE BILLETS TO A HOUSEHOLD"),
-		12, IBStyle::TextLo(), 500);
+		12, IBStyle::TextLo(), 80);
 	if (UVerticalBoxSlot* SubSlot = TitleBox->AddChildToVerticalBox(Sub))
 	{
 		SubSlot->SetPadding(FMargin(0.f, 6.f, 0.f, 0.f));
@@ -204,7 +196,7 @@ void UIBCharacterSelectScreen::BuildLayout()
 	// ---- Nameplate, bottom-left at the operative's feet ----
 	Nameplate = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	NameplateName = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 30, IBStyle::TextHi(), 350);
-	NameplateRole = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 12, IBStyle::Amber(), 450);
+	NameplateRole = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 12, IBStyle::Cyan(), 450);
 	NameplateMeta = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 11, IBStyle::TextLo(), 250);
 	Nameplate->AddChildToVerticalBox(NameplateName);
 	if (UVerticalBoxSlot* RoleSlot = Nameplate->AddChildToVerticalBox(NameplateRole))
@@ -259,7 +251,7 @@ void UIBCharacterSelectScreen::BuildLayout()
 	}
 	Column->AddChildToVerticalBox(ActionPanel);
 
-	Txt_Status = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 12, IBStyle::TextLo(), 300);
+	Txt_Status = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 12, IBStyle::TextLo(), 60);
 	Txt_Status->SetAutoWrapText(true);
 	USizeBox* StatusSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 	StatusSize->SetMinDesiredHeight(48.f); // two lines: the column doesn't jump when the line wraps
@@ -271,12 +263,12 @@ void UIBCharacterSelectScreen::BuildLayout()
 
 	USizeBox* ColumnSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 	ColumnSize->SetWidthOverride(SelColumnWidth);
-	ColumnSize->SetContent(Column);
+	ColumnSize->SetContent(IBHangar::Panel(WidgetTree, Column, FMargin(24)));
 	if (UOverlaySlot* ColumnSlot = RootOverlay->AddChildToOverlay(ColumnSize))
 	{
 		ColumnSlot->SetHorizontalAlignment(HAlign_Right);
 		ColumnSlot->SetVerticalAlignment(VAlign_Center);
-		ColumnSlot->SetPadding(FMargin(0.f, 0.f, 72.f, 0.f));
+		ColumnSlot->SetPadding(FMargin(0.f, 100.f, 48.f, 30.f));
 	}
 
 	// ---- Corners: BACK (switch only), QUIT TO DESKTOP ----
@@ -311,12 +303,16 @@ void UIBCharacterSelectScreen::EnsureStage()
 		return;
 	}
 
+	Stage->ConfigureForInventory(nullptr);
 	if (PreviewImage)
 	{
 		if (UTextureRenderTarget2D* RT = Stage->GetRenderTarget())
 		{
 			FSlateBrush Brush = PreviewImage->GetBrush();
-			Brush.SetResourceObject(RT);
+            UMaterialInstanceDynamic* Portrait = UMaterialInstanceDynamic::Create(
+                LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/IronBreach/UI/Hangar/M_OperativePortrait.M_OperativePortrait")), this);
+            if (Portrait) { Portrait->SetTextureParameterValue(TEXT("Portrait"), RT); }
+            Brush.SetResourceObject(Portrait);
 			Brush.ImageSize = FVector2D(SelPreviewPixels, SelPreviewPixels);
 			PreviewImage->SetBrush(Brush);
 		}
@@ -402,7 +398,7 @@ UButton* UIBCharacterSelectScreen::BuildRosterCard(int32 Index, const FIBCharact
 	UVerticalBox* Body = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	if (bLastOnStation)
 	{
-		UTextBlock* Tag = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBCharSelect", "LastTag", "LAST ON STATION"), 9, IBStyle::Amber(), 500);
+		UTextBlock* Tag = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBCharSelect", "LastTag", "LAST ON STATION"), 9, IBStyle::Cyan(), 500);
 		if (UVerticalBoxSlot* TagSlot = Body->AddChildToVerticalBox(Tag))
 		{
 			TagSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 3.f));
@@ -454,9 +450,9 @@ void UIBCharacterSelectScreen::BuildEmptyCard()
 	FButtonStyle Style = Card->GetStyle();
 	FLinearColor EmptyFill = IBStyle::Panel();
 	EmptyFill.A = 0.5f;
-	Style.Normal  = IBStyle::RoundedBrush(EmptyFill, 8.f, IBStyle::Line(), 1.f);
-	Style.Hovered = IBStyle::RoundedBrush(IBStyle::Panel(), 8.f, IBStyle::Amber(), 1.5f);
-	Style.Pressed = IBStyle::RoundedBrush(IBStyle::Ink(), 8.f, IBStyle::Amber(), 1.5f);
+	Style.Normal  = IBStyle::RoundedBrush(EmptyFill, 0.f, IBStyle::Line(), 1.f);
+	Style.Hovered = IBStyle::RoundedBrush(IBStyle::Panel(), 0.f, IBStyle::Cyan(), 1.5f);
+	Style.Pressed = IBStyle::RoundedBrush(IBStyle::Ink(), 0.f, IBStyle::Cyan(), 1.5f);
 	Style.NormalPadding = FMargin(0.f);
 	Style.PressedPadding = FMargin(0.f);
 	Card->SetStyle(Style);
@@ -469,7 +465,7 @@ void UIBCharacterSelectScreen::BuildEmptyCard()
 		PlusSlot->SetVerticalAlignment(VAlign_Center);
 		PlusSlot->SetPadding(FMargin(0.f, 0.f, 16.f, 0.f));
 	}
-	UTextBlock* Label = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBCharSelect", "NewOp", "NEW OPERATIVE"), 13, IBStyle::TextLo(), 500);
+	UTextBlock* Label = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBCharSelect", "NewOp", "NEW OPERATIVE"), 13, IBStyle::TextLo(), 80);
 	if (UHorizontalBoxSlot* LabelSlot = Row->AddChildToHorizontalBox(Label))
 	{
 		LabelSlot->SetVerticalAlignment(VAlign_Center);
@@ -515,7 +511,7 @@ void UIBCharacterSelectScreen::SetDeploying(const FText& Status)
 	if (Txt_Status)
 	{
 		Txt_Status->SetText(Status);
-		Txt_Status->SetColorAndOpacity(FSlateColor(IBStyle::Amber()));
+		Txt_Status->SetColorAndOpacity(FSlateColor(IBStyle::Cyan()));
 	}
 }
 
@@ -620,7 +616,7 @@ void UIBCharacterSelectScreen::HandleDecommission()
 		if (Btn_Decom)
 		{
 			FButtonStyle Style = Btn_Decom->GetStyle();
-			Style.Normal = IBStyle::RoundedBrush(FLinearColor(0.25f, 0.06f, 0.05f), 6.f, IBStyle::Danger(), 1.5f);
+			Style.Normal = IBStyle::RoundedBrush(FLinearColor(0.25f, 0.06f, 0.05f), 0.f, IBStyle::Danger(), 1.5f);
 			Btn_Decom->SetStyle(Style);
 		}
 		SetStatus(FText::FromString(FString::Printf(TEXT("DECOMMISSION %s? THE RECORD DOES NOT COME BACK"), *Record.Callsign)), true);

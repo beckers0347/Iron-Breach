@@ -14,9 +14,9 @@
 UENUM(BlueprintType)
 enum class EIBOperativeClass : uint8
 {
-	Breaker		UMETA(DisplayName = "Breaker"),
-	Picket		UMETA(DisplayName = "Picket"),
-	Bellringer	UMETA(DisplayName = "Bellringer"),
+	Breaker		UMETA(DisplayName = "Guardian"),
+	Picket		UMETA(DisplayName = "Sentinel"),
+	Bellringer	UMETA(DisplayName = "Saber"),
 	Corpsman	UMETA(DisplayName = "Corpsman"),
 };
 
@@ -67,9 +67,9 @@ namespace IBCharacter
 	{
 		switch (C)
 		{
-		case EIBOperativeClass::Breaker:    return NSLOCTEXT("IBCharacter", "ClassBreaker", "BREAKER");
-		case EIBOperativeClass::Picket:     return NSLOCTEXT("IBCharacter", "ClassPicket", "PICKET");
-		case EIBOperativeClass::Bellringer: return NSLOCTEXT("IBCharacter", "ClassBellringer", "BELLRINGER");
+		case EIBOperativeClass::Breaker:    return NSLOCTEXT("IBCharacter", "ClassBreaker", "GUARDIAN");
+		case EIBOperativeClass::Picket:     return NSLOCTEXT("IBCharacter", "ClassPicket", "SENTINEL");
+		case EIBOperativeClass::Bellringer: return NSLOCTEXT("IBCharacter", "ClassBellringer", "SABER");
 		case EIBOperativeClass::Corpsman:   return NSLOCTEXT("IBCharacter", "ClassCorpsman", "CORPSMAN");
 		}
 		return FText::GetEmpty();
@@ -80,9 +80,9 @@ namespace IBCharacter
 	{
 		switch (C)
 		{
-		case EIBOperativeClass::Breaker:    return NSLOCTEXT("IBCharacter", "RoleBreaker", "“HOLD THE DOOR” — VANGUARD");
-		case EIBOperativeClass::Picket:     return NSLOCTEXT("IBCharacter", "RolePicket", "“SEE IT FIRST” — RECON");
-		case EIBOperativeClass::Bellringer: return NSLOCTEXT("IBCharacter", "RoleBellringer", "“SHAPE THE FIELD” — CONTROL");
+		case EIBOperativeClass::Breaker:    return NSLOCTEXT("IBCharacter", "RoleBreaker", "GUARD / PROTECT / DISCHARGE");
+		case EIBOperativeClass::Picket:     return NSLOCTEXT("IBCharacter", "RolePicket", "CONCEAL / MISDIRECT / TRACK");
+		case EIBOperativeClass::Bellringer: return NSLOCTEXT("IBCharacter", "RoleBellringer", "DASH / BREACH / SWEEP");
 		case EIBOperativeClass::Corpsman:   return NSLOCTEXT("IBCharacter", "RoleCorpsman", "“BRING THEM HOME” — SUSTAIN");
 		}
 		return FText::GetEmpty();
@@ -92,9 +92,9 @@ namespace IBCharacter
 	{
 		switch (C)
 		{
-		case EIBOperativeClass::Breaker:    return NSLOCTEXT("IBCharacter", "DescBreaker", "First through the breach, last off the line. Front anchor; breaks kaiju armor seams open for the fireteam.");
-		case EIBOperativeClass::Picket:     return NSLOCTEXT("IBCharacter", "DescPicket", "Forward sentry of the exclusion zones. Intel, precision damage, and the class that finds what's hidden.");
-		case EIBOperativeClass::Bellringer: return NSLOCTEXT("IBCharacter", "DescBellringer", "Sonic-warfare corps. Shapes the battlefield — denies ground, redirects kaiju, owns dungeon utility.");
+		case EIBOperativeClass::Breaker:    return NSLOCTEXT("IBCharacter", "DescBreaker", "Time your guard, store the impact, and protect your fireteam with defensive fields.");
+		case EIBOperativeClass::Picket:     return NSLOCTEXT("IBCharacter", "DescPicket", "Break enemy tracking with camouflage and decoys. Mark targets and control the approach.");
+		case EIBOperativeClass::Bellringer: return NSLOCTEXT("IBCharacter", "DescBellringer", "Cross exposed ground with Vector Dash. Break through enemies with charges and kinetic sweeps.");
 		case EIBOperativeClass::Corpsman:   return NSLOCTEXT("IBCharacter", "DescCorpsman", "The extraction specialist. Sustain, revive economy, and the rescue scoring the Breakwater decorates.");
 		}
 		return FText::GetEmpty();
@@ -103,7 +103,7 @@ namespace IBCharacter
 	/** Phase-1 ships 3 trades; the medical corps opens post-launch (§8). */
 	inline bool ClassAvailable(EIBOperativeClass C)
 	{
-		return C != EIBOperativeClass::Corpsman;
+		return C == EIBOperativeClass::Breaker || C == EIBOperativeClass::Picket || C == EIBOperativeClass::Bellringer;
 	}
 
 	inline FText ClassLockedLine(EIBOperativeClass C)

@@ -13,13 +13,13 @@ class UTextureRenderTarget2D;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIBSectorPicked, FName, SectorId);
 
 /**
- * The planet outside the command deck window. A full-screen UImage whose brush
+ * The Director's full-screen orbital scene. A viewport-filling UImage whose brush
  * is M_WatchPlanet (a UI-domain material that ray-casts a unit sphere per
  * pixel — Scripts/ib_build_watch_materials.py has the shader); this widget
  * owns the camera, feeds the material its parameters every tick, and paints
  * everything that has to know where a point on the planet is on screen: the
  * sector pins (diamond markers with a hex-grid halo), the callout box, the
- * drop sequence and the deck framing around the glass.
+ * drop sequence. Navigation and the briefing are layered above the scene.
  *
  * The world is generated once, at startup: M_WatchMap is drawn into a
  * 2048x1024 render target, read back to place every sector pin on a coastline

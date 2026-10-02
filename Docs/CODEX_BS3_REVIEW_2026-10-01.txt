@@ -1,0 +1,84 @@
+BS3 review — October 1, 2026 PDT / October 2 UTC
+
+Decision
+
+The two BS3 rock changes pass review as a work-in-progress preview checkpoint.
+The review is complete; BS3 is not approved as a finished, playable garrison or
+for replacing the live map. A checkpoint push must retain the outstanding issues
+below and the preview status. This review does not approve unrelated working-tree
+changes or verify the contents of a proposed Git commit. Nothing was pushed.
+
+Reviewed candidate
+
+Content/_GarrisonPreview_Disposable/CarrowGateGarrison_BoulderShore3.umap
+SHA256 FDF8219D0C35A30EB778B92BDA76B55FBF2B6ABA4E3236C2AC56563E994BE132
+Receipt SHA256 656013F75938760239CF70A72F49F744EC71C52DA0D411937034522A09323683
+
+What passed
+
+- Independently rehashed all 2,748 protected project and engine files: all match.
+- Independently compared the recorded full fingerprints: 3,569 actors and 3,596
+  components; only the two planned rocks changed. RS1_Rock_025 is unchanged.
+- Rock_006 moves 68 cm with an instance-local Unwalkable override. Rock_018 moves
+  37.2 cm, turns +6 degrees, and receives the same override. Recorded materials,
+  meshes, BlockAll, height, pitch, roll and scale are preserved.
+- Copy and restored fingerprints match BS2; reapplied state matches first apply.
+  Fresh reload and no-op records pass; no-op saves neither map nor receipt.
+- The recorded 20 uninterrupted routes end on land and return to their starts.
+  The original isolated-stone and crevice failures improve against BS2 controls.
+- Actual weapon hits and four clear-water negative shots are recorded. Matched
+  local images preserve the rocky outline without a broad layout change.
+
+Outstanding gameplay findings
+
+1. Left wedge 19, surface point 3: the pawn remains held on RS1_Rock_013 after
+   seven escape attempts. BS2 has the same hold. This actor was outside the
+   permitted edit set; normal movement into this exact pocket is not established.
+
+2. Right wedge 01: the pawn remains suspended between RS1_Rock_025 and the coast
+   edge at approximately (3207.0, -8329.4, 47.8), after seven escape attempts.
+   BS2 has the same hold. One normal walk-in did not reproduce the hold. Claude
+   stopped because the tested broader outcrop moves create other nearby slots.
+
+3. One uninterrupted left jump sets LastSafeLocation on RS1_Rock_013 and Drown
+   returns the pawn there. A subsequent walk reaches connected land. This is an
+   improvement over BS2, but it does not satisfy the strict direct-to-land recovery
+   requirement. Do not describe this route as inescapable.
+
+The saved proof evaluator reports area_pass=false for both complete areas.
+The two changed stones can be accepted as incremental fixes; that does not clear
+the remaining pockets or the other previously known shoreline holds.
+
+Before gameplay approval
+
+- Resolve the two remaining pockets, or establish through focused uninterrupted
+  movement tests that players cannot enter them; document the recovery decision.
+- Verify the reachable RS1_Rock_013 top cannot lead into its held pocket and that
+  recovery remains usable. Retest the affected coast and inlets after changes.
+- Preserve the approved rock changes and keep the live map separate from the
+  preview until the remaining acceptance work is complete.
+
+Review limits and handoff
+
+This review used Claude's raw engine records, fingerprints, controls, scripts,
+saved images and final result, plus fresh file hashes. Codex did not launch a new
+engine session or conduct a manual/multiplayer playtest. Claude's result document
+arrived during the review and was included. No new implementation was started.
+No dedicated check proving the adjusted rocks cannot provide an unintended route
+onto the deck or beyond the allowed shoreline was located. Camera stops are 4.4 m
+from the faces, so they do not directly prove close-contact camera blocking.
+Scheduled Claude follow-ups remain paused under the user's earlier instruction.
+
+Primary evidence
+
+Docs/CLAUDE_GARRISON_SHORE_RECOVERY_PROOF_RESULT_2026-10-01.md
+Saved/GarrisonRestructure/20261001-claude-shorerecoveryproof/analysis/proof_eval.json
+Saved/GarrisonRestructure/20261001-claude-shorerecoveryproof/analysis/control_eval.json
+Saved/GarrisonRestructure/20261001-claude-shorerecoveryproof/run1/final/bs3_verify.json
+Saved/GarrisonRestructure/20261002-codex-bs3-review/protected-current.json
+Saved/GarrisonRestructure/20261002-codex-bs3-review/artifacts-current.json
+
+Packaging note: the BS3 tools, receipt and much of its evidence live under the
+Git-ignored Saved directory. Anyone preparing a reproducible checkpoint must
+include the required review/reproduction files and referenced preview assets in
+that package. An ordinary push of the map alone will not carry those local files.

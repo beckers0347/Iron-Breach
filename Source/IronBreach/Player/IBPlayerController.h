@@ -94,6 +94,7 @@ protected:
 	void OpenInventoryMenu();
 	void OpenMapMenu();
 	void OpenLedgerMenu();
+    void OpenSkillsMenu();
 	void OpenSystemMenu();
 
 private:

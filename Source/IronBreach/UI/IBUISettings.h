@@ -8,6 +8,14 @@
 
 class UIBMenuScreen;
 
+UENUM()
+enum class EIBMenuGroup : uint8
+{
+	Personal,
+	Director,
+	Utility
+};
+
 /**
  * One registered full-screen menu. Array order in the settings IS the tab-cycle
  * order (Q/E, shoulder buttons) — Destiny's bumper grammar, data-driven.
@@ -40,6 +48,10 @@ struct FIBMenuScreenDef
 	 *  layer (System, Settings) lives here — tabs are for the play loop. */
 	UPROPERTY(EditAnywhere, Category = "Screen")
 	bool bShowInTabBar = true;
+
+	/** Personal equipment/progression and Director activities have separate tab loops. */
+	UPROPERTY(EditAnywhere, Category = "Screen")
+	EIBMenuGroup MenuGroup = EIBMenuGroup::Personal;
 };
 
 /**
@@ -85,5 +97,24 @@ public:
 	const FIBMenuScreenDef* FindScreen(FName ScreenId) const
 	{
 		return Screens.FindByPredicate([ScreenId](const FIBMenuScreenDef& S) { return S.ScreenId == ScreenId; });
+	}
+
+	EIBMenuGroup GetMenuGroup(FName ScreenId) const
+	{
+		if (ScreenId == TEXT("Character") || ScreenId == TEXT("Backpack")) { ScreenId = TEXT("Inventory"); }
+		const FIBMenuScreenDef* Def = FindScreen(ScreenId);
+		return Def ? Def->MenuGroup : EIBMenuGroup::Personal;
+	}
+
+	TArray<FName> GetMenuTabs(EIBMenuGroup Group) const
+	{
+		TArray<FName> Tabs;
+		for (const FIBMenuScreenDef& Def : Screens)
+		{
+			if (!Def.bShowInTabBar || Def.MenuGroup != Group) { continue; }
+			if (Def.ScreenId == TEXT("Inventory")) { Tabs.Add(TEXT("Character")); Tabs.Add(TEXT("Backpack")); }
+			else { Tabs.Add(Def.ScreenId); }
+		}
+		return Tabs;
 	}
 };

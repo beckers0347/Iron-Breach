@@ -133,9 +133,54 @@ namespace IBDeploymentCheck
 						{
 							FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("DeploymentFix/arrival.png"), true, false);
 							UE_LOG(LogIronBreach, Display, TEXT("[DeploymentCheck] COMPLETE"));
-							if (FParse::Param(FCommandLine::Get(), TEXT("IBReferenceMenusAfterDeploy")))
+							// Chained suites, opt-in per flag. The XP header check is exclusive: it drives the live
+							// header on this settled world, and another suite clicking through tabs underneath it
+							// would move the very widget it is watching. Say so rather than overlap quietly.
+							const bool bReferenceMenus  = FParse::Param(FCommandLine::Get(), TEXT("IBReferenceMenusAfterDeploy"));
+							const bool bMenuConsistency = FParse::Param(FCommandLine::Get(), TEXT("IBMenuConsistencyAfterDeploy"));
+							const bool bMenuFlow        = FParse::Param(FCommandLine::Get(), TEXT("IBMenuFlowAfterMenus"));
+							const bool bSkills          = FParse::Param(FCommandLine::Get(), TEXT("IBSkillsAfterMenus"));
+							const bool bXPHeader        = FParse::Param(FCommandLine::Get(), TEXT("IBXPHeaderAfterDeploy"));
+							const bool bCrewQA          = FParse::Param(FCommandLine::Get(), TEXT("IBCrewQAAfterDeploy"));
+							const bool bOtherSuites     = bReferenceMenus || bMenuConsistency || bMenuFlow || bSkills;
+							if (bReferenceMenus)
 							{
 								PC->ConsoleCommand(TEXT("IB.ReferenceMenuCheck"), true);
+							}
+							if (bMenuConsistency)
+							{
+								PC->ConsoleCommand(TEXT("IB.MenuConsistencyCheck"), true);
+							}
+							if (bXPHeader)
+							{
+								if (bOtherSuites || bCrewQA)
+								{
+									UE_LOG(LogIronBreach, Error, TEXT("[DeploymentCheck] -IBXPHeaderAfterDeploy NOT started: it is exclusive and this run also passed one of ")
+										TEXT("-IBReferenceMenusAfterDeploy / -IBMenuConsistencyAfterDeploy / -IBMenuFlowAfterMenus / -IBSkillsAfterMenus / -IBCrewQAAfterDeploy. ")
+										TEXT("Relaunch with -IBXPHeaderAfterDeploy as the only menu-check flag."));
+								}
+								else
+								{
+									// Carrow Gate, settled and pawn-owned, with the deployed operative on the player
+									// state: the final world, so the check's world timers cannot be cancelled by travel.
+									PC->ConsoleCommand(TEXT("IB.MenuXPHeaderCheck"), true);
+								}
+							}
+							if (bCrewQA)
+							{
+								if (bOtherSuites || bXPHeader)
+								{
+									UE_LOG(LogIronBreach, Error, TEXT("[DeploymentCheck] -IBCrewQAAfterDeploy NOT started: it is exclusive and this run also passed one of ")
+										TEXT("-IBReferenceMenusAfterDeploy / -IBMenuConsistencyAfterDeploy / -IBMenuFlowAfterMenus / -IBSkillsAfterMenus / -IBXPHeaderAfterDeploy. ")
+										TEXT("Relaunch with -IBCrewQAAfterDeploy as the only menu-check flag."));
+								}
+								else
+								{
+									// The host half of the two-process crew check. It waits here for a second human
+									// to join, so it is started without knowing whether the client is up yet — which
+									// is what lets this run in a hidden process with no console typed into it.
+									PC->ConsoleCommand(TEXT("IB.CrewQAHost"), true);
+								}
 							}
 							return false;
 						}

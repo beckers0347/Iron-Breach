@@ -1,4 +1,17 @@
 #include "Enemy/IBEnemyAIController.h"
+#include "Classes/IBOperativeKitComponent.h"
+#include "Skills/IBSkillDecoy.h"
+#include "Classes/IBKitZone.h"
+#include "EngineUtils.h"
+
+namespace
+{
+    bool IsConcealed(const AActor* Actor)
+    {
+        const UIBOperativeKitComponent* Kit=Actor ? Actor->FindComponentByClass<UIBOperativeKitComponent>() : nullptr;
+        return Kit && Kit->IsConcealed();
+    }
+}
 #include "Enemy/IBCharacter_Enemy.h"
 #include "IronBreach.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -48,7 +61,7 @@ void AIBEnemyAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 {
 	// Any player-controlled pawn is a valid target (co-op aware)
 	const APawn* AsPawn = Cast<APawn>(Actor);
-	if (!AsPawn || !AsPawn->IsPlayerControlled()) return;
+	if (!AsPawn || !AsPawn->IsPlayerControlled() || IsConcealed(Actor)) return;
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
@@ -69,7 +82,7 @@ void AIBEnemyAIController::NotifyDamagedBy(AController* InstigatedBy, AActor* Da
 	{
 		Attacker = Cast<APawn>(DamageCauser);
 	}
-	if (Attacker && Attacker->IsPlayerControlled())
+	if (Attacker && Attacker->IsPlayerControlled() && !IsConcealed(Attacker))
 	{
 		TargetActor = Attacker;
 		LastSeenTime = GetWorld()->GetTimeSeconds();
@@ -83,6 +96,14 @@ void AIBEnemyAIController::Tick(float DeltaTime)
 	if (!EnemyPawn || EnemyPawn->IsDead()) return;
 
 	const float Now = GetWorld()->GetTimeSeconds();
+	if (IsConcealed(TargetActor)) { TargetActor=nullptr; }
+	float EchoDistance=TNumericLimits<float>::Max();
+	for (TActorIterator<AIBSkillDecoy> It(GetWorld()); It; ++It)
+	{
+		const float Distance=FVector::Dist(EnemyPawn->GetActorLocation(),It->GetActorLocation());
+		if (Distance<EchoDistance && Distance<=It->GetAttractionRadius() && LineOfSightTo(*It))
+		{ TargetActor=*It; EchoDistance=Distance; LastSeenTime=Now; }
+	}
 
 	// Direct sight check every tick. This intentionally doesn't rely on AIPerception
 	// events (belt and suspenders) — perception can silently fail to register listeners.
@@ -163,7 +184,7 @@ void AIBEnemyAIController::SetMaxWalkSpeed(float Speed)
 {
 	if (EnemyPawn && EnemyPawn->GetCharacterMovement())
 	{
-		EnemyPawn->GetCharacterMovement()->MaxWalkSpeed = Speed;
+		EnemyPawn->GetCharacterMovement()->MaxWalkSpeed = Speed * AIBKitZone::GetActiveSlowScale(EnemyPawn);
 	}
 }
 
@@ -180,7 +201,7 @@ AActor* AIBEnemyAIController::FindNearestVisiblePlayerPawn(float MaxRange) const
 	{
 		const APlayerController* PC = It->Get();
 		APawn* Candidate = PC ? PC->GetPawn() : nullptr;
-		if (!Candidate) continue;
+		if (!Candidate || IsConcealed(Candidate)) continue;
 
 		const float Dist = FVector::Dist(From, Candidate->GetActorLocation());
 		if (Dist <= BestDist && LineOfSightTo(Candidate))

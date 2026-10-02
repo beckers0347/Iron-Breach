@@ -1,4 +1,5 @@
 #include "Items/IBPlayerState.h"
+#include "Skills/IBSkillComponent.h"
 #include "IronBreach.h"
 #include "Items/IBInventoryComponent.h"
 #include "Items/IBItemDefinition.h"
@@ -13,6 +14,7 @@
 
 AIBPlayerState::AIBPlayerState()
 {
+	Skills = CreateDefaultSubobject<UIBSkillComponent>(TEXT("Skills"));
 	InventoryComponent = CreateDefaultSubobject<UIBInventoryComponent>(TEXT("InventoryComponent"));
 
 	// PlayerState's default 1Hz NetUpdateFrequency makes equip/loot feel laggy on
@@ -32,6 +34,7 @@ void AIBPlayerState::BeginPlay()
 			if (UIBXPSubsystem* XP = GI->GetSubsystem<UIBXPSubsystem>())
 			{
 				XP->OnXPLevelUp.AddDynamic(this, &AIBPlayerState::HandleXPLevelUp);
+				XP->OnXPAwarded.AddDynamic(this, &AIBPlayerState::HandleXPAwarded);
 			}
 		}
 	}
@@ -63,7 +66,16 @@ void AIBPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 			if (UIBXPSubsystem* XP = GI->GetSubsystem<UIBXPSubsystem>())
 			{
 				XP->OnXPLevelUp.RemoveDynamic(this, &AIBPlayerState::HandleXPLevelUp);
+				XP->OnXPAwarded.RemoveDynamic(this, &AIBPlayerState::HandleXPAwarded);
 			}
+		}
+
+		// A real departure (logout / kick destroys the PlayerState) takes any unarmed Watch
+		// proposal of theirs off the board. Map travel tears everything down together, so
+		// only the Destroyed reason counts — never LevelTransition / RemovedFromWorld.
+		if (EndPlayReason == EEndPlayReason::Destroyed)
+		{
+			if (AIBWatchBoard* Board = AIBWatchBoard::Get(GetWorld())) { Board->ServerPlayerLeft(this); }
 		}
 	}
 	if (UWorld* World = GetWorld())
@@ -82,6 +94,9 @@ void AIBPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(AIBPlayerState, bHasOperative);
 	DOREPLIFETIME(AIBPlayerState, OperativeId);
 	DOREPLIFETIME(AIBPlayerState, OperativeLevel);
+	DOREPLIFETIME(AIBPlayerState, OperativeXP);
+	DOREPLIFETIME(AIBPlayerState, OperativeLevelFloorXP);
+	DOREPLIFETIME(AIBPlayerState, OperativeNextLevelXP);
 }
 
 void AIBPlayerState::SetOperativeIdentity(const FString& Callsign, EIBOperativeClass Class, EIBOperativeGender Gender, const FGuid& CharacterId)
@@ -116,8 +131,10 @@ void AIBPlayerState::SetOperativeIdentity(const FString& Callsign, EIBOperativeC
 			if (UIBXPSubsystem* XP = GI->GetSubsystem<UIBXPSubsystem>())
 			{
 				SetOperativeLevel(XP->GetPilotLevel(GetOwningController()));
+				SetOperativeXP(XP->GetPilotXP(GetOwningController()));
 			}
 		}
+		if (Skills) { Skills->RestoreForIdentity(); }
 	}
 }
 
@@ -130,10 +147,40 @@ void AIBPlayerState::SetOperativeLevel(int32 NewLevel)
 	OnRep_OperativeLevel();
 }
 
+void AIBPlayerState::SetOperativeXP(int32 TotalXP)
+{
+	if (!HasAuthority()) { return; }
+	TotalXP = FMath::Max(0, TotalXP);
+	int32 FloorXP = 0, NextXP = 0;
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (const UIBXPSubsystem* XP = GI->GetSubsystem<UIBXPSubsystem>())
+		{
+			XP->GetLevelBounds(EXPTrack::Pilot, TotalXP, FloorXP, NextXP);
+		}
+	}
+	if (TotalXP == OperativeXP && FloorXP == OperativeLevelFloorXP && NextXP == OperativeNextLevelXP) { return; }
+	OperativeXP = TotalXP;
+	OperativeLevelFloorXP = FloorXP;
+	OperativeNextLevelXP = NextXP;
+	OnRep_OperativeXP(); // listen host / standalone: same notification clients get
+}
+
+void AIBPlayerState::OnRep_OperativeXP()
+{
+	OnOperativeXPChanged.Broadcast();
+}
+
+float AIBPlayerState::GetOperativeLevelProgress() const
+{
+	if (!HasNextLevel()) { return 1.f; }
+	return FMath::Clamp(static_cast<float>(OperativeXP - OperativeLevelFloorXP) / static_cast<float>(OperativeNextLevelXP - OperativeLevelFloorXP), 0.f, 1.f);
+}
+
 void AIBPlayerState::OnRep_OperativeLevel()
 {
 	SyncLevelToRoster();
-	OnOperativeIdentityChanged.Broadcast(); // banners re-read the level
+	OnOperativeIdentityChanged.Broadcast(); // banners re-read the level and XP
 }
 
 void AIBPlayerState::SyncLevelToRoster()
@@ -155,6 +202,14 @@ void AIBPlayerState::HandleXPLevelUp(EXPTrack Track, const FString& RecordKey, i
 	if (Track == EXPTrack::Pilot && bHasOperative && RecordKey == MakeProgressionKey())
 	{
 		SetOperativeLevel(NewLevel);
+	}
+}
+
+void AIBPlayerState::HandleXPAwarded(EXPTrack Track, const FString& RecordKey, int32 NewTotalXP)
+{
+	if (Track == EXPTrack::Pilot && bHasOperative && RecordKey == MakeProgressionKey())
+	{
+		SetOperativeXP(NewTotalXP);
 	}
 }
 
@@ -240,6 +295,10 @@ void AIBPlayerState::CopyProperties(APlayerState* PlayerState)
 		Other->bHasOperative = bHasOperative;
 		Other->OperativeId = OperativeId;
 		Other->OperativeLevel = OperativeLevel;
+		Other->OperativeXP = OperativeXP;
+		Other->OperativeLevelFloorXP = OperativeLevelFloorXP;
+		Other->OperativeNextLevelXP = OperativeNextLevelXP;
+		if (Other->Skills) { Other->Skills->CopyForTravel(Skills); }
 	}
 }
 

@@ -1,10 +1,12 @@
 #include "UI/IBFriendsScreen.h"
 #include "UI/IBMenuSubsystem.h"
 #include "UI/IBStyleKit.h"
+#include "UI/IBHangarStyle.h"
 #include "UI/IBPlayerBannerWidget.h"
 #include "UI/IBFriendRowWidget.h"
 #include "Online/IBFriendsSubsystem.h"
 #include "Online/IBSessionSubsystem.h"
+#include "Online/IBWatchTypes.h"
 #include "World/IBMapSubsystem.h"
 #include "World/IBMapTypes.h"
 #include "IronBreach.h"
@@ -22,12 +24,33 @@
 #include "Components/ScrollBox.h"
 #include "Components/ScrollBoxSlot.h"
 #include "Components/SizeBox.h"
+#include "Components/ScaleBox.h"
+#include "Components/ScaleBoxSlot.h"
 #include "Components/Border.h"
 #include "Blueprint/WidgetTree.h"
 
-namespace
+namespace IBSquadLayout
 {
-	constexpr int32 SquadSlots = 4; // mirrors UIBSessionSubsystem::MaxPlayers default
+	/** Banner seats: the fireteam size the session advertises (six). */
+	int32 SquadSlots() { return UIBSessionSubsystem::FireteamSize(); }
+
+	/** Subtle V: the row dips toward the middle so six cards read as a formation, not a shelf. */
+	float SeatDrop(int32 Index, int32 Count)
+	{
+		const float Center = (Count - 1) * 0.5f;
+		return (Center - FMath::Abs(Index - Center)) * 18.f;
+	}
+
+	/** Width of the social flyout's frame, in the 1600 x 900 design space. */
+	constexpr float FlyoutWidth = 340.f;
+	/** Gap the flyout keeps from the right edge of the sheet. */
+	constexpr float FlyoutInset = 8.f;
+	/** Clear air between the seat row and the flyout. */
+	constexpr float FlyoutGutter = 24.f;
+	/** What the seat row gives up on its right while the flyout is open. The row
+	 *  does not move by this amount — it is scaled to fit what is left, which is
+	 *  why the number only has to be right, not lucky. */
+	constexpr float SeatReserve = FlyoutWidth + FlyoutInset + FlyoutGutter;
 }
 
 void UIBFriendsScreen::NativeOnInitialized()
@@ -40,33 +63,12 @@ void UIBFriendsScreen::BuildLayout()
 {
 	if (!WidgetTree || BannerRow) { return; }
 
-	UOverlay* Root = Cast<UOverlay>(WidgetTree->RootWidget);
-	if (!WidgetTree->RootWidget)
-	{
-		Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-		WidgetTree->RootWidget = Root;
-	}
-	if (!Root) { return; }
-
-	// Menu-standard dim sheet.
-	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	Dim->SetBrushColor(FLinearColor(0.008f, 0.012f, 0.025f, 0.84f));
-	if (UOverlaySlot* DimSlot = Root->AddChildToOverlay(Dim))
-	{
-		DimSlot->SetHorizontalAlignment(HAlign_Fill);
-		DimSlot->SetVerticalAlignment(VAlign_Fill);
-	}
-
-	// ---- Title block, concept grammar: IRON BREACH // FIRETEAM ----
-	UVerticalBox* TitleBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	TitleBox->AddChildToVerticalBox(IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBSquad", "TitleTop", "IRON BREACH"), 24, IBStyle::TextHi(), 500));
-	TitleBox->AddChildToVerticalBox(IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBSquad", "TitleSub", "// FIRETEAM"), 15, IBStyle::Cyan(), 500));
-	if (UOverlaySlot* TitleSlot = Root->AddChildToOverlay(TitleBox))
-	{
-		TitleSlot->SetHorizontalAlignment(HAlign_Left);
-		TitleSlot->SetVerticalAlignment(VAlign_Top);
-		TitleSlot->SetPadding(FMargin(90.f, 46.f, 0.f, 0.f));
-	}
+	const auto Page = BuildHangarSection(
+        NSLOCTEXT("IBSquad", "PageTitle", "SQUAD"),
+        NSLOCTEXT("IBSquad", "PageSub", "BREAKWATER / FIRETEAM"),
+        NSLOCTEXT("IBSquad", "PageHint", "SELECT AN OPEN SEAT / INVITE     Q E / SWITCH MENU     ESC / RETURN"));
+    UOverlay* Root = WidgetTree->ConstructWidget<UOverlay>();
+    Page.Body->AddChildToVerticalBox(Root)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 
 	// ---- SOCIAL chip top-right (online count; toggles the flyout) ----
 	UTextBlock* RawSocialText = nullptr;
@@ -74,16 +76,12 @@ void UIBFriendsScreen::BuildLayout()
 	SocialCountText = RawSocialText;
 	SocialCountText->SetText(NSLOCTEXT("IBSquad", "Social", "SOCIAL"));
 	SocialButton->OnClicked.AddDynamic(this, &UIBFriendsScreen::HandleSocialToggle);
-	if (UOverlaySlot* SocialSlot = Root->AddChildToOverlay(SocialButton))
-	{
-		SocialSlot->SetHorizontalAlignment(HAlign_Right);
-		SocialSlot->SetVerticalAlignment(VAlign_Top);
-		SocialSlot->SetPadding(FMargin(0.f, 96.f, 90.f, 0.f));
-	}
+	Page.HeaderRight->AddChildToVerticalBox(SocialButton);
 
 	// ---- Center: the banner row (hero card at LocalSlotIndex) ----
 	BannerRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	for (int32 i = 0; i < SquadSlots; ++i)
+	const int32 Seats = IBSquadLayout::SquadSlots();
+	for (int32 i = 0; i < Seats; ++i)
 	{
 		UIBPlayerBannerWidget* Banner = CreateWidget<UIBPlayerBannerWidget>(GetOwningPlayer(), UIBPlayerBannerWidget::StaticClass());
 		if (!Banner) { continue; }
@@ -91,21 +89,38 @@ void UIBFriendsScreen::BuildLayout()
 		Banner->OnInviteClicked.AddDynamic(this, &UIBFriendsScreen::HandleInviteSlotClicked);
 		if (UHorizontalBoxSlot* CardSlot = BannerRow->AddChildToHorizontalBox(Banner))
 		{
-			CardSlot->SetPadding(FMargin(9.f, 0.f));
-			CardSlot->SetVerticalAlignment(VAlign_Center);
+			CardSlot->SetPadding(FMargin(8.f, IBSquadLayout::SeatDrop(i, Seats), 8.f, 0.f));
+			CardSlot->SetVerticalAlignment(VAlign_Top);
 		}
 		Banners.Add(Banner);
 	}
-	if (UOverlaySlot* RowSlot = Root->AddChildToOverlay(BannerRow))
+	// The row is a fixed 1202 design units of card and cannot simply be shoved
+	// sideways to make room for the flyout: an overlay slot that centres a child
+	// wider than its allotted space does not keep the left edge on screen, and
+	// the first seat went off the left of the sheet at both target sizes. Fit it
+	// instead. HAlign_Fill on the slot means there is no centring arithmetic to
+	// get wrong — the box is handed exactly what the padding leaves, and
+	// ScaleToFit guarantees all six cards land inside it whatever that is.
+	SeatFit = WidgetTree->ConstructWidget<UScaleBox>(UScaleBox::StaticClass());
+	SeatFit->SetStretch(EStretch::ScaleToFit);
+	SeatFit->SetStretchDirection(EStretchDirection::DownOnly); // never larger than authored
+	if (UScaleBoxSlot* SeatSlot = Cast<UScaleBoxSlot>(SeatFit->AddChild(BannerRow)))
 	{
-		RowSlot->SetHorizontalAlignment(HAlign_Center);
+		SeatSlot->SetHorizontalAlignment(HAlign_Center);
+		SeatSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	if (UOverlaySlot* RowSlot = Root->AddChildToOverlay(SeatFit))
+	{
+		RowSlot->SetHorizontalAlignment(HAlign_Fill);
 		RowSlot->SetVerticalAlignment(VAlign_Center);
-		RowSlot->SetPadding(FMargin(0.f, 30.f, 0.f, 0.f));
+		RowSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 70.f));
 	}
 
 	// ---- Right flyout: the friends list ----
-	UBorder* FlyoutCard = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.97f), 12.f);
-	FlyoutCard->SetPadding(FMargin(16.f));
+	// Near-opaque on purpose. At 0.95 the seat behind it read straight through
+	// the panel — a bright cyan + on near-black shows at five percent — and the
+	// flyout looked like a rendering fault rather than a panel on top.
+	UBorder* FlyoutCard = IBHangar::Glass(WidgetTree, nullptr, FMargin(18.f), FIBGlassStyle::Dossier(), FLinearColor(0.006f, 0.015f, 0.026f, 0.995f));
 	UVerticalBox* FlyoutColumn = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	FlyoutCard->SetContent(FlyoutColumn);
 
@@ -138,20 +153,20 @@ void UIBFriendsScreen::BuildLayout()
 	}
 
 	FlyoutFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	FlyoutFrame->SetWidthOverride(340.f);
+	// Same constant the seat row reserves against, so the two cannot drift apart.
+	FlyoutFrame->SetWidthOverride(IBSquadLayout::FlyoutWidth);
 	FlyoutFrame->SetHeightOverride(500.f);
 	FlyoutFrame->AddChild(FlyoutCard);
 	if (UOverlaySlot* FlyoutSlot = Root->AddChildToOverlay(FlyoutFrame))
 	{
 		FlyoutSlot->SetHorizontalAlignment(HAlign_Right);
 		FlyoutSlot->SetVerticalAlignment(VAlign_Center);
-		FlyoutSlot->SetPadding(FMargin(0.f, 0.f, 42.f, 0.f));
+		FlyoutSlot->SetPadding(FMargin(0.f, 0.f, IBSquadLayout::FlyoutInset, 70.f));
 	}
 	FlyoutFrame->SetVisibility(ESlateVisibility::Collapsed);
 
 	// ---- Bottom-left: CURRENT LOCATION card ----
-	UBorder* LocationCard = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.94f), 10.f);
-	LocationCard->SetPadding(FMargin(14.f, 10.f));
+	UBorder* LocationCard = IBHangar::Glass(WidgetTree, nullptr, FMargin(16.f, 10.f), FIBGlassStyle::Chip(), FLinearColor(0.008f, 0.018f, 0.03f, 0.9f));
 	UVerticalBox* LocationColumn = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	LocationCard->SetContent(LocationColumn);
 	LocationColumn->AddChildToVerticalBox(IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBSquad", "Location", "CURRENT LOCATION"), 9, IBStyle::TextLo(), 600));
@@ -163,7 +178,7 @@ void UIBFriendsScreen::BuildLayout()
 	{
 		LocationSlot->SetHorizontalAlignment(HAlign_Left);
 		LocationSlot->SetVerticalAlignment(VAlign_Bottom);
-		LocationSlot->SetPadding(FMargin(90.f, 0.f, 0.f, 46.f));
+		LocationSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 0.f));
 	}
 
 	// ---- Bottom bar: LEAVE FIRETEAM + privacy line ----
@@ -182,11 +197,16 @@ void UIBFriendsScreen::BuildLayout()
 	{
 		PrivacySlot->SetVerticalAlignment(VAlign_Center);
 	}
-	if (UOverlaySlot* BottomSlot = Root->AddChildToOverlay(BottomBar))
+	// On the same chip surface the CURRENT LOCATION card uses, for the same
+	// reason: the hangar floor is the brightest thing on this screen and the
+	// privacy line was sitting straight on top of its reflections.
+	UBorder* BottomChip = IBHangar::Glass(WidgetTree, BottomBar, FMargin(14.f, 8.f),
+		FIBGlassStyle::Chip(), FLinearColor(0.008f, 0.018f, 0.03f, 0.9f));
+	if (UOverlaySlot* BottomSlot = Root->AddChildToOverlay(BottomChip))
 	{
-		BottomSlot->SetHorizontalAlignment(HAlign_Center);
+		BottomSlot->SetHorizontalAlignment(HAlign_Right);
 		BottomSlot->SetVerticalAlignment(VAlign_Bottom);
-		BottomSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 46.f));
+		BottomSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 14.f));
 	}
 }
 
@@ -258,9 +278,9 @@ void UIBFriendsScreen::RefreshBanners(bool bForce)
 	}
 
 	TArray<const APlayerState*> Display;
-	Display.SetNum(SquadSlots);
+	Display.SetNum(Banners.Num());
 	int32 OtherIndex = 0;
-	for (int32 i = 0; i < SquadSlots; ++i)
+	for (int32 i = 0; i < Banners.Num(); ++i)
 	{
 		if (i == LocalSlotIndex)
 		{
@@ -278,6 +298,9 @@ void UIBFriendsScreen::RefreshBanners(bool bForce)
 		if (Display.IsValidIndex(i) && Display[i])
 		{
 			Banners[i]->SetFromPlayerState(Display[i], /*bIsHost=*/Display[i] == HostPS);
+			// Somebody took the seat the open flyout was raised from. It is not
+			// an open seat any more, so the mark goes with it.
+			if (i == SelectedSeatIndex) { SetSelectedSeat(INDEX_NONE); }
 		}
 		else
 		{
@@ -291,8 +314,8 @@ void UIBFriendsScreen::RefreshLocationCard()
 	const UWorld* World = GetWorld();
 	if (!World || !LocationMapText) { return; }
 
-	LocationMapText->SetText(FText::FromString(
-		World->GetMapName().Replace(TEXT("UEDPIE_0_"), TEXT("")).Replace(TEXT("Lvl_"), TEXT("")).ToUpper()));
+	const FIBDestination* Destination = IBWatch::Find(IBWatch::DestinationForMap(World->GetMapName()));
+	LocationMapText->SetText(Destination ? Destination->Name.ToUpper() : NSLOCTEXT("IBSquad", "Field", "FIELD OPERATIONS"));
 
 	FText Zone = FText::GetEmpty();
 	if (const UIBMapSubsystem* MapSub = World->GetSubsystem<UIBMapSubsystem>())
@@ -312,6 +335,20 @@ UIBFriendsSubsystem* UIBFriendsScreen::GetFriendsSubsystem() const
 	return GI ? GI->GetSubsystem<UIBFriendsSubsystem>() : nullptr;
 }
 
+void UIBFriendsScreen::SetSelectedSeat(int32 Index)
+{
+	if (SelectedSeatIndex == Index) { return; }
+	if (Banners.IsValidIndex(SelectedSeatIndex) && Banners[SelectedSeatIndex])
+	{
+		Banners[SelectedSeatIndex]->SetSeatSelected(false);
+	}
+	SelectedSeatIndex = Banners.IsValidIndex(Index) ? Index : INDEX_NONE;
+	if (Banners.IsValidIndex(SelectedSeatIndex) && Banners[SelectedSeatIndex])
+	{
+		Banners[SelectedSeatIndex]->SetSeatSelected(true);
+	}
+}
+
 void UIBFriendsScreen::SetFlyoutOpen(bool bOpen)
 {
 	bFlyoutOpen = bOpen;
@@ -319,6 +356,25 @@ void UIBFriendsScreen::SetFlyoutOpen(bool bOpen)
 	{
 		FlyoutFrame->SetVisibility(bFlyoutOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
+	// The seat row and the right-hand flyout share one overlay. Reserve the
+	// flyout's width on the row's right while it is open; the scale box then
+	// fits all six cards into what is left instead of the row running off the
+	// left of the sheet. Closed, the reserve is zero, the scale returns to 1 and
+	// the arrangement is the authored one again.
+	//
+	// Fitting rather than translating, deliberately: a translation has to be
+	// exactly right at every resolution and it was not, whereas ScaleToFit is
+	// correct by construction. The cards shrink about five percent with the
+	// flyout open, which keeps the order, the V and every hover, focus and
+	// selection mark — those are painted in each card's own local space, so they
+	// scale with it and stay on screen.
+	if (UOverlaySlot* RowSlot = Cast<UOverlaySlot>(SeatFit ? SeatFit->Slot.Get() : nullptr))
+	{
+		RowSlot->SetPadding(FMargin(0.f, 0.f, bFlyoutOpen ? IBSquadLayout::SeatReserve : 0.f, 70.f));
+	}
+	// The seat mark exists to say where an open flyout came from, so it never
+	// outlives the flyout.
+	if (!bFlyoutOpen) { SetSelectedSeat(INDEX_NONE); }
 }
 
 void UIBFriendsScreen::HandleSocialToggle()
@@ -326,14 +382,21 @@ void UIBFriendsScreen::HandleSocialToggle()
 	SetFlyoutOpen(!bFlyoutOpen);
 	if (bFlyoutOpen)
 	{
+		// Raised from the header chip, not from a seat: nothing to mark.
+		SetSelectedSeat(INDEX_NONE);
 		HandleRefreshClicked();
 	}
 }
 
-void UIBFriendsScreen::HandleInviteSlotClicked(UIBPlayerBannerWidget* /*Banner*/)
+void UIBFriendsScreen::HandleInviteSlotClicked(UIBPlayerBannerWidget* Banner)
 {
-	// The concept's +: an empty seat IS the invite affordance.
+	// The concept's +: an empty seat IS the invite affordance. The seat that
+	// raised the list gets marked so it is obvious where you came from — it is
+	// a visual origin only. Invites go to the session, not to a seat, and
+	// nothing below this line reads the mark.
 	SetFlyoutOpen(true);
+	SetSelectedSeat(Banners.IndexOfByPredicate(
+		[Banner](const TObjectPtr<UIBPlayerBannerWidget>& Seat) { return Seat.Get() == Banner; }));
 	HandleRefreshClicked();
 }
 

@@ -6,15 +6,7 @@
 
 class AIBKitZone;
 
-/**
- * Class kits — OPEN BY DESIGN. Each combat trade gets two verbs, a kit
- * ability (Q) and a movement tool (V); what they DO is data
- * (FIBKitAbilitySpec), built from a small set of generic effects so the
- * trades can be reshaped without touching C++, plus a Blueprint-only effect
- * for anything the primitives don't cover. The shipped values are first-pass
- * placeholders from CLASSES_AND_PROGRESSION.md §3 — tune or replace freely in
- * DA_Kit_<Trade> (Content/IronBreach/Classes).
- */
+/** Ability primitives shared by the skill catalog and legacy Blueprint kit assets. */
 UENUM(BlueprintType)
 enum class EIBKitEffect : uint8
 {
@@ -25,6 +17,11 @@ enum class EIBKitEffect : uint8
 	Glide		UMETA(DisplayName = "Glide (low gravity + full air control)"),
 	ConeStrike	UMETA(DisplayName = "Cone strike (short dash + damage/knockback ahead)"),
 	DeployZone	UMETA(DisplayName = "Deploy zone (pylon: slow / mark hostiles inside)"),
+	RadialStrike,
+	ReturnDash,
+	Cloak,
+	Decoy,
+	Guard,
 };
 
 USTRUCT(BlueprintType)
@@ -79,6 +76,12 @@ struct FIBKitAbilitySpec
 	/** DeployZone: drop it where you're aiming (up to Range) instead of at your feet. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kit")
 	bool bPlaceAtAim = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kit")
+	bool bUsesGuardEnergy = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kit")
+	bool bLeaveWard = false;
 
 	/** DeployZone: spawn this instead of the built-in pylon (must derive from AIBKitZone). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Kit")

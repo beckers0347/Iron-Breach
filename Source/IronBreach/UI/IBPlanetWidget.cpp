@@ -16,8 +16,8 @@
 namespace IBPlanetLayout
 {
 	constexpr float CardW      = 400.f;  // UIBWatchScreen's card width — keep in sync
-	constexpr float PillarW    = 72.f;   // the deck's left pillar
-	constexpr float ConsoleH   = 84.f;   // the deck's console along the bottom
+	constexpr float EdgeMargin = 32.f;
+	constexpr float FooterH    = 52.f;
 	constexpr float TanHalfFov = 0.36397f; // tan(20 deg): 40 deg vertical field of view
 	constexpr float SectorDist = 1.55f;
 	constexpr float DropDist   = 1.04f;
@@ -38,8 +38,6 @@ namespace IBPlanetLayout
 		const float T = FMath::Clamp((X - A) / (B - A), 0.f, 1.f);
 		return T * T * (3.f - 2.f * T);
 	}
-
-	inline FLinearColor Col(float R, float G, float B, float A = 1.f) { return FLinearColor(R, G, B, A); }
 }
 
 namespace IBPL = IBPlanetLayout;
@@ -48,10 +46,10 @@ namespace IBPL = IBPlanetLayout;
 
 void UIBPlanetWidget::BoardRect(const FVector2D& ScreenSize, FVector2D& OutPos, FVector2D& OutSize)
 {
-	const float Vista = FMath::Max(420.f, static_cast<float>(ScreenSize.X) - IBPL::CardW - 56.f);
-	const float AX = 92.f, AY = 150.f;
-	const float AW = Vista - AX - 12.f;
-	const float AH = static_cast<float>(ScreenSize.Y) - AY - 120.f;
+	const float Vista = FMath::Max(420.f, static_cast<float>(ScreenSize.X) - IBPL::CardW - 48.f);
+	const float AX = IBPL::EdgeMargin, AY = 220.f;
+	const float AW = FMath::Max(240.f, Vista - AX - 16.f);
+	const float AH = FMath::Max(180.f, static_cast<float>(ScreenSize.Y) - AY - IBPL::FooterH - 16.f);
 	float W = AW, H = W / 1.5f;
 	if (H > AH) { H = AH; W = H * 1.5f; }
 	OutPos = FVector2D(AX + (AW - W) * 0.5f, AY + (AH - H) * 0.5f);
@@ -331,17 +329,17 @@ FQuat UIBPlanetWidget::OrbitRotation() const
 
 float UIBPlanetWidget::OrbitDistance(const FVector2D& Size) const
 {
-	const float Vista = FMath::Max(420.f, static_cast<float>(Size.X) - IBPL::CardW - 56.f);
-	const float Rpx = FMath::Min(static_cast<float>(Size.Y) * 0.385f, (Vista - IBPL::PillarW) * 0.42f);
+	const float Vista = FMath::Max(420.f, static_cast<float>(Size.X) - IBPL::CardW - 48.f);
+	const float Rpx = FMath::Min(static_cast<float>(Size.Y) * 0.40f, (Vista - IBPL::EdgeMargin) * 0.45f);
 	const float Ang = FMath::Atan(Rpx * 2.f * IBPL::TanHalfFov / static_cast<float>(Size.Y));
 	return 1.f / FMath::Max(0.05f, FMath::Sin(Ang));
 }
 
 UIBPlanetWidget::FCam UIBPlanetWidget::OrbitCam(const FVector2D& Size) const
 {
-	const float Vista = FMath::Max(420.f, static_cast<float>(Size.X) - IBPL::CardW - 56.f);
-	const float PCX = IBPL::PillarW + (Vista - IBPL::PillarW) * 0.5f;
-	const float PCY = static_cast<float>(Size.Y) * 0.5f;
+	const float Vista = FMath::Max(420.f, static_cast<float>(Size.X) - IBPL::CardW - 48.f);
+	const float PCX = IBPL::EdgeMargin + (Vista - IBPL::EdgeMargin) * 0.5f;
+	const float PCY = static_cast<float>(Size.Y) * 0.53f;
 	FCam C;
 	C.Dist = OrbitDistance(Size) * ZoomScale;
 	C.Sx = (static_cast<float>(Size.X) * 0.5f - PCX) / static_cast<float>(Size.Y);
@@ -618,8 +616,8 @@ int32 UIBPlanetWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Geo,
 	const float W = static_cast<float>(Size.X), H = static_cast<float>(Size.Y);
 	if (W < 40.f || H < 40.f) { return L; }
 
-	const float Vista = FMath::Max(420.f, W - IBPL::CardW - 56.f);
-	const float PCX = IBPL::PillarW + (Vista - IBPL::PillarW) * 0.5f;
+	const float Vista = FMath::Max(420.f, W - IBPL::CardW - 48.f);
+	const float PCX = IBPL::EdgeMargin + (Vista - IBPL::EdgeMargin) * 0.5f;
 	const FSlateFontInfo FontGlyph = IBPaint::Font(TEXT("Bold"), 9.f, 0);
 	const FSlateFontInfo FontName  = IBPaint::Font(TEXT("Bold"), 10.f, 150);
 	const FSlateFontInfo FontSub   = IBPaint::Font(TEXT("Regular"), 8.f, 350);
@@ -696,8 +694,8 @@ int32 UIBPlanetWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Geo,
 				const bool bLeft = C.X < PCX;
 				const float Dir = bLeft ? -1.f : 1.f;
 				const float Gap = bSel ? 46.f : 30.f;
-				const float BX = FMath::Clamp(bLeft ? C.X - Gap - BW : C.X + Gap, IBPL::PillarW + 16.f, FMath::Max(IBPL::PillarW + 16.f, Vista - BW - 12.f));
-				const float BY = FMath::Clamp(C.Y - BH - 14.f, 124.f, FMath::Max(124.f, H - IBPL::ConsoleH - BH - 12.f));
+				const float BX = FMath::Clamp(bLeft ? C.X - Gap - BW : C.X + Gap, IBPL::EdgeMargin, FMath::Max(IBPL::EdgeMargin, Vista - BW - 12.f));
+				const float BY = FMath::Clamp(C.Y - BH - 14.f, 220.f, FMath::Max(220.f, H - IBPL::FooterH - BH - 12.f));
 				const float NearX = bLeft ? BX + BW : BX;
 				IBPaint::Line(Out, L + 3, Geo, { C + FVector2f(Dir * 13.f, -7.f), FVector2f(C.X + Dir * (Gap - 6.f), BY + BH), FVector2f(NearX, BY + BH) }, IBPaint::Alpha(Colr, 0.85f * A), 1.2f);
 				IBPaint::Rect(Out, L + 3, Geo, FVector2f(BX, BY), FVector2f(BW, BH), IBPaint::Alpha(IBStyle::Ink(), 0.82f * A));
@@ -761,70 +759,6 @@ int32 UIBPlanetWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Geo,
 		IBPaint::Gradient(Out, L, Geo, FVector2f(0, 0), FVector2f(W * 0.16f, H), Edge, Clear, false);
 		IBPaint::Gradient(Out, L, Geo, FVector2f(W * 0.84f, 0), FVector2f(W * 0.16f, H), Clear, Edge, false);
 		++L;
-	}
-
-	// ---- the deck around the glass ----
-	{
-		const FLinearColor Edge = IBPL::Col(0.43f, 0.67f, 0.82f, 0.14f);
-		// Soft contact shadow along the glass, then the bevelled pillar.
-		IBPaint::Gradient(Out, L, Geo, FVector2f(IBPL::PillarW, 0), FVector2f(45.f, H),
-			FLinearColor(0, 0, 0, 0.6f), FLinearColor::Transparent, false);
-		// left pillar
-		IBPaint::Rect(Out, L, Geo, FVector2f(0.f, 0.f), FVector2f(IBPL::PillarW, H), IBPL::Col(0.0045f, 0.006f, 0.008f));
-		IBPaint::Rect(Out, L, Geo, FVector2f(0.f, 0.f), FVector2f(IBPL::PillarW * 0.45f, H), IBPL::Col(0.007f, 0.0095f, 0.0125f));
-		IBPaint::Rect(Out, L, Geo, FVector2f(IBPL::PillarW - 2.f, 0.f), FVector2f(2.f, H), Edge);
-		for (float Y = 60.f; Y < H; Y += 150.f) { IBPaint::Rect(Out, L + 1, Geo, FVector2f(0.f, Y), FVector2f(IBPL::PillarW, 1.f), IBPL::Col(1.f, 1.f, 1.f, 0.04f)); }
-		IBPaint::Rect(Out, L + 1, Geo, FVector2f(12.f, H * 0.40f), FVector2f(46.f, 130.f), IBPL::Col(0.f, 0.f, 0.f, 0.5f));
-		IBPaint::Rect(Out, L + 2, Geo, FVector2f(32.f, H * 0.40f + 18.f), FVector2f(4.f, 4.f), IBStyle::Cyan());
-		IBPaint::Rect(Out, L + 2, Geo, FVector2f(32.f, H * 0.40f + 32.f), FVector2f(4.f, 4.f), IBStyle::Amber());
-		// Machined inset, service seams and a grazing reflection from the planet.
-		IBPaint::Gradient(Out, L + 1, Geo, FVector2f(8.f, 0), FVector2f(IBPL::PillarW - 16.f, H),
-			IBPL::Col(0.018f, 0.026f, 0.034f), IBPL::Col(0.003f, 0.005f, 0.007f), false);
-		IBPaint::Seg(Out, L + 2, Geo, FVector2f(8, 0), FVector2f(8, H), IBPL::Col(0.038f, 0.052f, 0.065f), 1.f);
-		IBPaint::Seg(Out, L + 2, Geo, FVector2f(IBPL::PillarW - 9, 0), FVector2f(IBPL::PillarW - 9, H), IBPL::Col(0, 0, 0, 0.9f), 2.f);
-		for (float Y = 140.f; Y < H - 90.f; Y += 240.f)
-		{
-			IBPaint::Seg(Out, L + 2, Geo, FVector2f(8, Y), FVector2f(IBPL::PillarW - 9, Y - 12), IBPL::Col(0, 0, 0, 0.9f), 2.f);
-			IBPaint::Disc(Out, L + 2, Geo, FVector2f(17, Y + 12), 2.4f, IBPL::Col(0.025f, 0.032f, 0.038f), 8);
-		}
-		// console
-		{
-			TArray<FVector2f> Poly;
-			TArray<FVector2f> Top;
-			for (float X = 0.f; X <= W + 1.f; X += 40.f)
-			{
-				const float XX = FMath::Min(X, W);
-				const float Y = H - IBPL::ConsoleH - 14.f * FMath::Sin(XX / W * PI);
-				Poly.Add(FVector2f(XX, Y));
-				Top.Add(FVector2f(XX, Y));
-			}
-			Poly.Add(FVector2f(W, H));
-			Poly.Add(FVector2f(0.f, H));
-			IBPaint::Fill(Out, L + 1, Geo, Poly, FVector2f(W * 0.5f, H), IBPL::Col(0.0035f, 0.005f, 0.007f));
-			IBPaint::Line(Out, L + 2, Geo, Top, IBPL::Col(0.43f, 0.67f, 0.82f, 0.18f), 1.5f);
-			for (float X = 90.f; X < W - 40.f; X += 26.f)
-			{
-				const float Y = H - IBPL::ConsoleH - 14.f * FMath::Sin(X / W * PI) + 8.f;
-				IBPaint::Rect(Out, L + 2, Geo, FVector2f(X, Y), FVector2f(1.f, 5.f), IBPL::Col(1.f, 1.f, 1.f, 0.06f));
-			}
-		}
-		IBPaint::Gradient(Out, L + 2, Geo, FVector2f(0, H - IBPL::ConsoleH + 18.f), FVector2f(W, IBPL::ConsoleH - 18.f),
-			IBPL::Col(0.015f, 0.022f, 0.029f), IBPL::Col(0.003f, 0.004f, 0.006f));
-		IBPaint::Seg(Out, L + 2, Geo, FVector2f(86, H - 20), FVector2f(W - 26, H - 20), IBPL::Col(0.031f, 0.045f, 0.057f), 1.f);
-		for (float X = 280.f; X < W - 100.f; X += 330.f)
-		{
-			IBPaint::Seg(Out, L + 2, Geo, FVector2f(X, H - 60), FVector2f(X - 28, H), IBPL::Col(0, 0, 0, 0.8f), 2.f);
-		}
-		// top-right truss
-		if (W > 1000.f)
-		{
-			IBPaint::Fill(Out, L + 1, Geo, { FVector2f(W - 640.f, 0.f), FVector2f(W - 30.f, 0.f), FVector2f(W - 30.f, 14.f), FVector2f(W - 540.f, 40.f), FVector2f(W - 640.f, 26.f) },
-				FVector2f(W - 335.f, 12.f), IBPL::Col(0.0028f, 0.0038f, 0.0055f));
-			IBPaint::Line(Out, L + 2, Geo, { FVector2f(W - 640.f, 26.f), FVector2f(W - 540.f, 40.f), FVector2f(W - 30.f, 14.f) }, IBPL::Col(0.43f, 0.67f, 0.82f, 0.12f), 1.f);
-			IBPaint::Fill(Out, L + 1, Geo, { FVector2f(W - 90.f, 0.f), FVector2f(W, 0.f), FVector2f(W, 70.f), FVector2f(W - 18.f, 62.f), FVector2f(W - 90.f, 12.f) },
-				FVector2f(W - 45.f, 30.f), IBPL::Col(0.0022f, 0.003f, 0.0045f));
-		}
-		L += 3;
 	}
 
 	return L;

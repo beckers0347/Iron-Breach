@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/LocalPlayerSubsystem.h"
+#include "UI/IBUISettings.h"
 #include "IBMenuSubsystem.generated.h"
 
 class UIBMenuScreen;
@@ -61,6 +62,8 @@ public:
 
 	/** Local presentation routing; does not change inventory or deployment state. */
 	UIBMenuScreen* GetActiveScreen() const { return ActiveScreen; }
+	FName GetActiveTabId() const;
+	EIBMenuGroup GetActiveMenuGroup() const { return ActiveMenuGroup; }
 
 private:
 	APlayerController* GetOwningPC() const;
@@ -84,6 +87,7 @@ private:
 	TObjectPtr<UIBMenuScreen> ActiveScreen;
 
 	FName ActiveScreenId;
+	EIBMenuGroup ActiveMenuGroup = EIBMenuGroup::Personal;
 
 	/** Toggle debounce (raw Escape floor + IA route can fire on one press). */
 	FName LastToggleId;

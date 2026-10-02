@@ -25,7 +25,7 @@ void UIBMapScreen::NativeOnInitialized()
 	// missing cartography without exposing asset names to the player.
 	if (!MapCanvas && !MapImage && WidgetTree)
 	{
-		const auto Page = IBMenuLayout::Begin(WidgetTree,
+		const auto Page = BuildHangarSection(
 			NSLOCTEXT("IBMap", "Title", "TACTICAL MAP"),
 			NSLOCTEXT("IBMap", "Kicker", "BREAKWATER / LOCAL RECONNAISSANCE"),
 			NSLOCTEXT("IBMap", "Controls", "B / THE WATCH     Q E / SWITCH MENU     ESC / RETURN"));

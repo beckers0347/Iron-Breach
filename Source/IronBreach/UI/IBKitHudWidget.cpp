@@ -35,8 +35,7 @@ void UIBKitHudWidget::BuildLayout()
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	KitChip = BuildChip(Column);
-	MoveChip = BuildChip(Column);
+	for (int32 I=0; I<4; ++I) { Chips.Add(BuildChip(Column)); }
 
 	if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(Column))
 	{
@@ -50,7 +49,7 @@ UIBKitHudWidget::FChip UIBKitHudWidget::BuildChip(UVerticalBox* InColumn)
 {
 	FChip Chip;
 
-	Chip.Frame = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.92f), 8.f);
+	Chip.Frame = IBStyle::MakePanel(WidgetTree, FLinearColor(0.015f, 0.022f, 0.04f, 0.92f), 0.f);
 	Chip.Frame->SetPadding(FMargin(10.f, 8.f));
 
 	UVerticalBox* Body = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
@@ -58,7 +57,7 @@ UIBKitHudWidget::FChip UIBKitHudWidget::BuildChip(UVerticalBox* InColumn)
 
 	// Key badge.
 	UBorder* Badge = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	Badge->SetBrush(IBStyle::RoundedBrush(IBStyle::Chip(), 4.f, IBStyle::Line(), 1.f));
+	Badge->SetBrush(IBStyle::RoundedBrush(IBStyle::Chip(), 0.f, IBStyle::Line(), 1.f));
 	Badge->SetPadding(FMargin(7.f, 2.f));
 	Chip.Key = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 11, IBStyle::TextHi(), 100);
 	Badge->SetContent(Chip.Key);
@@ -69,8 +68,8 @@ UIBKitHudWidget::FChip UIBKitHudWidget::BuildChip(UVerticalBox* InColumn)
 	}
 
 	UVerticalBox* Text = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	Chip.Name = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 11, IBStyle::TextHi(), 400);
-	Chip.State = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 9, IBStyle::TextLo(), 300);
+	Chip.Name = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 11, IBStyle::TextHi(), 50);
+	Chip.State = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 9, IBStyle::TextLo(), 50);
 	Text->AddChildToVerticalBox(Chip.Name);
 	if (UVerticalBoxSlot* StateSlot = Text->AddChildToVerticalBox(Chip.State))
 	{
@@ -85,7 +84,7 @@ UIBKitHudWidget::FChip UIBKitHudWidget::BuildChip(UVerticalBox* InColumn)
 
 	Chip.Bar = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass());
 	Chip.Bar->SetPercent(1.f);
-	Chip.Bar->SetFillColorAndOpacity(IBStyle::Amber());
+	Chip.Bar->SetFillColorAndOpacity(IBStyle::Cyan());
 	USizeBox* BarSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 	BarSize->SetHeightOverride(3.f);
 	BarSize->SetContent(Chip.Bar);
@@ -111,8 +110,7 @@ void UIBKitHudWidget::RefreshLabels()
 	UIBOperativeKitComponent* K = Kit.Get();
 	if (!K) { return; }
 
-	const FLinearColor Accent = IBCharacter::ClassColor(K->GetOperativeClass());
-	const FIBClassKit& KitData = K->GetKit();
+	const FLinearColor Accent = IBStyle::Cyan();
 
 	auto Apply = [&](FChip& Chip, const FIBKitAbilitySpec& Spec, const FKey& Key)
 	{
@@ -124,33 +122,38 @@ void UIBKitHudWidget::RefreshLabels()
 			Chip.Frame->SetVisibility(Spec.IsUsable() ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 		}
 	};
-	Apply(KitChip, KitData.KitAbility, K->GetKitAbilityKey());
-	Apply(MoveChip, KitData.MovementTool, K->GetMovementToolKey());
+	for (int32 I=0; I<Chips.Num(); ++I) { Apply(Chips[I], K->GetSlotSpec(static_cast<EIBSkillSlot>(I)), K->GetSlotKey(static_cast<EIBSkillSlot>(I))); }
 }
 
-void UIBKitHudWidget::UpdateChip(const FChip& Chip, bool bMovementTool)
+void UIBKitHudWidget::UpdateChip(const FChip& Chip, int32 SkillSlot)
 {
 	UIBOperativeKitComponent* K = Kit.Get();
 	if (!K || !Chip.Bar || !Chip.State) { return; }
 
-	const float Remaining = K->GetCooldownRemaining(bMovementTool);
-	const float Fraction = K->GetCooldownFraction(bMovementTool);
+	const float Remaining = K->GetSlotCooldown(static_cast<EIBSkillSlot>(SkillSlot));
+	const float Fraction = FMath::Clamp(Remaining/FMath::Max(.01f,K->GetSlotSpec(static_cast<EIBSkillSlot>(SkillSlot)).Cooldown),0.f,1.f);
 	Chip.Bar->SetPercent(1.f - Fraction);
 	if (Remaining > 0.05f)
 	{
-		Chip.State->SetText(FText::FromString(FString::Printf(TEXT("%.1fs"), Remaining)));
+		FString Recovery=FString::Printf(TEXT("%.1fs"),Remaining);
+        if (SkillSlot==0 && K->CanReturnToAnchor()) { Recovery=TEXT("PRESS AGAIN / RETURN"); }
+        else if (SkillSlot==0 && K->IsConcealed()) { Recovery=TEXT("VEIL ACTIVE / ")+Recovery; }
+        else if (SkillSlot==0 && K->GetOperativeClass()==EIBOperativeClass::Breaker)
+        { Recovery=FString::Printf(TEXT("%s / ENERGY %.0f"),K->IsGuardActive() ? TEXT("GUARD") : *Recovery,K->GetGuardEnergy()); }
+        Chip.State->SetText(FText::FromString(Recovery));
 		Chip.State->SetColorAndOpacity(FSlateColor(IBStyle::TextLo()));
 	}
 	else
 	{
-		Chip.State->SetText(NSLOCTEXT("IBKit", "Ready", "READY"));
-		Chip.State->SetColorAndOpacity(FSlateColor(IBStyle::Amber()));
+		if (SkillSlot==0 && K->GetOperativeClass()==EIBOperativeClass::Breaker)
+        { Chip.State->SetText(FText::FromString(FString::Printf(TEXT("READY  /  ENERGY %.0f / 100"),K->GetGuardEnergy()))); }
+        else { Chip.State->SetText(NSLOCTEXT("IBKit", "Ready", "READY")); }
+		Chip.State->SetColorAndOpacity(FSlateColor(IBStyle::Cyan()));
 	}
 }
 
 void UIBKitHudWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
-	UpdateChip(KitChip, false);
-	UpdateChip(MoveChip, true);
+	for (int32 I=0; I<Chips.Num(); ++I) { UpdateChip(Chips[I],I); }
 }

@@ -1,6 +1,7 @@
 // IBWeaponRackScreen.cpp
 #include "UI/IBWeaponRackScreen.h"
 #include "UI/IBStyleKit.h"
+#include "UI/IBHangarStyle.h"
 #include "UI/IBItemTileWidget.h"
 #include "Items/IBWeaponRack.h"
 #include "Items/IBItemDefinition.h"
@@ -67,21 +68,7 @@ void UIBWeaponRackScreen::BuildFallbackLayout()
 {
 	if (ItemGrid || !WidgetTree) { return; } // Already bound from a WBP child, or no tree yet.
 
-	UOverlay* Root = Cast<UOverlay>(WidgetTree->RootWidget);
-	if (!WidgetTree->RootWidget)
-	{
-		Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-		WidgetTree->RootWidget = Root;
-	}
-	if (!Root) { return; }
-
-	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	Dim->SetBrushColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.78f));
-	if (UOverlaySlot* DimSlot = Root->AddChildToOverlay(Dim))
-	{
-		DimSlot->SetHorizontalAlignment(HAlign_Fill);
-		DimSlot->SetVerticalAlignment(VAlign_Fill);
-	}
+	UOverlay* Root = IBHangar::Frontend(WidgetTree);
 
 	UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 
@@ -133,7 +120,7 @@ void UIBWeaponRackScreen::BuildFallbackLayout()
 		HintSlot->SetHorizontalAlignment(HAlign_Center);
 	}
 
-	if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(Column))
+	if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(IBHangar::Panel(WidgetTree, Column, FMargin(32))))
 	{
 		ColumnSlot->SetHorizontalAlignment(HAlign_Center);
 		ColumnSlot->SetVerticalAlignment(VAlign_Center);

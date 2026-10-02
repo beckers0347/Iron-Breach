@@ -9,8 +9,10 @@
 
 class UIBInventoryComponent;
 class UIBItemDefinition;
+class UIBSkillComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnIBOperativeIdentityChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnIBOperativeXPChanged);
 
 /**
  * Project player state: the durable per-player home. Inventory lives here so
@@ -28,6 +30,9 @@ class IRONBREACH_API AIBPlayerState : public APlayerState
 
 public:
 	AIBPlayerState();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skills")
+	TObjectPtr<UIBSkillComponent> Skills;
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	UIBInventoryComponent* GetInventory() const { return InventoryComponent; }
@@ -58,6 +63,26 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Operative")
 	int32 GetOperativeLevel() const { return OperativeLevel; }
 
+	/** Pilot XP mirrored from the host's ledger: the total, where the current level began and
+	 *  where the next one begins (0 = top of the ladder, or no ladder tuned). Real numbers only —
+	 *  the menu header draws its progress from these. */
+	UFUNCTION(BlueprintPure, Category = "Operative")
+	int32 GetOperativeXP() const { return OperativeXP; }
+
+	UFUNCTION(BlueprintPure, Category = "Operative")
+	int32 GetOperativeLevelFloorXP() const { return OperativeLevelFloorXP; }
+
+	UFUNCTION(BlueprintPure, Category = "Operative")
+	int32 GetOperativeNextLevelXP() const { return OperativeNextLevelXP; }
+
+	/** 0..1 through the current level; 1 at the top of the ladder. */
+	UFUNCTION(BlueprintPure, Category = "Operative")
+	float GetOperativeLevelProgress() const;
+
+	/** True while a next level exists on the tuned ladder. */
+	UFUNCTION(BlueprintPure, Category = "Operative")
+	bool HasNextLevel() const { return OperativeNextLevelXP > OperativeLevelFloorXP; }
+
 	/** Callsign when known, else the platform name — what banners should print. */
 	UFUNCTION(BlueprintPure, Category = "Operative")
 	FString GetDisplayCallsign() const;
@@ -68,6 +93,9 @@ public:
 
 	/** Server-only: mirror of the XP ledger. */
 	void SetOperativeLevel(int32 NewLevel);
+
+	/** Server-only: mirror of the XP ledger's total for this operative; derives the level bounds. */
+	void SetOperativeXP(int32 TotalXP);
 
 	/**
 	 * Owning-client entry point: authority sets directly, clients go through the
@@ -80,6 +108,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Operative")
 	FOnIBOperativeIdentityChanged OnOperativeIdentityChanged;
+
+	/** XP mirror moved (every award during a fight): separate from identity so HUD/menu
+	 *  listeners can be as cheap as they need to be. Level-ups still raise the identity event. */
+	UPROPERTY(BlueprintAssignable, Category = "Operative")
+	FOnIBOperativeXPChanged OnOperativeXPChanged;
 
 	// ---- The Watch (breach board): anyone proposes, the host confirms ----
 	// Owning-client entry points: authority applies directly, clients Server-RPC.
@@ -104,6 +137,9 @@ protected:
 	UFUNCTION()
 	void OnRep_OperativeLevel();
 
+	UFUNCTION()
+	void OnRep_OperativeXP();
+
 	UFUNCTION(Server, Reliable)
 	void Server_SetOperativeIdentity(const FString& Callsign, EIBOperativeClass Class, EIBOperativeGender Gender, const FGuid& CharacterId);
 
@@ -122,6 +158,7 @@ protected:
 	UFUNCTION() void HandleInventoryChangedForVault();
 	UFUNCTION() void HandleEquipmentChangedForVault(EIBEquipSlot Slot, const FIBItemInstance& Item);
 	UFUNCTION() void HandleXPLevelUp(EXPTrack Track, const FString& RecordKey, int32 NewLevel, int32 OldLevel);
+	UFUNCTION() void HandleXPAwarded(EXPTrack Track, const FString& RecordKey, int32 NewTotalXP);
 
 	void ScheduleVaultSave();
 	void SaveVaultNow();
@@ -150,6 +187,16 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_OperativeLevel, BlueprintReadOnly, Category = "Operative")
 	int32 OperativeLevel = 1;
+
+	// XP mirror (host writes, everyone reads). Bounds ride along so clients need no tuning asset.
+	UPROPERTY(ReplicatedUsing = OnRep_OperativeXP, BlueprintReadOnly, Category = "Operative")
+	int32 OperativeXP = 0;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Operative")
+	int32 OperativeLevelFloorXP = 0;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Operative")
+	int32 OperativeNextLevelXP = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UIBInventoryComponent> InventoryComponent;

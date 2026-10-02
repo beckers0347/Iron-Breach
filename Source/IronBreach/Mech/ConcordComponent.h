@@ -106,6 +106,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Concord")
 	bool IsDesynced() const { return bDesynced; }
 
+	/** Is a tuning profile assigned? Without one the meter cannot move and the safety lock can
+	 *  never engage, so AreHeavyWeaponsLocked() returning false says nothing about the link.
+	 *  Read-only; it changes no tuning and no lock behaviour. */
+	UFUNCTION(BlueprintPure, Category = "Concord")
+	bool IsTuned() const { return Tuning != nullptr; }
+
 	/** Heavy weapons safety-locked? (Desynced + tuning flag.) The mech checks this before firing. */
 	UFUNCTION(BlueprintPure, Category = "Concord")
 	bool AreHeavyWeaponsLocked() const;

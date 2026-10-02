@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "Classes/IBClassKitTypes.h"
 #include "InputCoreTypes.h"
+#include "Skills/IBSkillTypes.h"
 #include "IBOperativeKitComponent.generated.h"
 
 class UIBClassKitData;
@@ -13,19 +14,7 @@ class UInputComponent;
 class ACharacter;
 class APlayerController;
 
-/**
- * The operative's class kit on the infantry pawn: resolves the trade from the
- * PlayerState's operative identity, loads DA_Kit_<Trade> (or built-in
- * defaults), binds Q (kit ability) and V (movement tool), runs the generic
- * effects with cooldowns, and shows a two-chip HUD for the local player.
- *
- * Authority (ADR-002): the owning client predicts movement effects locally
- * and asks the server; the server re-validates cooldowns, runs the effect
- * for real (damage, zones), and multicasts the activation so every machine
- * can play FX through BP_OnKitActivated. Designers: reshape the kits in the
- * data assets; add FX in a BP child of the pawn; use Effect = Blueprint for
- * anything the primitives don't cover.
- */
+/** Four-slot operative abilities. Unlocks live on PlayerState; gameplay runs on authority. */
 UCLASS(ClassGroup = (IronBreach), meta = (BlueprintSpawnableComponent))
 class IRONBREACH_API UIBOperativeKitComponent : public UActorComponent
 {
@@ -46,6 +35,20 @@ public:
 	/** Re-resolve from the PlayerState (identity arrived or changed). */
 	UFUNCTION(BlueprintCallable, Category = "Kit")
 	void RefreshKit();
+    void ActivateSlot(EIBSkillSlot Slot);
+    void ActivateTacticalTwo() { ActivateSlot(EIBSkillSlot::TacticalTwo); }
+    void ActivateOverdrive() { ActivateSlot(EIBSkillSlot::Overdrive); }
+    const FIBKitAbilitySpec& GetSlotSpec(EIBSkillSlot Slot) const;
+    float GetSlotCooldown(EIBSkillSlot Slot) const;
+    FKey GetSlotKey(EIBSkillSlot Slot) const;
+    void NotifyAttack();
+    void RecordGuardedDamage(float IncomingDamage);
+    void ApplyWardDefense(float Scale, float Duration);
+    bool IsConcealed() const { return bConcealed; }
+    float GetGuardEnergy() const { return GuardEnergy; }
+    bool IsGuardActive() const;
+    bool CanReturnToAnchor() const { return Now()<ReturnUntil; }
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintPure, Category = "Kit")
 	const FIBClassKit& GetKit() const { return ActiveKit; }
@@ -69,7 +72,7 @@ public:
 	/** Incoming-damage multiplier while a defensive window is live (the pawn reads it on the server). */
 	float GetDamageTakenScale() const;
 
-	/** Per-trade kit assets; missing entries fall back to the built-in defaults. */
+	/** Legacy Blueprint property. Playable skill tuning now lives in IBSkills::Catalog. */
 	UPROPERTY(EditDefaultsOnly, Category = "Kit")
 	TMap<EIBOperativeClass, TSoftObjectPtr<UIBClassKitData>> KitData;
 
@@ -95,14 +98,19 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(Server, Reliable)
-	void Server_Activate(bool bMovementTool);
+	void Server_Activate(EIBSkillSlot Slot);
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_Activated(bool bMovementTool);
+	void Multicast_Activated(EIBSkillSlot Slot, const FIBKitAbilitySpec& Spec);
+
+    UFUNCTION(Client, Reliable) void Client_Cooldown(EIBSkillSlot Slot, FName Ability, float Remaining);
+    UFUNCTION() void OnRep_Concealed();
+    UFUNCTION(Client, Reliable) void Client_ReturnWindow(float Seconds);
 
 private:
-	void TryActivate(bool bMovementTool);
-	void ExecuteEffect(bool bMovementTool, bool bAuthority, bool bLocal);
+    friend struct FIBSkillCombatCheck;
+
+	void ExecuteEffect(EIBSkillSlot Slot);
 	const FIBKitAbilitySpec& SpecFor(bool bMovementTool) const { return bMovementTool ? ActiveKit.MovementTool : ActiveKit.KitAbility; }
 
 	FVector LookDirection(bool bFlatten) const;
@@ -111,6 +119,9 @@ private:
 	void DoGlide(const FIBKitAbilitySpec& Spec);
 	void EndGlide();
 	void DoConeStrikeDamage(const FIBKitAbilitySpec& Spec);
+    void DoStrikeDamage(FIBKitAbilitySpec Spec, bool bRadial);
+    bool TryReturn();
+    bool CanActivate() const;
 	void DoDeployZone(const FIBKitAbilitySpec& Spec);
 	void OpenDefenseWindow(const FIBKitAbilitySpec& Spec);
 	void EnsureHud();
@@ -127,8 +138,20 @@ private:
 	 *  re-resolve + asset load + log every frame -- it only re-runs when something changed. */
 	bool bKitApplied = false;
 
-	double KitReadyTime = 0.0;
-	double MoveReadyTime = 0.0;
+	FIBSkillState AppliedSkills;
+    TArray<FIBKitAbilitySpec> SlotSpecs;
+    double SlotReadyTime[4] = {};
+    TMap<FName, double> AbilityReadyTime;
+    double ReturnUntil = 0;
+    FVector ReturnAnchor;
+    UPROPERTY(ReplicatedUsing=OnRep_Concealed) bool bConcealed = false;
+    UPROPERTY(Replicated) float GuardEnergy = 0;
+    double CloakUntil = 0;
+    double GuardUntil = 0;
+    float GuardScale = 1;
+    double WardUntil = 0;
+    float WardScale = 1;
+    TArray<TWeakObjectPtr<class UMeshComponent>> ConcealedMeshes;
 
 	double DefenseUntil = 0.0;
 	float DefenseScale = 1.f;
@@ -137,7 +160,7 @@ private:
 	float SavedGravityScale = 1.f;
 	float SavedAirControl = 0.05f;
 	FTimerHandle GlideHandle;
-	FTimerHandle StrikeHandle;
+	TArray<FTimerHandle> EffectHandles;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UIBKitHudWidget> Hud;

@@ -1,4 +1,5 @@
 #include "Combat/HitscanWeaponComponent.h"
+#include "Classes/IBOperativeKitComponent.h"
 #include "IronBreach.h"
 #include "Combat/DamageableInterface.h"
 #include "Combat/WeaponCombatData.h"
@@ -120,6 +121,7 @@ void UHitscanWeaponComponent::PerformFire(const FVector& ViewLocation, const FVe
 	const float Now = World->GetTimeSeconds();
 	if (Now - LastServerFireTime < FMath::Max(UseInterval, 0.05f)) return;
 	LastServerFireTime = Now;
+	if (UIBOperativeKitComponent* Kit=Pawn->FindComponentByClass<UIBOperativeKitComponent>()) { Kit->NotifyAttack(); }
 
 	const float UseDamage = CombatData ? CombatData->BaseDamage : Damage;
 	const float UseRange = CombatData ? CombatData->MaxRange : Range;

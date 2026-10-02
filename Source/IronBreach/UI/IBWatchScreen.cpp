@@ -3,6 +3,7 @@
 #include "UI/IBSectorBoardWidget.h"
 #include "UI/IBMenuSubsystem.h"
 #include "UI/IBStyleKit.h"
+#include "UI/IBHangarStyle.h"
 #include "UI/IBPaintKit.h"
 #include "Online/IBWatchBoard.h"
 #include "Online/IBWatchTypes.h"
@@ -52,10 +53,10 @@ namespace IBWatchPresentation
 			const TArray<FVector2f> Shape = { FVector2f(0,0), FVector2f(W-C,0), FVector2f(W,C),
 				FVector2f(W,H), FVector2f(C,H), FVector2f(0,H-C) };
 			const FLinearColor Tint = Style.GetColorAndOpacityTint();
-			IBPaint::Fill(Out, LayerId, Geo, Shape, FVector2f(W*0.5f,H*0.5f), FLinearColor(0.008f,0.013f,0.022f,0.92f)*Tint);
+			IBPaint::Fill(Out, LayerId, Geo, Shape, FVector2f(W*0.5f,H*0.5f), IBHangar::Ink()*Tint);
 			TArray<FVector2f> Edge = Shape;
 			Edge.Add(Shape[0]);
-			IBPaint::Line(Out, LayerId+1, Geo, Edge, FLinearColor(0.09f,0.19f,0.26f,0.8f)*Tint, 1.f);
+			IBPaint::Line(Out, LayerId+1, Geo, Edge, IBStyle::Line()*Tint, 1.f);
 			IBPaint::Seg(Out, LayerId+1, Geo, FVector2f(0,0), FVector2f(58,0), IBStyle::Cyan()*Tint, 2.f);
 			return SCompoundWidget::OnPaint(Args, Geo, Cull, Out, LayerId+2, Style, bParentEnabled);
 		}
@@ -101,8 +102,8 @@ namespace IBWatchUI
 		default: break;
 		}
 		FButtonStyle St = Button->GetStyle();
-		St.Normal   = IBStyle::RoundedBrush(Fill, 3.f, Outline, OutlineW);
-		St.Hovered  = IBStyle::RoundedBrush(Hot, 3.f, Outline, OutlineW);
+		St.Normal   = IBStyle::RoundedBrush(Fill, 0.f, Outline, OutlineW);
+		St.Hovered  = IBStyle::RoundedBrush(Hot, 0.f, Outline, OutlineW);
 		St.Pressed  = IBStyle::RoundedBrush(Fill * FLinearColor(0.8f, 0.8f, 0.8f, 1.f), 3.f, Outline, OutlineW);
 		St.Disabled = IBStyle::RoundedBrush(FLinearColor(0.f, 0.f, 0.f, 0.f), 3.f, IBStyle::Line(), 1.f);
 		St.NormalPadding  = FMargin(22.f, 14.f);
@@ -142,7 +143,7 @@ namespace IBWatchUI
 
 	inline UTextBlock* Mono(UWidgetTree* Tree, const FText& Text, int32 Size, const FLinearColor& Color, int32 Tracking = 500)
 	{
-		return IBStyle::MakeText(Tree, Text, Size, Color, Tracking);
+		return IBMenuLayout::Text(Tree, Text, Size, Color, FMath::Min(Tracking, 100));
 	}
 
 	inline UBorder* Hairline(UWidgetTree* Tree)
@@ -159,11 +160,15 @@ namespace IBWatchUI
 void UIBWatchScreen::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+	HangarDefaultTab = TEXT("Watch");
 	BuildLayout();
 	SelectedSector = IBWatch::HomeSectorId();
 	SelectedId = DefaultSelection();
 	EnsureBoard();
 	RefreshAll();
+	// Lobby Watch is mounted directly, outside the registered menu lifecycle.
+	EnsureTabBanner();
+	RefreshTabBanner();
 	StartVisualTour();
 }
 
@@ -240,12 +245,19 @@ void UIBWatchScreen::NativeScreenOpened()
 
 FReply UIBWatchScreen::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
-	if (InKeyEvent.GetKey() == EKeys::Escape && bBoardView)
+	const FKey Key = InKeyEvent.GetKey();
+	const bool bBack = Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right;
+	if (bBack && bBoardView)
 	{
 		GoOrbit();
 		return FReply::Handled();
 	}
-	if (InKeyEvent.GetKey() == EKeys::Enter && !InKeyEvent.IsRepeat())
+	if (bBack && !GetMenuSubsystem())
+	{
+		HandleLeave();
+		return FReply::Handled();
+	}
+	if (Key == EKeys::Enter && !InKeyEvent.IsRepeat())
 	{
 		HandlePrimary();
 		return FReply::Handled();
@@ -259,16 +271,11 @@ void UIBWatchScreen::BuildLayout()
 {
 	if (!WidgetTree || Planet) { return; }
 
-	UOverlay* Root = Cast<UOverlay>(WidgetTree->RootWidget);
-	if (!WidgetTree->RootWidget)
-	{
-		Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-		WidgetTree->RootWidget = Root;
-	}
-	if (!Root) { return; }
+	UOverlay* Root = BuildDirectorPage(NSLOCTEXT("IBWatch", "PageHints", "DRAG / ROTATE     SCROLL / ZOOM     SELECT / INSPECT     ESC / BACK"));
 
-	// ---- the glass: the planet, full-bleed ----
-	Planet = CreateWidget<UIBPlanetWidget>(GetOwningPlayer(), UIBPlanetWidget::StaticClass());
+	// The planet is the Director's full viewport scene; the navigation and
+	// briefing float above it without a hangar sheet or command-window frame.
+	Planet = CreateWidget<UIBPlanetWidget>(GetOwningPlayer(), UIBPlanetWidget::StaticClass(), TEXT("WatchPlanet"));
 	if (Planet)
 	{
 		Planet->OnSectorPicked.AddDynamic(this, &UIBWatchScreen::HandleSectorPicked);
@@ -306,7 +313,7 @@ void UIBWatchScreen::BuildLayout()
 		if (BoardSlot)
 		{
 			BoardSlot->SetAutoSize(false);
-			BoardSlot->SetPosition(FVector2D(92.0, 150.0));
+			BoardSlot->SetPosition(FVector2D(32.0, 220.0));
 			BoardSlot->SetSize(FVector2D(900.0, 600.0));
 		}
 	}
@@ -347,7 +354,7 @@ void UIBWatchScreen::BuildHeader(UOverlay* Root)
 
 	UHorizontalBox* Title = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 	Title->AddChildToHorizontalBox(IBStyle::MakeText(WidgetTree, FText::FromString(TEXT("//")), 24, IBStyle::Cyan(), 300));
-	if (UHorizontalBoxSlot* S = Title->AddChildToHorizontalBox(IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBWatch", "Title", "THE WATCH"), 24, IBStyle::TextHi(), 300)))
+	if (UHorizontalBoxSlot* S = Title->AddChildToHorizontalBox(IBMenuLayout::Heading(WidgetTree, NSLOCTEXT("IBWatch", "Title", "THE WATCH"), 36)))
 	{
 		S->SetPadding(FMargin(14.f, 0.f, 0.f, 0.f));
 	}
@@ -378,7 +385,7 @@ void UIBWatchScreen::BuildHeader(UOverlay* Root)
 	{
 		S->SetHorizontalAlignment(HAlign_Left);
 		S->SetVerticalAlignment(VAlign_Top);
-		S->SetPadding(FMargin(92.f, 26.f, 0.f, 0.f));
+		S->SetPadding(FMargin(32.f, 104.f, 0.f, 0.f));
 	}
 }
 
@@ -398,7 +405,7 @@ void UIBWatchScreen::BuildRoster(UOverlay* Root)
 	{
 		S->SetHorizontalAlignment(HAlign_Right);
 		S->SetVerticalAlignment(VAlign_Top);
-		S->SetPadding(FMargin(0.f, 28.f, IBWatchUI::CardW + 48.f, 0.f));
+		S->SetPadding(FMargin(0.f, 104.f, 32.f, 0.f));
 	}
 }
 
@@ -557,15 +564,20 @@ void UIBWatchScreen::BuildCard(UOverlay* Root)
 		if (UVerticalBoxSlot* S = Card->AddChildToVerticalBox(Wrap)) { S->SetPadding(FMargin(0.f, 12.f, 0.f, 0.f)); }
 	}
 
+	// The briefing scrolls independently; deployment controls stay reachable.
+	UVerticalBox* Briefing = Card;
+	Card = WidgetTree->ConstructWidget<UVerticalBox>();
+	IBMenuLayout::Scroll(WidgetTree, Card, Briefing);
 	NarratorText = IBWatchUI::Mono(WidgetTree, FText::GetEmpty(), 9, IBStyle::Cyan(), 250);
 	NarratorText->SetAutoWrapText(true);
 	if (UVerticalBoxSlot* S = Card->AddChildToVerticalBox(NarratorText)) { S->SetPadding(FMargin(0.f, 10.f, 0.f, 8.f)); }
 
 	// DEPLOY
-	PrimaryButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+	PrimaryButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("WatchDeployButton"));
 	{
 		UHorizontalBox* Inner = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-		PrimaryLabel = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBWatch", "Deploy", "DEPLOY"), 17, FLinearColor::Black, 500);
+		PrimaryLabel = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBWatch", "Deploy", "DEPLOY"), 16, FLinearColor::Black, 100);
+		PrimaryLabel->SetAutoWrapText(true);
 		PrimaryLabel->SetShadowColorAndOpacity(FLinearColor::Transparent);
 		if (UHorizontalBoxSlot* S = Inner->AddChildToHorizontalBox(PrimaryLabel)) { S->SetSize(FSlateChildSize(ESlateSizeRule::Fill)); S->SetVerticalAlignment(VAlign_Center); }
 		PrimaryChevron = IBStyle::MakeText(WidgetTree, FText::FromString(TEXT("››")), 18, FLinearColor::Black, 0);
@@ -600,7 +612,7 @@ void UIBWatchScreen::BuildCard(UOverlay* Root)
 	ViewButton->OnClicked.AddDynamic(this, &UIBWatchScreen::HandleView);
 	if (UVerticalBoxSlot* S = Card->AddChildToVerticalBox(ViewButton)) { S->SetPadding(FMargin(0.f, 4.f, 0.f, 0.f)); }
 
-	CardPanel = WidgetTree->ConstructWidget<UIBWatchCardBorder>(UIBWatchCardBorder::StaticClass());
+	CardPanel = WidgetTree->ConstructWidget<UIBWatchCardBorder>(UIBWatchCardBorder::StaticClass(), TEXT("WatchBriefingPanel"));
 	CardPanel->SetBrush(IBStyle::RoundedBrush(IBWatchUI::Glass(), 0.f));
 	CardPanel->SetPadding(FMargin(24.f, 22.f, 24.f, 16.f));
 	CardPanel->SetContent(Card);
@@ -610,22 +622,13 @@ void UIBWatchScreen::BuildCard(UOverlay* Root)
 	if (UOverlaySlot* S = Root->AddChildToOverlay(CardSize))
 	{
 		S->SetHorizontalAlignment(HAlign_Right);
-		S->SetVerticalAlignment(VAlign_Center);
-		S->SetPadding(FMargin(0.f, 0.f, 24.f, 0.f));
+		S->SetVerticalAlignment(VAlign_Fill);
+		S->SetPadding(FMargin(0.f, 168.f, 32.f, 52.f));
 	}
 }
 
 void UIBWatchScreen::BuildFooter(UOverlay* Root)
 {
-	UTextBlock* Hints = IBWatchUI::Mono(WidgetTree,
-		NSLOCTEXT("IBWatch", "Hints", "DRAG  ROTATE        SCROLL  ZOOM        SELECT  ·  DOUBLE-CLICK OPENS THE BOARD        ESC  BACK"), 8, IBStyle::TextLo(), 500);
-	if (UOverlaySlot* S = Root->AddChildToOverlay(Hints))
-	{
-		S->SetHorizontalAlignment(HAlign_Left);
-		S->SetVerticalAlignment(VAlign_Bottom);
-		S->SetPadding(FMargin(92.f, 0.f, 0.f, 30.f));
-	}
-
 	UTextBlock* RawLeave = nullptr;
 	LeaveButton = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBWatch", "Leave", "LEAVE THE WATCH"), 8, false, &RawLeave);
 	LeaveLabel = RawLeave;
@@ -636,7 +639,7 @@ void UIBWatchScreen::BuildFooter(UOverlay* Root)
 	{
 		S->SetHorizontalAlignment(HAlign_Right);
 		S->SetVerticalAlignment(VAlign_Bottom);
-		S->SetPadding(FMargin(0.f, 0.f, 24.f, 26.f));
+		S->SetPadding(FMargin(0.f, 0.f, 32.f, 12.f));
 	}
 }
 
@@ -668,7 +671,7 @@ void UIBWatchScreen::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	Super::NativeTick(MyGeometry, InDeltaTime);
 	if (!BoardState || !IsValid(BoardState)) { EnsureBoard(); }
 
-	const FVector2D Size = MyGeometry.GetLocalSize();
+	const FVector2D Size = Planet ? Planet->GetCachedGeometry().GetLocalSize() : MyGeometry.GetLocalSize();
 	if (Size.X > 8.0 && Size.Y > 8.0) { LastScreenSize = Size; }
 	TickViews(LastScreenSize, InDeltaTime);
 
@@ -684,6 +687,7 @@ void UIBWatchScreen::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	{
 		RosterAccumulator = 0.f;
 		RefreshRoster();
+		RefreshTabBanner();
 	}
 
 	if (Board && BoardState)
@@ -1008,7 +1012,13 @@ void UIBWatchScreen::RefreshRoster()
 		USizeBox* DotSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 		DotSize->SetWidthOverride(5.f); DotSize->SetHeightOverride(5.f); DotSize->AddChild(Dot);
 		if (UHorizontalBoxSlot* S = Inner->AddChildToHorizontalBox(DotSize)) { S->SetPadding(FMargin(0.f, 0.f, 8.f, 0.f)); S->SetVerticalAlignment(VAlign_Center); }
-		Inner->AddChildToHorizontalBox(IBWatchUI::Mono(WidgetTree, FText::FromString(E.Name.ToUpper()), 9, IBStyle::TextHi(), 400));
+		UTextBlock* Callsign = IBWatchUI::Mono(WidgetTree, FText::FromString(E.Name.ToUpper()), 9, IBStyle::TextHi(), 400);
+		Callsign->SetTextOverflowPolicy(ETextOverflowPolicy::Ellipsis);
+		Callsign->SetClipping(EWidgetClipping::ClipToBounds);
+		USizeBox* CallsignSize = WidgetTree->ConstructWidget<USizeBox>();
+		CallsignSize->SetMaxDesiredWidth(116.f);
+		CallsignSize->SetContent(Callsign);
+		Inner->AddChildToHorizontalBox(CallsignSize);
 		Inner->AddChildToHorizontalBox(IBWatchUI::Mono(WidgetTree, FText::FromString(bHostEntry ? TEXT("  ·  HOST") : TEXT("  ·  LINKED")), 9, IBStyle::TextLo(), 400));
 		Chip->SetContent(Inner);
 		if (UHorizontalBoxSlot* S = RosterRow->AddChildToHorizontalBox(Chip)) { S->SetPadding(FMargin(0.f, 0.f, 8.f, 0.f)); }
@@ -1351,6 +1361,9 @@ void UIBWatchScreen::RefreshButtons()
 
 	if (LeaveButton && LeaveLabel)
 	{
+		// In missions the Director has its shared Back control. The lobby still
+		// needs the explicit leave-session action as well as Escape.
+		LeaveButton->SetVisibility(GetMenuSubsystem() ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
 		if (GetMenuSubsystem())
 		{
 			LeaveLabel->SetText(NSLOCTEXT("IBWatch", "Close", "CLOSE"));

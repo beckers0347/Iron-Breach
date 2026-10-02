@@ -20,8 +20,28 @@ void UIBFriendRowWidget::BuildLayout()
 	Frame->SetHeightOverride(46.f);
 	WidgetTree->RootWidget = Frame;
 
+	// Surface carries the hover / focus fill for the whole line; the lane holds
+	// a 3 px lead edge beside the original row, which is otherwise untouched.
+	Surface = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+	Frame->AddChild(Surface);
+	UHorizontalBox* Lane = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	Surface->SetContent(Lane);
+
+	LeadEdge = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+	USizeBox* EdgeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
+	EdgeBox->SetWidthOverride(3.f);
+	EdgeBox->AddChild(LeadEdge);
+	if (UHorizontalBoxSlot* EdgeSlot = Lane->AddChildToHorizontalBox(EdgeBox))
+	{
+		EdgeSlot->SetVerticalAlignment(VAlign_Fill);
+	}
+
 	UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	Frame->AddChild(Row);
+	if (UHorizontalBoxSlot* RowSlot = Lane->AddChildToHorizontalBox(Row))
+	{
+		RowSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		RowSlot->SetPadding(FMargin(9.f, 0.f, 4.f, 0.f));
+	}
 
 	// Presence dot.
 	USizeBox* DotBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
@@ -57,6 +77,54 @@ void UIBFriendRowWidget::BuildLayout()
 	{
 		ActionSlot->SetVerticalAlignment(VAlign_Center);
 	}
+
+	ApplyStateVisuals();
+}
+
+void UIBFriendRowWidget::ApplyStateVisuals()
+{
+	if (!Surface) { return; }
+	// Flat at rest — a list of outlined boxes is exactly what the panel should
+	// not look like. Hover fills faintly; focus fills further and lights the
+	// lead edge, which is the tell that survives when the pointer is elsewhere.
+	const FLinearColor Fill = bFocused ? FLinearColor(.045f, .165f, .205f, .95f)
+		: bHovered ? FLinearColor(.028f, .105f, .135f, .80f)
+		: FLinearColor::Transparent;
+	Surface->SetBrush(IBStyle::RoundedBrush(Fill, 0.f,
+		bFocused ? IBStyle::Cyan() : FLinearColor::Transparent, bFocused ? 1.f : 0.f));
+	if (LeadEdge)
+	{
+		LeadEdge->SetBrush(IBStyle::RoundedBrush(bFocused ? IBStyle::Cyan()
+			: bHovered ? IBStyle::Line() : FLinearColor::Transparent, 0.f));
+	}
+}
+
+void UIBFriendRowWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+	bHovered = true;
+	ApplyStateVisuals();
+}
+
+void UIBFriendRowWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseLeave(InMouseEvent);
+	bHovered = false;
+	ApplyStateVisuals();
+}
+
+void UIBFriendRowWidget::NativeOnAddedToFocusPath(const FFocusEvent& InFocusEvent)
+{
+	Super::NativeOnAddedToFocusPath(InFocusEvent);
+	bFocused = true;
+	ApplyStateVisuals();
+}
+
+void UIBFriendRowWidget::NativeOnRemovedFromFocusPath(const FFocusEvent& InFocusEvent)
+{
+	Super::NativeOnRemovedFromFocusPath(InFocusEvent);
+	bFocused = false;
+	ApplyStateVisuals();
 }
 
 void UIBFriendRowWidget::InitRow(const FIBFriendInfo& InInfo, bool bCanInvite)

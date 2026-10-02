@@ -1,6 +1,7 @@
 #include "UI/IBMenuSubsystem.h"
 #include "IronBreach.h"
 #include "UI/IBMenuScreen.h"
+#include "UI/IBInventoryScreen.h"
 #include "UI/IBUISettings.h"
 #include "Blueprint/UserWidget.h"
 #include "Engine/LocalPlayer.h"
@@ -46,7 +47,7 @@ void UIBMenuSubsystem::ToggleScreen(FName ScreenId)
 	LastToggleId = ScreenId;
 	LastToggleTime = Now;
 
-	if (IsMenuOpen() && ActiveScreenId == ScreenId)
+	if (IsMenuOpen() && (GetActiveTabId() == ScreenId || ActiveScreenId == ScreenId))
 	{
 		CloseMenu();
 	}
@@ -58,6 +59,8 @@ void UIBMenuSubsystem::ToggleScreen(FName ScreenId)
 
 void UIBMenuSubsystem::OpenScreen(FName ScreenId)
 {
+	const FName RequestedTab = ScreenId;
+	if (ScreenId == TEXT("Character") || ScreenId == TEXT("Backpack")) { ScreenId = TEXT("Inventory"); }
 	APlayerController* PC = GetOwningPC();
 	if (!PC) { return; }
 
@@ -73,6 +76,13 @@ void UIBMenuSubsystem::OpenScreen(FName ScreenId)
 	}
 
 	const bool bWasOpen = IsMenuOpen();
+	const EIBMenuGroup Group = UIBUISettings::Get()->GetMenuGroup(ScreenId);
+	if (Group != EIBMenuGroup::Utility) { ActiveMenuGroup = Group; }
+	if (UIBInventoryScreen* Inventory = Cast<UIBInventoryScreen>(Screen))
+	{
+		if (RequestedTab == TEXT("Character")) { Inventory->ShowCharacterTab(); }
+		else if (RequestedTab == TEXT("Backpack")) { Inventory->ShowBackpackTab(); }
+	}
 
 	// Sideways switch: swap widgets without churning input mode or re-firing
 	// the open/close signals (the menu hum shouldn't restart on every tab).
@@ -83,6 +93,7 @@ void UIBMenuSubsystem::OpenScreen(FName ScreenId)
 	}
 	else if (ActiveScreen == Screen)
 	{
+		Screen->SetKeyboardFocus();
 		return;
 	}
 
@@ -115,25 +126,21 @@ void UIBMenuSubsystem::CloseMenu()
 
 void UIBMenuSubsystem::CycleScreen(int32 Direction)
 {
-	const UIBUISettings* Settings = UIBUISettings::Get();
-	const int32 Num = Settings->Screens.Num();
+	const TArray<FName> Tabs = UIBUISettings::Get()->GetMenuTabs(ActiveMenuGroup);
+	const int32 Num = Tabs.Num();
 	if (!IsMenuOpen() || Num < 2 || Direction == 0) { return; }
+	const int32 Index = Tabs.IndexOfByKey(GetActiveTabId());
+	if (Index == INDEX_NONE) { return; } // System/Settings are outside either tab loop.
+	OpenScreen(Tabs[(Index + (Direction > 0 ? 1 : -1) + Num) % Num]);
+}
 
-	int32 Index = Settings->Screens.IndexOfByPredicate(
-		[this](const FIBMenuScreenDef& S) { return S.ScreenId == ActiveScreenId; });
-	if (Index == INDEX_NONE) { Index = 0; }
-
-	// Walk until the next TAB screen — the Escape layer (System, Settings)
-	// isn't part of the bumper loop. Bounded so an all-hidden registry can't spin.
-	for (int32 Step = 0; Step < Num; ++Step)
+FName UIBMenuSubsystem::GetActiveTabId() const
+{
+	if (const UIBInventoryScreen* Inventory = Cast<UIBInventoryScreen>(ActiveScreen))
 	{
-		Index = (Index + (Direction > 0 ? 1 : -1) + Num) % Num;
-		if (Settings->Screens[Index].bShowInTabBar)
-		{
-			OpenScreen(Settings->Screens[Index].ScreenId);
-			return;
-		}
+		return Inventory->IsBackpackTab() ? FName(TEXT("Backpack")) : FName(TEXT("Character"));
 	}
+	return ActiveScreenId;
 }
 
 UIBMenuScreen* UIBMenuSubsystem::GetOrCreateScreen(FName ScreenId)

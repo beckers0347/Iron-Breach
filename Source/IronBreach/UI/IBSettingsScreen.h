@@ -8,6 +8,8 @@ class UTextBlock;
 class UButton;
 class UVerticalBox;
 class UHorizontalBox;
+class UScrollBox;
+class UWidget;
 
 /**
  * The Settings screen — registered as "Settings" in the screen registry (no
@@ -65,13 +67,23 @@ protected:
 	UFUNCTION() void HandleAdsModeToggle() { ToggleAdsMode(); }
 	UFUNCTION() void HandleResetClicked();
 
+	// Category strip. Jumping to a category only scrolls its column to that
+	// heading — no row moves, no value changes, nothing is filtered away.
+	UFUNCTION() void HandleCategoryVideo()    { ShowCategory(0); }
+	UFUNCTION() void HandleCategoryAudio()    { ShowCategory(1); }
+	UFUNCTION() void HandleCategoryControls() { ShowCategory(2); }
+
 private:
 	void BuildFallbackLayout();
 
 	/** One settings row: label left, [<] value [>] right. Returns the value
 	 *  text block; Prev/Next receive the created arrow buttons. */
 	UTextBlock* MakeRow(UVerticalBox* Column, const FText& Label, UButton*& OutPrev, UButton*& OutNext);
-	void AddSection(UVerticalBox* Column, const FText& Label);
+	/** Category heading in the shared dossier treatment. Returns the heading row
+	 *  so the category strip has something to scroll to. */
+	UWidget* AddSection(UVerticalBox* Column, const FText& Label);
+	/** Scrolls the owning column to a category and lights its chip. */
+	void ShowCategory(int32 Index);
 
 	void StepQuality(int32 Direction);
 	void StepWindowMode(int32 Direction);
@@ -112,6 +124,14 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> AdsSensitivityValue;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> InvertValue;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> AdsModeValue;
+
+	// ---- Category strip ----
+	UPROPERTY(Transient) TObjectPtr<UScrollBox> LeftScroll;
+	UPROPERTY(Transient) TObjectPtr<UScrollBox> RightScroll;
+	/** Heading widgets in strip order: VIDEO, AUDIO, CONTROLS. */
+	UPROPERTY(Transient) TArray<TObjectPtr<UWidget>> CategoryAnchors;
+	UPROPERTY(Transient) TArray<TObjectPtr<UButton>> CategoryChips;
+	int32 ActiveCategory = 0;
 
 	/** Common 16:9 ladder; the current native res is inserted if missing. */
 	TArray<FIntPoint> ResolutionOptions;

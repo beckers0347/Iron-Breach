@@ -2,6 +2,7 @@
 #include "UI/IBStyleKit.h"
 #include "UI/IBPlayerBannerWidget.h"
 #include "UI/IBMenuSubsystem.h"
+#include "Online/IBSessionSubsystem.h"
 #include "IronBreach.h"
 #include "Engine/World.h"
 #include "Engine/LocalPlayer.h"
@@ -16,9 +17,10 @@
 #include "Components/OverlaySlot.h"
 #include "Blueprint/WidgetTree.h"
 
-namespace
+namespace IBLobbyStripLayout
 {
-	constexpr int32 LobbySlots = 4; // mirrors UIBSessionSubsystem::MaxPlayers default
+	/** Banner pool size: the fireteam size the session advertises (six). */
+	int32 LobbySlots() { return UIBSessionSubsystem::FireteamSize(); }
 }
 
 void UIBLobbyStripWidget::NativeOnInitialized()
@@ -40,7 +42,7 @@ void UIBLobbyStripWidget::BuildLayout()
 
 	UHorizontalBox* Header = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 	LobbyTitleText = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBLobby", "Title", "SQUAD"), 13, IBStyle::TextLo(), 600);
-	CountText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 13, IBStyle::Amber(), 300);
+	CountText = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 13, IBStyle::Cyan(), 300);
 	FriendsButton = IBStyle::MakeButton(WidgetTree, NSLOCTEXT("IBLobby", "Friends", "FRIENDS"), 11);
 	FriendsButton->OnClicked.AddDynamic(this, &UIBLobbyStripWidget::HandleFriendsClicked);
 
@@ -74,7 +76,7 @@ void UIBLobbyStripWidget::BuildLayout()
 	}
 
 	// Banner pool: MaxPlayers cards, filled/emptied in place.
-	for (int32 i = 0; i < LobbySlots; ++i)
+	for (int32 i = 0; i < IBLobbyStripLayout::LobbySlots(); ++i)
 	{
 		UIBPlayerBannerWidget* Banner = CreateWidget<UIBPlayerBannerWidget>(GetOwningPlayer(), UIBPlayerBannerWidget::StaticClass());
 		if (!Banner) { continue; }

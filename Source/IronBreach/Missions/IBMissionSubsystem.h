@@ -20,10 +20,13 @@ class IRONBREACH_API UIBMissionSubsystem : public UWorldSubsystem
 public:
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
-	/** The world's director, if any (placed or auto-spawned). */
+	/** The world's director, if any (placed or auto-spawned). On clients the auto-spawned
+	 *  director arrives by replication some time after world begin, so this resolves lazily:
+	 *  the first call after it lands finds and caches it. Null until then (and in menu worlds). */
 	UFUNCTION(BlueprintPure, Category = "Mission")
-	AIBMissionDirector* GetDirector() const { return Director.Get(); }
+	AIBMissionDirector* GetDirector() const;
 
 private:
-	TWeakObjectPtr<AIBMissionDirector> Director;
+	/** Cache — filled on the server at spawn, on clients by the first successful lookup. */
+	mutable TWeakObjectPtr<AIBMissionDirector> Director;
 };

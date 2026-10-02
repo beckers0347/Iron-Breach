@@ -9,11 +9,7 @@ class UTextBlock;
 class UProgressBar;
 class UBorder;
 
-/**
- * Two chips bottom-right: [Q] KIT ABILITY and [V] MOVEMENT TOOL, each with a
- * cooldown bar in the trade's color. Pure C++ floor (zero content); reskin by
- * parenting a WBP later.
- */
+/** Signature, two tacticals and overdrive with live recovery and class-state feedback. */
 UCLASS()
 class IRONBREACH_API UIBKitHudWidget : public UUserWidget
 {
@@ -39,11 +35,10 @@ private:
 
 	void BuildLayout();
 	FChip BuildChip(class UVerticalBox* Column);
-	void UpdateChip(const FChip& Chip, bool bMovementTool);
+	void UpdateChip(const FChip& Chip, int32 SkillSlot);
 
 	TWeakObjectPtr<UIBOperativeKitComponent> Kit;
-	FChip KitChip;
-	FChip MoveChip;
+	TArray<FChip> Chips;
 
 	UPROPERTY(Transient) TObjectPtr<UVerticalBox> Column;
 };

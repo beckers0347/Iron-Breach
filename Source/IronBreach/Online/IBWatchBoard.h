@@ -41,6 +41,12 @@ public:
 	void ServerConfirm(APlayerState* By);
 	void ServerCancel(APlayerState* By);
 
+	/** SERVER. A player's PlayerState is going away (logout / kick). A proposal they made
+	 *  that the host never armed dies with them — otherwise the card keeps offering a drop
+	 *  "proposed by" someone who is no longer on the net. An ARMED drop is the host's call
+	 *  and proceeds regardless. Called from AIBPlayerState::EndPlay; safe for anyone. */
+	void ServerPlayerLeft(const APlayerState* Leaver);
+
 	/** Listen-server host (or the standalone player): the local controller on the authority. */
 	bool IsHostPlayer(const APlayerState* PS) const;
 

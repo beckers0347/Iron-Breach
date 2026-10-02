@@ -1,6 +1,8 @@
 #include "UI/IBSettingsScreen.h"
 #include "UI/IBStyleKit.h"
 #include "UI/IBMenuLayout.h"
+#include "UI/IBHangarStyle.h"
+#include "Components/ScrollBox.h"
 #include "IronBreach.h"
 #include "Player/IBUserSettings.h"
 #include "Components/TextBlock.h"
@@ -67,18 +69,55 @@ void UIBSettingsScreen::NativeScreenOpened()
 	RefreshValues();
 }
 
-void UIBSettingsScreen::AddSection(UVerticalBox* Column, const FText& Label)
+UWidget* UIBSettingsScreen::AddSection(UVerticalBox* Column, const FText& Label)
 {
-	UTextBlock* Section = IBMenuLayout::Heading(WidgetTree, Label, 18);
-	if (UVerticalBoxSlot* SectionSlot = Column->AddChildToVerticalBox(Section))
+	// The dossier heading the character and mission sheets already wear: a lit
+	// mark, tracked cyan caps, then the hairline. Smaller than the old 18 pt
+	// display heading on purpose — a category label is a signpost, not a title,
+	// and at 18 pt it was competing with SETTINGS itself.
+	UHorizontalBox* Head = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	if (UHorizontalBoxSlot* MarkSlot = Head->AddChildToHorizontalBox(
+		IBHangar::Glyph(WidgetTree, EIBMenuGlyph::Diamond, IBStyle::Cyan(), 11.f)))
 	{
-		SectionSlot->SetPadding(FMargin(0.f, 12.f, 0.f, 2.f));
+		MarkSlot->SetVerticalAlignment(VAlign_Center);
+		MarkSlot->SetPadding(FMargin(0.f, 0.f, 9.f, 0.f));
+	}
+	if (UHorizontalBoxSlot* TextSlot = Head->AddChildToHorizontalBox(
+		IBMenuLayout::Text(WidgetTree, Label, 13, IBStyle::Cyan(), 180)))
+	{
+		TextSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	if (UVerticalBoxSlot* SectionSlot = Column->AddChildToVerticalBox(Head))
+	{
+		// Space above a heading is what separates one category from the rows of
+		// the last one; space below it only pushes the heading off its own list.
+		SectionSlot->SetPadding(FMargin(0.f, 22.f, 0.f, 8.f));
 	}
 	UBorder* Line = IBStyle::MakeAccentBar(WidgetTree, IBStyle::Line());
 	Line->SetPadding(FMargin(0.f, 0.5f));
 	if (UVerticalBoxSlot* LineSlot = Column->AddChildToVerticalBox(Line))
 	{
-		LineSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 4.f));
+		LineSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 10.f));
+	}
+	return Head;
+}
+
+void UIBSettingsScreen::ShowCategory(int32 Index)
+{
+	if (!CategoryAnchors.IsValidIndex(Index)) { return; }
+	ActiveCategory = Index;
+	for (int32 i = 0; i < CategoryChips.Num(); ++i)
+	{
+		IBHangar::StyleTab(CategoryChips[i], i == ActiveCategory);
+	}
+	// VIDEO owns the left column; AUDIO and CONTROLS share the right one. The
+	// chip scrolls that column to the heading and stops there: no row is
+	// hidden, no value is touched, and both columns stay fully scrollable by
+	// hand — this is a shortcut, not a filter.
+	UScrollBox* ColumnScroll = (Index == 0) ? LeftScroll.Get() : RightScroll.Get();
+	if (ColumnScroll && CategoryAnchors[Index])
+	{
+		ColumnScroll->ScrollWidgetIntoView(CategoryAnchors[Index].Get());
 	}
 }
 
@@ -95,23 +134,38 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 		LabelSlot->SetVerticalAlignment(VAlign_Center);
 	}
 
-	auto MakeArrow = [this](const FText& Glyph)
+	auto MakeArrow = [this](EIBMenuGlyph Mark)
 	{
-		UButton* Button = IBMenuLayout::Button(WidgetTree, Glyph);
+		// The chevron is the affordance; the box only shows up under the
+		// pointer. Sixteen rows times two arrows is thirty-two outlined boxes
+		// otherwise, and the sheet stops reading as one surface.
+		UButton* Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+		Button->SetContent(IBHangar::Glyph(WidgetTree, Mark, IBStyle::Cyan(), 13.f));
 		FButtonStyle Style = Button->GetStyle();
-		Style.NormalPadding = FMargin(12, 5);
-		Style.PressedPadding = FMargin(12, 6, 12, 4);
+		Style.Normal   = IBStyle::RoundedBrush(FLinearColor::Transparent, 0.f);
+		Style.Hovered  = IBStyle::RoundedBrush(FLinearColor(.04f, .16f, .20f, .95f), 0.f, IBStyle::Cyan(), 1.f);
+		Style.Pressed  = IBStyle::RoundedBrush(FLinearColor(.08f, .23f, .28f, .95f), 0.f, IBStyle::Cyan(), 1.f);
+		// Disabled keeps a box deliberately: an unavailable control still has to
+		// look like a control rather than like empty space.
+		Style.Disabled = IBStyle::RoundedBrush(FLinearColor(.006f, .017f, .025f, .45f), 0.f, IBStyle::Line(), 1.f);
+		Style.NormalPadding = FMargin(14.f, 7.f);
+		Style.PressedPadding = Style.NormalPadding;
 		Button->SetStyle(Style);
 		return Button;
 	};
 
-	OutPrev = MakeArrow(NSLOCTEXT("IBSettings", "Prev", "<"));
+	OutPrev = MakeArrow(EIBMenuGlyph::ChevronLeft);
 	if (UHorizontalBoxSlot* PrevSlot = Row->AddChildToHorizontalBox(OutPrev))
 	{
 		PrevSlot->SetVerticalAlignment(VAlign_Center);
 	}
 
-	UTextBlock* Value = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 13, IBStyle::Amber(), 150);
+	// White, one step larger than its label. The approved sheets put cyan on
+	// section titles and controls and keep values in service steel; this screen
+	// had it the other way round, so cyan was carrying both the headings' job
+	// and the data's and separating neither. The chevrons stay cyan, which
+	// leaves one honest rule on the page: cyan is what you can act on.
+	UTextBlock* Value = IBStyle::MakeText(WidgetTree, FText::GetEmpty(), 14, IBStyle::TextHi(), 80);
 	Value->SetJustification(ETextJustify::Center);
 	USizeBox* ValueSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 	ValueSize->SetWidthOverride(190.f);
@@ -121,7 +175,7 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 		ValueSlot->SetVerticalAlignment(VAlign_Center);
 	}
 
-	OutNext = MakeArrow(NSLOCTEXT("IBSettings", "Next", ">"));
+	OutNext = MakeArrow(EIBMenuGlyph::Chevron);
 	if (UHorizontalBoxSlot* NextSlot = Row->AddChildToHorizontalBox(OutNext))
 	{
 		NextSlot->SetVerticalAlignment(VAlign_Center);
@@ -129,37 +183,68 @@ UTextBlock* UIBSettingsScreen::MakeRow(UVerticalBox* Column, const FText& Label,
 
 	if (UVerticalBoxSlot* RowSlot = Column->AddChildToVerticalBox(Row))
 	{
-		RowSlot->SetPadding(FMargin(0.f, 4.f));
+		RowSlot->SetPadding(FMargin(0.f, 5.f));
 	}
 	return Value;
 }
 
 void UIBSettingsScreen::BuildFallbackLayout()
 {
-	const auto Page = IBMenuLayout::Begin(WidgetTree,
+	const auto Page = BuildHangarSection(
 		NSLOCTEXT("IBSettings", "Title", "SETTINGS"),
 		NSLOCTEXT("IBSettings", "Kicker", "OPERATIVE / TERMINAL PREFERENCES"),
 		NSLOCTEXT("IBSettings", "ControlsHint", "CHANGES APPLY AND SAVE IMMEDIATELY     ESC / RETURN TO GAME"));
 	if (!Page.Body) { return; }
 	UVerticalBox* Outer = Page.Body;
+
+	// ---- Category strip ----
+	// Sixteen rows across two scrolling columns had no way to get to a heading
+	// except by dragging. These chips jump to one. They filter nothing.
+	UHorizontalBox* Strip = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	auto AddChip = [this, Strip](const FText& Label) -> UButton*
+	{
+		UButton* Chip = IBStyle::MakeButton(WidgetTree, Label, 11);
+		IBHangar::StyleTab(Chip, /*bActive=*/CategoryChips.Num() == 0);
+		if (UHorizontalBoxSlot* ChipSlot = Strip->AddChildToHorizontalBox(Chip))
+		{
+			ChipSlot->SetVerticalAlignment(VAlign_Center);
+			ChipSlot->SetPadding(FMargin(0.f, 0.f, 8.f, 0.f));
+		}
+		CategoryChips.Add(Chip);
+		return Chip;
+	};
+	AddChip(NSLOCTEXT("IBSettings", "Video", "VIDEO"))
+		->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleCategoryVideo);
+	AddChip(NSLOCTEXT("IBSettings", "Audio", "AUDIO"))
+		->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleCategoryAudio);
+	AddChip(NSLOCTEXT("IBSettings", "Controls", "CONTROLS"))
+		->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleCategoryControls);
+	if (UVerticalBoxSlot* StripSlot = Outer->AddChildToVerticalBox(Strip))
+	{
+		StripSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 16.f));
+	}
+
 	// Two columns: VIDEO left; AUDIO + CONTROLS right.
 	UHorizontalBox* Columns = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 	UVerticalBox* Left = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	UVerticalBox* Right = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	UVerticalBox* LeftPanel = WidgetTree->ConstructWidget<UVerticalBox>();
 	UVerticalBox* RightPanel = WidgetTree->ConstructWidget<UVerticalBox>();
-	IBMenuLayout::Scroll(WidgetTree, LeftPanel, Left);
-	IBMenuLayout::Scroll(WidgetTree, RightPanel, Right);
-	UHorizontalBoxSlot* LeftSlot = Columns->AddChildToHorizontalBox(IBMenuLayout::Card(WidgetTree, LeftPanel));
+	LeftScroll = IBMenuLayout::Scroll(WidgetTree, LeftPanel, Left);
+	RightScroll = IBMenuLayout::Scroll(WidgetTree, RightPanel, Right);
+	// Roomier gutter inside each card and a wider trough between them: the rows
+	// are long and low-contrast, and they were running into the frame.
+	const FMargin CardPad(26.f, 18.f, 22.f, 18.f);
+	UHorizontalBoxSlot* LeftSlot = Columns->AddChildToHorizontalBox(IBMenuLayout::Card(WidgetTree, LeftPanel, CardPad));
 	LeftSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-	LeftSlot->SetPadding(FMargin(0, 0, 20, 0));
-	Columns->AddChildToHorizontalBox(IBMenuLayout::Card(WidgetTree, RightPanel))->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+	LeftSlot->SetPadding(FMargin(0, 0, 24, 0));
+	Columns->AddChildToHorizontalBox(IBMenuLayout::Card(WidgetTree, RightPanel, CardPad))->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 	Outer->AddChildToVerticalBox(Columns)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 
 	UButton *Prev = nullptr, *Next = nullptr;
 
 	// ---- VIDEO (left) ----
-	AddSection(Left, NSLOCTEXT("IBSettings", "Video", "VIDEO"));
+	CategoryAnchors.Add(AddSection(Left, NSLOCTEXT("IBSettings", "Video", "VIDEO")));
 
 	QualityValue = MakeRow(Left, NSLOCTEXT("IBSettings", "Quality", "QUALITY"), Prev, Next);
 	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleQualityPrev);
@@ -198,7 +283,7 @@ void UIBSettingsScreen::BuildFallbackLayout()
 	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleShowFpsToggle);
 
 	// ---- AUDIO (right) ----
-	AddSection(Right, NSLOCTEXT("IBSettings", "Audio", "AUDIO"));
+	CategoryAnchors.Add(AddSection(Right, NSLOCTEXT("IBSettings", "Audio", "AUDIO")));
 
 	MasterValue = MakeRow(Right, NSLOCTEXT("IBSettings", "Master", "MASTER VOLUME"), Prev, Next);
 	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleMasterPrev);
@@ -213,7 +298,7 @@ void UIBSettingsScreen::BuildFallbackLayout()
 	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleSfxNext);
 
 	// ---- CONTROLS (right) ----
-	AddSection(Right, NSLOCTEXT("IBSettings", "Controls", "CONTROLS"));
+	CategoryAnchors.Add(AddSection(Right, NSLOCTEXT("IBSettings", "Controls", "CONTROLS")));
 
 	SensitivityValue = MakeRow(Right, NSLOCTEXT("IBSettings", "Sensitivity", "MOUSE SENSITIVITY"), Prev, Next);
 	Prev->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleSensPrev);
@@ -232,6 +317,14 @@ void UIBSettingsScreen::BuildFallbackLayout()
 	Next->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleAdsModeToggle);
 
 	// ---- Footer: reset + hint ----
+	// A hairline first: the footer acts on everything above it, so it should
+	// read as a different band rather than as one more row of the right column.
+	UBorder* FooterRule = IBStyle::MakeAccentBar(WidgetTree, FLinearColor(.13f, .33f, .40f, .55f));
+	FooterRule->SetPadding(FMargin(0.f, 0.5f));
+	if (UVerticalBoxSlot* RuleSlot = Outer->AddChildToVerticalBox(FooterRule))
+	{
+		RuleSlot->SetPadding(FMargin(0.f, 18.f, 0.f, 0.f));
+	}
 	UHorizontalBox* Footer = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 	UButton* Reset = IBMenuLayout::Button(WidgetTree, NSLOCTEXT("IBSettings", "Reset", "RESET TO DEFAULTS"));
 	Reset->OnClicked.AddDynamic(this, &UIBSettingsScreen::HandleResetClicked);
@@ -249,7 +342,7 @@ void UIBSettingsScreen::BuildFallbackLayout()
 	}
 	if (UVerticalBoxSlot* FooterSlot = Outer->AddChildToVerticalBox(Footer))
 	{
-		FooterSlot->SetPadding(FMargin(0.f, 16.f, 0.f, 0.f));
+		FooterSlot->SetPadding(FMargin(0.f, 14.f, 0.f, 0.f));
 		FooterSlot->SetHorizontalAlignment(HAlign_Center);
 	}
 

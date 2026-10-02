@@ -5,13 +5,22 @@
 #include "OnlineSessionSettings.h"  // FOnlineSessionSettings, FOnlineSessionSearch
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
+#include "Engine/Engine.h"          // GEngine->OnNetworkFailure / OnTravelFailure
+#include "Engine/NetDriver.h"       // UNetDriver::GetNetMode in the failure handler
 #include "GameFramework/PlayerController.h"
+#include "TimerManager.h"
 #include "UObject/UObjectGlobals.h"
 
 namespace
 {
 	// One project-wide session name; we only ever run one session at a time.
 	const FName IBSessionName(NAME_GameSession);
+
+	// How long after the title map loads before the link-failure banner goes out
+	// (the front end needs a beat to construct and bind OnSessionStatusChanged).
+	constexpr float LinkFailureAnnounceDelay = 1.5f;
+	// If no map load follows a failure (the engine decided not to travel), say it anyway.
+	constexpr float LinkFailureFallbackDelay = 4.0f;
 }
 
 void UIBSessionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -26,6 +35,15 @@ void UIBSessionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	}
 
 	PreLoadMapHandle = FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UIBSessionSubsystem::HandlePreLoadMap);
+	PostLoadMapHandle = FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UIBSessionSubsystem::HandlePostLoadMap);
+
+	// Link failures: the engine's default already drops a client back to GameDefaultMap;
+	// these hooks add the WHY (status + remembered message) and the local session cleanup.
+	if (GEngine)
+	{
+		GEngine->OnNetworkFailure().AddUObject(this, &UIBSessionSubsystem::HandleNetworkFailure);
+		GEngine->OnTravelFailure().AddUObject(this, &UIBSessionSubsystem::HandleTravelFailure);
+	}
 }
 
 void UIBSessionSubsystem::HandlePreLoadMap(const FString& MapName)
@@ -47,7 +65,166 @@ void UIBSessionSubsystem::Deinitialize()
 		Sessions->ClearOnSessionUserInviteAcceptedDelegate_Handle(InviteAcceptedHandle);
 	}
 	FCoreUObjectDelegates::PreLoadMap.Remove(PreLoadMapHandle);
+	FCoreUObjectDelegates::PostLoadMapWithWorld.Remove(PostLoadMapHandle);
+	if (GEngine)
+	{
+		GEngine->OnNetworkFailure().RemoveAll(this);
+		GEngine->OnTravelFailure().RemoveAll(this);
+	}
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		GI->GetTimerManager().ClearTimer(LinkFailureAnnounceHandle);
+	}
 	Super::Deinitialize();
+}
+
+// ---- Link failures ---------------------------------------------------------
+
+void UIBSessionSubsystem::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
+{
+	// GEngine's delegates are global: in PIE every game instance hears every failure.
+	// Only act on our own world's.
+	if (World && World->GetGameInstance() != GetGameInstance()) { return; }
+
+	const bool bClientSide = NetDriver ? (NetDriver->GetNetMode() == NM_Client)
+	                                   : (World && World->GetNetMode() == NM_Client);
+	UE_LOG(LogIronBreach, Warning, TEXT("Session: network failure %s on the %s — %s"),
+		ENetworkFailure::ToString(FailureType), bClientSide ? TEXT("client") : TEXT("host"), *ErrorString);
+
+	if (!bClientSide)
+	{
+		// Listen host. A client dropping is routine — THEIR connection is what failed, the
+		// engine already told the GameMode (Logout -> PawnLeavingGame -> crew/vault cleanup).
+		// The one host-side failure worth shouting about is the listen socket itself: if it
+		// never opened (Steam driver / port), nobody can ever join and the host would not know.
+		if (FailureType == ENetworkFailure::NetDriverListenFailure ||
+			FailureType == ENetworkFailure::NetDriverCreateFailure ||
+			FailureType == ENetworkFailure::NetDriverAlreadyExists)
+		{
+			ReportStatus(EIBSessionStatus::Failed, TEXT("LISTEN SOCKET FAILED - SQUAD CANNOT JOIN (see log)"));
+		}
+		return;
+	}
+
+	// Client side: the engine is about to send us home (Browse to GameDefaultMap). Say why.
+	FString Message;
+	switch (FailureType)
+	{
+	case ENetworkFailure::ConnectionLost:
+	case ENetworkFailure::ConnectionTimeout:
+		Message = TEXT("SQUAD LINK LOST - THE HOST WENT DARK");
+		break;
+	case ENetworkFailure::FailureReceived:            // the server closed the connection on purpose
+		Message = TEXT("THE HOST CLOSED THE LINK");
+		break;
+	case ENetworkFailure::PendingConnectionFailure:   // join never completed the handshake
+		Message = TEXT("COULD NOT REACH THE HOST");
+		break;
+	case ENetworkFailure::OutdatedClient:
+	case ENetworkFailure::OutdatedServer:
+	case ENetworkFailure::NetGuidMismatch:
+	case ENetworkFailure::NetChecksumMismatch:
+		Message = TEXT("BUILD MISMATCH - RUN UPDATE_IronBreach.bat AND RETRY");
+		break;
+	default:
+		Message = FString::Printf(TEXT("SQUAD LINK FAILED (%s)"), ENetworkFailure::ToString(FailureType));
+		break;
+	}
+	QueueLinkFailure(Message);
+
+	// Our local session entry still points at the dead host. DestroyThen would clear it before
+	// the next host/join anyway, but leaving it registered keeps the Steam overlay advertising
+	// a lobby that no longer exists. Tear it down now; nobody waits on the callback.
+	if (IOnlineSessionPtr Sessions = GetSessionInterface())
+	{
+		if (Sessions->GetNamedSession(IBSessionName))
+		{
+			UE_LOG(LogIronBreach, Log, TEXT("Session: dropping the stale local session entry after the link failure"));
+			Sessions->DestroySession(IBSessionName);
+		}
+	}
+}
+
+void UIBSessionSubsystem::HandleTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString)
+{
+	if (World && World->GetGameInstance() != GetGameInstance()) { return; }
+
+	UE_LOG(LogIronBreach, Warning, TEXT("Session: travel failure %s — %s"), ETravelFailure::ToString(FailureType), *ErrorString);
+
+	FString Message;
+	switch (FailureType)
+	{
+	case ETravelFailure::PackageMissing:
+	case ETravelFailure::PackageVersion:
+	case ETravelFailure::NoDownload:
+		Message = TEXT("MAP MISSING OR OUTDATED - RUN UPDATE_IronBreach.bat");
+		break;
+	case ETravelFailure::ServerTravelFailure:
+	case ETravelFailure::ClientTravelFailure:
+	case ETravelFailure::LoadMapFailure:
+	case ETravelFailure::InvalidURL:
+	case ETravelFailure::PendingNetGameCreateFailure:
+	case ETravelFailure::CheatCommands:
+	case ETravelFailure::CloudSaveFailure:
+	default:
+		Message = FString::Printf(TEXT("DEPLOYMENT FAILED (%s)"), ETravelFailure::ToString(FailureType));
+		break;
+	}
+	QueueLinkFailure(Message);
+}
+
+void UIBSessionSubsystem::QueueLinkFailure(const FString& Message)
+{
+	PendingLinkFailure = FText::FromString(Message);
+	bLinkFailurePending = true;
+	LastLinkFailure = PendingLinkFailure;
+	bHasUnreadLinkFailure = true;
+
+	// The GameInstance timer manager outlives the world that just died, unlike a world timer.
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		GI->GetTimerManager().SetTimer(LinkFailureAnnounceHandle, this,
+			&UIBSessionSubsystem::AnnouncePendingLinkFailure, LinkFailureFallbackDelay, false);
+	}
+}
+
+void UIBSessionSubsystem::HandlePostLoadMap(UWorld* LoadedWorld)
+{
+	if (!bLinkFailurePending) { return; }
+	if (LoadedWorld && LoadedWorld->GetGameInstance() != GetGameInstance()) { return; }
+
+	// We landed somewhere (normally GameDefaultMap). Give the front end a beat to construct
+	// and bind, then say what happened.
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		GI->GetTimerManager().SetTimer(LinkFailureAnnounceHandle, this,
+			&UIBSessionSubsystem::AnnouncePendingLinkFailure, LinkFailureAnnounceDelay, false);
+	}
+}
+
+void UIBSessionSubsystem::AnnouncePendingLinkFailure()
+{
+	if (!bLinkFailurePending) { return; }
+	bLinkFailurePending = false;
+
+	const FString Message = PendingLinkFailure.ToString();
+	ReportStatus(EIBSessionStatus::Failed, Message);
+
+#if !UE_BUILD_SHIPPING
+	// Zero-content floor: even with no widget listening yet, the player sees a line.
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 8.0f, FColor::Red, Message);
+	}
+#endif
+}
+
+bool UIBSessionSubsystem::ConsumeLastLinkFailure(FText& OutMessage)
+{
+	if (!bHasUnreadLinkFailure) { return false; }
+	bHasUnreadLinkFailure = false;
+	OutMessage = LastLinkFailure;
+	return true;
 }
 
 void UIBSessionSubsystem::OnInviteAccepted(const bool bWasSuccessful, const int32 /*ControllerId*/,

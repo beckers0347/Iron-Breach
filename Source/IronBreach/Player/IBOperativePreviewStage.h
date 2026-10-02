@@ -6,6 +6,7 @@
 #include "IBOperativePreviewStage.generated.h"
 
 class USkeletalMeshComponent;
+class UStaticMeshComponent;
 class USceneCaptureComponent2D;
 class USpotLightComponent;
 class UPointLightComponent;
@@ -46,9 +47,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Operative")
 	void ShowNothing();
 
-	/** Inventory-only framing and the live infantry body's mesh/materials.
-	 *  Does not modify the pawn or the front-end preview's default framing. */
-	void ConfigureForInventory(const USkeletalMeshComponent* SourceBody);
+	/** Inventory-only framing and the live infantry body's mesh/materials, plus
+	 *  the weapon that body is actually carrying (its third-person mesh, same
+	 *  socket and offset). Reads the pawn only; never modifies it or the
+	 *  front-end preview's default framing. */
+	void ConfigureForInventory(const USkeletalMeshComponent* SourceBody, const UStaticMeshComponent* SourceWeapon = nullptr);
 
 protected:
 	virtual void BeginPlay() override;
@@ -86,7 +89,16 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UTextureRenderTarget2D> RenderTarget;
 
+	/** Mirror of the pawn's third-person weapon, created on first use. */
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMeshComponent> WeaponProp;
+
 private:
+	/** Plays the idle clip only when it fits the body's skeleton; otherwise runs the source
+	 *  body's own animation class on the copied mesh, else holds the reference pose. */
+	void ApplyIdlePose(const USkeletalMeshComponent* SourceBody);
+	void SyncWeapon(const UStaticMeshComponent* SourceWeapon);
+
 	/** Which body is loaded, so re-showing the same gender doesn't reload/restart the idle. */
 	bool bHasBody = false;
 	EIBOperativeGender LoadedGender = EIBOperativeGender::Male;

@@ -10,6 +10,7 @@ class UButton;
 class UScrollBox;
 class USizeBox;
 class UBorder;
+class UScaleBox;
 class UIBPlayerBannerWidget;
 class UIBFriendsSubsystem;
 
@@ -46,9 +47,14 @@ private:
 	void RebuildFriendRows();
 	void RefreshLocationCard();
 	void SetFlyoutOpen(bool bOpen);
+	/** Marks which seat the open flyout came from. INDEX_NONE clears it. */
+	void SetSelectedSeat(int32 Index);
 	UIBFriendsSubsystem* GetFriendsSubsystem() const;
 
 	UPROPERTY(Transient) TObjectPtr<UHorizontalBox> BannerRow;
+	/** Scales the seat row down to whatever width is left beside an open flyout.
+	 *  Down only — with the flyout closed the row is at its authored size. */
+	UPROPERTY(Transient) TObjectPtr<UScaleBox> SeatFit;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> SocialCountText;
 	UPROPERTY(Transient) TObjectPtr<UScrollBox> FriendsList;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> FriendsEmptyText;
@@ -64,6 +70,11 @@ private:
 	float RefreshAccumulator = 0.0f;
 	bool bFriendsBound = false;
 	bool bFlyoutOpen = false;
+
+	/** Index into Banners of the seat whose + opened the flyout, or INDEX_NONE.
+	 *  An index rather than a pointer: Banners already owns the references, and
+	 *  a stale index can only ever miss, never dangle. */
+	int32 SelectedSeatIndex = INDEX_NONE;
 
 	/** The local player's banner always sits here (the featured hero card). */
 	static constexpr int32 LocalSlotIndex = 1;

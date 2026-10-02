@@ -99,8 +99,9 @@ struct IRONBREACH_API FIBDestination
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Destination")
 	int32 SquadMin = 1;
 
+	/** Fireteam ceiling for the card; matches UIBSessionSubsystem::MaxPlayers. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Destination")
-	int32 SquadMax = 4;
+	int32 SquadMax = 6;
 
 	/** False = pinned but not deployable (Locked kind implies false). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Destination")

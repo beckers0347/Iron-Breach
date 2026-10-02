@@ -74,14 +74,30 @@ protected:
 	UFUNCTION()
 	void HandleKaijuFightPhase(EKaijuFightPhase NewPhase);
 
+	/** A tracked kaiju left the world WITHOUT dying (spawner reset, level script, dev
+	 *  command). Without this the live count never reached zero and ZONE SECURED could
+	 *  never fire again for that mission. Corpses that already reported Dead are ignored. */
+	UFUNCTION()
+	void HandleKaijuDestroyed(AActor* DestroyedActor);
+
+public:
+	/** Server-side truth; clients only ever see the phase. */
+	UFUNCTION(BlueprintPure, Category = "Mission")
+	int32 GetLiveKaijuCount() const { return LiveKaiju.Num(); }
+
 private:
 	void SetMissionPhase(EIBMissionPhase NewPhase); // server only
 	void TrackKaiju(AIBCharacter_Kaiju* Kaiju);     // server only
 	void OnWorldActorSpawned(AActor* Actor);        // server only
+	/** Server only: unbind a kaiju we no longer track (dead or destroyed) and log it. */
+	void ReleaseKaiju(AIBCharacter_Kaiju* Kaiju, const TCHAR* Why);
+	/** Server only: no live kaiju left mid-fight -> ZONE SECURED. Also sheds stale entries. */
+	void EvaluateSecured();
 
 	FDelegateHandle ActorSpawnedHandle;
 	FTimerHandle EmergenceTimer;
 
-	/** Live tracked kaiju count; Secured when it returns to zero. */
-	int32 LiveKaiju = 0;
+	/** Live tracked kaiju (server only); Secured when it empties. A set, not a counter, so
+	 *  death + destruction of the same beast can never double-count. */
+	TSet<TWeakObjectPtr<AIBCharacter_Kaiju>> LiveKaiju;
 };

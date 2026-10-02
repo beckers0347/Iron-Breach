@@ -67,15 +67,30 @@ protected:
 private:
 	void RebuildGrid();
 	void ResetDetails();
+	void ShowDetails(const UIBItemDefinition* Definition);
 	void RefreshFilters();
+	UFUNCTION() void HandleTileClicked(UIBItemTileWidget* Tile);
 	UFUNCTION() void HandleAll();
 	UFUNCTION() void HandleWeapons() { SetCategoryFilter(EIBItemCategory::Weapon); }
 	UFUNCTION() void HandleArmor() { SetCategoryFilter(EIBItemCategory::Armor); }
 	UFUNCTION() void HandleMaterials() { SetCategoryFilter(EIBItemCategory::KaijuMaterial); }
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailName;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailInfo;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailRarity;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailCategory;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailRating;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailRatingLabel;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> DetailFooter;
+	UPROPERTY(Transient) TObjectPtr<class UImage> DetailIcon;
+	UPROPERTY(Transient) TObjectPtr<class UIBItemGlyphWidget> DetailGlyph;
+	UPROPERTY(Transient) TObjectPtr<class UBorder> DetailAccent;
+	UPROPERTY(Transient) TObjectPtr<class UBorder> DetailFrame;
+	UPROPERTY(Transient) TObjectPtr<class UVerticalBox> DetailStats;
+	UPROPERTY(Transient) TObjectPtr<const UIBItemDefinition> SelectedDefinition;
 	UPROPERTY(Transient) TObjectPtr<class UProgressBar> CollectionProgress;
 	UPROPERTY(Transient) TArray<TObjectPtr<class UButton>> FilterButtons;
+	UPROPERTY(Transient) TArray<TObjectPtr<UTextBlock>> FilterLabels;
+	UPROPERTY(Transient) TArray<TObjectPtr<class UBorder>> FilterAccents;
 	UIBLedgerSubsystem* GetLedger() const;
 
 	EIBItemCategory CategoryFilter = EIBItemCategory::Weapon;

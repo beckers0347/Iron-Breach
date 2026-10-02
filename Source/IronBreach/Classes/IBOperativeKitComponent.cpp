@@ -1,5 +1,10 @@
 #include "Classes/IBOperativeKitComponent.h"
 #include "Classes/IBClassKitData.h"
+#include "Skills/IBSkillComponent.h"
+#include "Skills/IBSkillDecoy.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/MeshComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Classes/IBKitZone.h"
 #include "Combat/DamageableInterface.h"
 #include "Infantry/IBCharacter_Infantry.h"
@@ -37,49 +42,11 @@ UIBOperativeKitComponent::UIBOperativeKitComponent()
 
 FIBClassKit UIBOperativeKitComponent::DefaultKitFor(EIBOperativeClass Class)
 {
-	FIBClassKit Kit;
-	FIBKitAbilitySpec& A = Kit.KitAbility;
-	FIBKitAbilitySpec& M = Kit.MovementTool;
-
-	switch (Class)
-	{
-	case EIBOperativeClass::Breaker:
-		A.DisplayName = NSLOCTEXT("IBKit", "RamCharge", "RAM CHARGE");
-		A.Description = NSLOCTEXT("IBKit", "RamChargeDesc", "Shoulder-mounted concussive breach: a short lunge that hammers everything in front of you and opens armor seams.");
-		A.Effect = EIBKitEffect::ConeStrike; A.Cooldown = 10.f; A.Duration = 0.2f; A.Strength = 1500.f; A.Range = 380.f; A.Radius = 220.f; A.Damage = 60.f;
-		M.DisplayName = NSLOCTEXT("IBKit", "BulwarkDash", "BULWARK DASH");
-		M.Description = NSLOCTEXT("IBKit", "BulwarkDashDesc", "Armored lunge — most incoming damage shrugs off for the length of the dash.");
-		M.Effect = EIBKitEffect::Dash; M.Cooldown = 6.f; M.Duration = 0.6f; M.Strength = 1600.f; M.DamageTakenScale = 0.35f;
-		break;
-
-	case EIBOperativeClass::Picket:
-		A.DisplayName = NSLOCTEXT("IBKit", "LamplightFlare", "LAMPLIGHT FLARE");
-		A.Description = NSLOCTEXT("IBKit", "LamplightFlareDesc", "Thrown sensor spike: everything hostile around it is marked for the fireteam while it burns.");
-		A.Effect = EIBKitEffect::DeployZone; A.Cooldown = 14.f; A.Duration = 8.f; A.Range = 2500.f; A.Radius = 900.f; A.bMarksTargets = true; A.bPlaceAtAim = true; A.SlowFactor = 1.f;
-		M.DisplayName = NSLOCTEXT("IBKit", "LineBolt", "LINE BOLT");
-		M.Description = NSLOCTEXT("IBKit", "LineBoltDesc", "Launchable cable runner — zip to whatever you're aiming at.");
-		M.Effect = EIBKitEffect::Grapple; M.Cooldown = 5.f; M.Range = 3000.f; M.Strength = 2200.f;
-		break;
-
-	case EIBOperativeClass::Bellringer:
-		A.DisplayName = NSLOCTEXT("IBKit", "DeterrentPylon", "DETERRENT PYLON");
-		A.Description = NSLOCTEXT("IBKit", "DeterrentPylonDesc", "Area denial: it sings 'nothing here' — hostiles inside crawl.");
-		A.Effect = EIBKitEffect::DeployZone; A.Cooldown = 16.f; A.Duration = 10.f; A.Radius = 700.f; A.SlowFactor = 0.45f;
-		M.DisplayName = NSLOCTEXT("IBKit", "NullStep", "NULL STEP");
-		M.Description = NSLOCTEXT("IBKit", "NullStepDesc", "Acoustic-dampened glide: hang in the air with full control for a few seconds.");
-		M.Effect = EIBKitEffect::Glide; M.Cooldown = 5.f; M.Duration = 2.5f; M.Strength = 0.12f;
-		break;
-
-	case EIBOperativeClass::Corpsman:
-		A.DisplayName = NSLOCTEXT("IBKit", "StimLine", "STIM LINE");
-		A.Description = NSLOCTEXT("IBKit", "StimLineDesc", "Tethered field-dressing dart. (Post-launch corps — Blueprint placeholder.)");
-		A.Effect = EIBKitEffect::Blueprint; A.Cooldown = 10.f;
-		M.DisplayName = NSLOCTEXT("IBKit", "SurgeCarry", "SURGE CARRY");
-		M.Description = NSLOCTEXT("IBKit", "SurgeCarryDesc", "A sprint that ignores carry penalties.");
-		M.Effect = EIBKitEffect::Dash; M.Cooldown = 6.f; M.Duration = 0.3f; M.Strength = 1300.f;
-		break;
-	}
-	return Kit;
+    FIBClassKit Kit;
+    const FIBSkillState Starter = IBSkills::StarterState(Class);
+    if (const FIBSkillNode* N=IBSkills::Find(Starter.Equipped[0])) { Kit.MovementTool=N->Spec; }
+    if (const FIBSkillNode* N=IBSkills::Find(Starter.Equipped[1])) { Kit.KitAbility=N->Spec; }
+    return Kit;
 }
 
 // ---------------------------------------------------------------- lifecycle
@@ -95,7 +62,8 @@ void UIBOperativeKitComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (UWorld* World = GetWorld())
 	{
 		World->GetTimerManager().ClearTimer(GlideHandle);
-		World->GetTimerManager().ClearTimer(StrikeHandle);
+		for (FTimerHandle Handle:EffectHandles) { World->GetTimerManager().ClearTimer(Handle); }
+        EndGlide();
 	}
 	if (Hud)
 	{
@@ -110,10 +78,8 @@ void UIBOperativeKitComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// The PlayerState (and its operative) can land after BeginPlay on clients.
-	if (!bResolvedFromIdentity)
-	{
-		RefreshKit();
-	}
+	RefreshKit();
+    if (GetOwner()->HasAuthority() && bConcealed && (Now() >= CloakUntil || !CanActivate())) { NotifyAttack(); }
 	EnsureHud();
 }
 
@@ -124,25 +90,18 @@ void UIBOperativeKitComponent::RefreshKit()
 	const bool bHasIdentity = PS && PS->HasOperative();
 	const EIBOperativeClass Class = bHasIdentity ? PS->GetOperativeClass() : EIBOperativeClass::Breaker;
 
-	if (bKitApplied && Class == ResolvedClass && bHasIdentity == bResolvedFromIdentity)
-	{
-		return; // nothing changed (also stops the per-tick re-resolve + log spam on identity-less pawns)
-	}
-
-	UIBClassKitData* Data = nullptr;
-	if (const TSoftObjectPtr<UIBClassKitData>* Found = KitData.Find(Class))
-	{
-		Data = Found->LoadSynchronous();
-	}
-	ActiveKit = Data ? Data->Kit : DefaultKitFor(Class);
-	ResolvedClass = Class;
-	bResolvedFromIdentity = bHasIdentity;
-	bKitApplied = true;
-
-	UE_LOG(LogIronBreach, Log, TEXT("Kit: %s -> %s / %s (%s)"),
-		*IBCharacter::ClassName(Class).ToString(),
-		*ActiveKit.KitAbility.DisplayName.ToString(), *ActiveKit.MovementTool.DisplayName.ToString(),
-		Data ? TEXT("asset") : TEXT("built-in defaults"));
+    const FIBSkillState Next = PS && PS->Skills && PS->Skills->IsReady()
+        ? PS->Skills->GetState() : IBSkills::StarterState(Class);
+    if (bKitApplied && Class==ResolvedClass && bHasIdentity==bResolvedFromIdentity && Next==AppliedSkills) { return; }
+    AppliedSkills=Next;
+    SlotSpecs.SetNum(4);
+    for (int32 I=0; I<4; ++I)
+    {
+        const FIBSkillNode* N=Next.Equipped.IsValidIndex(I) ? IBSkills::Find(Next.Equipped[I]) : nullptr;
+        SlotSpecs[I]=N ? N->Spec : FIBKitAbilitySpec();
+    }
+    ActiveKit.KitAbility=SlotSpecs[1]; ActiveKit.MovementTool=SlotSpecs[0];
+    ResolvedClass=Class; bResolvedFromIdentity=bHasIdentity; bKitApplied=true;
 
 	if (Hud)
 	{
@@ -180,7 +139,10 @@ void UIBOperativeKitComponent::BindInput(UInputComponent* PlayerInputComponent, 
 		PlayerInputComponent->BindKey(MovementToolKey, IE_Pressed, this, &UIBOperativeKitComponent::ActivateMovementTool);
 	}
 
-	// Optional Enhanced Input route for Connor's IMC (gamepad etc.).
+	PlayerInputComponent->BindKey(EKeys::Z, IE_Pressed, this, &UIBOperativeKitComponent::ActivateTacticalTwo);
+    PlayerInputComponent->BindKey(EKeys::X, IE_Pressed, this, &UIBOperativeKitComponent::ActivateOverdrive);
+
+    // Optional Enhanced Input route for Connor's IMC (gamepad etc.).
 	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		if (KitAbilityAction)   { EIC->BindAction(KitAbilityAction,   ETriggerEvent::Started, this, &UIBOperativeKitComponent::ActivateKitAbility); }
@@ -188,129 +150,153 @@ void UIBOperativeKitComponent::BindInput(UInputComponent* PlayerInputComponent, 
 	}
 }
 
-void UIBOperativeKitComponent::ActivateKitAbility()   { TryActivate(false); }
-void UIBOperativeKitComponent::ActivateMovementTool() { TryActivate(true); }
-
-double UIBOperativeKitComponent::Now() const
+void UIBOperativeKitComponent::ActivateKitAbility() { ActivateSlot(EIBSkillSlot::TacticalOne); }
+void UIBOperativeKitComponent::ActivateMovementTool() { ActivateSlot(EIBSkillSlot::Signature); }
+double UIBOperativeKitComponent::Now() const { return GetWorld() ? GetWorld()->GetTimeSeconds() : 0; }
+const FIBKitAbilitySpec& UIBOperativeKitComponent::GetSlotSpec(EIBSkillSlot Slot) const
 {
-	const UWorld* World = GetWorld();
-	return World ? World->GetTimeSeconds() : 0.0;
+    static const FIBKitAbilitySpec Empty;
+    return SlotSpecs.IsValidIndex(static_cast<int32>(Slot)) ? SlotSpecs[static_cast<int32>(Slot)] : Empty;
 }
-
+FKey UIBOperativeKitComponent::GetSlotKey(EIBSkillSlot Slot) const
+{
+    switch (Slot) { case EIBSkillSlot::Signature:return MovementToolKey; case EIBSkillSlot::TacticalOne:return KitAbilityKey;
+    case EIBSkillSlot::TacticalTwo:return EKeys::Z; default:return EKeys::X; }
+}
+float UIBOperativeKitComponent::GetSlotCooldown(EIBSkillSlot Slot) const
+{
+    const int32 I=static_cast<int32>(Slot); if (I<0 || I>=4) { return 0; }
+    const FName Root=AppliedSkills.Equipped.IsValidIndex(I) ? IBSkills::RootAbility(AppliedSkills.Equipped[I]) : NAME_None;
+    const double* AbilityReady=AbilityReadyTime.Find(Root);
+    return FMath::Max(0.f,static_cast<float>(FMath::Max(SlotReadyTime[I],AbilityReady ? *AbilityReady : 0.0)-Now()));
+}
 float UIBOperativeKitComponent::GetCooldownRemaining(bool bMovementTool) const
-{
-	const double Ready = bMovementTool ? MoveReadyTime : KitReadyTime;
-	return FMath::Max(0.f, static_cast<float>(Ready - Now()));
-}
-
+{ return GetSlotCooldown(bMovementTool ? EIBSkillSlot::Signature : EIBSkillSlot::TacticalOne); }
 float UIBOperativeKitComponent::GetCooldownFraction(bool bMovementTool) const
-{
-	const float Cooldown = SpecFor(bMovementTool).Cooldown;
-	if (Cooldown <= KINDA_SMALL_NUMBER) { return 0.f; }
-	return FMath::Clamp(GetCooldownRemaining(bMovementTool) / Cooldown, 0.f, 1.f);
-}
-
+{ return FMath::Clamp(GetCooldownRemaining(bMovementTool)/FMath::Max(.01f,SpecFor(bMovementTool).Cooldown),0.f,1.f); }
 float UIBOperativeKitComponent::GetDamageTakenScale() const
 {
-	return (Now() < DefenseUntil) ? DefenseScale : 1.f;
+    float Scale=Now()<DefenseUntil ? DefenseScale : 1.f;
+    if (Now()<GuardUntil) { Scale=FMath::Min(Scale,GuardScale); }
+    if (Now()<WardUntil) { Scale=FMath::Min(Scale,WardScale); }
+    return Scale;
 }
-
-void UIBOperativeKitComponent::TryActivate(bool bMovementTool)
+void UIBOperativeKitComponent::ApplyWardDefense(float Scale,float Duration)
 {
-	if (!bResolvedFromIdentity) { RefreshKit(); }
-
-	ACharacter* Character = OwnerCharacter();
-	const FIBKitAbilitySpec& Spec = SpecFor(bMovementTool);
-	if (!Character || !Spec.IsUsable()) { return; }
-
-	double& Ready = bMovementTool ? MoveReadyTime : KitReadyTime;
-	if (Now() < Ready) { return; }
-	Ready = Now() + Spec.Cooldown; // predicted; the server keeps its own clock
-
-	if (Character->HasAuthority())
-	{
-		ExecuteEffect(bMovementTool, /*bAuthority=*/true, /*bLocal=*/Character->IsLocallyControlled());
-	}
-	else
-	{
-		ExecuteEffect(bMovementTool, /*bAuthority=*/false, /*bLocal=*/true);
-		Server_Activate(bMovementTool);
-	}
+    if (!GetOwner()->HasAuthority()) { return; }
+    if (Now()>=WardUntil || Scale<=WardScale) { WardScale=FMath::Clamp(Scale,0.f,1.f); WardUntil=Now()+Duration; }
 }
-
-void UIBOperativeKitComponent::Server_Activate_Implementation(bool bMovementTool)
+void UIBOperativeKitComponent::RecordGuardedDamage(float IncomingDamage)
 {
-	if (!bResolvedFromIdentity) { RefreshKit(); }
-
-	const FIBKitAbilitySpec& Spec = SpecFor(bMovementTool);
-	if (!Spec.IsUsable()) { return; }
-
-	double& Ready = bMovementTool ? MoveReadyTime : KitReadyTime;
-	if (Now() < Ready - 0.15) { return; } // a little slack for latency
-	Ready = Now() + Spec.Cooldown;
-
-	ExecuteEffect(bMovementTool, /*bAuthority=*/true, /*bLocal=*/false);
+    if (GetOwner()->HasAuthority() && Now()<GuardUntil && FMath::IsFinite(IncomingDamage))
+    { GuardEnergy=FMath::Clamp(GuardEnergy+FMath::Max(0.f,IncomingDamage)*(1.f-GuardScale),0.f,100.f); }
 }
-
-void UIBOperativeKitComponent::Multicast_Activated_Implementation(bool bMovementTool)
+bool UIBOperativeKitComponent::CanActivate() const
 {
-	BP_OnKitActivated(bMovementTool, SpecFor(bMovementTool));
+    const AIBCharacter_Infantry* Infantry=Cast<AIBCharacter_Infantry>(GetOwner());
+    return Infantry && !Infantry->IsDead() && Infantry->GetController();
 }
-
-// ---------------------------------------------------------------- effects
-
-void UIBOperativeKitComponent::ExecuteEffect(bool bMovementTool, bool bAuthority, bool bLocal)
+void UIBOperativeKitComponent::ActivateSlot(EIBSkillSlot Slot)
 {
-	const FIBKitAbilitySpec& Spec = SpecFor(bMovementTool);
-
-	switch (Spec.Effect)
-	{
-	case EIBKitEffect::Dash:
-		DoDash(Spec);                         // both the owning client and the server move the body
-		OpenDefenseWindow(Spec);
-		break;
-
-	case EIBKitEffect::Grapple:
-		DoGrapple(Spec);
-		break;
-
-	case EIBKitEffect::Glide:
-		DoGlide(Spec);
-		break;
-
-	case EIBKitEffect::ConeStrike:
-		DoDash(Spec);
-		OpenDefenseWindow(Spec);
-		if (bAuthority)
-		{
-			// Let the lunge land first, then hit what's in front.
-			if (UWorld* World = GetWorld())
-			{
-				const FIBKitAbilitySpec SpecCopy = Spec;
-				World->GetTimerManager().SetTimer(StrikeHandle, FTimerDelegate::CreateWeakLambda(this, [this, SpecCopy]()
-				{
-					DoConeStrikeDamage(SpecCopy);
-				}), FMath::Max(0.05f, Spec.Duration), false);
-			}
-		}
-		break;
-
-	case EIBKitEffect::DeployZone:
-		if (bAuthority) { DoDeployZone(Spec); }
-		break;
-
-	case EIBKitEffect::Blueprint:
-	case EIBKitEffect::None:
-	default:
-		break;
-	}
-
-	if (bAuthority)
-	{
-		Multicast_Activated(bMovementTool); // FX on every machine
-	}
-	UE_LOG(LogIronBreach, Verbose, TEXT("Kit: %s activated (%s%s)"), *Spec.DisplayName.ToString(),
-		bAuthority ? TEXT("authority") : TEXT("client"), bLocal ? TEXT(", local") : TEXT(""));
+    if (CanActivate()) { Server_Activate(Slot); }
+}
+void UIBOperativeKitComponent::Server_Activate_Implementation(EIBSkillSlot Slot)
+{
+    const int32 I=static_cast<int32>(Slot);
+    if (I<0 || I>=4 || !CanActivate()) { return; }
+    RefreshKit();
+    const FIBKitAbilitySpec& Spec=GetSlotSpec(Slot);
+    if (!Spec.IsUsable()) { return; }
+    if (Spec.Effect==EIBKitEffect::ReturnDash && Now()<ReturnUntil && TryReturn()) { return; }
+    const FName Root=IBSkills::RootAbility(AppliedSkills.Equipped[I]);
+    if (GetSlotCooldown(Slot)>0)
+    { Client_Cooldown(Slot,Root,GetSlotCooldown(Slot)); return; }
+    SlotReadyTime[I]=Now()+Spec.Cooldown; AbilityReadyTime.Add(Root,SlotReadyTime[I]);
+    Client_Cooldown(Slot,Root,Spec.Cooldown);
+    ExecuteEffect(Slot);
+}
+void UIBOperativeKitComponent::Client_Cooldown_Implementation(EIBSkillSlot Slot,FName Ability,float Remaining)
+{
+    const int32 I=static_cast<int32>(Slot); if (I<0 || I>=4 || GetOwner()->HasAuthority()) { return; }
+    SlotReadyTime[I]=Now()+Remaining; AbilityReadyTime.Add(Ability,SlotReadyTime[I]);
+}
+void UIBOperativeKitComponent::Multicast_Activated_Implementation(EIBSkillSlot Slot,const FIBKitAbilitySpec& Spec)
+{ BP_OnKitActivated(Slot==EIBSkillSlot::Signature,Spec); }
+void UIBOperativeKitComponent::ExecuteEffect(EIBSkillSlot Slot)
+{
+    const FIBKitAbilitySpec Spec=GetSlotSpec(Slot);
+    if (Spec.Damage>0) { NotifyAttack(); }
+    auto Later=[&](float Delay,TFunction<void()> Action)
+    {
+        FTimerHandle& Handle=EffectHandles.AddDefaulted_GetRef();
+        GetWorld()->GetTimerManager().SetTimer(Handle,FTimerDelegate::CreateWeakLambda(this,[this,Action]()
+        { if (CanActivate()) { Action(); } }),Delay,false);
+    };
+    switch(Spec.Effect)
+    {
+    case EIBKitEffect::ReturnDash:
+        ReturnAnchor=GetOwner()->GetActorLocation(); ReturnUntil=Now()+3; Client_ReturnWindow(3);
+        DoDash(Spec); break;
+    case EIBKitEffect::Dash:
+        DoDash(Spec); OpenDefenseWindow(Spec);
+        if (Spec.bLeaveWard) { Later(.6f,[this,Spec]() { FIBKitAbilitySpec Ward=Spec; Ward.Duration=5; DoDeployZone(Ward); }); }
+        break;
+    case EIBKitEffect::Grapple: DoGrapple(Spec); break;
+    case EIBKitEffect::Glide: DoGlide(Spec); break;
+    case EIBKitEffect::ConeStrike:
+        DoDash(Spec); OpenDefenseWindow(Spec);
+        Later(FMath::Max(.05f,Spec.Duration),[this,Spec]() { DoConeStrikeDamage(Spec); }); break;
+    case EIBKitEffect::RadialStrike:
+        OpenDefenseWindow(Spec); DoStrikeDamage(Spec,true); break;
+    case EIBKitEffect::Guard:
+        GuardUntil=Now()+Spec.Duration; GuardScale=Spec.DamageTakenScale; break;
+    case EIBKitEffect::DeployZone: DoDeployZone(Spec); break;
+    case EIBKitEffect::Cloak:
+        bConcealed=true; CloakUntil=Now()+Spec.Duration; OnRep_Concealed();
+        if (Spec.Strength>0) { DoDash(Spec); }
+        if (Spec.bMarksTargets || Spec.SlowFactor<1) { DoDeployZone(Spec); }
+        break;
+    case EIBKitEffect::Decoy: AIBSkillDecoy::Project(OwnerCharacter(),Spec); break;
+    default: break;
+    }
+    GetOwner()->ForceNetUpdate(); Multicast_Activated(Slot,Spec);
+}
+bool UIBOperativeKitComponent::TryReturn()
+{
+    ACharacter* C=OwnerCharacter(); if (!C || Now()>=ReturnUntil) { return false; }
+    UCapsuleComponent* Capsule=C->GetCapsuleComponent();
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(IBReturnVector),false,C);
+    const FCollisionShape Shape=FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(),Capsule->GetScaledCapsuleHalfHeight());
+    FHitResult Hit;
+    if (GetWorld()->SweepSingleByChannel(Hit,C->GetActorLocation(),ReturnAnchor,FQuat::Identity,ECC_Pawn,Shape,Params)
+        || GetWorld()->OverlapBlockingTestByChannel(ReturnAnchor,FQuat::Identity,ECC_Pawn,Shape,Params)) { return false; }
+    C->GetCharacterMovement()->StopMovementImmediately();
+    if (!C->TeleportTo(ReturnAnchor,C->GetActorRotation(),false,true)) { return false; }
+    ReturnUntil=0; Client_ReturnWindow(0); return true;
+}
+void UIBOperativeKitComponent::NotifyAttack()
+{
+    if (!GetOwner()->HasAuthority() || !bConcealed) { return; }
+    bConcealed=false; CloakUntil=0; OnRep_Concealed(); GetOwner()->ForceNetUpdate();
+}
+void UIBOperativeKitComponent::OnRep_Concealed()
+{
+    if (bConcealed)
+    {
+        TArray<UMeshComponent*> Meshes; GetOwner()->GetComponents(Meshes);
+        for (UMeshComponent* Mesh:Meshes) if (Mesh->IsVisible()) { ConcealedMeshes.AddUnique(Mesh); Mesh->SetVisibility(false); }
+    }
+    else
+    {
+        for (auto Weak:ConcealedMeshes) if (UMeshComponent* Mesh=Weak.Get()) { Mesh->SetVisibility(true); }
+        ConcealedMeshes.Empty();
+    }
+}
+void UIBOperativeKitComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(UIBOperativeKitComponent,bConcealed);
+    DOREPLIFETIME_CONDITION(UIBOperativeKitComponent,GuardEnergy,COND_OwnerOnly);
 }
 
 FVector UIBOperativeKitComponent::LookDirection(bool bFlatten) const
@@ -329,8 +315,15 @@ void UIBOperativeKitComponent::DoDash(const FIBKitAbilitySpec& Spec)
 {
 	if (ACharacter* Character = OwnerCharacter())
 	{
-		const FVector Dir = LookDirection(/*bFlatten=*/true);
-		Character->LaunchCharacter(Dir * Spec.Strength + FVector(0.f, 0.f, Spec.Strength * 0.12f), true, true);
+		if (Spec.Strength<=0) { return; }
+        FVector Dir=LookDirection(true);
+        if (Spec.Effect==EIBKitEffect::Dash || Spec.Effect==EIBKitEffect::ReturnDash || Spec.Effect==EIBKitEffect::Cloak)
+        {
+            FVector Input=Character->GetLastMovementInputVector(); Input.Z=0;
+            if (Input.IsNearlyZero()) { Input=Character->GetCharacterMovement()->GetCurrentAcceleration(); Input.Z=0; }
+            if (!Input.IsNearlyZero()) { Dir=Input.GetSafeNormal(); }
+        }
+        Character->LaunchCharacter(Dir * Spec.Strength + FVector(0.f, 0.f, Spec.Strength * 0.12f), true, true);
 	}
 }
 
@@ -409,51 +402,35 @@ void UIBOperativeKitComponent::EndGlide()
 	}
 }
 
-void UIBOperativeKitComponent::DoConeStrikeDamage(const FIBKitAbilitySpec& Spec)
+void UIBOperativeKitComponent::DoConeStrikeDamage(const FIBKitAbilitySpec& Spec) { DoStrikeDamage(Spec,false); }
+void UIBOperativeKitComponent::DoStrikeDamage(FIBKitAbilitySpec Spec,bool bRadial)
 {
-	ACharacter* Character = OwnerCharacter();
-	if (!Character || !Character->HasAuthority()) { return; }
-
-	const FVector Origin = Character->GetActorLocation();
-	const FVector Dir = LookDirection(/*bFlatten=*/true);
-	const FVector Center = Origin + Dir * (Spec.Range * 0.5f);
-
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
-	TArray<AActor*> Ignore;
-	Ignore.Add(Character);
-	TArray<AActor*> Overlaps;
-	UKismetSystemLibrary::SphereOverlapActors(this, Center, FMath::Max(Spec.Range * 0.5f, Spec.Radius), ObjectTypes, AActor::StaticClass(), Ignore, Overlaps);
-
-	AController* Instigator = Character->GetController();
-	int32 Hits = 0;
-	for (AActor* Target : Overlaps)
-	{
-		if (!Target || Target->IsA<AIBCharacter_Infantry>()) { continue; } // never the fireteam
-		if (!Target->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass())) { continue; }
-
-		// In front of us, within the cone's half-width at its far end.
-		const FVector ToTarget = Target->GetActorLocation() - Origin;
-		const float Along = FVector::DotProduct(ToTarget, Dir);
-		if (Along < 0.f || Along > Spec.Range + Spec.Radius) { continue; }
-		const float Across = (ToTarget - Dir * Along).Size();
-		if (Across > Spec.Radius) { continue; }
-
-		FHitResult Hit;
-		Hit.ImpactPoint = Target->GetActorLocation();
-		Hit.Location = Hit.ImpactPoint;
-		Hit.ImpactNormal = -Dir;
-		Hit.Normal = -Dir;
-		Hit.HitObjectHandle = FActorInstanceHandle(Target);
-		IDamageableInterface::Execute_HandleTakeDamage(Target, Spec.Damage, Hit, Instigator, Character);
-
-		if (ACharacter* TargetCharacter = Cast<ACharacter>(Target))
-		{
-			TargetCharacter->LaunchCharacter(Dir * Spec.Strength * 0.6f + FVector(0.f, 0.f, 260.f), true, true);
-		}
-		++Hits;
-	}
-	UE_LOG(LogIronBreach, Log, TEXT("Kit: %s hit %d target(s)"), *Spec.DisplayName.ToString(), Hits);
+    ACharacter* C=OwnerCharacter(); if (!C || !C->HasAuthority() || !CanActivate()) { return; }
+    if (Spec.bUsesGuardEnergy) { Spec.Damage+=GuardEnergy; GuardEnergy=0; }
+    const FVector Origin=C->GetActorLocation(), Dir=LookDirection(true);
+    TArray<TEnumAsByte<EObjectTypeQuery>> Types; Types.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+    TArray<AActor*> Ignore {C}, Targets;
+    UKismetSystemLibrary::SphereOverlapActors(this,Origin,bRadial ? Spec.Radius : Spec.Range+Spec.Radius,Types,AActor::StaticClass(),Ignore,Targets);
+    for (AActor* Target:Targets)
+    {
+        if (!Target || Target->IsA<AIBCharacter_Infantry>() || Target->IsA<AIBSkillDecoy>()
+            || !Target->GetClass()->ImplementsInterface(UDamageableInterface::StaticClass())) { continue; }
+        const FVector To=Target->GetActorLocation()-Origin;
+        if (!bRadial)
+        {
+            const float Along=FVector::DotProduct(To,Dir);
+            if (Along<0 || Along>Spec.Range || (To-Dir*Along).Size()>Spec.Radius) { continue; }
+        }
+        // No strikes through walls; use the hit component/bone for the existing armor pipeline.
+        FCollisionQueryParams Params(SCENE_QUERY_STAT(IBSkillStrike),true,C);
+        FHitResult Hit;
+        const bool bHit=GetWorld()->LineTraceSingleByChannel(Hit,Origin,Target->GetActorLocation(),ECC_Pawn,Params);
+        if (bHit && Hit.GetActor()!=Target) { continue; }
+        if (!bHit) { Hit=FHitResult(Target,Cast<UPrimitiveComponent>(Target->GetRootComponent()),Target->GetActorLocation(),-To.GetSafeNormal()); }
+        IDamageableInterface::Execute_HandleTakeDamage(Target,Spec.Damage,Hit,C->GetController(),C);
+        if (ACharacter* Other=Cast<ACharacter>(Target); Other && Spec.Strength>0)
+        { Other->LaunchCharacter(To.GetSafeNormal2D()*Spec.Strength+FVector(0,0,200),true,true); }
+    }
 }
 
 void UIBOperativeKitComponent::DoDeployZone(const FIBKitAbilitySpec& Spec)
@@ -514,4 +491,14 @@ APlayerController* UIBOperativeKitComponent::OwnerPC() const
 {
 	const APawn* Pawn = Cast<APawn>(GetOwner());
 	return Pawn ? Cast<APlayerController>(Pawn->GetController()) : nullptr;
+}
+
+void UIBOperativeKitComponent::Client_ReturnWindow_Implementation(float Seconds)
+{ if (!GetOwner()->HasAuthority()) { ReturnUntil=Now()+Seconds; } }
+
+bool UIBOperativeKitComponent::IsGuardActive() const
+{
+    if (GetOwner()->HasAuthority()) { return Now()<GuardUntil; }
+    const FIBKitAbilitySpec& Spec=GetSlotSpec(EIBSkillSlot::Signature);
+    return Spec.Effect==EIBKitEffect::Guard && GetSlotCooldown(EIBSkillSlot::Signature)>Spec.Cooldown-Spec.Duration;
 }

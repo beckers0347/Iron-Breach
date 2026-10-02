@@ -96,7 +96,7 @@ void UIBMainMenuWidget::EnterHostLobbyState()
 		if (UTextBlock* Label = Cast<UTextBlock>(Btn_Host->GetChildAt(0)))
 		{
 			Label->SetText(NSLOCTEXT("IBMenu", "Deploy", "DEPLOY SQUAD"));
-			Label->SetColorAndOpacity(FSlateColor(IBStyle::Amber()));
+			Label->SetColorAndOpacity(FSlateColor(IBStyle::Cyan()));
 		}
 	}
 	if (Btn_Join) { Btn_Join->SetIsEnabled(false); }
@@ -166,12 +166,18 @@ void UIBMainMenuWidget::ApplyHouseStyle()
 		if (!Button) { continue; }
 
 		IBStyle::StyleButton(Button); // rounded chip + amber hover stroke
+		if (!Button->GetContent())
+		{
+			const FString Name = Button == Btn_Solo ? TEXT("SOLO") : Button == Btn_Host ? TEXT("HOST SQUAD")
+				: Button == Btn_Join ? TEXT("JOIN SQUAD") : Button == Btn_Settings ? TEXT("SETTINGS") : TEXT("QUIT TO DESKTOP");
+			Button->SetContent(IBStyle::MakeText(WidgetTree, FText::FromString(Name), 19, IBStyle::TextHi(), 80));
+		}
 
 		if (UTextBlock* Label = Cast<UTextBlock>(Button->GetChildAt(0)))
 		{
 			FSlateFontInfo Font = Label->GetFont();
 			Font.Size = FMath::Max(Font.Size, 19);
-			Font.LetterSpacing = 250;
+			Font.LetterSpacing = 80;
 			Label->SetFont(Font);
 			Label->SetColorAndOpacity(FSlateColor(IBStyle::TextHi()));
 			Label->SetShadowOffset(FVector2D(1.f, 1.f));
@@ -181,7 +187,7 @@ void UIBMainMenuWidget::ApplyHouseStyle()
 
 	if (Txt_Status)
 	{
-		Txt_Status->SetColorAndOpacity(FSlateColor(IBStyle::Amber())); // amber narrator
+		Txt_Status->SetColorAndOpacity(FSlateColor(IBStyle::Cyan())); // amber narrator
 	}
 }
 
@@ -532,7 +538,7 @@ void UIBMainMenuWidget::InjectOperativeChip()
 		SwitchSlot->SetVerticalAlignment(VAlign_Center);
 	}
 
-	UBorder* Chip = IBStyle::MakePanel(WidgetTree, IBStyle::Panel(), 8.f);
+	UBorder* Chip = IBStyle::MakePanel(WidgetTree, IBStyle::Panel(), 0.f);
 	Chip->SetPadding(FMargin(12.f, 8.f));
 	Chip->SetContent(Row);
 

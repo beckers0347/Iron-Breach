@@ -3,9 +3,12 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h" // IOnlineSessionPtr + completion delegate types
+#include "Engine/EngineBaseTypes.h"            // ENetworkFailure / ETravelFailure (link-failure handlers)
+#include "Engine/EngineTypes.h"                // FTimerHandle
 #include "IBSessionSubsystem.generated.h"
 
 class FOnlineSessionSearch;
+class UNetDriver;
 
 /** Every beat of the host/join flow, for front-end feedback. A silent menu
  *  reads as a broken menu — the demo build cannot afford that. */
@@ -113,14 +116,46 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
 	FString LeaveTravelURL = TEXT("/Game/FirstPerson/Lvl_MainMenu");
 
+	/** Fireteam size: the slots the session advertises and every squad surface builds for (Connor, 09-17: six). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "IronBreach|Online")
-	int32 MaxPlayers = 4;
+	int32 MaxPlayers = 6;
+
+	/** The one number the squad banners, lobby strip and Watch read for fireteam capacity. */
+	static int32 FireteamSize() { return FMath::Max(1, GetDefault<UIBSessionSubsystem>()->MaxPlayers); }
 
 	/** Front-end feedback channel (IBMainMenuWidget listens; BPs can too). */
 	UPROPERTY(BlueprintAssignable, Category = "IronBreach|Online")
 	FOnIBSessionStatusChanged OnSessionStatusChanged;
 
+	/**
+	 * The last LINK failure this machine suffered — the host went dark, the connection timed
+	 * out, a build mismatch, a travel that never landed. The engine handles the mechanics
+	 * (a client is dropped back onto GameDefaultMap); this remembers WHY so the front end can
+	 * say it instead of reading as a silent crash-to-title. One-shot: returns true and clears
+	 * the message the first time it is read after a failure. Call it from the operative sheet /
+	 * main menu on construct.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "IronBreach|Online")
+	bool ConsumeLastLinkFailure(FText& OutMessage);
+
 private:
+	// ---- Link failures (2026-09-15, MP_HARDENING_2026-09-15.md) ----
+	// Before this, a host dropping out dumped clients on the title screen with no word and a
+	// stale Steam session entry still registered locally. Now: log it, remember it, tear the
+	// local session entry down, and announce it once the title map is up.
+	void HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
+	void HandleTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString);
+	void HandlePostLoadMap(UWorld* LoadedWorld);
+	/** Remember a failure and arm the announcement (after the next map load, or on a fallback timer). */
+	void QueueLinkFailure(const FString& Message);
+	void AnnouncePendingLinkFailure();
+	FDelegateHandle PostLoadMapHandle;
+	FTimerHandle LinkFailureAnnounceHandle;
+	FText PendingLinkFailure;
+	bool bLinkFailurePending = false;
+	FText LastLinkFailure;
+	bool bHasUnreadLinkFailure = false;
+
 	/** Input-mode law, enforced globally: UIOnly survives map travel and
 	 *  bricks the next level, so every travel (host ServerTravel, client
 	 *  follow, solo OpenLevel) resets the local player to GameOnly first.

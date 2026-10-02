@@ -1,7 +1,17 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "UI/IBMenuScreen.h"
+#include "Components/Border.h"
 #include "IBMissionsScreen.generated.h"
+
+/** A directional shade keeps mission text readable over its real recon image. */
+UCLASS()
+class IRONBREACH_API UIBMissionImageShade : public UBorder
+{
+    GENERATED_BODY()
+protected:
+    virtual TSharedRef<SWidget> RebuildWidget() override;
+};
 
 /** Mission briefings use the same destination registry as the Watch. No second travel path. */
 UCLASS()
@@ -30,6 +40,15 @@ private:
     UPROPERTY(Transient) TObjectPtr<class UTextBlock> Objective;
     UPROPERTY(Transient) TObjectPtr<class UTextBlock> Intel;
     UPROPERTY(Transient) TObjectPtr<class UTextBlock> Status;
+    UPROPERTY(Transient) TObjectPtr<class UTextBlock> ReconCaption;
+    UPROPERTY(Transient) TObjectPtr<class UTextBlock> ReconFallback;
+    UPROPERTY(Transient) TObjectPtr<class UTextBlock> ObjectiveSource;
+    UPROPERTY(Transient) TObjectPtr<class UTextBlock> MissionCount;
+    /** Live log strip above the briefings: the replicated director's objective for the map you stand in. */
+    UPROPERTY(Transient) TObjectPtr<class UWidget> ActiveStrip;
+    UPROPERTY(Transient) TObjectPtr<class UTextBlock> ActiveLocation;
+    UPROPERTY(Transient) TObjectPtr<class UTextBlock> ActiveObjective;
+    FText LastActiveObjective;
     UPROPERTY(Transient) TObjectPtr<class UImage> Recon;
     UPROPERTY(Transient) TObjectPtr<class UButton> WatchButton;
     UPROPERTY(Transient) TArray<TObjectPtr<class UButton>> Filters;

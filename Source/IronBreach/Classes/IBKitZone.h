@@ -10,20 +10,14 @@ class UPointLightComponent;
 class UMaterialInterface;
 class ACharacter;
 
-/**
- * The built-in pylon for EIBKitEffect::DeployZone: a disc + post + colored
- * light, replicated to everyone, that pulses every quarter second and does two
- * things to HOSTILE characters inside its radius — slows them (MaxWalkSpeed ×
- * SlowFactor, restored on exit/expiry; server-only) and/or marks them (Custom
- * Depth stencil 1, every machine, for an outline post-process to pick up).
- * Infantry are never affected. Subclass in BP for a real look.
- */
+/** Replicated field: protects friendly infantry, slows hostiles, and supplies sensor HUD marks. */
 UCLASS()
 class IRONBREACH_API AIBKitZone : public AActor
 {
 	GENERATED_BODY()
 
 public:
+    friend struct FIBSkillCombatCheck;
 	AIBKitZone();
 
 	/** Server: configure from the spec and arm the pulse. */
@@ -31,6 +25,8 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Kit")
 	float GetRadius() const { return Radius; }
+	static float GetActiveSlowScale(const ACharacter* Character);
+	const TArray<TWeakObjectPtr<ACharacter>>& GetMarkedTargets() const { return MarkedTargets; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -79,11 +75,13 @@ protected:
 	UPROPERTY(Replicated)
 	bool bMarksTargets = false;
 
+	UPROPERTY(Replicated) float FriendlyDamageScale = 1.f;
+
 	float Lifetime = 8.f;
 
 	TWeakObjectPtr<AActor> OwnerPawn;
 	TMap<TWeakObjectPtr<ACharacter>, float> SlowedOriginalSpeeds;
-	TArray<TWeakObjectPtr<UPrimitiveComponent>> MarkedComponents;
+	TArray<TWeakObjectPtr<ACharacter>> MarkedTargets;
 	FTimerHandle PulseHandle;
 	FTimerHandle ExpireHandle;
 };

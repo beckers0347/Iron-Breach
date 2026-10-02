@@ -11,8 +11,7 @@
 
 /**
  * The Iron Breach UI house style, one header. Every C++-built screen pulls
- * from here so the whole game reads as ONE service console: ink-dark rounded
- * panels, service-steel text, Relic-amber accents, uplink-cyan for friendlies.
+	 * from here: dark glass panels, service-steel text and cyan navigation.
  *
  * Shane: WBP children override freely — this only styles what C++ builds.
  */
@@ -23,11 +22,11 @@ namespace IBStyle
 	inline FLinearColor Panel()   { return FLinearColor(0.030f, 0.040f, 0.065f); } // cards / sheets
 	inline FLinearColor Chip()    { return FLinearColor(0.050f, 0.070f, 0.110f); } // buttons at rest
 	inline FLinearColor ChipHot() { return FLinearColor(0.100f, 0.130f, 0.190f); } // buttons hovered
-	inline FLinearColor Line()    { return FLinearColor(0.120f, 0.160f, 0.240f); } // hairlines / strokes
+	inline FLinearColor Line()    { return FLinearColor(0.120f, 0.290f, 0.350f, 0.65f); } // hairlines / strokes
 	inline FLinearColor TextHi()  { return FLinearColor(0.850f, 0.900f, 1.000f); } // primary text
 	inline FLinearColor TextLo()  { return FLinearColor(0.550f, 0.620f, 0.750f); } // secondary text
 	inline FLinearColor Amber()   { return FLinearColor(0.850f, 0.620f, 0.180f); } // the Relic accent
-	inline FLinearColor Cyan()    { return FLinearColor(0.250f, 0.750f, 0.850f); } // friendly / online
+	inline FLinearColor Cyan()    { return FLinearColor(0.280f, 0.780f, 0.900f); } // navigation / online
 	inline FLinearColor Danger()  { return FLinearColor(0.800f, 0.250f, 0.200f); } // destructive
 
 	/** Rounded solid-color brush — the base of every panel and chip. */
@@ -78,27 +77,30 @@ namespace IBStyle
 	/** Screen title: big, tracked-out, service-steel. */
 	inline UTextBlock* MakeTitle(UWidgetTree* Tree, const FText& Text)
 	{
-		return MakeText(Tree, Text, 26, TextHi(), 400);
+		UTextBlock* Title = MakeText(Tree, Text, 36, TextHi(), 60);
+		UseDisplayFace(Title);
+		Title->SetShadowOffset(FVector2D::ZeroVector);
+		return Title;
 	}
 
 	/** Small tracked-out section label ("WEAPONS", "BACKPACK"). */
 	inline UTextBlock* MakeSection(UWidgetTree* Tree, const FText& Text)
 	{
-		return MakeText(Tree, Text, 12, TextLo(), 500);
+		return MakeText(Tree, Text, 12, Cyan(), 100);
 	}
 
-	/** The house button: rounded chip, lighter on hover with an amber stroke,
-	 *  pressed sinks. Works on ANY UButton (fallback-built or WBP-bound). */
-	inline void StyleButton(UButton* Button, bool bAccent = false, float Radius = 6.0f)
+	/** Shared menu control. Radius remains optional for specialized widgets. */
+	inline void StyleButton(UButton* Button, bool bAccent = false, float Radius = 0.0f)
 	{
 		if (!Button) { return; }
-		const FLinearColor Rest = bAccent ? FLinearColor(0.32f, 0.235f, 0.075f) : Chip();
+		const FLinearColor Rest = bAccent ? FLinearColor(.025f,.12f,.16f,.88f) : FLinearColor(.006f,.017f,.025f,.55f);
 		FButtonStyle Style = Button->GetStyle();
-		Style.Normal  = RoundedBrush(Rest, Radius, Line(), 1.0f);
-		Style.Hovered = RoundedBrush(ChipHot(), Radius, Amber(), 1.5f);
-		Style.Pressed = RoundedBrush(Ink(), Radius, Amber(), 1.5f);
-		Style.NormalPadding  = FMargin(14.f, 7.f);
-		Style.PressedPadding = FMargin(14.f, 8.f, 14.f, 6.f);
+		Style.Normal  = RoundedBrush(Rest, Radius, bAccent ? Cyan() : Line(), 1.0f);
+		Style.Hovered = RoundedBrush(FLinearColor(.04f,.16f,.20f,.95f), Radius, Cyan(), 1.0f);
+		Style.Pressed = RoundedBrush(FLinearColor(.08f,.23f,.28f), Radius, Cyan(), 1.0f);
+		Style.Disabled = RoundedBrush(FLinearColor(.006f,.017f,.025f,.45f), Radius, Line(), 1.0f);
+		Style.NormalPadding  = FMargin(16.f, 12.f);
+		Style.PressedPadding = Style.NormalPadding;
 		Button->SetStyle(Style);
 	}
 
@@ -108,7 +110,9 @@ namespace IBStyle
 	{
 		UButton* Button = Tree->ConstructWidget<UButton>(UButton::StaticClass());
 		StyleButton(Button, bAccent);
-		UTextBlock* Text = MakeText(Tree, Label, FontSize, TextHi(), 250);
+		UTextBlock* Text = MakeText(Tree, Label, FontSize, TextHi(), 80);
+		Text->SetFont(FCoreStyle::GetDefaultFontStyle(TEXT("Regular"), FontSize));
+		Text->SetShadowOffset(FVector2D::ZeroVector);
 		Button->AddChild(Text);
 		if (OutLabel) { *OutLabel = Text; }
 		return Button;

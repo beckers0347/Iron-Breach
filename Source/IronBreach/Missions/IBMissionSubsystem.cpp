@@ -41,3 +41,20 @@ void UIBMissionSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	UE_LOG(LogIronBreach, Log, TEXT("[Mission] Auto-spawned director for %s"), *InWorld.GetName());
 }
+
+AIBMissionDirector* UIBMissionSubsystem::GetDirector() const
+{
+	if (Director.IsValid()) { return Director.Get(); }
+
+	// Clients (and anyone asking before OnWorldBeginPlay): the replicated actor does not go
+	// through this subsystem, so look for it — same trick AIBWatchBoard::Get uses.
+	if (UWorld* World = GetWorld())
+	{
+		for (TActorIterator<AIBMissionDirector> It(World); It; ++It)
+		{
+			Director = *It;
+			return *It;
+		}
+	}
+	return nullptr;
+}

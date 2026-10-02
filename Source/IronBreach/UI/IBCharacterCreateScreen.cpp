@@ -1,5 +1,7 @@
 #include "UI/IBCharacterCreateScreen.h"
 #include "UI/IBStyleKit.h"
+#include "UI/IBHangarStyle.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "UI/IBSheetDismissProcessor.h"
 #include "Player/IBCharacterSubsystem.h"
 #include "Player/IBOperativePreviewStage.h"
@@ -26,7 +28,7 @@
 namespace
 {
 	constexpr int32 MaxCallsignLen = 16;
-	constexpr float CreateColumnWidth = 460.f;
+	constexpr float CreateColumnWidth = 560.f;
 	constexpr float CreatePreviewPixels = 1024.f;
 
 	const EIBOperativeClass AllClasses[] =
@@ -34,7 +36,6 @@ namespace
 		EIBOperativeClass::Breaker,
 		EIBOperativeClass::Picket,
 		EIBOperativeClass::Bellringer,
-		EIBOperativeClass::Corpsman,
 	};
 
 	/** Rim color before a trade is chosen: the fireteam ice-blue, dimmed. */
@@ -69,7 +70,10 @@ void UIBCharacterCreateScreen::NativeConstruct()
 		if (UTextureRenderTarget2D* RT = Stage->GetRenderTarget())
 		{
 			FSlateBrush Brush = PreviewImage->GetBrush();
-			Brush.SetResourceObject(RT);
+            UMaterialInstanceDynamic* Portrait = UMaterialInstanceDynamic::Create(
+                LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/IronBreach/UI/Hangar/M_OperativePortrait.M_OperativePortrait")), this);
+            if (Portrait) { Portrait->SetTextureParameterValue(TEXT("Portrait"), RT); }
+            Brush.SetResourceObject(Portrait);
 			Brush.ImageSize = FVector2D(CreatePreviewPixels, CreatePreviewPixels);
 			PreviewImage->SetBrush(Brush);
 		}
@@ -117,20 +121,8 @@ void UIBCharacterCreateScreen::BuildLayout()
 {
 	if (!WidgetTree || Btn_Enlist) { return; }
 
-	UOverlay* Root = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-	WidgetTree->RootWidget = Root;
-
-	// Foreground for descendants that inherit it (the callsign field).
+	UOverlay* Root = IBHangar::Frontend(WidgetTree);
 	SetForegroundColor(FSlateColor(IBStyle::TextHi()));
-
-	// Opaque stage-black sheet (this sits over the select screen).
-	UBorder* Sheet = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	Sheet->SetBrush(IBStyle::RoundedBrush(FLinearColor::Black, 0.f));
-	if (UOverlaySlot* SheetSlot = Root->AddChildToOverlay(Sheet))
-	{
-		SheetSlot->SetHorizontalAlignment(HAlign_Fill);
-		SheetSlot->SetVerticalAlignment(VAlign_Fill);
-	}
 
 	// ---- The body being built: left, full height ----
 	PreviewImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass());
@@ -153,6 +145,7 @@ void UIBCharacterCreateScreen::BuildLayout()
 	{
 		PreviewSlot->SetHorizontalAlignment(HAlign_Left);
 		PreviewSlot->SetVerticalAlignment(VAlign_Fill);
+		PreviewSlot->SetPadding(FMargin(0,110,0,80));
 	}
 
 	// ---- Title, top-left over the stage ----
@@ -160,7 +153,7 @@ void UIBCharacterCreateScreen::BuildLayout()
 	TitleBox->AddChildToVerticalBox(IBStyle::MakeTitle(WidgetTree, NSLOCTEXT("IBCharCreate", "Title", "NEW OPERATIVE")));
 	UTextBlock* Sub = IBStyle::MakeText(WidgetTree,
 		NSLOCTEXT("IBCharCreate", "Sub", "GRAFT PROGRAM INTAKE — THE BREAKWATER TAKES ITS OWN"),
-		12, IBStyle::TextLo(), 500);
+		12, IBStyle::TextLo(), 80);
 	if (UVerticalBoxSlot* SubSlot = TitleBox->AddChildToVerticalBox(Sub))
 	{
 		SubSlot->SetPadding(FMargin(0.f, 6.f, 0.f, 0.f));
@@ -175,7 +168,7 @@ void UIBCharacterCreateScreen::BuildLayout()
 	// ---- Nameplate at the feet: what the record will read ----
 	UVerticalBox* Plate = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	PlateName = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBCharCreate", "PlateUnnamed", "UNNAMED OPERATIVE"), 30, IBStyle::TextHi(), 350);
-	PlateRole = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBCharCreate", "PlateNoTrade", "NO TRADE ASSIGNED"), 12, IBStyle::TextLo(), 450);
+	PlateRole = IBStyle::MakeText(WidgetTree, NSLOCTEXT("IBCharCreate", "PlateNoTrade", "NO CLASS SELECTED"), 12, IBStyle::TextLo(), 450);
 	Plate->AddChildToVerticalBox(PlateName);
 	if (UVerticalBoxSlot* RoleSlot = Plate->AddChildToVerticalBox(PlateRole))
 	{
@@ -201,7 +194,7 @@ void UIBCharacterCreateScreen::BuildLayout()
 	// Callsign
 	Column->AddChildToVerticalBox(IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBCharCreate", "SecCallsign", "CALLSIGN")));
 	UBorder* CallsignChip = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-	CallsignChip->SetBrush(IBStyle::RoundedBrush(IBStyle::Chip(), 6.0f, IBStyle::Line(), 1.0f));
+	CallsignChip->SetBrush(IBStyle::RoundedBrush(IBHangar::Ink(), 0.f, IBStyle::Line(), 1.0f));
 	CallsignChip->SetPadding(FMargin(14.f, 10.f));
 	Ed_Callsign = WidgetTree->ConstructWidget<UEditableText>(UEditableText::StaticClass());
 	Ed_Callsign->SetHintText(NSLOCTEXT("IBCharCreate", "CallsignHint", "ENTER CALLSIGN"));
@@ -220,7 +213,7 @@ void UIBCharacterCreateScreen::BuildLayout()
 	AddGap(22.f);
 
 	// Combat trade: 2x2
-	Column->AddChildToVerticalBox(IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBCharCreate", "SecClass", "COMBAT TRADE")));
+	Column->AddChildToVerticalBox(IBStyle::MakeSection(WidgetTree, NSLOCTEXT("IBCharCreate", "SecClass", "CLASS")));
 	UUniformGridPanel* Grid = WidgetTree->ConstructWidget<UUniformGridPanel>(UUniformGridPanel::StaticClass());
 	Grid->SetSlotPadding(FMargin(5.f));
 	ClassButtons.SetNum(UE_ARRAY_COUNT(AllClasses));
@@ -274,8 +267,8 @@ void UIBCharacterCreateScreen::BuildLayout()
 
 	// Status line
 	Txt_Status = IBStyle::MakeText(WidgetTree,
-		NSLOCTEXT("IBCharCreate", "StatusIdle", "PICK A TRADE AND A GENDER, THEN ENLIST. A BLANK CALLSIGN GETS A SERVICE-ISSUED ONE."),
-		12, IBStyle::TextLo(), 300);
+		NSLOCTEXT("IBCharCreate", "StatusIdle", "PICK A CLASS AND A GENDER, THEN ENLIST. A BLANK CALLSIGN GETS A SERVICE-ISSUED ONE."),
+		12, IBStyle::TextLo(), 60);
 	Txt_Status->SetAutoWrapText(true);
 	USizeBox* StatusSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 	StatusSize->SetMinDesiredHeight(64.f); // three lines: the form doesn't jump when the line wraps
@@ -310,12 +303,12 @@ void UIBCharacterCreateScreen::BuildLayout()
 
 	USizeBox* ColumnSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 	ColumnSize->SetWidthOverride(CreateColumnWidth);
-	ColumnSize->SetContent(Column);
+	ColumnSize->SetContent(IBHangar::Panel(WidgetTree, Column, FMargin(24)));
 	if (UOverlaySlot* ColumnSlot = Root->AddChildToOverlay(ColumnSize))
 	{
 		ColumnSlot->SetHorizontalAlignment(HAlign_Right);
 		ColumnSlot->SetVerticalAlignment(VAlign_Center);
-		ColumnSlot->SetPadding(FMargin(0.f, 0.f, 72.f, 0.f));
+		ColumnSlot->SetPadding(FMargin(0.f, 100.f, 48.f, 30.f));
 	}
 
 	RefreshSelectionStyles();
@@ -327,7 +320,7 @@ UButton* UIBCharacterCreateScreen::BuildClassCard(EIBOperativeClass Class)
 	const FLinearColor Accent = IBCharacter::ClassColor(Class);
 
 	UButton* Card = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
-	IBStyle::StyleButton(Card, /*bAccent=*/false, 8.0f);
+	IBStyle::StyleButton(Card, /*bAccent=*/false, 0.f);
 	{
 		FButtonStyle Style = Card->GetStyle();
 		Style.NormalPadding = FMargin(0.f);
@@ -357,6 +350,7 @@ UButton* UIBCharacterCreateScreen::BuildClassCard(EIBOperativeClass Class)
 	}
 
 	UTextBlock* Desc = IBStyle::MakeText(WidgetTree, IBCharacter::ClassDescription(Class), 9, IBStyle::TextLo(), 0);
+	if (!bAvailable) { Desc->SetText(FText::GetEmpty()); }
 	Desc->SetAutoWrapText(true);
 	if (UVerticalBoxSlot* DescSlot = Body->AddChildToVerticalBox(Desc))
 	{
@@ -365,7 +359,7 @@ UButton* UIBCharacterCreateScreen::BuildClassCard(EIBOperativeClass Class)
 
 	if (!bAvailable)
 	{
-		UTextBlock* Locked = IBStyle::MakeText(WidgetTree, IBCharacter::ClassLockedLine(Class), 9, IBStyle::Amber(), 400);
+		UTextBlock* Locked = IBStyle::MakeText(WidgetTree, IBCharacter::ClassLockedLine(Class), 9, IBStyle::Cyan(), 400);
 		if (UVerticalBoxSlot* LockSlot = Body->AddChildToVerticalBox(Locked))
 		{
 			LockSlot->SetPadding(FMargin(0.f, 6.f, 0.f, 0.f));
@@ -378,7 +372,7 @@ UButton* UIBCharacterCreateScreen::BuildClassCard(EIBOperativeClass Class)
 	Pad->SetContent(Body);
 
 	USizeBox* CardSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	CardSize->SetHeightOverride(150.f);
+	CardSize->SetHeightOverride(130.f);
 	CardSize->SetContent(Pad);
 	Card->AddChild(CardSize);
 
@@ -398,8 +392,8 @@ void UIBCharacterCreateScreen::RefreshSelectionStyles()
 
 		FButtonStyle Style = Card->GetStyle();
 		Style.Normal = bSelected
-			? IBStyle::RoundedBrush(IBStyle::ChipHot(), 8.0f, IBCharacter::ClassColor(Class), 2.0f)
-			: IBStyle::RoundedBrush(IBStyle::Chip(), 8.0f, IBStyle::Line(), 1.0f);
+			? IBStyle::RoundedBrush(FLinearColor(.025f,.12f,.16f,.88f), 0.f, IBStyle::Cyan(), 1.0f)
+			: IBStyle::RoundedBrush(IBHangar::Ink(), 0.f, IBStyle::Line(), 1.0f);
 		Card->SetStyle(Style);
 	}
 
@@ -409,8 +403,8 @@ void UIBCharacterCreateScreen::RefreshSelectionStyles()
 		const bool bSelected = bGenderChosen && Gender == SelectedGender;
 		FButtonStyle Style = Chip->GetStyle();
 		Style.Normal = bSelected
-			? IBStyle::RoundedBrush(IBStyle::ChipHot(), 6.0f, IBStyle::Amber(), 2.0f)
-			: IBStyle::RoundedBrush(IBStyle::Chip(), 6.0f, IBStyle::Line(), 1.0f);
+			? IBStyle::RoundedBrush(FLinearColor(.025f,.12f,.16f,.88f), 0.f, IBStyle::Cyan(), 1.0f)
+			: IBStyle::RoundedBrush(IBHangar::Ink(), 0.f, IBStyle::Line(), 1.0f);
 		Chip->SetStyle(Style);
 	};
 	StyleGender(Btn_Male, EIBOperativeGender::Male);
@@ -444,7 +438,7 @@ void UIBCharacterCreateScreen::RefreshPreview()
 		}
 		else
 		{
-			PlateRole->SetText(NSLOCTEXT("IBCharCreate", "PlateNoTrade", "NO TRADE ASSIGNED"));
+			PlateRole->SetText(NSLOCTEXT("IBCharCreate", "PlateNoTrade", "NO CLASS SELECTED"));
 			PlateRole->SetColorAndOpacity(FSlateColor(IBStyle::TextLo()));
 		}
 	}
@@ -498,7 +492,7 @@ void UIBCharacterCreateScreen::HandleEnlist()
 {
 	if (!bClassChosen)
 	{
-		SetStatus(NSLOCTEXT("IBCharCreate", "ErrNoClass", "CHOOSE A COMBAT TRADE"), true);
+		SetStatus(NSLOCTEXT("IBCharCreate", "ErrNoClass", "CHOOSE A CLASS"), true);
 		return;
 	}
 	if (!bGenderChosen)

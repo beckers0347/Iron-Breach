@@ -32,12 +32,12 @@ protected:
 };
 
 /**
- * THE WATCH — the command deck. The planet turns outside the glass
+ * THE WATCH — the full-screen Director. The planet fills the viewport
  * (UIBPlanetWidget), every sector of the world is pinned on it, and the card
  * on the right reads the pick: recon still, threat class, mission type,
  * objective, fireteam, mech deployment, DEPLOY. Anyone proposes, the host
  * confirms; DEPLOY is not a countdown any more — it is the drop: the camera
- * aims at the breach and falls, the deck fades, white-out, and the squad
+ * aims at the breach and falls, the briefing fades, white-out, and the squad
  * travels together on the black frame (AIBWatchBoard::DeployAtServerTime is
  * the shared clock, IBWatch::DeployDropSeconds the length).
  *

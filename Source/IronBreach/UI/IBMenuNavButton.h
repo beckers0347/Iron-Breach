@@ -12,6 +12,7 @@ class IRONBREACH_API UIBMenuNavButton : public UButton
 {
 	GENERATED_BODY()
 public:
+	UIBMenuNavButton(const FObjectInitializer& ObjectInitializer);
 	void Init(UIBMenuSubsystem* InMenu, FName InScreenId);
 private:
 	UFUNCTION() void OpenDestination();

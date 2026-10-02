@@ -1,6 +1,10 @@
 #include "UI/IBMenuNavButton.h"
 #include "UI/IBMenuSubsystem.h"
-#include "UI/IBInventoryScreen.h"
+
+UIBMenuNavButton::UIBMenuNavButton(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	InitIsFocusable(false); // Navigation leaves keyboard focus on the active screen.
+}
 
 void UIBMenuNavButton::Init(UIBMenuSubsystem* InMenu, FName InScreenId)
 {
@@ -12,14 +16,5 @@ void UIBMenuNavButton::Init(UIBMenuSubsystem* InMenu, FName InScreenId)
 void UIBMenuNavButton::OpenDestination()
 {
 	if (!Menu.IsValid()) { return; }
-	if (Destination == TEXT("Character") || Destination == TEXT("Backpack"))
-	{
-		Menu->OpenScreen(TEXT("Inventory"));
-		if (UIBInventoryScreen* Screen = Cast<UIBInventoryScreen>(Menu->GetActiveScreen()))
-		{
-			if (Destination == TEXT("Character")) { Screen->ShowCharacterTab(); }
-			else { Screen->ShowBackpackTab(); }
-		}
-	}
-	else { Menu->OpenScreen(Destination); }
+	Menu->OpenScreen(Destination);
 }

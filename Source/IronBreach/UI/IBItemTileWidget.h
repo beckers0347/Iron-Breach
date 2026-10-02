@@ -11,6 +11,23 @@ class UBorder;
 class UIBItemDefinition;
 class UIBItemTileWidget;
 
+/** Native category/slot pictograms, used when there is no authored item art. */
+UCLASS()
+class IRONBREACH_API UIBItemGlyphWidget : public UUserWidget
+{
+	GENERATED_BODY()
+public:
+	void SetGlyph(EIBItemCategory InCategory, EIBEquipSlot InSlot = EIBEquipSlot::None);
+	void SetTint(FLinearColor InTint);
+protected:
+	virtual void NativeOnInitialized() override;
+	virtual int32 NativePaint(const FPaintArgs&, const FGeometry&, const FSlateRect&, FSlateWindowElementList&, int32, const FWidgetStyle&, bool) const override;
+private:
+	EIBItemCategory Category = EIBItemCategory::None;
+	EIBEquipSlot EquipSlot = EIBEquipSlot::None;
+	FLinearColor Tint = FLinearColor(.48f, .70f, .80f, .7f);
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemTileClicked, UIBItemTileWidget*, Tile);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemTileHoverChanged, UIBItemTileWidget*, Tile, bool, bHovered);
 
@@ -63,6 +80,7 @@ public:
 
 protected:
 	virtual void NativeOnInitialized() override;
+	virtual int32 NativePaint(const FPaintArgs&, const FGeometry&, const FSlateRect&, FSlateWindowElementList&, int32, const FWidgetStyle&, bool) const override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
@@ -93,6 +111,7 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<class UBorder> TileSurface;
+	UPROPERTY(Transient) TObjectPtr<UIBItemGlyphWidget> FallbackGlyph;
 
 	FIBItemInstance Item;
 
@@ -102,4 +121,5 @@ private:
 	EIBEquipSlot RepresentedSlot = EIBEquipSlot::None;
 	bool bLocked = false;
 	bool bSelected = false;
+	bool bHovered = false;
 };

@@ -27,6 +27,7 @@ class IRONBREACH_API AIBEnemyAIController : public AAIController
 	GENERATED_BODY()
 
 public:
+    friend struct FIBSkillCombatCheck;
 	AIBEnemyAIController();
 
 	/** Called by the pawn when it takes damage so we can aggro the attacker. */

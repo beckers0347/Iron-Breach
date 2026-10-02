@@ -20,6 +20,24 @@ class AIBGunnerSeat;
 class AIBCharacter_Infantry;
 
 /**
+ * How one physical station is occupied, as EVERY machine can see it.
+ *
+ * The seat and role members below are AController pointers, and a controller is only ever
+ * relevant to its own client (AController sets bOnlyRelevantToOwner), while AI controllers
+ * are server-side objects that never replicate at all. Marking those pointers Replicated
+ * would not help: the referenced actor is not in the remote machine's world, so the
+ * reference cannot resolve and arrives null. Occupancy therefore has to travel as data.
+ * Identity does not: each station pawn's PlayerState already replicates to everyone.
+ */
+UENUM(BlueprintType)
+enum class EIBMechStationOccupancy : uint8
+{
+	Vacant    UMETA(DisplayName = "Vacant"),
+	Operative UMETA(DisplayName = "Operative"),
+	Copilot   UMETA(DisplayName = "AI co-pilot")
+};
+
+/**
  * Caryatid-class mech hull. Two crew: a navigator/driver (hull movement) and a gunner
  * (weapons). Implements decision uq4 Option B from Docs/CARYATID-architecture.md:
  *
@@ -89,6 +107,10 @@ protected:
 
 	void PerformWeaponTrace();
 
+	/** SERVER. Mirrors who is actually possessing each station pawn into HullOccupancy /
+	 *  SeatOccupancy. A pure read of existing state — it writes nothing but those two. */
+	void RefreshCrewView();
+
 public:
 	// --- SEAT ASSIGNMENTS ---
 	// Who is physically sitting where (Player or AI)
@@ -105,6 +127,17 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Mech|Roles")
 	TObjectPtr<AController> CurrentGunner;
+
+	// --- STATION VIEW (replicated) ---
+	// Server-derived mirror of the four pointers above, for machines that cannot see them.
+	// STATIONS only (hull / gunner seat) — never roles, which are controller-keyed and stay
+	// knowable only where this frame has authority. Written by RefreshCrewView(); nothing
+	// reads these to make a decision, so boarding and role swapping are untouched.
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Mech|Seats")
+	EIBMechStationOccupancy HullOccupancy = EIBMechStationOccupancy::Vacant;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Mech|Seats")
+	EIBMechStationOccupancy SeatOccupancy = EIBMechStationOccupancy::Vacant;
 
 	// --- SEATING FUNCTIONS (legacy single-machine flow + shared bookkeeping) ---
 	UFUNCTION(BlueprintCallable, Category = "Mech|System")
