@@ -1,0 +1,29 @@
+# Garrison composition preview — Codex handoff, September 30, 2026
+
+## Review outcome
+
+I read the completed preview result and the 21-step evidence, inspected the receipt/apply/revert implementation and sampled the underlying repeat/conflict/reload logs. I independently rehashed all 106 protected files (including the four live saves) against shared-before-120.json: zero differences today. All 14 snapshots also match. The live map remains FAFFD601EE4165A6FF76760BA264665D38631240D1DFC72C9322DD7A0B51EFEC and Preview3 remains 8FCD23B9B51906A786AF0A117FC3B8A27B0B1AB3869071AFE6B62ABF6096C585.
+
+I inspected the reference-framed overhead, all four ground captures and the proposal diagram. The lifecycle work is sufficient to proceed to the next isolated candidate. I did not rerun the engine tests or claim a manual gameplay pass. Downward support probes establish floors, not unobstructed walking; the water result remains one scripted PIE observation. Existing GameFeatureData/BP_Mech errors are separate from tool success.
+
+The visible structure is a useful base. It is not reference acceptance: the control platform is empty, the hangar reserve is forward, and several ground shots are strongly backlit. Keep Preview3 and its receipt/evidence for comparison for now; do not clean up the whole preview folder.
+
+## Next bounded task: implement P3 composition in a new disposable preview
+
+The user has already authorized restructuring the garrison to the confirmed picture. Moving complete assemblies in an isolated preview is within that instruction; do not stop for another choice between P1/P2/P3. Choose **P3 for the control platform**, with the genuinely rear, centred reservation from P1 as a provisional footprint. This selects a reviewable next candidate, not final hangar dimensions or live integration.
+
+1. Create a new clearly named disposable candidate from the current source using the guarded copy/receipt process. Keep live-write disabled. Use the verified structural spine/pad/pier/channel base.
+2. Move **Command plus Command_DoorFrame and Mess_Hall plus Mess_Hall_DoorFrame** onto the left control platform as complete assemblies. Arrange the tower and low block to read like the approved reference, retain the proposed approximately 7 m circulation space where feasible, and face usable entrances toward the connecting walkway. Audit attachment/interior/interaction dependencies by identity, not folder labels. Include every moved actor in the manifest and exact revert. If fresh evidence contradicts the asserted complete two-actor assemblies, resolve from evidence before moving; report genuine unknowns without guessing.
+3. Move the hangar reservation to the rear edge and centre it on the spine. P1's current safe envelope (48.9 m depth by 38.6 m width) is acceptable for this provisional candidate. Label the dimensions and explain the gate/spawn constraints; do not represent these as Connor's chosen hangar dimensions. The actual hangar building remains entirely Connor's. Reserve space only. Keep a clear apron and a continuous approach from the spine.
+4. Keep Armory, Barracks, Medical, gate/road, PlayerStart, weapon rack, unknown Cube actors, empty placeholders, outer harbour walls, existing shared assets and gameplay logic unchanged in this pass. P3 involves two known building assemblies; do not turn it into a whole map/asset rewrite. The helicopter pose and ship draft remain explicit visual review items, not permission to replace their assets.
+5. Preserve the lifecycle guards and exact rollback for the expanded move set. Confirm new building/door transforms survive save/reload, repeat is a no-op and revert restores the original assemblies. Existing lifecycle evidence does not need another full matrix unless your implementation changes those guards. Extend generated-piece checks to actor-level collision enabled as well as component collision, so a visually intact deck with actor collision disabled cannot pass verification.
+
+## Focused evidence for this candidate
+
+- Regenerate the manifest and geometry checks for the moved assemblies and their actual rotated door approaches; no stale paths to old doors. Report any overlaps or loss of support honestly.
+- In the isolated preview, verify actual clearance to both relocated entrances and across forecourt/spine, spine/pad, forecourt/pier and spine/control. Downward ground hits alone are insufficient: use pawn-channel clearance/movement evidence to distinguish a traversable route from a path through the gate, crane or helicopter. Do not change shared collision assets just to pass. Preserve the existing functioning route and report blockers if found.
+- Capture a reference-framed overhead, top-down, a control-platform view showing both buildings/entrances, and a ground view toward the rear reserve. Pick camera positions that show the lit faces and readable silhouette; keep world lighting/assets unchanged. Keep reservation markings readable. Annotate the separate comparison image if useful rather than adding implementation labels to game UI.
+- Preserve source/shared-asset/live-save hashes before and after. Use an isolated UserDir, stop only owned processes, save only the named candidate package. Include exact evidence paths, map/plan hashes and clearly separated geometry, editor, scripted PIE and untested gameplay claims.
+- Leave the candidate and comparison evidence ready for Codex's focused in-game review. No Git, lock changes, commits/pushes, live map writes, messages to Shane, menu/mech work or unrelated changes. Do not delete prior evidence or working previews during this task.
+
+Write the complete result to **Docs/CLAUDE_GARRISON_COMPOSITION_PREVIEW_RESULT_2026-09-30.md**, update Claude outputs/CLAUDE_STATUS.md, and give a concise desktop handoff when done. Codex will check at the next 15-minute interval; do not wait for a new routine layout approval to begin this isolated candidate.

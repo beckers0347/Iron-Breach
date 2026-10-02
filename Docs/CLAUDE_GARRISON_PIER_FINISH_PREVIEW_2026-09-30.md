@@ -1,0 +1,32 @@
+# Garrison preview: pier circulation and deck finish
+
+September 30, 2026, 16:03 UTC check. Codex coordination brief under the existing reference-restructure authorization. Claude owns implementation and analysis; Codex reviews and tests. This is the next bounded task; no new routine option approval is required.
+
+## Review outcome
+
+Read the full P3 result and reviewed its overhead, control-platform and comparison-board captures against the approved reference. Accept P3's tower/low-block composition and provisional rear reservation as the base for the next preview. This is not final visual acceptance or live integration.
+
+Codex independently rehashed the 110 protected files from shared-before-130, including live saves, then ran one focused scripted PIE walk using the actual infantry pawn from the spine through the passage between Command and Mess_Hall. It reached the goal in 13.09 s, with no script errors or dirty map packages. Afterward all 112 protected paths (the 110 plus both previews) were unchanged. Evidence: Saved/GarrisonRestructure/20260930-codex-composition-review/review-summary.json and control-passage/clearance_checks.json. This is scripted game movement, not manual input; the attempted UI captures of the hidden editor were unusable, so visual assessment uses your recorded editor captures. Existing GameFeatureData/BP_Mech/CurrentVisualData engine errors remain separate.
+
+Keep the two door interiors documented as a pre-existing building-collision limitation reproduced on Preview3. Do not modify shared building collision assets or hide this limitation in this task. The P3 entrances and exterior passage are sufficient to continue the exterior-layout work.
+
+## Next candidate
+
+Create a NEW named disposable preview under /Game/_GarrisonPreview_Disposable/. Preserve P3Candidate1 (550234E37695D83CF45E58B78FA00723DE83C226490FBD931C718D8C96250FF7), Preview3 (8FCD23B9B51906A786AF0A117FC3B8A27B0B1AB3869071AFE6B62ABF6096C585), their receipts and evidence. Keep the same source guard: live CarrowGateGarrison FAFFD601EE4165A6FF76760BA264665D38631240D1DFC72C9322DD7A0B51EFEC. Refuse unexplained source changes.
+
+1. **Clear the pier route.** P3's centreline stalls on Docks_Crane_01 and its passing lanes hug the edges. Reposition only the already-authorized pier crane/truck props, after checking their complete associations, to produce one continuous, legible corridor from forecourt to pier end. Prefer a straight service lane; aim for 6 m clear where feasible, with at least 3 m usable walking width and an edge buffer at the tightest point. Verify actual collision rather than visual bounds alone. Keep crane support/feet and trucks properly on deck and the ship at its berth. Do not turn collision off, float props over water, stretch the pier to the old apron, or merely relabel the blocked centreline as clear. If the crane cannot fit with a sensible lane, document the specific fit limitation and a minimal alternative; do not make unrelated structural changes.
+
+2. **Give the new decks the reference's finished outline and route markings.** Use the approved image directly: References/GarrisonTargets/garrison-overhead-approved-2026-09-23.png. Confine this pass to generated spine, left control platform, right pier and octagonal pad. Add restrained quay fascia/coping and yellow edge/route markings using existing project assets/materials where suitable. Avoid the current thin, unfinished slab edges; retain the dark water gaps and octagonal pad silhouette. Keep visual scale consistent across adjacent deck seams, avoid z-fighting, and preserve a flush walkable connection at every join and both door approaches. Use sparse service detail only when it reinforces these routes. Do not duplicate buildings, repaint shared materials, redesign the wider harbor/landscape, or clutter the helicopter's clearance. New finish pieces must be owned/tagged by this candidate and handled by the same safe apply/revert mechanism. Collision should reflect their intended function; document it.
+
+3. **Keep the rear reservation provisional.** The actual rear hangar building remains Connor's. Keep the 48.9 x 38.6 m safe envelope, gate, PlayerStart and open apron. Its flat outline being subtle at eye height does not justify inventing a hangar or blocking the reserved area. Do not add a building or change its dimensions here.
+
+Keep Command/Mess_Hall and their door assemblies at reviewed P3 positions. Preserve Armory, Barracks, Medical, weapon rack, gate/road, unknown Cubes/associations, water, existing outer harbor walls, accepted menu/navigation, spawn/deployment/return paths, shared assets and live saves. No live map writes, Git, locks, commit/push, deletion/cleanup or messages to Shane/others.
+
+## Focused verification and result
+
+- Audit exact changed actors and generated pieces. Explain the final measured pier width/collision corridor and every relocated prop's supported footprint. Compare against the P3 composition; identify only intended differences.
+- Save/reload/repeat and reversible restore checks for the newly changed transforms/generated pieces in the disposable preview. Reuse accepted refusal tests; only rerun broader matrices when code changes make them relevant.
+- Drive the real infantry pawn along the final pier corridor in both directions, through the altered deck joins, and past any new coping at the control entrance approaches. No teleport-through-obstacle test. Record blocked/fell/reached truthfully and keep standing capsule/floor evidence distinct from movement. Also preserve the passage route independently checked by Codex: [10982,3750] -> [13900,5850] -> [14100,7300] -> [11300,7300].
+- Capture an overhead framed like the reference, a pier ground view showing the full clear lane, and a control/pad edge view. Save genuine in-game pawn-view captures if practical, and label editor vs gameplay views. No need to repeat unaffected menu/crew tests or fix existing interior/Blueprint problems.
+- Hash live map, both prior previews, shared assets and live saves before/after. Use isolated UserDir and close only your owned test processes. Leave new candidate saved for Codex review, with no test process waiting.
+- Write Docs/CLAUDE_GARRISON_PIER_FINISH_PREVIEW_RESULT_2026-09-30.md with concise evidence paths, screenshots, final hashes, remaining issues and exact candidate name; update Claude outputs/CLAUDE_STATUS.md. Then stop for review.
