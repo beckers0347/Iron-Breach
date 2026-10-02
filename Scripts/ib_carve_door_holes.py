@@ -92,12 +92,19 @@ BUILDINGS = [
 
 DOOR_CUT_WIDTH_CM = 220.0
 DOOR_CUT_HEIGHT_CM = 280.0
-DOOR_CUT_DEPTH_CM = 600.0
+# Was 600 -- deepened after real-world testing showed a successful-looking
+# carve (real triangle delta, visually aligned hole) still stopped the
+# player a step or two in. Root cause: fill_holes=True caps off whichever
+# end of the cutter box stops short of true open air, so a cutter that
+# doesn't reach interior open space just replaces the exterior wall with a
+# new wall-plug a bit further in. Doubling this reduces the chance either
+# end of the box lands inside solid mass instead of clearing it.
+DOOR_CUT_DEPTH_CM = 1200.0
 
 # Fallback size, tried only if every yaw candidate misses at normal size.
 ENLARGED_CUT_WIDTH_CM = 340.0
 ENLARGED_CUT_HEIGHT_CM = 380.0
-ENLARGED_CUT_DEPTH_CM = 1200.0
+ENLARGED_CUT_DEPTH_CM = 2400.0
 
 YAW_SWEEP_STEP_DEG = 15.0
 MIN_TRIANGLE_DELTA = 50  # a real cut; filters out near-miss/grazing noise
