@@ -3,6 +3,7 @@
 #include "Act1BarracksDirector.h"
 #include "IronBreach.h"
 #include "IBCampaignDebugLibrary.h"
+#include "IBDialogueVoice.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 
@@ -133,7 +134,10 @@ void AAct1BarracksDirector::PlayLineAtIndex(int32 Index)
 		*GetSpeakerDisplayName(Line.Speaker).ToString(),
 		*Line.Text.ToString());
 
-	const float TotalDelay = FMath::Max(0.01f, Line.HoldDuration + Line.PauseAfter);
+	// Voice-over (optional): plays Line.VoiceSound, or the asset A#_L### by naming convention,
+	// and holds the line until the clip ends. No sound found = unchanged subtitle-only timing.
+	const float VoDuration = IBDialogueVoice::PlayLine(this, Line, TEXT("A1"), Index);
+	const float TotalDelay = FMath::Max(0.01f, FMath::Max(Line.HoldDuration, VoDuration) + Line.PauseAfter);
 	GetWorldTimerManager().SetTimer(LineTimerHandle, this, &AAct1BarracksDirector::AdvanceToNextLine, TotalDelay, false);
 }
 

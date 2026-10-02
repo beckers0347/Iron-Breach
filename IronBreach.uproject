@@ -78,8 +78,7 @@
 		},
 		{
 			"Name": "Aura",
-			"Enabled": true,
-			"Optional": true,
+			"Enabled": false,
 			"SupportedTargetPlatforms": [
 				"Win64",
 				"Mac"

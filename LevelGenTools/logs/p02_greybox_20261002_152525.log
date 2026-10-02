@@ -1,0 +1,8 @@
+[Thornfield] === p02_greybox start ===
+[Thornfield] Loaded existing level /Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison (True)
+[Thornfield] Cleanup: removed 57 previous GEN_Phase2 actors
+[Thornfield] ERROR: Unexpected: AttributeError("module 'gen_common' has no attribute 'plan_to_world'")
+[Thornfield] ERROR: VERIFY: p02_unexpected FAIL (AttributeError("module 'gen_common' has no attribute 'plan_to_world'"))
+[Thornfield] SUMMARY: 1 checks, 0 PASS, 1 FAIL
+[Thornfield] ERROR:   FAILED: p02_unexpected AttributeError("module 'gen_common' has no attribute 'plan_to_world'")
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p02_greybox_20261002_152525.log

@@ -1,0 +1,54 @@
+{
+ "name": "SM_CommsTower",
+ "doors": {
+  "SM_CommsTower_Door": {
+   "type": "hinge",
+   "pivot": [
+    -0.68,
+    -3.8,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": 95.0
+  }
+ },
+ "lights": [
+  [
+   "white",
+   [
+    -2,
+    0,
+    3.4
+   ]
+  ],
+  [
+   "white",
+   [
+    2,
+    0,
+    3.4
+   ]
+  ],
+  [
+   "red",
+   [
+    0,
+    0,
+    45.3
+   ]
+  ],
+  [
+   "red",
+   [
+    0,
+    0,
+    20.3
+   ]
+  ]
+ ],
+ "note": "Blender coords in meters; front faces -Y; hinge open = degrees about axis, slide open = meters along axis"
+}

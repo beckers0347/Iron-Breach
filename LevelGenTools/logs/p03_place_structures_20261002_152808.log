@@ -1,0 +1,26 @@
+[Thornfield] === p03_place_structures start ===
+[Thornfield] Cleanup: removed 0 previous GEN_Phase3 actors
+[Thornfield] Removed 26 Phase-2 structure boxes/labels
+[Thornfield] Placed Gate at (16750, 17262, 0) yaw=0.0
+[Thornfield] Placed Barracks at (6000, 7762, 0) yaw=-90.0
+[Thornfield] Placed Armory at (7500, 3138, 0) yaw=-90.0
+[Thornfield] Placed Medical at (9750, 12512, 0) yaw=-90.0
+[Thornfield] Placed Hangar at (27750, 7512, 0) yaw=21.5
+[Thornfield] Placed Command at (17312, 5138, 0) yaw=0.0
+[Thornfield] Placed MessHall at (21500, 1762, 0) yaw=0.0
+[Thornfield] Placed RearShed_A at (21800, 4262, 0) yaw=0.0
+[Thornfield] Placed RearShed_B at (22500, 14512, 0) yaw=0.0
+[Thornfield] Placed Comms at (24375, 1762, 0) yaw=0.0
+[Thornfield] Placed WatchTower_NW at (5000, 5262, 0) yaw=0.0
+[Thornfield] Placed WatchTower_N at (17500, 1262, 0) yaw=0.0
+[Thornfield] Placed WatchTower_SE at (31250, 14012, 0) yaw=0.0
+[Thornfield] Placed 13 structures, 52 door meshes
+[Thornfield] VERIFY: no_overlaps PASS (13 footprints)
+[Thornfield] VERIFY: inside_bounds PASS (all inside)
+[Thornfield] VERIFY: open_space_clear PASS (3000x2000 uu yard in front of Command)
+[Thornfield] VERIFY: doors_placed PASS (52 door meshes)
+[Thornfield] WARN: Door meshes whose bounds are far from their origin (pivot may be baked): ['SM_GateCheckpoint_SM_GateCheckpoint_TowerW_Door origin offset 1287 cm', 'SM_GateCheckpoint_SM_GateCheckpoint_TowerE_Door origin offset 1287 cm', 'SM_BermBunker_BlastDoor_L origin offset 972 cm', 'SM_BermBunker_BlastDoor_R origin offset 972 cm', 'SM_BermBunker_RearDoor origin offset 734 cm', 'SM_BermBunker_BlastDoor_L origin offset 972 cm', 'SM_BermBunker_BlastDoor_R origin offset 972 cm', 'SM_BermBunker_RearDoor origin offset 734 cm', 'SM_BermBunker_BlastDoor_L origin offset 972 cm', 'SM_BermBunker_BlastDoor_R origin offset 972 cm', 'SM_BermBunker_RearDoor origin offset 734 cm', 'SM_HangarBlock_Bay0_DoorLB origin offset 3485 cm', 'SM_HangarBlock_Bay0_DoorLA origin offset 3229 cm', 'SM_HangarBlock_Bay0_DoorRB origin offset 2718 cm', 'SM_HangarBlock_Bay0_DoorRA origin offset 2980 cm', 'SM_HangarBlock_Bay0_RearDoor origin offset 2918 cm', 'SM_HangarBlock_Bay1_DoorLB origin offset 2220 cm', 'SM_HangarBlock_Bay1_DoorLA origin offset 2194 cm', 'SM_HangarBlock_Bay1_DoorRB origin offset 2220 cm', 'SM_HangarBlock_Bay1_DoorRA origin offset 2194 cm', 'SM_HangarBlock_Bay1_RearDoor origin offset 1917 cm', 'SM_HangarBlock_Bay2_DoorLB origin offset 2718 cm', 'SM_HangarBlock_Bay2_DoorLA origin offset 2980 cm', 'SM_HangarBlock_Bay2_DoorRB origin offset 3485 cm', 'SM_HangarBlock_Bay2_DoorRA origin offset 3229 cm', 'SM_HangarBlock_Bay2_RearDoor origin offset 2918 cm', 'SM_CentralBunker_FrontW_DoorL origin offset 2142 cm', 'SM_CentralBunker_FrontW_DoorR origin offset 1911 cm', 'SM_CentralBunker_FrontC_DoorL origin offset 1374 cm', 'SM_CentralBunker_FrontC_DoorR origin offset 1374 cm', 'SM_CentralBunker_FrontE_DoorL origin offset 1911 cm', 'SM_CentralBunker_FrontE_DoorR origin offset 2142 cm', 'SM_CentralBunker_InnerWDoor origin offset 806 cm', 'SM_CentralBunker_InnerEDoor origin offset 806 cm', 'SM_CentralBunker_RearDoor origin offset 1115 cm', 'SM_MessHall_DoorL origin offset 611 cm', 'SM_MessHall_DoorR origin offset 611 cm']
+[Thornfield] VERIFY: structures_placed PASS (13 of 13)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 6 checks, 6 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p03_place_structures_20261002_152808.log

@@ -1,0 +1,32 @@
+[Thornfield] === p00_import_assets start ===
+[Thornfield] Skip BermBunker (already imported)
+[Thornfield] Body import BermBunker: 0 collision primitives
+[Thornfield] Skip HangarBlock (already imported)
+[Thornfield] Body import HangarBlock: 0 collision primitives
+[Thornfield] Skip CentralBunker (already imported)
+[Thornfield] Body import CentralBunker: 0 collision primitives
+[Thornfield] Skip GateCheckpoint (already imported)
+[Thornfield] Body import GateCheckpoint: 0 collision primitives
+[Thornfield] Skip WatchTower (already imported)
+[Thornfield] Body import WatchTower: 0 collision primitives
+[Thornfield] Skip CommsTower (already imported)
+[Thornfield] Body import CommsTower: 0 collision primitives
+[Thornfield] Skip RearShed (already imported)
+[Thornfield] Body import RearShed: 0 collision primitives
+[Thornfield] Skip MessHall (already imported)
+[Thornfield] Body import MessHall: 0 collision primitives
+[Thornfield] ERROR: VERIFY: import_buildings FAIL (8 buildings)
+[Thornfield] Skip Tree_Spruce_A (already imported)
+[Thornfield] Skip Tree_PonderosaPine_A (already imported)
+[Thornfield] Skip Tree_DeadSnag_A (already imported)
+[Thornfield] Skip Rock_MossBoulder_A (already imported)
+[Thornfield] Skip Rock_MossCluster_B (already imported)
+[Thornfield] Skip Rock_GranitePillar_C (already imported)
+[Thornfield] Skip Rock_RiverBoulder_D (already imported)
+[Thornfield] Skip Cliff_GraniteWall_A (already imported)
+[Thornfield] Skip Mountain_Forested_A (already imported)
+[Thornfield] VERIFY: import_nature PASS (9 models)
+[Thornfield] VERIFY: import_textures PASS (21 textures)
+[Thornfield] SUMMARY: 3 checks, 2 PASS, 1 FAIL
+[Thornfield] ERROR:   FAILED: import_buildings 8 buildings
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p00_import_assets_20261002_145613.log

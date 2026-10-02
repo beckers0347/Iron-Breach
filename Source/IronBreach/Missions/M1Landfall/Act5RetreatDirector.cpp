@@ -4,6 +4,7 @@
 #include "Act4DeepWaterDirector.h"
 #include "IronBreach.h"
 #include "IBCampaignDebugLibrary.h"
+#include "IBDialogueVoice.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 
@@ -32,8 +33,10 @@ void AAct5RetreatDirector::BuildDefaultBeats()
 		5.0f, 0.6f,
 		FName("MechToss")));
 
-	// Current assumption per v2 mission doc §13 Q7: this is where Vance is lost. Flagged,
-	// not locked -- confirm before treating this line as canon.
+	// Confirmed per v4 mission doc §13 Q7 (resolved in v3, restated in v4 §0a item 1):
+	// Vance is lost here, in the Act V mountain-toss. His body is recovered in
+	// M4 -- HIGH COUNTRY the following morning, where his tag becomes the first
+	// Field Recovery Tag the player picks up. This is locked canon, not a guess.
 	Beats.Add(FDialogueLine(
 		EDialogueSpeaker::Comms,
 		FText::FromString(TEXT("Vance: -checklist cuts off mid-word. Nothing after it.")),
@@ -225,7 +228,10 @@ void AAct5RetreatDirector::PlayLineAtIndex(int32 Index)
 		return;
 	}
 
-	const float TotalDelay = FMath::Max(0.01f, Line.HoldDuration + Line.PauseAfter);
+	// Voice-over (optional): plays Line.VoiceSound, or the asset A#_L### by naming convention,
+	// and holds the line until the clip ends. No sound found = unchanged subtitle-only timing.
+	const float VoDuration = IBDialogueVoice::PlayLine(this, Line, TEXT("A5"), Index);
+	const float TotalDelay = FMath::Max(0.01f, FMath::Max(Line.HoldDuration, VoDuration) + Line.PauseAfter);
 	GetWorldTimerManager().SetTimer(LineTimerHandle, this, &AAct5RetreatDirector::AdvanceToNextLine, TotalDelay, false);
 }
 

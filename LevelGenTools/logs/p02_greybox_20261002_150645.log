@@ -1,0 +1,27 @@
+[Thornfield] === p02_greybox start ===
+[Thornfield] Created new level /Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison (True)
+[Thornfield] Cleanup: removed 0 previous GEN_Phase2 actors
+[Thornfield] Greybox Gate at (26800, 3100) yaw=-180.0 size 6800x2000x1730
+[Thornfield] Greybox Barracks at (9600, 18300) yaw=-90.0 size 2600x2500x997
+[Thornfield] Greybox Armory at (12000, 25700) yaw=-90.0 size 2600x2500x997
+[Thornfield] Greybox Medical at (15600, 10700) yaw=-90.0 size 2600x2500x997
+[Thornfield] Greybox Hangar at (44400, 18700) yaw=-160.0 size 6920x5400x1520
+[Thornfield] Greybox Command at (27700, 22500) yaw=-180.0 size 6000x3800x1480
+[Thornfield] Greybox MessHall at (34400, 27900) yaw=-180.0 size 2400x1700x720
+[Thornfield] Greybox RearShed_A at (32600, 23900) yaw=-180.0 size 1600x1300x485
+[Thornfield] Greybox RearShed_B at (36000, 7500) yaw=-180.0 size 1600x1300x485
+[Thornfield] Greybox Comms at (39000, 27900) yaw=-180.0 size 1800x1800x4560
+[Thornfield] Greybox WatchTower_NW at (8000, 22300) yaw=-180.0 size 1400x1600x1930
+[Thornfield] Greybox WatchTower_N at (28000, 28700) yaw=-180.0 size 1400x1600x1930
+[Thornfield] Greybox WatchTower_SE at (50000, 8300) yaw=-180.0 size 1400x1600x1930
+[Thornfield] Greybox spawned: 57 actors
+[Thornfield] VERIFY: footprint PASS (55000 x 30700 cm)
+[Thornfield] VERIFY: structures_greybox PASS (13 of 13)
+[Thornfield] ERROR: VERIFY: greybox_inside_bounds FAIL (outside: ['Gate'])
+[Thornfield] VERIFY: player_start PASS (at (9600, 18300, 100))
+[Thornfield] VERIFY: scale_refs PASS (180 cm person + 800 cm vehicle)
+[Thornfield] VERIFY: roads PASS (14 segments)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 7 checks, 6 PASS, 1 FAIL
+[Thornfield] ERROR:   FAILED: greybox_inside_bounds outside: ['Gate']
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p02_greybox_20261002_150645.log

@@ -1,0 +1,27 @@
+{
+  "_comment": "Props are not modelled yet. Kit entries get ue_path filled in once the props are built (Phase 9). Trees/rocks come from assets.json 'nature'.",
+  "kit": {
+    "PerimeterWall": {"ue_path": null, "status": "to_model"},
+    "JerseyBarrier": {"ue_path": null, "status": "to_model"},
+    "TankTrap": {"ue_path": null, "status": "to_model"},
+    "CargoContainer": {"ue_path": null, "status": "to_model"},
+    "Crate": {"ue_path": null, "status": "to_model"},
+    "Pallet": {"ue_path": null, "status": "to_model"},
+    "FuelTank": {"ue_path": null, "status": "to_model"},
+    "Generator": {"ue_path": null, "status": "to_model"},
+    "LightPole": {"ue_path": null, "status": "to_model"},
+    "Sign": {"ue_path": null, "status": "to_model"}
+  },
+  "scatter": {
+    "trees_outside": {"assets": ["Tree_Spruce_A", "Tree_PonderosaPine_A", "Tree_DeadSnag_A"], "weights": [0.55, 0.35, 0.10], "scale_range": [0.9, 1.3], "target_height_cm": [1800, 2800], "density_per_ha": 120},
+    "trees_inside": {"assets": ["Tree_Spruce_A", "Tree_PonderosaPine_A"], "weights": [0.6, 0.4], "scale_range": [0.9, 1.2], "density_per_ha": 8},
+    "rocks": {"assets": ["Rock_MossBoulder_A", "Rock_MossCluster_B", "Rock_GranitePillar_C", "Rock_RiverBoulder_D"], "scale_range": [0.6, 1.8], "density_per_ha": 6},
+    "cliffs": {"assets": ["Cliff_GraniteWall_A"], "placement": "hill slopes outside the wall"},
+    "mountains": {"assets": ["Mountain_Forested_A"], "placement": "far backdrop only, ringed beyond the landscape edge"}
+  },
+  "rules": {
+    "light_pole_spacing_cm": 2500,
+    "keep_clear_of_roads_cm": 500,
+    "keep_clear_of_buildings_cm": 600
+  }
+}

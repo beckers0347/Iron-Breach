@@ -1,0 +1,338 @@
+{
+ "name": "SM_HangarBlock",
+ "doors": {
+  "SM_HangarBlock_Bay0_DoorLB": {
+   "type": "slide",
+   "pivot": [
+    -27.41,
+    -20.85,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": -3.5
+  },
+  "SM_HangarBlock_Bay0_DoorLA": {
+   "type": "slide",
+   "pivot": [
+    -23.759999999999998,
+    -21.200000000000003,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": -7.0
+  },
+  "SM_HangarBlock_Bay0_DoorRB": {
+   "type": "slide",
+   "pivot": [
+    -16.59,
+    -20.85,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": 3.5
+  },
+  "SM_HangarBlock_Bay0_DoorRA": {
+   "type": "slide",
+   "pivot": [
+    -20.240000000000002,
+    -21.200000000000003,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": 7.0
+  },
+  "SM_HangarBlock_Bay0_RearDoor": {
+   "type": "hinge",
+   "pivot": [
+    -22.99,
+    19.15,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": -95.0
+  },
+  "SM_HangarBlock_Bay1_DoorLB": {
+   "type": "slide",
+   "pivot": [
+    -5.41,
+    -20.85,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": -3.5
+  },
+  "SM_HangarBlock_Bay1_DoorLA": {
+   "type": "slide",
+   "pivot": [
+    -1.76,
+    -21.200000000000003,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": -7.0
+  },
+  "SM_HangarBlock_Bay1_DoorRB": {
+   "type": "slide",
+   "pivot": [
+    5.41,
+    -20.85,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": 3.5
+  },
+  "SM_HangarBlock_Bay1_DoorRA": {
+   "type": "slide",
+   "pivot": [
+    1.76,
+    -21.200000000000003,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": 7.0
+  },
+  "SM_HangarBlock_Bay1_RearDoor": {
+   "type": "hinge",
+   "pivot": [
+    -0.99,
+    19.15,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": -95.0
+  },
+  "SM_HangarBlock_Bay2_DoorLB": {
+   "type": "slide",
+   "pivot": [
+    16.59,
+    -20.85,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": -3.5
+  },
+  "SM_HangarBlock_Bay2_DoorLA": {
+   "type": "slide",
+   "pivot": [
+    20.240000000000002,
+    -21.200000000000003,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": -7.0
+  },
+  "SM_HangarBlock_Bay2_DoorRB": {
+   "type": "slide",
+   "pivot": [
+    27.41,
+    -20.85,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": 3.5
+  },
+  "SM_HangarBlock_Bay2_DoorRA": {
+   "type": "slide",
+   "pivot": [
+    23.759999999999998,
+    -21.200000000000003,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": 7.0
+  },
+  "SM_HangarBlock_Bay2_RearDoor": {
+   "type": "hinge",
+   "pivot": [
+    21.01,
+    19.15,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": -95.0
+  }
+ },
+ "lights": [
+  [
+   "amber",
+   [
+    -22.0,
+    -14,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    -22.0,
+    -7,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    -22.0,
+    0,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    -22.0,
+    7,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    -22.0,
+    14,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    0.0,
+    -14,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    0.0,
+    -7,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    0.0,
+    0,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    0.0,
+    7,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    0.0,
+    14,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    22.0,
+    -14,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    22.0,
+    -7,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    22.0,
+    0,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    22.0,
+    7,
+    9.7
+   ]
+  ],
+  [
+   "amber",
+   [
+    22.0,
+    14,
+    9.7
+   ]
+  ]
+ ],
+ "note": "Blender coords in meters; front faces -Y; hinge open = degrees about axis, slide open = meters along axis"
+}

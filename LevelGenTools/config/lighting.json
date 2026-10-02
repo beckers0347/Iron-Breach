@@ -1,0 +1,54 @@
+{
+  "_comment": "Golden hour sliding to dusk. Sun comes from the west-southwest, low. Used by Phase 6. from_compass_deg = direction the sun is IN (clockwise from north, WSW=247.5); the script converts it to a UE yaw using north=-Y, east=+X. yaw_deg is ignored.",
+  "sun": {
+    "pitch_deg": -9.0,
+    "yaw_deg": 250.0,
+    "intensity_lux": 6.0,
+    "color_rgb": [
+      1.0,
+      0.62,
+      0.32
+    ],
+    "source_angle_deg": 1.5,
+    "from_compass_deg": 247.5
+  },
+  "sky_light": {
+    "intensity": 1.0,
+    "real_time_capture": true
+  },
+  "fog": {
+    "density": 0.035,
+    "falloff": 0.18,
+    "start_distance_cm": 800,
+    "color_rgb": [
+      0.55,
+      0.5,
+      0.5
+    ],
+    "volumetric": true,
+    "volumetric_distribution": 0.9
+  },
+  "post_process": {
+    "unbound": true,
+    "exposure_method": "manual",
+    "exposure_compensation": 0.5,
+    "bloom_intensity": 0.6,
+    "lumen_gi": true,
+    "lumen_reflections": true
+  },
+  "interior_lights": {
+    "amber_rgb": [
+      1.0,
+      0.65,
+      0.25
+    ],
+    "blue_rgb": [
+      0.25,
+      0.5,
+      1.0
+    ],
+    "amber_intensity_cd": 800,
+    "blue_intensity_cd": 300,
+    "attenuation_cm": 900
+  }
+}

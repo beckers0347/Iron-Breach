@@ -1,0 +1,62 @@
+{
+ "name": "SM_WatchTower",
+ "doors": {
+  "SM_WatchTower_SM_WatchTower_Door": {
+   "type": "hinge",
+   "pivot": [
+    -0.73,
+    -2.8,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": 95.0
+  }
+ },
+ "lights": [
+  [
+   "white",
+   [
+    -2.2,
+    0.0,
+    3.1
+   ]
+  ],
+  [
+   "white",
+   [
+    -2.2,
+    0.0,
+    6.1
+   ]
+  ],
+  [
+   "white",
+   [
+    -2.2,
+    0.0,
+    9.1
+   ]
+  ],
+  [
+   "blue",
+   [
+    -2.0,
+    -2.0,
+    16.1
+   ]
+  ],
+  [
+   "white",
+   [
+    0.0,
+    0.0,
+    14.8
+   ]
+  ]
+ ],
+ "note": "Blender coords in meters; front faces -Y; hinge open = degrees about axis, slide open = meters along axis"
+}

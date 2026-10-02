@@ -1,0 +1,25 @@
+[Thornfield] === p03_place_structures start ===
+[Thornfield] Cleanup: removed 78 previous GEN_Phase3 actors
+[Thornfield] Removed 0 Phase-2 structure boxes/labels
+[Thornfield] Placed Gate at (16750, 17262, 0) yaw=0.0
+[Thornfield] Placed Barracks at (6000, 7762, 0) yaw=-90.0
+[Thornfield] Placed Armory at (7500, 3138, 0) yaw=-90.0
+[Thornfield] Placed Medical at (9750, 12512, 0) yaw=-90.0
+[Thornfield] Placed Hangar at (27750, 7512, 0) yaw=21.5
+[Thornfield] Placed Command at (17312, 5138, 0) yaw=0.0
+[Thornfield] Placed MessHall at (21500, 1762, 0) yaw=0.0
+[Thornfield] Placed RearShed_A at (21800, 4262, 0) yaw=0.0
+[Thornfield] Placed RearShed_B at (22500, 14512, 0) yaw=0.0
+[Thornfield] Placed Comms at (24375, 1762, 0) yaw=0.0
+[Thornfield] Placed WatchTower_NW at (5000, 5262, 0) yaw=0.0
+[Thornfield] Placed WatchTower_N at (17500, 1262, 0) yaw=0.0
+[Thornfield] Placed WatchTower_SE at (31250, 14012, 0) yaw=0.0
+[Thornfield] Placed 13 structures, 52 door meshes
+[Thornfield] VERIFY: no_overlaps PASS (13 footprints)
+[Thornfield] VERIFY: inside_bounds PASS (all inside)
+[Thornfield] VERIFY: open_space_clear PASS (3000x2000 uu yard in front of Command)
+[Thornfield] VERIFY: doors_placed PASS (52 door meshes)
+[Thornfield] VERIFY: structures_placed PASS (13 of 13)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 6 checks, 6 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p03_place_structures_20261002_153043.log

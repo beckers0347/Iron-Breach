@@ -1,0 +1,753 @@
+[
+  {
+    "id": "S01_top_down_plan",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: TOP-DOWN LAYOUT PLAN. Strict orthographic top-down view of the entire garrison from the reference image, camera straight above. Preserve the exact placement of every building, the hairpin dirt road winding from the lower-left gate up the terraced hill to the central paved apron, the three berm bunkers on the upper-left terraces, the central bunker top-centre, the three arched hangars on the right, the lattice comms tower top-right, the rear sheds, retaining walls and stairs. Show the surrounding pine forest. No people, vehicles or mechs. Add a thin scale grid and compass north arrow. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S02_aerial_south",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: AERIAL OBLIQUE from the SOUTH (the gate side), 40 degrees down, same garrison, same layout. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S03_aerial_east",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: AERIAL OBLIQUE from the EAST, the hangar block nearest the camera, same garrison, same layout. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S04_aerial_north",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: AERIAL OBLIQUE from the NORTH, looking back over the comms tower toward the gate, same garrison, same layout. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S05_aerial_west",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: AERIAL OBLIQUE from the WEST, the berm bunkers on the terraces nearest the camera, same garrison, same layout. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S06_ground_gate_in",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: GROUND-LEVEL, camera at 1.7 m eye height standing just outside the main gate looking in through the gantry arch up the hairpin road toward the bunkers. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S07_ground_yard_hangars",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: GROUND-LEVEL, camera at 1.7 m eye height in the central paved apron looking at the three arched hangars across the hazard-striped ground. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S08_ground_road_uphill",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: GROUND-LEVEL, camera at 1.7 m eye height on the hairpin road looking uphill at the three berm bunkers on their terraces. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S09_ground_terrace_down",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: GROUND-LEVEL, camera at 1.7 m eye height on the upper terrace in front of the central bunker looking down over the apron, road and gate. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S10_terrain_heightmap",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: TERRAIN HEIGHTMAP. Top-down greyscale heightmap of the garrison valley: black = lowest, white = highest. Show the road bench, the flat paved apron, the stepped terraces for the bunkers, the surrounding forested hills and the distant ridge. Smooth gradients, no buildings drawn, no text. Square image. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S11_elevation_section",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: SIDE SECTION ELEVATION. Orthographic side cross-section through the garrison from the gate to the comms tower showing the terrace heights, retaining walls, building heights and the forest slope, drawn as a clean rendered diagram with a metre scale bar. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S12_road_network",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: ROAD NETWORK DIAGRAM. Top-down schematic of the road: hairpin dirt road, paved apron, service spurs, gate lane. Show widths in metres and mark where lane lines and yellow hazard stripes are painted. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S13_ground_materials",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: GROUND MATERIALS SHEET. A 2x3 grid of seamless tileable textures: wet churned mud with tire ruts and puddles, gravel, poured concrete apron with yellow hazard stripes, pine-needle forest floor, moss-covered earth, painted lane lines on asphalt. Top-down, flat lighting. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S14_forest_vegetation",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: VEGETATION SHEET. Pine tree species and scale: tall conifers (20-30 m), mid conifers, shrubs, ferns, fallen logs, boulders, grass tufts, laid out on a neutral background with a metre scale bar. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S15_prop_sheet",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: PROP SHEET. Neutral studio background: shipping container (blue-gray), cylindrical fuel tank on a stand, yellow gantry crane, light pole with lamp, concrete jersey barrier, steel tank trap hedgehog, sandbag wall, camouflage netting lean-to, fence section with hazard gate, banner pole with blue winged-emblem banner. Orthographic front views arranged in a tidy grid, with a 1.8 m human silhouette for scale. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "S16_lighting_mood",
+    "kind": "site",
+    "prompt": "Using the attached Thornfield Garrison reference image as the single source of truth for layout and design, generate: LIGHTING MOOD. The same garrison at low golden-hour with ground mist, amber door glow, blue accent lights and wet reflective ground, cinematic wide shot. Keep identical architecture, road shape, palette (charcoal steel, gray concrete, olive moss, amber glow, blue accents, yellow hazard stripes). No people, vehicles or mechs. Output a single image, 16:9 unless stated square.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "gate_checkpoint__front",
+    "kind": "building",
+    "building": "gate_checkpoint",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Main Gate Checkpoint: a fortified vehicle checkpoint spanning a two-lane road: a dark-steel gantry arch with blue indicator lights along its top beam, supported by two heavy concrete-and-steel piers, a square flat-roofed guard booth tower on one side, a taller concrete watch tower with a glazed observation booth and antenna on the other, long segments of concrete wall running off both sides, yellow bollards, tank-trap hedgehogs and jersey barriers at the entrance (barriers optional). Approximate real size: about 28 m wide x 14 m deep x 12 m tall for the arch; watch tower 16 m tall. View: FRONT ELEVATION. Strict orthographic, camera directly in front at mid-height, no perspective, the main entrance facing the camera. Show the whole facade edge to edge. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "gate_checkpoint__back",
+    "kind": "building",
+    "building": "gate_checkpoint",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Main Gate Checkpoint: a fortified vehicle checkpoint spanning a two-lane road: a dark-steel gantry arch with blue indicator lights along its top beam, supported by two heavy concrete-and-steel piers, a square flat-roofed guard booth tower on one side, a taller concrete watch tower with a glazed observation booth and antenna on the other, long segments of concrete wall running off both sides, yellow bollards, tank-trap hedgehogs and jersey barriers at the entrance (barriers optional). Approximate real size: about 28 m wide x 14 m deep x 12 m tall for the arch; watch tower 16 m tall. View: BACK ELEVATION. Strict orthographic, camera directly behind, no perspective. Invent plausible rear details consistent with the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "gate_checkpoint__front"
+    ]
+  },
+  {
+    "id": "gate_checkpoint__left",
+    "kind": "building",
+    "building": "gate_checkpoint",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Main Gate Checkpoint: a fortified vehicle checkpoint spanning a two-lane road: a dark-steel gantry arch with blue indicator lights along its top beam, supported by two heavy concrete-and-steel piers, a square flat-roofed guard booth tower on one side, a taller concrete watch tower with a glazed observation booth and antenna on the other, long segments of concrete wall running off both sides, yellow bollards, tank-trap hedgehogs and jersey barriers at the entrance (barriers optional). Approximate real size: about 28 m wide x 14 m deep x 12 m tall for the arch; watch tower 16 m tall. View: LEFT SIDE ELEVATION. Strict orthographic from the building's left, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "gate_checkpoint__front"
+    ]
+  },
+  {
+    "id": "gate_checkpoint__right",
+    "kind": "building",
+    "building": "gate_checkpoint",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Main Gate Checkpoint: a fortified vehicle checkpoint spanning a two-lane road: a dark-steel gantry arch with blue indicator lights along its top beam, supported by two heavy concrete-and-steel piers, a square flat-roofed guard booth tower on one side, a taller concrete watch tower with a glazed observation booth and antenna on the other, long segments of concrete wall running off both sides, yellow bollards, tank-trap hedgehogs and jersey barriers at the entrance (barriers optional). Approximate real size: about 28 m wide x 14 m deep x 12 m tall for the arch; watch tower 16 m tall. View: RIGHT SIDE ELEVATION. Strict orthographic from the building's right, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "gate_checkpoint__front"
+    ]
+  },
+  {
+    "id": "gate_checkpoint__top",
+    "kind": "building",
+    "building": "gate_checkpoint",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Main Gate Checkpoint: a fortified vehicle checkpoint spanning a two-lane road: a dark-steel gantry arch with blue indicator lights along its top beam, supported by two heavy concrete-and-steel piers, a square flat-roofed guard booth tower on one side, a taller concrete watch tower with a glazed observation booth and antenna on the other, long segments of concrete wall running off both sides, yellow bollards, tank-trap hedgehogs and jersey barriers at the entrance (barriers optional). Approximate real size: about 28 m wide x 14 m deep x 12 m tall for the arch; watch tower 16 m tall. View: TOP-DOWN ROOF PLAN. Camera straight above, orthographic, showing the full roof layout, vents, hatches, skylights and markings. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "gate_checkpoint__front"
+    ]
+  },
+  {
+    "id": "gate_checkpoint__persp_front_left",
+    "kind": "building",
+    "building": "gate_checkpoint",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Main Gate Checkpoint: a fortified vehicle checkpoint spanning a two-lane road: a dark-steel gantry arch with blue indicator lights along its top beam, supported by two heavy concrete-and-steel piers, a square flat-roofed guard booth tower on one side, a taller concrete watch tower with a glazed observation booth and antenna on the other, long segments of concrete wall running off both sides, yellow bollards, tank-trap hedgehogs and jersey barriers at the entrance (barriers optional). Approximate real size: about 28 m wide x 14 m deep x 12 m tall for the arch; watch tower 16 m tall. View: THREE-QUARTER FRONT-LEFT VIEW. Perspective camera at about 1.7 m eye-height-plus, 35 degrees to the left of the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "gate_checkpoint__front"
+    ]
+  },
+  {
+    "id": "gate_checkpoint__persp_back_right",
+    "kind": "building",
+    "building": "gate_checkpoint",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Main Gate Checkpoint: a fortified vehicle checkpoint spanning a two-lane road: a dark-steel gantry arch with blue indicator lights along its top beam, supported by two heavy concrete-and-steel piers, a square flat-roofed guard booth tower on one side, a taller concrete watch tower with a glazed observation booth and antenna on the other, long segments of concrete wall running off both sides, yellow bollards, tank-trap hedgehogs and jersey barriers at the entrance (barriers optional). Approximate real size: about 28 m wide x 14 m deep x 12 m tall for the arch; watch tower 16 m tall. View: THREE-QUARTER BACK-RIGHT VIEW. Perspective camera 35 degrees behind and to the right, slightly elevated. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "gate_checkpoint__front"
+    ]
+  },
+  {
+    "id": "gate_checkpoint__interior_plan",
+    "kind": "building",
+    "building": "gate_checkpoint",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Main Gate Checkpoint: walkable interior: ground-floor guard room with ID-scanner consoles and monitor wall, a stairwell up the watch tower to the glazed observation booth, a small armory locker, plain concrete floors, cable trays, utilitarian ceiling lights.  Exterior reference description: a fortified vehicle checkpoint spanning a two-lane road: a dark-steel gantry arch with blue indicator lights along its top beam, supported by two heavy concrete-and-steel piers, a square flat-roofed guard booth tower on one side, a taller concrete watch tower with a glazed observation booth and antenna on the other, long segments of concrete wall running off both sides, yellow bollards, tank-trap hedgehogs and jersey barriers at the entrance (barriers optional). Approximate real size: about 28 m wide x 14 m deep x 12 m tall for the arch; watch tower 16 m tall. View: INTERIOR FLOOR PLAN. Top-down orthographic architectural cutaway with the roof removed, showing walls, doors, rooms, stairs and room furniture layout, drawn as a clean rendered game-level blockout with a scale grid. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "gate_checkpoint__front"
+    ]
+  },
+  {
+    "id": "gate_checkpoint__detail_sheet",
+    "kind": "building",
+    "building": "gate_checkpoint",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Main Gate Checkpoint: a fortified vehicle checkpoint spanning a two-lane road: a dark-steel gantry arch with blue indicator lights along its top beam, supported by two heavy concrete-and-steel piers, a square flat-roofed guard booth tower on one side, a taller concrete watch tower with a glazed observation booth and antenna on the other, long segments of concrete wall running off both sides, yellow bollards, tank-trap hedgehogs and jersey barriers at the entrance (barriers optional). Approximate real size: about 28 m wide x 14 m deep x 12 m tall for the arch; watch tower 16 m tall. View: DETAIL SHEET. A 2x3 grid of close-up material and detail shots of this exact building: door, window or opening, roof equipment, signage and banner, base and foundation, wall surface texture. Photoreal. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "gate_checkpoint__front"
+    ]
+  },
+  {
+    "id": "berm_bunker__front",
+    "kind": "building",
+    "building": "berm_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Berm Bunker (x3, barracks / armory / medical variants): a half-buried reinforced concrete bunker built into a hillside terrace: a sloped, angled concrete front face with large double sliding steel blast doors, heavy sloped flank walls, a thick earth roof covered in moss, grass and small shrubs with a few vent stacks and equipment boxes, a dark-blue winged-emblem banner beside the door, small amber lights over the door, a concrete apron in front. Approximate real size: about 22 m wide x 18 m deep x 7 m tall, front face 8 m tall. View: FRONT ELEVATION. Strict orthographic, camera directly in front at mid-height, no perspective, the main entrance facing the camera. Show the whole facade edge to edge. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "berm_bunker__back",
+    "kind": "building",
+    "building": "berm_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Berm Bunker (x3, barracks / armory / medical variants): a half-buried reinforced concrete bunker built into a hillside terrace: a sloped, angled concrete front face with large double sliding steel blast doors, heavy sloped flank walls, a thick earth roof covered in moss, grass and small shrubs with a few vent stacks and equipment boxes, a dark-blue winged-emblem banner beside the door, small amber lights over the door, a concrete apron in front. Approximate real size: about 22 m wide x 18 m deep x 7 m tall, front face 8 m tall. View: BACK ELEVATION. Strict orthographic, camera directly behind, no perspective. Invent plausible rear details consistent with the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "berm_bunker__front"
+    ]
+  },
+  {
+    "id": "berm_bunker__left",
+    "kind": "building",
+    "building": "berm_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Berm Bunker (x3, barracks / armory / medical variants): a half-buried reinforced concrete bunker built into a hillside terrace: a sloped, angled concrete front face with large double sliding steel blast doors, heavy sloped flank walls, a thick earth roof covered in moss, grass and small shrubs with a few vent stacks and equipment boxes, a dark-blue winged-emblem banner beside the door, small amber lights over the door, a concrete apron in front. Approximate real size: about 22 m wide x 18 m deep x 7 m tall, front face 8 m tall. View: LEFT SIDE ELEVATION. Strict orthographic from the building's left, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "berm_bunker__front"
+    ]
+  },
+  {
+    "id": "berm_bunker__right",
+    "kind": "building",
+    "building": "berm_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Berm Bunker (x3, barracks / armory / medical variants): a half-buried reinforced concrete bunker built into a hillside terrace: a sloped, angled concrete front face with large double sliding steel blast doors, heavy sloped flank walls, a thick earth roof covered in moss, grass and small shrubs with a few vent stacks and equipment boxes, a dark-blue winged-emblem banner beside the door, small amber lights over the door, a concrete apron in front. Approximate real size: about 22 m wide x 18 m deep x 7 m tall, front face 8 m tall. View: RIGHT SIDE ELEVATION. Strict orthographic from the building's right, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "berm_bunker__front"
+    ]
+  },
+  {
+    "id": "berm_bunker__top",
+    "kind": "building",
+    "building": "berm_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Berm Bunker (x3, barracks / armory / medical variants): a half-buried reinforced concrete bunker built into a hillside terrace: a sloped, angled concrete front face with large double sliding steel blast doors, heavy sloped flank walls, a thick earth roof covered in moss, grass and small shrubs with a few vent stacks and equipment boxes, a dark-blue winged-emblem banner beside the door, small amber lights over the door, a concrete apron in front. Approximate real size: about 22 m wide x 18 m deep x 7 m tall, front face 8 m tall. View: TOP-DOWN ROOF PLAN. Camera straight above, orthographic, showing the full roof layout, vents, hatches, skylights and markings. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "berm_bunker__front"
+    ]
+  },
+  {
+    "id": "berm_bunker__persp_front_left",
+    "kind": "building",
+    "building": "berm_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Berm Bunker (x3, barracks / armory / medical variants): a half-buried reinforced concrete bunker built into a hillside terrace: a sloped, angled concrete front face with large double sliding steel blast doors, heavy sloped flank walls, a thick earth roof covered in moss, grass and small shrubs with a few vent stacks and equipment boxes, a dark-blue winged-emblem banner beside the door, small amber lights over the door, a concrete apron in front. Approximate real size: about 22 m wide x 18 m deep x 7 m tall, front face 8 m tall. View: THREE-QUARTER FRONT-LEFT VIEW. Perspective camera at about 1.7 m eye-height-plus, 35 degrees to the left of the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "berm_bunker__front"
+    ]
+  },
+  {
+    "id": "berm_bunker__persp_back_right",
+    "kind": "building",
+    "building": "berm_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Berm Bunker (x3, barracks / armory / medical variants): a half-buried reinforced concrete bunker built into a hillside terrace: a sloped, angled concrete front face with large double sliding steel blast doors, heavy sloped flank walls, a thick earth roof covered in moss, grass and small shrubs with a few vent stacks and equipment boxes, a dark-blue winged-emblem banner beside the door, small amber lights over the door, a concrete apron in front. Approximate real size: about 22 m wide x 18 m deep x 7 m tall, front face 8 m tall. View: THREE-QUARTER BACK-RIGHT VIEW. Perspective camera 35 degrees behind and to the right, slightly elevated. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "berm_bunker__front"
+    ]
+  },
+  {
+    "id": "berm_bunker__interior_plan",
+    "kind": "building",
+    "building": "berm_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Berm Bunker (x3, barracks / armory / medical variants): walkable interior: entry vestibule behind the blast doors, a long central hall with side rooms (bunk alcoves and lockers for the barracks variant), reinforced concrete walls and ceiling beams, ceiling light strips, a stairwell to the roof hatch.  Exterior reference description: a half-buried reinforced concrete bunker built into a hillside terrace: a sloped, angled concrete front face with large double sliding steel blast doors, heavy sloped flank walls, a thick earth roof covered in moss, grass and small shrubs with a few vent stacks and equipment boxes, a dark-blue winged-emblem banner beside the door, small amber lights over the door, a concrete apron in front. Approximate real size: about 22 m wide x 18 m deep x 7 m tall, front face 8 m tall. View: INTERIOR FLOOR PLAN. Top-down orthographic architectural cutaway with the roof removed, showing walls, doors, rooms, stairs and room furniture layout, drawn as a clean rendered game-level blockout with a scale grid. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "berm_bunker__front"
+    ]
+  },
+  {
+    "id": "berm_bunker__detail_sheet",
+    "kind": "building",
+    "building": "berm_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Berm Bunker (x3, barracks / armory / medical variants): a half-buried reinforced concrete bunker built into a hillside terrace: a sloped, angled concrete front face with large double sliding steel blast doors, heavy sloped flank walls, a thick earth roof covered in moss, grass and small shrubs with a few vent stacks and equipment boxes, a dark-blue winged-emblem banner beside the door, small amber lights over the door, a concrete apron in front. Approximate real size: about 22 m wide x 18 m deep x 7 m tall, front face 8 m tall. View: DETAIL SHEET. A 2x3 grid of close-up material and detail shots of this exact building: door, window or opening, roof equipment, signage and banner, base and foundation, wall surface texture. Photoreal. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "berm_bunker__front"
+    ]
+  },
+  {
+    "id": "central_bunker__front",
+    "kind": "building",
+    "building": "central_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Central Command Bunker: a wide low reinforced concrete bunker with three large arched open bays glowing amber inside, angled sloped roof flanks, two tall dark-blue winged-emblem banners on the front piers, a concrete retaining wall and short concrete staircase on its left side, roof vents and cable boxes, a hazard-striped apron in front. Approximate real size: about 46 m wide x 24 m deep x 9 m tall. View: FRONT ELEVATION. Strict orthographic, camera directly in front at mid-height, no perspective, the main entrance facing the camera. Show the whole facade edge to edge. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "central_bunker__back",
+    "kind": "building",
+    "building": "central_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Central Command Bunker: a wide low reinforced concrete bunker with three large arched open bays glowing amber inside, angled sloped roof flanks, two tall dark-blue winged-emblem banners on the front piers, a concrete retaining wall and short concrete staircase on its left side, roof vents and cable boxes, a hazard-striped apron in front. Approximate real size: about 46 m wide x 24 m deep x 9 m tall. View: BACK ELEVATION. Strict orthographic, camera directly behind, no perspective. Invent plausible rear details consistent with the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "central_bunker__front"
+    ]
+  },
+  {
+    "id": "central_bunker__left",
+    "kind": "building",
+    "building": "central_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Central Command Bunker: a wide low reinforced concrete bunker with three large arched open bays glowing amber inside, angled sloped roof flanks, two tall dark-blue winged-emblem banners on the front piers, a concrete retaining wall and short concrete staircase on its left side, roof vents and cable boxes, a hazard-striped apron in front. Approximate real size: about 46 m wide x 24 m deep x 9 m tall. View: LEFT SIDE ELEVATION. Strict orthographic from the building's left, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "central_bunker__front"
+    ]
+  },
+  {
+    "id": "central_bunker__right",
+    "kind": "building",
+    "building": "central_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Central Command Bunker: a wide low reinforced concrete bunker with three large arched open bays glowing amber inside, angled sloped roof flanks, two tall dark-blue winged-emblem banners on the front piers, a concrete retaining wall and short concrete staircase on its left side, roof vents and cable boxes, a hazard-striped apron in front. Approximate real size: about 46 m wide x 24 m deep x 9 m tall. View: RIGHT SIDE ELEVATION. Strict orthographic from the building's right, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "central_bunker__front"
+    ]
+  },
+  {
+    "id": "central_bunker__top",
+    "kind": "building",
+    "building": "central_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Central Command Bunker: a wide low reinforced concrete bunker with three large arched open bays glowing amber inside, angled sloped roof flanks, two tall dark-blue winged-emblem banners on the front piers, a concrete retaining wall and short concrete staircase on its left side, roof vents and cable boxes, a hazard-striped apron in front. Approximate real size: about 46 m wide x 24 m deep x 9 m tall. View: TOP-DOWN ROOF PLAN. Camera straight above, orthographic, showing the full roof layout, vents, hatches, skylights and markings. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "central_bunker__front"
+    ]
+  },
+  {
+    "id": "central_bunker__persp_front_left",
+    "kind": "building",
+    "building": "central_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Central Command Bunker: a wide low reinforced concrete bunker with three large arched open bays glowing amber inside, angled sloped roof flanks, two tall dark-blue winged-emblem banners on the front piers, a concrete retaining wall and short concrete staircase on its left side, roof vents and cable boxes, a hazard-striped apron in front. Approximate real size: about 46 m wide x 24 m deep x 9 m tall. View: THREE-QUARTER FRONT-LEFT VIEW. Perspective camera at about 1.7 m eye-height-plus, 35 degrees to the left of the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "central_bunker__front"
+    ]
+  },
+  {
+    "id": "central_bunker__persp_back_right",
+    "kind": "building",
+    "building": "central_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Central Command Bunker: a wide low reinforced concrete bunker with three large arched open bays glowing amber inside, angled sloped roof flanks, two tall dark-blue winged-emblem banners on the front piers, a concrete retaining wall and short concrete staircase on its left side, roof vents and cable boxes, a hazard-striped apron in front. Approximate real size: about 46 m wide x 24 m deep x 9 m tall. View: THREE-QUARTER BACK-RIGHT VIEW. Perspective camera 35 degrees behind and to the right, slightly elevated. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "central_bunker__front"
+    ]
+  },
+  {
+    "id": "central_bunker__interior_plan",
+    "kind": "building",
+    "building": "central_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Central Command Bunker: walkable interior: three connected bays opening into a central operations hall with a tactical map table, wall screens, supply racks and workbenches, concrete floor with yellow lane markings, steel roof trusses.  Exterior reference description: a wide low reinforced concrete bunker with three large arched open bays glowing amber inside, angled sloped roof flanks, two tall dark-blue winged-emblem banners on the front piers, a concrete retaining wall and short concrete staircase on its left side, roof vents and cable boxes, a hazard-striped apron in front. Approximate real size: about 46 m wide x 24 m deep x 9 m tall. View: INTERIOR FLOOR PLAN. Top-down orthographic architectural cutaway with the roof removed, showing walls, doors, rooms, stairs and room furniture layout, drawn as a clean rendered game-level blockout with a scale grid. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "central_bunker__front"
+    ]
+  },
+  {
+    "id": "central_bunker__detail_sheet",
+    "kind": "building",
+    "building": "central_bunker",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Central Command Bunker: a wide low reinforced concrete bunker with three large arched open bays glowing amber inside, angled sloped roof flanks, two tall dark-blue winged-emblem banners on the front piers, a concrete retaining wall and short concrete staircase on its left side, roof vents and cable boxes, a hazard-striped apron in front. Approximate real size: about 46 m wide x 24 m deep x 9 m tall. View: DETAIL SHEET. A 2x3 grid of close-up material and detail shots of this exact building: door, window or opening, roof equipment, signage and banner, base and foundation, wall surface texture. Photoreal. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "central_bunker__front"
+    ]
+  },
+  {
+    "id": "hangar_block__front",
+    "kind": "building",
+    "building": "hangar_block",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Hangar Block (3 arched hangars): three adjoining large arched-roof hangars side by side, each with a ribbed corrugated dark-steel pitched roof carrying a long skylight and solar-panel strip with blue lights, tall open doorways glowing amber inside, concrete lower walls, blue winged-emblem banners on the pillars between bays, yellow gantry cranes standing at the door (cranes optional), hazard-striped concrete apron. Approximate real size: each bay about 22 m wide x 40 m long x 16 m tall, block 66 m wide. View: FRONT ELEVATION. Strict orthographic, camera directly in front at mid-height, no perspective, the main entrance facing the camera. Show the whole facade edge to edge. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "hangar_block__back",
+    "kind": "building",
+    "building": "hangar_block",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Hangar Block (3 arched hangars): three adjoining large arched-roof hangars side by side, each with a ribbed corrugated dark-steel pitched roof carrying a long skylight and solar-panel strip with blue lights, tall open doorways glowing amber inside, concrete lower walls, blue winged-emblem banners on the pillars between bays, yellow gantry cranes standing at the door (cranes optional), hazard-striped concrete apron. Approximate real size: each bay about 22 m wide x 40 m long x 16 m tall, block 66 m wide. View: BACK ELEVATION. Strict orthographic, camera directly behind, no perspective. Invent plausible rear details consistent with the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "hangar_block__front"
+    ]
+  },
+  {
+    "id": "hangar_block__left",
+    "kind": "building",
+    "building": "hangar_block",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Hangar Block (3 arched hangars): three adjoining large arched-roof hangars side by side, each with a ribbed corrugated dark-steel pitched roof carrying a long skylight and solar-panel strip with blue lights, tall open doorways glowing amber inside, concrete lower walls, blue winged-emblem banners on the pillars between bays, yellow gantry cranes standing at the door (cranes optional), hazard-striped concrete apron. Approximate real size: each bay about 22 m wide x 40 m long x 16 m tall, block 66 m wide. View: LEFT SIDE ELEVATION. Strict orthographic from the building's left, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "hangar_block__front"
+    ]
+  },
+  {
+    "id": "hangar_block__right",
+    "kind": "building",
+    "building": "hangar_block",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Hangar Block (3 arched hangars): three adjoining large arched-roof hangars side by side, each with a ribbed corrugated dark-steel pitched roof carrying a long skylight and solar-panel strip with blue lights, tall open doorways glowing amber inside, concrete lower walls, blue winged-emblem banners on the pillars between bays, yellow gantry cranes standing at the door (cranes optional), hazard-striped concrete apron. Approximate real size: each bay about 22 m wide x 40 m long x 16 m tall, block 66 m wide. View: RIGHT SIDE ELEVATION. Strict orthographic from the building's right, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "hangar_block__front"
+    ]
+  },
+  {
+    "id": "hangar_block__top",
+    "kind": "building",
+    "building": "hangar_block",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Hangar Block (3 arched hangars): three adjoining large arched-roof hangars side by side, each with a ribbed corrugated dark-steel pitched roof carrying a long skylight and solar-panel strip with blue lights, tall open doorways glowing amber inside, concrete lower walls, blue winged-emblem banners on the pillars between bays, yellow gantry cranes standing at the door (cranes optional), hazard-striped concrete apron. Approximate real size: each bay about 22 m wide x 40 m long x 16 m tall, block 66 m wide. View: TOP-DOWN ROOF PLAN. Camera straight above, orthographic, showing the full roof layout, vents, hatches, skylights and markings. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "hangar_block__front"
+    ]
+  },
+  {
+    "id": "hangar_block__persp_front_left",
+    "kind": "building",
+    "building": "hangar_block",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Hangar Block (3 arched hangars): three adjoining large arched-roof hangars side by side, each with a ribbed corrugated dark-steel pitched roof carrying a long skylight and solar-panel strip with blue lights, tall open doorways glowing amber inside, concrete lower walls, blue winged-emblem banners on the pillars between bays, yellow gantry cranes standing at the door (cranes optional), hazard-striped concrete apron. Approximate real size: each bay about 22 m wide x 40 m long x 16 m tall, block 66 m wide. View: THREE-QUARTER FRONT-LEFT VIEW. Perspective camera at about 1.7 m eye-height-plus, 35 degrees to the left of the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "hangar_block__front"
+    ]
+  },
+  {
+    "id": "hangar_block__persp_back_right",
+    "kind": "building",
+    "building": "hangar_block",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Hangar Block (3 arched hangars): three adjoining large arched-roof hangars side by side, each with a ribbed corrugated dark-steel pitched roof carrying a long skylight and solar-panel strip with blue lights, tall open doorways glowing amber inside, concrete lower walls, blue winged-emblem banners on the pillars between bays, yellow gantry cranes standing at the door (cranes optional), hazard-striped concrete apron. Approximate real size: each bay about 22 m wide x 40 m long x 16 m tall, block 66 m wide. View: THREE-QUARTER BACK-RIGHT VIEW. Perspective camera 35 degrees behind and to the right, slightly elevated. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "hangar_block__front"
+    ]
+  },
+  {
+    "id": "hangar_block__interior_plan",
+    "kind": "building",
+    "building": "hangar_block",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Hangar Block (3 arched hangars): walkable interior per bay: a huge open maintenance hall with an overhead gantry crane rail, yellow steel maintenance gantries and ladders, tool racks, heavy floor hazard markings and a central lift pad, wall-mounted lamps, steel roof trusses.  Exterior reference description: three adjoining large arched-roof hangars side by side, each with a ribbed corrugated dark-steel pitched roof carrying a long skylight and solar-panel strip with blue lights, tall open doorways glowing amber inside, concrete lower walls, blue winged-emblem banners on the pillars between bays, yellow gantry cranes standing at the door (cranes optional), hazard-striped concrete apron. Approximate real size: each bay about 22 m wide x 40 m long x 16 m tall, block 66 m wide. View: INTERIOR FLOOR PLAN. Top-down orthographic architectural cutaway with the roof removed, showing walls, doors, rooms, stairs and room furniture layout, drawn as a clean rendered game-level blockout with a scale grid. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "hangar_block__front"
+    ]
+  },
+  {
+    "id": "hangar_block__detail_sheet",
+    "kind": "building",
+    "building": "hangar_block",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Hangar Block (3 arched hangars): three adjoining large arched-roof hangars side by side, each with a ribbed corrugated dark-steel pitched roof carrying a long skylight and solar-panel strip with blue lights, tall open doorways glowing amber inside, concrete lower walls, blue winged-emblem banners on the pillars between bays, yellow gantry cranes standing at the door (cranes optional), hazard-striped concrete apron. Approximate real size: each bay about 22 m wide x 40 m long x 16 m tall, block 66 m wide. View: DETAIL SHEET. A 2x3 grid of close-up material and detail shots of this exact building: door, window or opening, roof equipment, signage and banner, base and foundation, wall surface texture. Photoreal. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "hangar_block__front"
+    ]
+  },
+  {
+    "id": "comms_tower__front",
+    "kind": "building",
+    "building": "comms_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Comms Tower: a tall lattice steel radio tower topped with a large satellite dish and antenna masts with red/blue beacons, standing beside a small concrete equipment building with a steel door, cable trays, fenced base with hazard signage. Approximate real size: tower about 40 m tall, base building 8 m x 8 m x 4 m. View: FRONT ELEVATION. Strict orthographic, camera directly in front at mid-height, no perspective, the main entrance facing the camera. Show the whole facade edge to edge. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "comms_tower__back",
+    "kind": "building",
+    "building": "comms_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Comms Tower: a tall lattice steel radio tower topped with a large satellite dish and antenna masts with red/blue beacons, standing beside a small concrete equipment building with a steel door, cable trays, fenced base with hazard signage. Approximate real size: tower about 40 m tall, base building 8 m x 8 m x 4 m. View: BACK ELEVATION. Strict orthographic, camera directly behind, no perspective. Invent plausible rear details consistent with the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "comms_tower__front"
+    ]
+  },
+  {
+    "id": "comms_tower__left",
+    "kind": "building",
+    "building": "comms_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Comms Tower: a tall lattice steel radio tower topped with a large satellite dish and antenna masts with red/blue beacons, standing beside a small concrete equipment building with a steel door, cable trays, fenced base with hazard signage. Approximate real size: tower about 40 m tall, base building 8 m x 8 m x 4 m. View: LEFT SIDE ELEVATION. Strict orthographic from the building's left, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "comms_tower__front"
+    ]
+  },
+  {
+    "id": "comms_tower__right",
+    "kind": "building",
+    "building": "comms_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Comms Tower: a tall lattice steel radio tower topped with a large satellite dish and antenna masts with red/blue beacons, standing beside a small concrete equipment building with a steel door, cable trays, fenced base with hazard signage. Approximate real size: tower about 40 m tall, base building 8 m x 8 m x 4 m. View: RIGHT SIDE ELEVATION. Strict orthographic from the building's right, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "comms_tower__front"
+    ]
+  },
+  {
+    "id": "comms_tower__top",
+    "kind": "building",
+    "building": "comms_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Comms Tower: a tall lattice steel radio tower topped with a large satellite dish and antenna masts with red/blue beacons, standing beside a small concrete equipment building with a steel door, cable trays, fenced base with hazard signage. Approximate real size: tower about 40 m tall, base building 8 m x 8 m x 4 m. View: TOP-DOWN ROOF PLAN. Camera straight above, orthographic, showing the full roof layout, vents, hatches, skylights and markings. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "comms_tower__front"
+    ]
+  },
+  {
+    "id": "comms_tower__persp_front_left",
+    "kind": "building",
+    "building": "comms_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Comms Tower: a tall lattice steel radio tower topped with a large satellite dish and antenna masts with red/blue beacons, standing beside a small concrete equipment building with a steel door, cable trays, fenced base with hazard signage. Approximate real size: tower about 40 m tall, base building 8 m x 8 m x 4 m. View: THREE-QUARTER FRONT-LEFT VIEW. Perspective camera at about 1.7 m eye-height-plus, 35 degrees to the left of the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "comms_tower__front"
+    ]
+  },
+  {
+    "id": "comms_tower__persp_back_right",
+    "kind": "building",
+    "building": "comms_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Comms Tower: a tall lattice steel radio tower topped with a large satellite dish and antenna masts with red/blue beacons, standing beside a small concrete equipment building with a steel door, cable trays, fenced base with hazard signage. Approximate real size: tower about 40 m tall, base building 8 m x 8 m x 4 m. View: THREE-QUARTER BACK-RIGHT VIEW. Perspective camera 35 degrees behind and to the right, slightly elevated. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "comms_tower__front"
+    ]
+  },
+  {
+    "id": "comms_tower__interior_plan",
+    "kind": "building",
+    "building": "comms_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Comms Tower: walkable interior of the equipment building: server racks, radio consoles, battery banks, one central door and stair to the tower's maintenance ladder.  Exterior reference description: a tall lattice steel radio tower topped with a large satellite dish and antenna masts with red/blue beacons, standing beside a small concrete equipment building with a steel door, cable trays, fenced base with hazard signage. Approximate real size: tower about 40 m tall, base building 8 m x 8 m x 4 m. View: INTERIOR FLOOR PLAN. Top-down orthographic architectural cutaway with the roof removed, showing walls, doors, rooms, stairs and room furniture layout, drawn as a clean rendered game-level blockout with a scale grid. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "comms_tower__front"
+    ]
+  },
+  {
+    "id": "comms_tower__detail_sheet",
+    "kind": "building",
+    "building": "comms_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Comms Tower: a tall lattice steel radio tower topped with a large satellite dish and antenna masts with red/blue beacons, standing beside a small concrete equipment building with a steel door, cable trays, fenced base with hazard signage. Approximate real size: tower about 40 m tall, base building 8 m x 8 m x 4 m. View: DETAIL SHEET. A 2x3 grid of close-up material and detail shots of this exact building: door, window or opening, roof equipment, signage and banner, base and foundation, wall surface texture. Photoreal. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "comms_tower__front"
+    ]
+  },
+  {
+    "id": "watch_tower__front",
+    "kind": "building",
+    "building": "watch_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Watch Tower: a freestanding square concrete watch tower with a glazed, railed observation booth at the top, a searchlight and antenna on the roof, a steel exterior stair or ladder, narrow vertical slit windows, blue indicator lights, yellow bollards at the base. Approximate real size: about 6 m x 6 m x 16 m tall. View: FRONT ELEVATION. Strict orthographic, camera directly in front at mid-height, no perspective, the main entrance facing the camera. Show the whole facade edge to edge. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "watch_tower__back",
+    "kind": "building",
+    "building": "watch_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Watch Tower: a freestanding square concrete watch tower with a glazed, railed observation booth at the top, a searchlight and antenna on the roof, a steel exterior stair or ladder, narrow vertical slit windows, blue indicator lights, yellow bollards at the base. Approximate real size: about 6 m x 6 m x 16 m tall. View: BACK ELEVATION. Strict orthographic, camera directly behind, no perspective. Invent plausible rear details consistent with the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "watch_tower__front"
+    ]
+  },
+  {
+    "id": "watch_tower__left",
+    "kind": "building",
+    "building": "watch_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Watch Tower: a freestanding square concrete watch tower with a glazed, railed observation booth at the top, a searchlight and antenna on the roof, a steel exterior stair or ladder, narrow vertical slit windows, blue indicator lights, yellow bollards at the base. Approximate real size: about 6 m x 6 m x 16 m tall. View: LEFT SIDE ELEVATION. Strict orthographic from the building's left, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "watch_tower__front"
+    ]
+  },
+  {
+    "id": "watch_tower__right",
+    "kind": "building",
+    "building": "watch_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Watch Tower: a freestanding square concrete watch tower with a glazed, railed observation booth at the top, a searchlight and antenna on the roof, a steel exterior stair or ladder, narrow vertical slit windows, blue indicator lights, yellow bollards at the base. Approximate real size: about 6 m x 6 m x 16 m tall. View: RIGHT SIDE ELEVATION. Strict orthographic from the building's right, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "watch_tower__front"
+    ]
+  },
+  {
+    "id": "watch_tower__top",
+    "kind": "building",
+    "building": "watch_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Watch Tower: a freestanding square concrete watch tower with a glazed, railed observation booth at the top, a searchlight and antenna on the roof, a steel exterior stair or ladder, narrow vertical slit windows, blue indicator lights, yellow bollards at the base. Approximate real size: about 6 m x 6 m x 16 m tall. View: TOP-DOWN ROOF PLAN. Camera straight above, orthographic, showing the full roof layout, vents, hatches, skylights and markings. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "watch_tower__front"
+    ]
+  },
+  {
+    "id": "watch_tower__persp_front_left",
+    "kind": "building",
+    "building": "watch_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Watch Tower: a freestanding square concrete watch tower with a glazed, railed observation booth at the top, a searchlight and antenna on the roof, a steel exterior stair or ladder, narrow vertical slit windows, blue indicator lights, yellow bollards at the base. Approximate real size: about 6 m x 6 m x 16 m tall. View: THREE-QUARTER FRONT-LEFT VIEW. Perspective camera at about 1.7 m eye-height-plus, 35 degrees to the left of the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "watch_tower__front"
+    ]
+  },
+  {
+    "id": "watch_tower__persp_back_right",
+    "kind": "building",
+    "building": "watch_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Watch Tower: a freestanding square concrete watch tower with a glazed, railed observation booth at the top, a searchlight and antenna on the roof, a steel exterior stair or ladder, narrow vertical slit windows, blue indicator lights, yellow bollards at the base. Approximate real size: about 6 m x 6 m x 16 m tall. View: THREE-QUARTER BACK-RIGHT VIEW. Perspective camera 35 degrees behind and to the right, slightly elevated. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "watch_tower__front"
+    ]
+  },
+  {
+    "id": "watch_tower__interior_plan",
+    "kind": "building",
+    "building": "watch_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Watch Tower: walkable interior: ground-floor entry room, concentric stairwell, a top booth with a console desk and viewing windows.  Exterior reference description: a freestanding square concrete watch tower with a glazed, railed observation booth at the top, a searchlight and antenna on the roof, a steel exterior stair or ladder, narrow vertical slit windows, blue indicator lights, yellow bollards at the base. Approximate real size: about 6 m x 6 m x 16 m tall. View: INTERIOR FLOOR PLAN. Top-down orthographic architectural cutaway with the roof removed, showing walls, doors, rooms, stairs and room furniture layout, drawn as a clean rendered game-level blockout with a scale grid. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "watch_tower__front"
+    ]
+  },
+  {
+    "id": "watch_tower__detail_sheet",
+    "kind": "building",
+    "building": "watch_tower",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Watch Tower: a freestanding square concrete watch tower with a glazed, railed observation booth at the top, a searchlight and antenna on the roof, a steel exterior stair or ladder, narrow vertical slit windows, blue indicator lights, yellow bollards at the base. Approximate real size: about 6 m x 6 m x 16 m tall. View: DETAIL SHEET. A 2x3 grid of close-up material and detail shots of this exact building: door, window or opening, roof equipment, signage and banner, base and foundation, wall surface texture. Photoreal. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "watch_tower__front"
+    ]
+  },
+  {
+    "id": "rear_sheds__front",
+    "kind": "building",
+    "building": "rear_sheds",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Rear Utility Sheds / Mess Hall: a cluster of low prefabricated military buildings with shallow pitched or arched roofs in drab olive and charcoal panels, small steel doors, roof vents, cable runs, one larger shed with double doors and a serving hatch (mess hall), camouflage netting over a lean-to. Approximate real size: sheds about 12 m x 8 m x 4 m, mess hall 20 m x 12 m x 5 m. View: FRONT ELEVATION. Strict orthographic, camera directly in front at mid-height, no perspective, the main entrance facing the camera. Show the whole facade edge to edge. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png"
+    ]
+  },
+  {
+    "id": "rear_sheds__back",
+    "kind": "building",
+    "building": "rear_sheds",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Rear Utility Sheds / Mess Hall: a cluster of low prefabricated military buildings with shallow pitched or arched roofs in drab olive and charcoal panels, small steel doors, roof vents, cable runs, one larger shed with double doors and a serving hatch (mess hall), camouflage netting over a lean-to. Approximate real size: sheds about 12 m x 8 m x 4 m, mess hall 20 m x 12 m x 5 m. View: BACK ELEVATION. Strict orthographic, camera directly behind, no perspective. Invent plausible rear details consistent with the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "rear_sheds__front"
+    ]
+  },
+  {
+    "id": "rear_sheds__left",
+    "kind": "building",
+    "building": "rear_sheds",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Rear Utility Sheds / Mess Hall: a cluster of low prefabricated military buildings with shallow pitched or arched roofs in drab olive and charcoal panels, small steel doors, roof vents, cable runs, one larger shed with double doors and a serving hatch (mess hall), camouflage netting over a lean-to. Approximate real size: sheds about 12 m x 8 m x 4 m, mess hall 20 m x 12 m x 5 m. View: LEFT SIDE ELEVATION. Strict orthographic from the building's left, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "rear_sheds__front"
+    ]
+  },
+  {
+    "id": "rear_sheds__right",
+    "kind": "building",
+    "building": "rear_sheds",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Rear Utility Sheds / Mess Hall: a cluster of low prefabricated military buildings with shallow pitched or arched roofs in drab olive and charcoal panels, small steel doors, roof vents, cable runs, one larger shed with double doors and a serving hatch (mess hall), camouflage netting over a lean-to. Approximate real size: sheds about 12 m x 8 m x 4 m, mess hall 20 m x 12 m x 5 m. View: RIGHT SIDE ELEVATION. Strict orthographic from the building's right, no perspective. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "rear_sheds__front"
+    ]
+  },
+  {
+    "id": "rear_sheds__top",
+    "kind": "building",
+    "building": "rear_sheds",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Rear Utility Sheds / Mess Hall: a cluster of low prefabricated military buildings with shallow pitched or arched roofs in drab olive and charcoal panels, small steel doors, roof vents, cable runs, one larger shed with double doors and a serving hatch (mess hall), camouflage netting over a lean-to. Approximate real size: sheds about 12 m x 8 m x 4 m, mess hall 20 m x 12 m x 5 m. View: TOP-DOWN ROOF PLAN. Camera straight above, orthographic, showing the full roof layout, vents, hatches, skylights and markings. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "rear_sheds__front"
+    ]
+  },
+  {
+    "id": "rear_sheds__persp_front_left",
+    "kind": "building",
+    "building": "rear_sheds",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Rear Utility Sheds / Mess Hall: a cluster of low prefabricated military buildings with shallow pitched or arched roofs in drab olive and charcoal panels, small steel doors, roof vents, cable runs, one larger shed with double doors and a serving hatch (mess hall), camouflage netting over a lean-to. Approximate real size: sheds about 12 m x 8 m x 4 m, mess hall 20 m x 12 m x 5 m. View: THREE-QUARTER FRONT-LEFT VIEW. Perspective camera at about 1.7 m eye-height-plus, 35 degrees to the left of the front. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "rear_sheds__front"
+    ]
+  },
+  {
+    "id": "rear_sheds__persp_back_right",
+    "kind": "building",
+    "building": "rear_sheds",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Rear Utility Sheds / Mess Hall: a cluster of low prefabricated military buildings with shallow pitched or arched roofs in drab olive and charcoal panels, small steel doors, roof vents, cable runs, one larger shed with double doors and a serving hatch (mess hall), camouflage netting over a lean-to. Approximate real size: sheds about 12 m x 8 m x 4 m, mess hall 20 m x 12 m x 5 m. View: THREE-QUARTER BACK-RIGHT VIEW. Perspective camera 35 degrees behind and to the right, slightly elevated. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "rear_sheds__front"
+    ]
+  },
+  {
+    "id": "rear_sheds__interior_plan",
+    "kind": "building",
+    "building": "rear_sheds",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Rear Utility Sheds / Mess Hall: walkable interior of the larger shed: mess hall with long tables, serving counter, vending machines and notice boards, concrete floor, ceiling light strips.  Exterior reference description: a cluster of low prefabricated military buildings with shallow pitched or arched roofs in drab olive and charcoal panels, small steel doors, roof vents, cable runs, one larger shed with double doors and a serving hatch (mess hall), camouflage netting over a lean-to. Approximate real size: sheds about 12 m x 8 m x 4 m, mess hall 20 m x 12 m x 5 m. View: INTERIOR FLOOR PLAN. Top-down orthographic architectural cutaway with the roof removed, showing walls, doors, rooms, stairs and room furniture layout, drawn as a clean rendered game-level blockout with a scale grid. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "rear_sheds__front"
+    ]
+  },
+  {
+    "id": "rear_sheds__detail_sheet",
+    "kind": "building",
+    "building": "rear_sheds",
+    "prompt": "Using the attached Thornfield Garrison reference image as the design guide, generate a Rear Utility Sheds / Mess Hall: a cluster of low prefabricated military buildings with shallow pitched or arched roofs in drab olive and charcoal panels, small steel doors, roof vents, cable runs, one larger shed with double doors and a serving hatch (mess hall), camouflage netting over a lean-to. Approximate real size: sheds about 12 m x 8 m x 4 m, mess hall 20 m x 12 m x 5 m. View: DETAIL SHEET. A 2x3 grid of close-up material and detail shots of this exact building: door, window or opening, roof equipment, signage and banner, base and foundation, wall surface texture. Photoreal. Style: dark charcoal painted-steel panels and weathered gray poured concrete, olive-green moss and grass on earth-covered roofs, yellow-orange hazard striping, small blue accent indicator lights, warm amber window and door glow, a white winged-emblem on dark-blue banners, wet and stained surfaces, rivets and panel seams. Industrial military sci-fi, photoreal game-environment concept art, matches the attached Thornfield Garrison reference image exactly in design language. Neutral light-gray seamless studio background, soft even diffused lighting, no people, no vehicles, no mechs, no text other than the painted markings described, single subject centered, whole building fully in frame. IMPORTANT: this is the SAME building as in the previous views. Keep identical proportions, door positions, roof shapes, markings and materials. Do not redesign it. Also attach the FRONT view already generated for this building as a second reference. Output a single image, 16:9.",
+    "attach": [
+      "Thornfield Garrison.png",
+      "rear_sheds__front"
+    ]
+  }
+]

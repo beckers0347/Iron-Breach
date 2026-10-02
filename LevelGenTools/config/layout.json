@@ -1,0 +1,379 @@
+{
+  "_comment": "Plan coordinates in cm: origin at the SW corner of the plan, +X east, +Y north (plan y-up). Scripts convert to UE world with gen_common.plan_to_world (UE is left-handed, so north becomes -Y). Scale 0.25 m per plan pixel (the S01 plan's own ruler). facing is a compass direction; yaw_offset_deg is added in WORLD yaw. Hangar: front faces SSW (offset +21.5).",
+  "facing_vectors": {
+    "N": [
+      0,
+      -1
+    ],
+    "S": [
+      0,
+      1
+    ],
+    "E": [
+      1,
+      0
+    ],
+    "W": [
+      -1,
+      0
+    ]
+  },
+  "zones": [
+    {
+      "id": 1,
+      "name": "Gate_Checkpoint",
+      "center": [
+        16750,
+        1938
+      ],
+      "size": [
+        4375,
+        1500
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Barracks",
+      "center": [
+        6000,
+        11438
+      ],
+      "size": [
+        1625,
+        1375
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Armory",
+      "center": [
+        7500,
+        16062
+      ],
+      "size": [
+        1625,
+        1375
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Mech_Hangar",
+      "center": [
+        27750,
+        11688
+      ],
+      "size": [
+        4625,
+        2875
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Medical",
+      "center": [
+        9750,
+        6688
+      ],
+      "size": [
+        1625,
+        1375
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Command_Yard",
+      "center": [
+        17312,
+        14062
+      ],
+      "size": [
+        3375,
+        2500
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Mess_Storage",
+      "center": [
+        21500,
+        17438
+      ],
+      "size": [
+        2812,
+        2188
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Comms",
+      "center": [
+        24375,
+        17438
+      ],
+      "size": [
+        1500,
+        1500
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Motor_Pool",
+      "center": [
+        27750,
+        7500
+      ],
+      "size": [
+        5625,
+        3750
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Forest_Perimeter",
+      "center": [
+        17188,
+        9594
+      ],
+      "size": [
+        34375,
+        19188
+      ]
+    }
+  ],
+  "structures": [
+    {
+      "label": "Gate",
+      "asset": "GateCheckpoint",
+      "pos": [
+        16750,
+        1938
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 0,
+      "zone": 1
+    },
+    {
+      "label": "Barracks",
+      "asset": "BermBunker",
+      "pos": [
+        6000,
+        11438
+      ],
+      "facing": "E",
+      "yaw_offset_deg": 0,
+      "zone": 2,
+      "player_start": true
+    },
+    {
+      "label": "Armory",
+      "asset": "BermBunker",
+      "pos": [
+        7500,
+        16062
+      ],
+      "facing": "E",
+      "yaw_offset_deg": 0,
+      "zone": 3
+    },
+    {
+      "label": "Medical",
+      "asset": "BermBunker",
+      "pos": [
+        9750,
+        6688
+      ],
+      "facing": "E",
+      "yaw_offset_deg": 0,
+      "zone": 5
+    },
+    {
+      "label": "Hangar",
+      "asset": "HangarBlock",
+      "pos": [
+        27750,
+        11688
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 21.5,
+      "zone": 4
+    },
+    {
+      "label": "Command",
+      "asset": "CentralBunker",
+      "pos": [
+        17312,
+        14062
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 0,
+      "zone": 6
+    },
+    {
+      "label": "MessHall",
+      "asset": "MessHall",
+      "pos": [
+        21500,
+        17438
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 0,
+      "zone": 7
+    },
+    {
+      "label": "RearShed_A",
+      "asset": "RearShed",
+      "pos": [
+        21800,
+        14938
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 0,
+      "zone": 10
+    },
+    {
+      "label": "RearShed_B",
+      "asset": "RearShed",
+      "pos": [
+        22500,
+        4688
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 0,
+      "zone": 10
+    },
+    {
+      "label": "Comms",
+      "asset": "CommsTower",
+      "pos": [
+        24375,
+        17438
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 0,
+      "zone": 8
+    },
+    {
+      "label": "WatchTower_NW",
+      "asset": "WatchTower",
+      "pos": [
+        5000,
+        13938
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 0,
+      "zone": 10
+    },
+    {
+      "label": "WatchTower_N",
+      "asset": "WatchTower",
+      "pos": [
+        17500,
+        17938
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 0,
+      "zone": 10
+    },
+    {
+      "label": "WatchTower_SE",
+      "asset": "WatchTower",
+      "pos": [
+        31250,
+        5188
+      ],
+      "facing": "S",
+      "yaw_offset_deg": 0,
+      "zone": 10
+    }
+  ],
+  "player_start": {
+    "structure": "Barracks",
+    "local_offset_cm": [
+      0,
+      0,
+      100
+    ],
+    "note": "Phase 2 refines this once the interior is inspected in the editor."
+  },
+  "roads": [
+    {
+      "name": "MainLoop",
+      "surface": "dirt",
+      "width_cm": 600,
+      "points": [
+        [
+          16750,
+          0
+        ],
+        [
+          16750,
+          1938
+        ],
+        [
+          16750,
+          3750
+        ],
+        [
+          12500,
+          5625
+        ],
+        [
+          10938,
+          7500
+        ],
+        [
+          8438,
+          9375
+        ],
+        [
+          6875,
+          12500
+        ],
+        [
+          8750,
+          15000
+        ],
+        [
+          12500,
+          16562
+        ],
+        [
+          17312,
+          12500
+        ],
+        [
+          21250,
+          12812
+        ],
+        [
+          23750,
+          14688
+        ],
+        [
+          24375,
+          16250
+        ]
+      ]
+    },
+    {
+      "name": "HangarApron",
+      "surface": "concrete",
+      "width_cm": 1800,
+      "points": [
+        [
+          21250,
+          12812
+        ],
+        [
+          25000,
+          9062
+        ],
+        [
+          27750,
+          8750
+        ]
+      ]
+    }
+  ],
+  "waypoints": []
+}

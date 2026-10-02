@@ -1,0 +1,21 @@
+[Thornfield] === p05_zones_markers start ===
+[Thornfield] Cleanup: removed 0 previous GEN_Phase5 actors
+[Thornfield] Zone 01 Gate_Checkpoint at (16750, 17262) size 4375 x 1500
+[Thornfield] Zone 02 Barracks at (6000, 7762) size 1625 x 1375
+[Thornfield] Zone 03 Armory at (7500, 3138) size 1625 x 1375
+[Thornfield] Zone 04 Mech_Hangar at (27750, 7512) size 4625 x 2875
+[Thornfield] Zone 05 Medical at (9750, 12512) size 1625 x 1375
+[Thornfield] Zone 06 Command_Yard at (17312, 5138) size 3375 x 2500
+[Thornfield] Zone 07 Mess_Storage at (21500, 1762) size 2812 x 2188
+[Thornfield] Zone 08 Comms at (24375, 1762) size 1500 x 1500
+[Thornfield] Zone 09 Motor_Pool at (27750, 11700) size 5625 x 3750
+[Thornfield] Zone 10 Forest_Perimeter at (17188, 9606) size 34375 x 19188
+[Thornfield] VERIFY: zones_placed PASS (10 of 10)
+[Thornfield] VERIFY: entrances_placed PASS (13 of 13)
+[Thornfield] ERROR: VERIFY: zone_coverage FAIL (outside own zone: ['RearShed_A', 'RearShed_B'])
+[Thornfield] VERIFY: roadpoints_placed PASS (16 road points)
+[Thornfield] VERIFY: player_start_zone PASS (PlayerStart is inside zone 2 (Barracks))
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 6 checks, 5 PASS, 1 FAIL
+[Thornfield] ERROR:   FAILED: zone_coverage outside own zone: ['RearShed_A', 'RearShed_B']
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p05_zones_markers_20261002_153602.log

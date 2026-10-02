@@ -1,0 +1,270 @@
+{
+ "name": "SM_CentralBunker",
+ "doors": {
+  "SM_CentralBunker_FrontW_DoorL": {
+   "type": "slide",
+   "pivot": [
+    -16.560000000000002,
+    -13.35,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": -3.1
+  },
+  "SM_CentralBunker_FrontW_DoorR": {
+   "type": "slide",
+   "pivot": [
+    -13.440000000000001,
+    -13.35,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": 3.1
+  },
+  "SM_CentralBunker_FrontC_DoorL": {
+   "type": "slide",
+   "pivot": [
+    -1.81,
+    -13.35,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": -3.6
+  },
+  "SM_CentralBunker_FrontC_DoorR": {
+   "type": "slide",
+   "pivot": [
+    1.81,
+    -13.35,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": 3.6
+  },
+  "SM_CentralBunker_FrontE_DoorL": {
+   "type": "slide",
+   "pivot": [
+    13.440000000000001,
+    -13.35,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": -3.1
+  },
+  "SM_CentralBunker_FrontE_DoorR": {
+   "type": "slide",
+   "pivot": [
+    16.560000000000002,
+    -13.35,
+    0
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "open": 3.1
+  },
+  "SM_CentralBunker_InnerWDoor": {
+   "type": "hinge",
+   "pivot": [
+    -7.95,
+    -1.15,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": -95.0
+  },
+  "SM_CentralBunker_InnerEDoor": {
+   "type": "hinge",
+   "pivot": [
+    7.95,
+    -1.15,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": 95.0
+  },
+  "SM_CentralBunker_RearDoor": {
+   "type": "hinge",
+   "pivot": [
+    -1.05,
+    11.1,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": -95.0
+  }
+ },
+ "lights": [
+  [
+   "amber",
+   [
+    -15.0,
+    -12.8,
+    5.0
+   ]
+  ],
+  [
+   "amber",
+   [
+    0.0,
+    -12.8,
+    5.4
+   ]
+  ],
+  [
+   "amber",
+   [
+    15.0,
+    -12.8,
+    5.0
+   ]
+  ],
+  [
+   "blue",
+   [
+    -20.6,
+    -12.8,
+    2.5
+   ]
+  ],
+  [
+   "blue",
+   [
+    20.6,
+    -12.8,
+    2.5
+   ]
+  ],
+  [
+   "white",
+   [
+    -15,
+    -8,
+    6.5
+   ]
+  ],
+  [
+   "white",
+   [
+    -15,
+    -3,
+    6.5
+   ]
+  ],
+  [
+   "white",
+   [
+    -15,
+    3,
+    6.5
+   ]
+  ],
+  [
+   "white",
+   [
+    -15,
+    8,
+    6.5
+   ]
+  ],
+  [
+   "white",
+   [
+    0,
+    -8,
+    6.8
+   ]
+  ],
+  [
+   "white",
+   [
+    0,
+    -3,
+    6.8
+   ]
+  ],
+  [
+   "white",
+   [
+    0,
+    3,
+    6.8
+   ]
+  ],
+  [
+   "white",
+   [
+    0,
+    8,
+    6.8
+   ]
+  ],
+  [
+   "white",
+   [
+    15,
+    -8,
+    6.5
+   ]
+  ],
+  [
+   "white",
+   [
+    15,
+    -3,
+    6.5
+   ]
+  ],
+  [
+   "white",
+   [
+    15,
+    3,
+    6.5
+   ]
+  ],
+  [
+   "white",
+   [
+    15,
+    8,
+    6.5
+   ]
+  ]
+ ],
+ "note": "Blender coords in meters; front faces -Y; hinge open = degrees about axis, slide open = meters along axis"
+}

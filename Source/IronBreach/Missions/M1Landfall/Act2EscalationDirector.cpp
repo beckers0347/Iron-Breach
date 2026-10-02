@@ -4,6 +4,7 @@
 #include "Act1BarracksDirector.h"
 #include "IronBreach.h"
 #include "IBCampaignDebugLibrary.h"
+#include "IBDialogueVoice.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 
@@ -163,7 +164,10 @@ void AAct2EscalationDirector::PlayLineAtIndex(int32 Index)
 	// "ContactBeneath" is the hard cut into Act III -- end the act the moment this
 	// line's hold finishes, same as every other line, but the FinishAct2() that
 	// follows is really the beat everything upstream has been building to.
-	const float TotalDelay = FMath::Max(0.01f, Line.HoldDuration + Line.PauseAfter);
+	// Voice-over (optional): plays Line.VoiceSound, or the asset A#_L### by naming convention,
+	// and holds the line until the clip ends. No sound found = unchanged subtitle-only timing.
+	const float VoDuration = IBDialogueVoice::PlayLine(this, Line, TEXT("A2"), Index);
+	const float TotalDelay = FMath::Max(0.01f, FMath::Max(Line.HoldDuration, VoDuration) + Line.PauseAfter);
 	GetWorldTimerManager().SetTimer(LineTimerHandle, this, &AAct2EscalationDirector::AdvanceToNextLine, TotalDelay, false);
 }
 

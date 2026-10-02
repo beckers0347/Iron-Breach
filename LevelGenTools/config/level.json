@@ -1,0 +1,35 @@
+{
+  "project_tag": "Thornfield",
+  "level_name": "L_ThornfieldGarrison",
+  "level_path": "/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison",
+  "content_root": "/Game/IronBreach/Thornfield",
+  "seed": 1337,
+  "units": "cm",
+  "north_axis": "-Y (plan y is flipped into UE world: Y_ue = H - y_plan)",
+  "bounds_cm": {
+    "min": [
+      0,
+      0
+    ],
+    "max": [
+      34400,
+      19200
+    ]
+  },
+  "base_plateau_z": 0,
+  "kill_z": -5000,
+  "sea_level": null,
+  "landscape": {
+    "heightmap_size": 1009,
+    "approx_size_cm": [
+      140000,
+      140000
+    ]
+  },
+  "mesh_native_front_yaw_deg": 90,
+  "mesh_native_front_note": "GUESS: Blender -Y front imports into UE as +Y (yaw 90). Phase 3 prints each placed building's front vector; flip this value by 180 if fronts point the wrong way.",
+  "scale_check_tolerance": 0.15,
+  "player_height_cm": 180,
+  "plan_flip_y": true,
+  "plan_scale_m_per_px": 0.25
+}

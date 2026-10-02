@@ -1,0 +1,123 @@
+[Thornfield] === p00_import_assets start ===
+[Thornfield] Imported BermBunker: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/BermBunker/SM_BermBunker.SM_BermBunker
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/BermBunker/SM_BermBunker_BlastDoor_L.SM_BermBunker_BlastDoor_L
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/BermBunker/SM_BermBunker_BlastDoor_R.SM_BermBunker_BlastDoor_R
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/BermBunker/SM_BermBunker_InnerDoor_L.SM_BermBunker_InnerDoor_L
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/BermBunker/SM_BermBunker_InnerDoor_R.SM_BermBunker_InnerDoor_R
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/BermBunker/SM_BermBunker_RearDoor.SM_BermBunker_RearDoor
+[Thornfield] Imported HangarBlock: 16 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock.SM_HangarBlock
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay0_DoorLA.SM_HangarBlock_Bay0_DoorLA
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay0_DoorLB.SM_HangarBlock_Bay0_DoorLB
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay0_DoorRA.SM_HangarBlock_Bay0_DoorRA
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay0_DoorRB.SM_HangarBlock_Bay0_DoorRB
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay0_RearDoor.SM_HangarBlock_Bay0_RearDoor
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay1_DoorLA.SM_HangarBlock_Bay1_DoorLA
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay1_DoorLB.SM_HangarBlock_Bay1_DoorLB
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay1_DoorRA.SM_HangarBlock_Bay1_DoorRA
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay1_DoorRB.SM_HangarBlock_Bay1_DoorRB
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay1_RearDoor.SM_HangarBlock_Bay1_RearDoor
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay2_DoorLA.SM_HangarBlock_Bay2_DoorLA
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay2_DoorLB.SM_HangarBlock_Bay2_DoorLB
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay2_DoorRA.SM_HangarBlock_Bay2_DoorRA
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay2_DoorRB.SM_HangarBlock_Bay2_DoorRB
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/HangarBlock/SM_HangarBlock_Bay2_RearDoor.SM_HangarBlock_Bay2_RearDoor
+[Thornfield] Imported CentralBunker: 10 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker.SM_CentralBunker
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker_FrontC_DoorL.SM_CentralBunker_FrontC_DoorL
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker_FrontC_DoorR.SM_CentralBunker_FrontC_DoorR
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker_FrontE_DoorL.SM_CentralBunker_FrontE_DoorL
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker_FrontE_DoorR.SM_CentralBunker_FrontE_DoorR
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker_FrontW_DoorL.SM_CentralBunker_FrontW_DoorL
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker_FrontW_DoorR.SM_CentralBunker_FrontW_DoorR
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker_InnerEDoor.SM_CentralBunker_InnerEDoor
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker_InnerWDoor.SM_CentralBunker_InnerWDoor
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CentralBunker/SM_CentralBunker_RearDoor.SM_CentralBunker_RearDoor
+[Thornfield] Imported GateCheckpoint: 4 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/GateCheckpoint/SM_GateCheckpoint.SM_GateCheckpoint
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/GateCheckpoint/SM_GateCheckpoint_BoomBarrier.SM_GateCheckpoint_BoomBarrier
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/GateCheckpoint/SM_GateCheckpoint_SM_GateCheckpoint_TowerE_Door.SM_GateCheckpoint_SM_GateCheckpoint_TowerE_Door
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/GateCheckpoint/SM_GateCheckpoint_SM_GateCheckpoint_TowerW_Door.SM_GateCheckpoint_SM_GateCheckpoint_TowerW_Door
+[Thornfield] Imported WatchTower: 2 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/WatchTower/SM_WatchTower.SM_WatchTower
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/WatchTower/SM_WatchTower_SM_WatchTower_Door.SM_WatchTower_SM_WatchTower_Door
+[Thornfield] Imported CommsTower: 2 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CommsTower/SM_CommsTower.SM_CommsTower
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/CommsTower/SM_CommsTower_Door.SM_CommsTower_Door
+[Thornfield] Imported RearShed: 3 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/RearShed/SM_RearShed.SM_RearShed
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/RearShed/SM_RearShed_DoorL.SM_RearShed_DoorL
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/RearShed/SM_RearShed_DoorR.SM_RearShed_DoorR
+[Thornfield] Imported MessHall: 3 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/MessHall/SM_MessHall.SM_MessHall
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/MessHall/SM_MessHall_DoorL.SM_MessHall_DoorL
+[Thornfield]     /Game/IronBreach/Thornfield/Meshes/MessHall/SM_MessHall_DoorR.SM_MessHall_DoorR
+[Thornfield] VERIFY: import_buildings PASS (8 buildings)
+[Thornfield] Imported Tree_Spruce_A: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_Spruce_A/tripo_image_67c3ffc9_0.tripo_image_67c3ffc9_0
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_Spruce_A/tripo_image_67c3ffc9_2.tripo_image_67c3ffc9_2
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_Spruce_A/tripo_image_67c3ffc9-2546-450a-be4c-cf5c5f486495_0_Roughness.tripo_image_67c3ffc9-2546-450a-be4c-cf5c5f486495_0_Roughness
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_Spruce_A/tripo_image_67c3ffc9-2546-450a-be4c-cf5c5f486495_0_Metallic.tripo_image_67c3ffc9-2546-450a-be4c-cf5c5f486495_0_Metallic
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_Spruce_A/tripo_mat_67c3ffc9.tripo_mat_67c3ffc9
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_Spruce_A/Tree_Spruce_A.Tree_Spruce_A
+[Thornfield] Imported Tree_PonderosaPine_A: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_PonderosaPine_A/tripo_image_777c4847_0.tripo_image_777c4847_0
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_PonderosaPine_A/tripo_image_777c4847_2.tripo_image_777c4847_2
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_PonderosaPine_A/tripo_image_777c4847-1908-41c2-8ac6-8c2ce54b7541_0_Roughness.tripo_image_777c4847-1908-41c2-8ac6-8c2ce54b7541_0_Roughness
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_PonderosaPine_A/tripo_image_777c4847-1908-41c2-8ac6-8c2ce54b7541_0_Metallic.tripo_image_777c4847-1908-41c2-8ac6-8c2ce54b7541_0_Metallic
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_PonderosaPine_A/tripo_mat_777c4847.tripo_mat_777c4847
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_PonderosaPine_A/Tree_PonderosaPine_A.Tree_PonderosaPine_A
+[Thornfield] Imported Tree_DeadSnag_A: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_DeadSnag_A/tripo_image_4468ea91_0.tripo_image_4468ea91_0
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_DeadSnag_A/tripo_image_4468ea91_2.tripo_image_4468ea91_2
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_DeadSnag_A/tripo_image_4468ea91-c7f2-4ffe-9f6a-7699ec8b4d23_0_Roughness.tripo_image_4468ea91-c7f2-4ffe-9f6a-7699ec8b4d23_0_Roughness
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_DeadSnag_A/tripo_image_4468ea91-c7f2-4ffe-9f6a-7699ec8b4d23_0_Metallic.tripo_image_4468ea91-c7f2-4ffe-9f6a-7699ec8b4d23_0_Metallic
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_DeadSnag_A/tripo_mat_4468ea91.tripo_mat_4468ea91
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Tree_DeadSnag_A/Tree_DeadSnag_A.Tree_DeadSnag_A
+[Thornfield] Imported Rock_MossBoulder_A: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossBoulder_A/tripo_image_a4735d09_0.tripo_image_a4735d09_0
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossBoulder_A/tripo_image_a4735d09_2.tripo_image_a4735d09_2
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossBoulder_A/tripo_image_a4735d09-53ac-4b26-98df-78a626b30e67_0_Roughness.tripo_image_a4735d09-53ac-4b26-98df-78a626b30e67_0_Roughness
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossBoulder_A/tripo_image_a4735d09-53ac-4b26-98df-78a626b30e67_0_Metallic.tripo_image_a4735d09-53ac-4b26-98df-78a626b30e67_0_Metallic
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossBoulder_A/tripo_mat_a4735d09.tripo_mat_a4735d09
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossBoulder_A/Rock_MossBoulder_A.Rock_MossBoulder_A
+[Thornfield] Imported Rock_MossCluster_B: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossCluster_B/tripo_image_3859588d_0.tripo_image_3859588d_0
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossCluster_B/tripo_image_3859588d_2.tripo_image_3859588d_2
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossCluster_B/tripo_image_3859588d-585a-4043-a835-11f3ea867c14_0_Roughness.tripo_image_3859588d-585a-4043-a835-11f3ea867c14_0_Roughness
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossCluster_B/tripo_image_3859588d-585a-4043-a835-11f3ea867c14_0_Metallic.tripo_image_3859588d-585a-4043-a835-11f3ea867c14_0_Metallic
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossCluster_B/tripo_mat_3859588d.tripo_mat_3859588d
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_MossCluster_B/Rock_MossCluster_B.Rock_MossCluster_B
+[Thornfield] Imported Rock_GranitePillar_C: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_GranitePillar_C/tripo_image_d21c426c_0.tripo_image_d21c426c_0
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_GranitePillar_C/tripo_image_d21c426c_2.tripo_image_d21c426c_2
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_GranitePillar_C/tripo_image_d21c426c-b221-49e6-af17-55d3c1d6e4d8_0_Roughness.tripo_image_d21c426c-b221-49e6-af17-55d3c1d6e4d8_0_Roughness
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_GranitePillar_C/tripo_image_d21c426c-b221-49e6-af17-55d3c1d6e4d8_0_Metallic.tripo_image_d21c426c-b221-49e6-af17-55d3c1d6e4d8_0_Metallic
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_GranitePillar_C/tripo_mat_d21c426c.tripo_mat_d21c426c
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_GranitePillar_C/Rock_GranitePillar_C.Rock_GranitePillar_C
+[Thornfield] Imported Rock_RiverBoulder_D: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_RiverBoulder_D/tripo_image_e87b2b60_0.tripo_image_e87b2b60_0
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_RiverBoulder_D/tripo_image_e87b2b60_2.tripo_image_e87b2b60_2
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_RiverBoulder_D/tripo_image_e87b2b60-b8f4-4e04-8644-272f2632815e_0_Roughness.tripo_image_e87b2b60-b8f4-4e04-8644-272f2632815e_0_Roughness
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_RiverBoulder_D/tripo_image_e87b2b60-b8f4-4e04-8644-272f2632815e_0_Metallic.tripo_image_e87b2b60-b8f4-4e04-8644-272f2632815e_0_Metallic
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_RiverBoulder_D/tripo_mat_e87b2b60.tripo_mat_e87b2b60
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Rock_RiverBoulder_D/Rock_RiverBoulder_D.Rock_RiverBoulder_D
+[Thornfield] Imported Cliff_GraniteWall_A: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Cliff_GraniteWall_A/tripo_image_c3f6a6ad_0.tripo_image_c3f6a6ad_0
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Cliff_GraniteWall_A/tripo_image_c3f6a6ad_2.tripo_image_c3f6a6ad_2
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Cliff_GraniteWall_A/tripo_image_c3f6a6ad-1e8f-45ea-9405-6877ffebc31b_0_Roughness.tripo_image_c3f6a6ad-1e8f-45ea-9405-6877ffebc31b_0_Roughness
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Cliff_GraniteWall_A/tripo_image_c3f6a6ad-1e8f-45ea-9405-6877ffebc31b_0_Metallic.tripo_image_c3f6a6ad-1e8f-45ea-9405-6877ffebc31b_0_Metallic
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Cliff_GraniteWall_A/tripo_mat_c3f6a6ad.tripo_mat_c3f6a6ad
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Cliff_GraniteWall_A/Cliff_GraniteWall_A.Cliff_GraniteWall_A
+[Thornfield] Imported Mountain_Forested_A: 6 asset(s)
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Mountain_Forested_A/tripo_image_e697d545_0.tripo_image_e697d545_0
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Mountain_Forested_A/tripo_image_e697d545_2.tripo_image_e697d545_2
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Mountain_Forested_A/tripo_image_e697d545-d36d-4b9a-854e-da2dc580b674_0_Roughness.tripo_image_e697d545-d36d-4b9a-854e-da2dc580b674_0_Roughness
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Mountain_Forested_A/tripo_image_e697d545-d36d-4b9a-854e-da2dc580b674_0_Metallic.tripo_image_e697d545-d36d-4b9a-854e-da2dc580b674_0_Metallic
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Mountain_Forested_A/tripo_mat_e697d545.tripo_mat_e697d545
+[Thornfield]     /Game/IronBreach/Thornfield/Nature/Mountain_Forested_A/Mountain_Forested_A.Mountain_Forested_A
+[Thornfield] VERIFY: import_nature PASS (9 models)
+[Thornfield] VERIFY: import_textures PASS (21 textures)
+[Thornfield] SUMMARY: 3 checks, 3 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p00_import_assets_20261002_143614.log

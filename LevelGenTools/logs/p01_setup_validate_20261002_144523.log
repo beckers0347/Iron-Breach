@@ -1,0 +1,66 @@
+[Thornfield] === p01_setup_validate start ===
+[Thornfield] VERIFY: python_ok PASS (UE 5.8.1-56057345+++UE5+Release-5.8)
+[Thornfield] VERIFY: configs PASS (5 files parsed)
+[Thornfield] VERIFY: layout_refs PASS (13 structures)
+[Thornfield] VERIFY: player_start_defined PASS (1 marked)
+[Thornfield] VERIFY: asset BermBunker PASS (bounds 2600x2500x997 cm)
+[Thornfield] WARN: BermBunker X size 26.0 m vs expected ~22.0 m (check import scale / spec guess)
+[Thornfield] WARN: BermBunker Y size 25.0 m vs expected ~18.0 m (check import scale / spec guess)
+[Thornfield] WARN: BermBunker Z size 10.0 m vs expected ~7.0 m (check import scale / spec guess)
+[Thornfield] ERROR: VERIFY: collision BermBunker FAIL (0 convex, expected 28)
+[Thornfield] VERIFY: doors BermBunker PASS (5 door meshes)
+[Thornfield] VERIFY: asset HangarBlock PASS (bounds 6920x5400x1520 cm)
+[Thornfield] WARN: HangarBlock Y size 54.0 m vs expected ~40.0 m (check import scale / spec guess)
+[Thornfield] ERROR: VERIFY: collision HangarBlock FAIL (0 convex, expected 31)
+[Thornfield] VERIFY: doors HangarBlock PASS (15 door meshes)
+[Thornfield] VERIFY: asset CentralBunker PASS (bounds 6000x3800x1480 cm)
+[Thornfield] WARN: CentralBunker X size 60.0 m vs expected ~46.0 m (check import scale / spec guess)
+[Thornfield] WARN: CentralBunker Y size 38.0 m vs expected ~24.0 m (check import scale / spec guess)
+[Thornfield] WARN: CentralBunker Z size 14.8 m vs expected ~9.6 m (check import scale / spec guess)
+[Thornfield] ERROR: VERIFY: collision CentralBunker FAIL (0 convex, expected 46)
+[Thornfield] VERIFY: doors CentralBunker PASS (9 door meshes)
+[Thornfield] VERIFY: asset GateCheckpoint PASS (bounds 6800x2000x1730 cm)
+[Thornfield] WARN: GateCheckpoint Z size 17.3 m vs expected ~13.4 m (check import scale / spec guess)
+[Thornfield] ERROR: VERIFY: collision GateCheckpoint FAIL (0 convex, expected 271)
+[Thornfield] VERIFY: doors GateCheckpoint PASS (3 door meshes)
+[Thornfield] VERIFY: asset WatchTower PASS (bounds 1400x1600x1930 cm)
+[Thornfield] WARN: WatchTower Z size 19.3 m vs expected ~16.0 m (check import scale / spec guess)
+[Thornfield] ERROR: VERIFY: collision WatchTower FAIL (0 convex, expected 144)
+[Thornfield] VERIFY: doors WatchTower PASS (1 door meshes)
+[Thornfield] VERIFY: asset CommsTower PASS (bounds 1800x1800x4560 cm)
+[Thornfield] ERROR: VERIFY: collision CommsTower FAIL (0 convex, expected 20)
+[Thornfield] VERIFY: doors CommsTower PASS (1 door meshes)
+[Thornfield] VERIFY: asset RearShed PASS (bounds 1600x1300x485 cm)
+[Thornfield] WARN: RearShed X size 16.0 m vs expected ~12.0 m (check import scale / spec guess)
+[Thornfield] WARN: RearShed Y size 13.0 m vs expected ~8.0 m (check import scale / spec guess)
+[Thornfield] WARN: RearShed Z size 4.9 m vs expected ~4.0 m (check import scale / spec guess)
+[Thornfield] ERROR: VERIFY: collision RearShed FAIL (0 convex, expected 15)
+[Thornfield] VERIFY: doors RearShed PASS (2 door meshes)
+[Thornfield] VERIFY: asset MessHall PASS (bounds 2400x1700x720 cm)
+[Thornfield] WARN: MessHall X size 24.0 m vs expected ~20.0 m (check import scale / spec guess)
+[Thornfield] WARN: MessHall Y size 17.0 m vs expected ~12.0 m (check import scale / spec guess)
+[Thornfield] WARN: MessHall Z size 7.2 m vs expected ~5.0 m (check import scale / spec guess)
+[Thornfield] ERROR: VERIFY: collision MessHall FAIL (0 convex, expected 15)
+[Thornfield] VERIFY: doors MessHall PASS (2 door meshes)
+[Thornfield] VERIFY: asset Tree_Spruce_A PASS (bounds 60x57x100 cm)
+[Thornfield] VERIFY: asset Tree_PonderosaPine_A PASS (bounds 39x40x100 cm)
+[Thornfield] VERIFY: asset Tree_DeadSnag_A PASS (bounds 48x45x100 cm)
+[Thornfield] VERIFY: asset Rock_MossBoulder_A PASS (bounds 85x100x68 cm)
+[Thornfield] VERIFY: asset Rock_MossCluster_B PASS (bounds 100x85x43 cm)
+[Thornfield] VERIFY: asset Rock_GranitePillar_C PASS (bounds 65x64x100 cm)
+[Thornfield] VERIFY: asset Rock_RiverBoulder_D PASS (bounds 100x95x70 cm)
+[Thornfield] VERIFY: asset Cliff_GraniteWall_A PASS (bounds 100x99x88 cm)
+[Thornfield] VERIFY: asset Mountain_Forested_A PASS (bounds 100x100x64 cm)
+[Thornfield] VERIFY: textures PASS (21 present)
+[Thornfield] ERROR: VERIFY: all_assets FAIL
+[Thornfield] SUMMARY: 39 checks, 30 PASS, 9 FAIL
+[Thornfield] ERROR:   FAILED: collision BermBunker 0 convex, expected 28
+[Thornfield] ERROR:   FAILED: collision HangarBlock 0 convex, expected 31
+[Thornfield] ERROR:   FAILED: collision CentralBunker 0 convex, expected 46
+[Thornfield] ERROR:   FAILED: collision GateCheckpoint 0 convex, expected 271
+[Thornfield] ERROR:   FAILED: collision WatchTower 0 convex, expected 144
+[Thornfield] ERROR:   FAILED: collision CommsTower 0 convex, expected 20
+[Thornfield] ERROR:   FAILED: collision RearShed 0 convex, expected 15
+[Thornfield] ERROR:   FAILED: collision MessHall 0 convex, expected 15
+[Thornfield] ERROR:   FAILED: all_assets 
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p01_setup_validate_20261002_144523.log

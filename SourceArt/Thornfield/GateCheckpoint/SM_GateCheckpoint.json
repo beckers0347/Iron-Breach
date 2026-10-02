@@ -1,0 +1,186 @@
+{
+ "name": "SM_GateCheckpoint",
+ "doors": {
+  "SM_GateCheckpoint_SM_GateCheckpoint_TowerW_Door": {
+   "type": "hinge",
+   "pivot": [
+    -13.23,
+    -2.8,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": 95.0
+  },
+  "SM_GateCheckpoint_SM_GateCheckpoint_TowerE_Door": {
+   "type": "hinge",
+   "pivot": [
+    11.77,
+    -2.8,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "open": 95.0
+  },
+  "SM_GateCheckpoint_BoomBarrier": {
+   "type": "hinge",
+   "pivot": [
+    -5.4,
+    -5.0,
+    1.1
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "open": -90.0
+  }
+ },
+ "lights": [
+  [
+   "blue",
+   [
+    -5.3,
+    -1.1,
+    8.4
+   ]
+  ],
+  [
+   "blue",
+   [
+    5.3,
+    -1.1,
+    8.4
+   ]
+  ],
+  [
+   "blue",
+   [
+    -2.2,
+    0,
+    11.6
+   ]
+  ],
+  [
+   "blue",
+   [
+    -5.6,
+    0,
+    11.6
+   ]
+  ],
+  [
+   "blue",
+   [
+    2.2,
+    0,
+    11.6
+   ]
+  ],
+  [
+   "blue",
+   [
+    5.6,
+    0,
+    11.6
+   ]
+  ],
+  [
+   "white",
+   [
+    -14.7,
+    0.0,
+    3.1
+   ]
+  ],
+  [
+   "white",
+   [
+    -14.7,
+    0.0,
+    6.1
+   ]
+  ],
+  [
+   "white",
+   [
+    -14.7,
+    0.0,
+    9.1
+   ]
+  ],
+  [
+   "blue",
+   [
+    -14.5,
+    -2.0,
+    14.1
+   ]
+  ],
+  [
+   "white",
+   [
+    -12.5,
+    0.0,
+    12.8
+   ]
+  ],
+  [
+   "white",
+   [
+    10.3,
+    0.0,
+    3.1
+   ]
+  ],
+  [
+   "white",
+   [
+    10.3,
+    0.0,
+    6.1
+   ]
+  ],
+  [
+   "white",
+   [
+    10.3,
+    0.0,
+    9.1
+   ]
+  ],
+  [
+   "blue",
+   [
+    10.5,
+    -2.0,
+    14.1
+   ]
+  ],
+  [
+   "white",
+   [
+    12.5,
+    0.0,
+    12.8
+   ]
+  ],
+  [
+   "amber",
+   [
+    0,
+    -1.6,
+    8.8
+   ]
+  ]
+ ],
+ "note": "Blender coords in meters; front faces -Y; hinge open = degrees about axis, slide open = meters along axis"
+}

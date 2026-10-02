@@ -5,7 +5,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/SoftObjectPtr.h"
 #include "IBLandfallDialogueTypes.generated.h"
+
+class USoundBase;
 
 UENUM(BlueprintType)
 enum class EDialogueSpeaker : uint8
@@ -51,6 +54,12 @@ struct FDialogueLine
 	// (seismic detection, stand-to order, lighting cues) off the same timeline as the VO.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue")
 	FName ScriptedEventTag = NAME_None;
+
+	// Optional voice-over clip for this line. If left empty, the director looks for a sound
+	// asset by naming convention (/Game/IronBreach/Audio/VO/M1/A1_L003 = Act I, line 3), so
+	// VO can be dropped in without touching this struct. See IBDialogueVoice.h.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue")
+	TSoftObjectPtr<USoundBase> VoiceSound;
 
 	FDialogueLine() = default;
 

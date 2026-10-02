@@ -1,0 +1,175 @@
+{
+  "_comment": "Paths are read only from here. source is relative to the project folder. expected_size_m = measured UE bounds from the first p01 run (scale confirmed 100 uu per m); used for a WARN-only sanity check. body_source = main mesh + UCX collision only (imported as ONE mesh so UE keeps the collision); source = full FBX incl. separate door meshes.",
+  "content_root": "/Game/IronBreach/Thornfield",
+  "buildings": {
+    "BermBunker": {
+      "source": "SourceArt/Thornfield/BermBunker/SM_BermBunker.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Meshes/BermBunker",
+      "main_mesh": "SM_BermBunker",
+      "door_json": "SourceArt/Thornfield/BermBunker/SM_BermBunker.json",
+      "expected_ucx": 28,
+      "expected_size_m": [
+        26,
+        25,
+        9.97
+      ],
+      "body_source": "SourceArt/Thornfield/BermBunker/Body/SM_BermBunker.fbx"
+    },
+    "HangarBlock": {
+      "source": "SourceArt/Thornfield/HangarBlock/SM_HangarBlock.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Meshes/HangarBlock",
+      "main_mesh": "SM_HangarBlock",
+      "door_json": "SourceArt/Thornfield/HangarBlock/SM_HangarBlock.json",
+      "expected_ucx": 31,
+      "expected_size_m": [
+        69.2,
+        54,
+        15.2
+      ],
+      "body_source": "SourceArt/Thornfield/HangarBlock/Body/SM_HangarBlock.fbx"
+    },
+    "CentralBunker": {
+      "source": "SourceArt/Thornfield/CentralBunker/SM_CentralBunker.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Meshes/CentralBunker",
+      "main_mesh": "SM_CentralBunker",
+      "door_json": "SourceArt/Thornfield/CentralBunker/SM_CentralBunker.json",
+      "expected_ucx": 46,
+      "expected_size_m": [
+        60,
+        38,
+        14.8
+      ],
+      "body_source": "SourceArt/Thornfield/CentralBunker/Body/SM_CentralBunker.fbx"
+    },
+    "GateCheckpoint": {
+      "source": "SourceArt/Thornfield/GateCheckpoint/SM_GateCheckpoint.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Meshes/GateCheckpoint",
+      "main_mesh": "SM_GateCheckpoint",
+      "door_json": "SourceArt/Thornfield/GateCheckpoint/SM_GateCheckpoint.json",
+      "expected_ucx": 271,
+      "expected_size_m": [
+        68,
+        20,
+        17.3
+      ],
+      "body_source": "SourceArt/Thornfield/GateCheckpoint/Body/SM_GateCheckpoint.fbx"
+    },
+    "WatchTower": {
+      "source": "SourceArt/Thornfield/WatchTower/SM_WatchTower.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Meshes/WatchTower",
+      "main_mesh": "SM_WatchTower",
+      "door_json": "SourceArt/Thornfield/WatchTower/SM_WatchTower.json",
+      "expected_ucx": 144,
+      "expected_size_m": [
+        14,
+        16,
+        19.3
+      ],
+      "body_source": "SourceArt/Thornfield/WatchTower/Body/SM_WatchTower.fbx"
+    },
+    "CommsTower": {
+      "source": "SourceArt/Thornfield/CommsTower/SM_CommsTower.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Meshes/CommsTower",
+      "main_mesh": "SM_CommsTower",
+      "door_json": "SourceArt/Thornfield/CommsTower/SM_CommsTower.json",
+      "expected_ucx": 20,
+      "expected_size_m": [
+        18,
+        18,
+        45.6
+      ],
+      "body_source": "SourceArt/Thornfield/CommsTower/Body/SM_CommsTower.fbx"
+    },
+    "RearShed": {
+      "source": "SourceArt/Thornfield/RearShed/SM_RearShed.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Meshes/RearShed",
+      "main_mesh": "SM_RearShed",
+      "door_json": "SourceArt/Thornfield/RearShed/SM_RearShed.json",
+      "expected_ucx": 15,
+      "expected_size_m": [
+        16,
+        13,
+        4.85
+      ],
+      "body_source": "SourceArt/Thornfield/RearShed/Body/SM_RearShed.fbx"
+    },
+    "MessHall": {
+      "source": "SourceArt/Thornfield/MessHall/SM_MessHall.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Meshes/MessHall",
+      "main_mesh": "SM_MessHall",
+      "door_json": "SourceArt/Thornfield/MessHall/SM_MessHall.json",
+      "expected_ucx": 15,
+      "expected_size_m": [
+        24,
+        17,
+        7.2
+      ],
+      "body_source": "SourceArt/Thornfield/MessHall/Body/SM_MessHall.fbx"
+    }
+  },
+  "nature": {
+    "Tree_Spruce_A": {
+      "source": "SourceArt/Thornfield/Tripo/Tree_Spruce_A/Tree_Spruce_A.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Nature/Tree_Spruce_A",
+      "ue_path": "/Game/IronBreach/Thornfield/Nature/Tree_Spruce_A/Tree_Spruce_A"
+    },
+    "Tree_PonderosaPine_A": {
+      "source": "SourceArt/Thornfield/Tripo/Tree_PonderosaPine_A/Tree_PonderosaPine_A.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Nature/Tree_PonderosaPine_A",
+      "ue_path": "/Game/IronBreach/Thornfield/Nature/Tree_PonderosaPine_A/Tree_PonderosaPine_A"
+    },
+    "Tree_DeadSnag_A": {
+      "source": "SourceArt/Thornfield/Tripo/Tree_DeadSnag_A/Tree_DeadSnag_A.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Nature/Tree_DeadSnag_A",
+      "ue_path": "/Game/IronBreach/Thornfield/Nature/Tree_DeadSnag_A/Tree_DeadSnag_A"
+    },
+    "Rock_MossBoulder_A": {
+      "source": "SourceArt/Thornfield/Tripo/Rock_MossBoulder_A/Rock_MossBoulder_A.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Nature/Rock_MossBoulder_A",
+      "ue_path": "/Game/IronBreach/Thornfield/Nature/Rock_MossBoulder_A/Rock_MossBoulder_A"
+    },
+    "Rock_MossCluster_B": {
+      "source": "SourceArt/Thornfield/Tripo/Rock_MossCluster_B/Rock_MossCluster_B.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Nature/Rock_MossCluster_B",
+      "ue_path": "/Game/IronBreach/Thornfield/Nature/Rock_MossCluster_B/Rock_MossCluster_B"
+    },
+    "Rock_GranitePillar_C": {
+      "source": "SourceArt/Thornfield/Tripo/Rock_GranitePillar_C/Rock_GranitePillar_C.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Nature/Rock_GranitePillar_C",
+      "ue_path": "/Game/IronBreach/Thornfield/Nature/Rock_GranitePillar_C/Rock_GranitePillar_C"
+    },
+    "Rock_RiverBoulder_D": {
+      "source": "SourceArt/Thornfield/Tripo/Rock_RiverBoulder_D/Rock_RiverBoulder_D.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Nature/Rock_RiverBoulder_D",
+      "ue_path": "/Game/IronBreach/Thornfield/Nature/Rock_RiverBoulder_D/Rock_RiverBoulder_D"
+    },
+    "Cliff_GraniteWall_A": {
+      "source": "SourceArt/Thornfield/Tripo/Cliff_GraniteWall_A/Cliff_GraniteWall_A.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Nature/Cliff_GraniteWall_A",
+      "ue_path": "/Game/IronBreach/Thornfield/Nature/Cliff_GraniteWall_A/Cliff_GraniteWall_A"
+    },
+    "Mountain_Forested_A": {
+      "source": "SourceArt/Thornfield/Tripo/Mountain_Forested_A/Mountain_Forested_A.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Nature/Mountain_Forested_A",
+      "ue_path": "/Game/IronBreach/Thornfield/Nature/Mountain_Forested_A/Mountain_Forested_A"
+    }
+  },
+  "textures": {
+    "source_dir": "SourceArt/Thornfield/Textures",
+    "dest": "/Game/IronBreach/Thornfield/Textures",
+    "sets": [
+      "Concrete",
+      "ConcreteDark",
+      "Steel",
+      "Hazard",
+      "MossEarth",
+      "FloorConcrete",
+      "Banner"
+    ],
+    "suffixes": {
+      "BC": "color",
+      "N": "normal_opengl",
+      "ORM": "orm"
+    }
+  }
+}
