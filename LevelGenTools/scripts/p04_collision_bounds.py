@@ -134,6 +134,8 @@ def main():
             try:
                 comp.set_collision_profile_name("BlockAll")
                 comp.set_editor_property("hidden_in_game", True)
+                comp.set_visibility(False)           # invisible in editor + game; collision stays
+                comp.set_editor_property("cast_shadow", False)
                 walls_ok += 1
             except Exception as e:
                 G.err("Wall %s setup failed: %r" % (label, e))

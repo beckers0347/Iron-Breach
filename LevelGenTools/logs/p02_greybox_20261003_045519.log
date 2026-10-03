@@ -1,0 +1,27 @@
+[Thornfield] === p02_greybox start ===
+[Thornfield] Loaded existing level /Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison (True)
+[Thornfield] Cleanup: removed 31 previous GEN_Phase2 actors
+[Thornfield] Greybox Gate at (16750, 1938) yaw=0.0 size 6800x2000x1730
+[Thornfield] Greybox Barracks at (6000, 11438) yaw=-90.0 size 2600x2500x997
+[Thornfield] Greybox Armory at (7500, 16062) yaw=-90.0 size 2600x2500x997
+[Thornfield] Greybox Medical at (9750, 6688) yaw=-90.0 size 2600x2500x997
+[Thornfield] Greybox Hangar at (27750, 11688) yaw=21.5 size 6920x5400x1520
+[Thornfield] Greybox Command at (17312, 14062) yaw=0.0 size 6000x3800x1480
+[Thornfield] Greybox MessHall at (21500, 17438) yaw=0.0 size 2400x1700x720
+[Thornfield] Greybox RearShed_A at (21800, 14938) yaw=0.0 size 1600x1300x485
+[Thornfield] Greybox RearShed_B at (22500, 4688) yaw=0.0 size 1600x1300x485
+[Thornfield] Greybox Comms at (24375, 17438) yaw=0.0 size 1800x1800x4560
+[Thornfield] Greybox WatchTower_NW at (5000, 13938) yaw=0.0 size 1400x1600x1930
+[Thornfield] Greybox WatchTower_N at (17500, 17938) yaw=0.0 size 1400x1600x1930
+[Thornfield] Greybox WatchTower_SE at (31250, 5188) yaw=0.0 size 1400x1600x1930
+[Thornfield] Greybox spawned: 57 actors
+[Thornfield] Viewport set to top-down over the base (North (-Y) up, East right, matching the S01 plan). Switch the viewport to Lit/Unlit as you like.
+[Thornfield] VERIFY: footprint PASS (34400 x 19200 cm)
+[Thornfield] VERIFY: structures_greybox PASS (13 of 13)
+[Thornfield] VERIFY: greybox_inside_bounds PASS (all inside)
+[Thornfield] VERIFY: player_start PASS (at (6000, 7762, 100))
+[Thornfield] VERIFY: scale_refs PASS (180 cm person + 800 cm vehicle)
+[Thornfield] VERIFY: roads PASS (14 segments)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 7 checks, 7 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p02_greybox_20261003_045519.log

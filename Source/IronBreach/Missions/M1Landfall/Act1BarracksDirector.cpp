@@ -44,7 +44,8 @@ void AAct1BarracksDirector::BuildDefaultBeats()
 	Beats.Add(FDialogueLine(
 		EDialogueSpeaker::None,
 		FText::FromString(TEXT("Lt. Rhodes enters the watch room.")),
-		2.0f, 0.5f));
+		2.0f, 0.5f,
+		FName("RhodesEnters")));
 
 	Beats.Add(FDialogueLine(
 		EDialogueSpeaker::Comms,
@@ -77,6 +78,15 @@ void AAct1BarracksDirector::BeginPlay()
 	{
 		UE_LOG(LogIronBreach, Log, TEXT("[Act I] Campaign disabled (IronBreach.DisableCampaign) -- staying dormant."));
 		return;
+	}
+
+	// Staging: everyone with an entrance cue waits off-stage until their beat.
+	for (const FAct1NPCCue& Cue : NPCCues)
+	{
+		if (Cue.RevealOnEvent != NAME_None)
+		{
+			SetCueVisible(Cue, false);
+		}
 	}
 
 	if (bAutoStart)
@@ -143,7 +153,24 @@ void AAct1BarracksDirector::PlayLineAtIndex(int32 Index)
 
 void AAct1BarracksDirector::HandleScriptedEvent(FName EventTag)
 {
+	for (const FAct1NPCCue& Cue : NPCCues)
+	{
+		if (Cue.RevealOnEvent == EventTag)
+		{
+			SetCueVisible(Cue, true);
+			UE_LOG(LogIronBreach, Log, TEXT("[Act I] %s enters (%s)."), Cue.Actor.Get() ? *Cue.Actor.Get()->GetActorNameOrLabel() : TEXT("<unset>"), *EventTag.ToString());
+		}
+	}
 	OnScriptedEvent.Broadcast(EventTag);
+}
+
+void AAct1BarracksDirector::SetCueVisible(const FAct1NPCCue& Cue, bool bVisible) const
+{
+	if (AActor* A = Cue.Actor.Get())
+	{
+		A->SetActorHiddenInGame(!bVisible);
+		A->SetActorEnableCollision(bVisible);
+	}
 }
 
 void AAct1BarracksDirector::FinishAct1()
@@ -154,6 +181,10 @@ void AAct1BarracksDirector::FinishAct1()
 	}
 
 	bHasCompleted = true;
+	for (const FAct1NPCCue& Cue : NPCCues)
+	{
+		SetCueVisible(Cue, true); // nobody stays off-stage once the squad moves out
+	}
 	UE_LOG(LogIronBreach, Log, TEXT("[Act I] Complete -- stand-to order given."));
 	OnAct1Complete.Broadcast();
 }

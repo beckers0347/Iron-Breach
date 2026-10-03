@@ -1,0 +1,50 @@
+[Thornfield] === p01_setup_validate start ===
+[Thornfield] VERIFY: python_ok PASS (UE 5.8.1-56057345+++UE5+Release-5.8)
+[Thornfield] VERIFY: configs PASS (5 files parsed)
+[Thornfield] VERIFY: layout_refs PASS (13 structures)
+[Thornfield] VERIFY: player_start_defined PASS (1 marked)
+[Thornfield] VERIFY: asset BermBunker PASS (bounds 2600x2500x997 cm)
+[Thornfield] collision detail BermBunker: {'convex': 28, 'box': 0, 'sphere': 0, 'sphyl': 0, 'lib_convex': 28, 'complexity': '<CollisionTraceFlag.CTF_USE_DEFAULT: 0>'}
+[Thornfield] VERIFY: collision BermBunker PASS (28 primitives, UCX in FBX 28)
+[Thornfield] VERIFY: doors BermBunker PASS (5 door meshes)
+[Thornfield] VERIFY: asset HangarBlock PASS (bounds 6920x5400x1520 cm)
+[Thornfield] collision detail HangarBlock: {'convex': 31, 'box': 0, 'sphere': 0, 'sphyl': 0, 'lib_convex': 31, 'complexity': '<CollisionTraceFlag.CTF_USE_DEFAULT: 0>'}
+[Thornfield] VERIFY: collision HangarBlock PASS (31 primitives, UCX in FBX 31)
+[Thornfield] VERIFY: doors HangarBlock PASS (15 door meshes)
+[Thornfield] VERIFY: asset CentralBunker PASS (bounds 6000x3800x1480 cm)
+[Thornfield] collision detail CentralBunker: {'convex': 46, 'box': 0, 'sphere': 0, 'sphyl': 0, 'lib_convex': 46, 'complexity': '<CollisionTraceFlag.CTF_USE_DEFAULT: 0>'}
+[Thornfield] VERIFY: collision CentralBunker PASS (46 primitives, UCX in FBX 46)
+[Thornfield] VERIFY: doors CentralBunker PASS (9 door meshes)
+[Thornfield] VERIFY: asset GateCheckpoint PASS (bounds 6800x2000x1730 cm)
+[Thornfield] collision detail GateCheckpoint: {'convex': 271, 'box': 0, 'sphere': 0, 'sphyl': 0, 'lib_convex': 271, 'complexity': '<CollisionTraceFlag.CTF_USE_DEFAULT: 0>'}
+[Thornfield] VERIFY: collision GateCheckpoint PASS (271 primitives, UCX in FBX 271)
+[Thornfield] VERIFY: doors GateCheckpoint PASS (3 door meshes)
+[Thornfield] VERIFY: asset WatchTower PASS (bounds 1400x1600x1930 cm)
+[Thornfield] collision detail WatchTower: {'convex': 144, 'box': 0, 'sphere': 0, 'sphyl': 0, 'lib_convex': 144, 'complexity': '<CollisionTraceFlag.CTF_USE_DEFAULT: 0>'}
+[Thornfield] VERIFY: collision WatchTower PASS (144 primitives, UCX in FBX 144)
+[Thornfield] VERIFY: doors WatchTower PASS (1 door meshes)
+[Thornfield] VERIFY: asset CommsTower PASS (bounds 1800x1800x4560 cm)
+[Thornfield] collision detail CommsTower: {'convex': 20, 'box': 0, 'sphere': 0, 'sphyl': 0, 'lib_convex': 20, 'complexity': '<CollisionTraceFlag.CTF_USE_DEFAULT: 0>'}
+[Thornfield] VERIFY: collision CommsTower PASS (20 primitives, UCX in FBX 20)
+[Thornfield] VERIFY: doors CommsTower PASS (1 door meshes)
+[Thornfield] VERIFY: asset RearShed PASS (bounds 1600x1300x485 cm)
+[Thornfield] collision detail RearShed: {'convex': 15, 'box': 0, 'sphere': 0, 'sphyl': 0, 'lib_convex': 15, 'complexity': '<CollisionTraceFlag.CTF_USE_DEFAULT: 0>'}
+[Thornfield] VERIFY: collision RearShed PASS (15 primitives, UCX in FBX 15)
+[Thornfield] VERIFY: doors RearShed PASS (2 door meshes)
+[Thornfield] VERIFY: asset MessHall PASS (bounds 2400x1700x720 cm)
+[Thornfield] collision detail MessHall: {'convex': 15, 'box': 0, 'sphere': 0, 'sphyl': 0, 'lib_convex': 15, 'complexity': '<CollisionTraceFlag.CTF_USE_DEFAULT: 0>'}
+[Thornfield] VERIFY: collision MessHall PASS (15 primitives, UCX in FBX 15)
+[Thornfield] VERIFY: doors MessHall PASS (2 door meshes)
+[Thornfield] VERIFY: asset Tree_Spruce_A PASS (bounds 60x57x100 cm)
+[Thornfield] VERIFY: asset Tree_PonderosaPine_A PASS (bounds 39x40x100 cm)
+[Thornfield] VERIFY: asset Tree_DeadSnag_A PASS (bounds 48x45x100 cm)
+[Thornfield] VERIFY: asset Rock_MossBoulder_A PASS (bounds 85x100x68 cm)
+[Thornfield] VERIFY: asset Rock_MossCluster_B PASS (bounds 100x85x43 cm)
+[Thornfield] VERIFY: asset Rock_GranitePillar_C PASS (bounds 65x64x100 cm)
+[Thornfield] VERIFY: asset Rock_RiverBoulder_D PASS (bounds 100x95x70 cm)
+[Thornfield] VERIFY: asset Cliff_GraniteWall_A PASS (bounds 100x99x88 cm)
+[Thornfield] VERIFY: asset Mountain_Forested_A PASS (bounds 100x100x64 cm)
+[Thornfield] VERIFY: textures PASS (21 present)
+[Thornfield] VERIFY: all_assets PASS
+[Thornfield] SUMMARY: 39 checks, 39 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p01_setup_validate_20261003_045512.log

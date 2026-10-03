@@ -1,0 +1,15 @@
+[Thornfield] === p06_lighting start ===
+[Thornfield] Cleanup: removed 165 previous GEN_Phase6 actors
+[Thornfield] Sun: pitch -9.0, yaw -22.5 (sun in the 247.5 compass direction), 6.0 lux
+[Thornfield] VERIFY: sun PASS (6.0 lux, yaw -22.5)
+[Thornfield] VERIFY: atmosphere PASS (SkyAtmosphere + SkyLight (real-time capture))
+[Thornfield] WARN: Could not set fog.fog_inscattering_color: Exception("ExponentialHeightFogComponent: Failed to find property 'fog_inscattering_color' for attribute 'fog_inscattering_color' on 'ExponentialHeightFogComponent'")
+[Thornfield] WARN: Could not set fog.volumetric_fog: Exception("ExponentialHeightFogComponent: Failed to find property 'volumetric_fog' for attribute 'volumetric_fog' on 'ExponentialHeightFogComponent'")
+[Thornfield] WARN: Could not set fog.volumetric_fog_distribution_contribution: Exception("ExponentialHeightFogComponent: Failed to find property 'volumetric_fog_distribution_contribution' for attribute 'volumetric_fog_distribution_contribution' on 'ExponentialHeightFogComponent'")
+[Thornfield] VERIFY: fog PASS (density 0.035 falloff 0.18 volumetric True)
+[Thornfield] VERIFY: post_process PASS (unbound=True, manual exposure, bloom 0.6, Lumen GI/reflections)
+[Thornfield] Interior lights by colour: {'blue': 19, 'white': 93, 'amber': 46, 'red': 2}
+[Thornfield] VERIFY: interior_lights PASS (160 lights (expected 160), 0 outside bounds)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 6 checks, 6 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p06_lighting_20261003_045550.log

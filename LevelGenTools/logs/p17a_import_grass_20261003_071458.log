@@ -1,0 +1,9 @@
+[Thornfield] === p17a_import_grass start ===
+[Thornfield] VERIFY: grass_material PASS (M_Grass (two-sided, root-to-tip gradient))
+[Thornfield] SM_GrassPatch_0: bounds 438x421x70
+[Thornfield] SM_GrassPatch_1: bounds 421x420x72
+[Thornfield] SM_GrassPatch_2: bounds 401x434x71
+[Thornfield] SM_GrassPatch_3: bounds 437x422x72
+[Thornfield] VERIFY: grass_imported PASS (4 of 4)
+[Thornfield] SUMMARY: 2 checks, 2 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p17a_import_grass_20261003_071458.log

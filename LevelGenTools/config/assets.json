@@ -171,5 +171,68 @@
       "N": "normal_opengl",
       "ORM": "orm"
     }
+  },
+  "props": {
+    "PerimeterWall": {
+      "source": "SourceArt/Thornfield/Props/SM_PerimeterWall.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_PerimeterWall"
+    },
+    "JerseyBarrier": {
+      "source": "SourceArt/Thornfield/Props/SM_JerseyBarrier.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_JerseyBarrier"
+    },
+    "TankTrap": {
+      "source": "SourceArt/Thornfield/Props/SM_TankTrap.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_TankTrap"
+    },
+    "CargoContainer": {
+      "source": "SourceArt/Thornfield/Props/SM_CargoContainer.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_CargoContainer"
+    },
+    "Crate": {
+      "source": "SourceArt/Thornfield/Props/SM_Crate.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_Crate"
+    },
+    "Pallet": {
+      "source": "SourceArt/Thornfield/Props/SM_Pallet.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_Pallet"
+    },
+    "FuelTank": {
+      "source": "SourceArt/Thornfield/Props/SM_FuelTank.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_FuelTank"
+    },
+    "Generator": {
+      "source": "SourceArt/Thornfield/Props/SM_Generator.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_Generator"
+    },
+    "LightPole": {
+      "source": "SourceArt/Thornfield/Props/SM_LightPole.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_LightPole"
+    },
+    "Sign": {
+      "source": "SourceArt/Thornfield/Props/SM_Sign.fbx",
+      "dest": "/Game/IronBreach/Thornfield/Props",
+      "ue_path": "/Game/IronBreach/Thornfield/Props/SM_Sign"
+    }
+  },
+  "door_skeletals": {
+    "source_root": "SourceArt/Thornfield/Doors",
+    "dest_root": "/Game/IronBreach/Thornfield/Doors",
+    "sensor_margin_cm": 350,
+    "close_delay_s": 2.0
+  },
+  "grass": {
+    "source_dir": "SourceArt/Thornfield/Grass",
+    "dest": "/Game/IronBreach/Thornfield/Nature/Grass",
+    "variants": 4
   }
 }

@@ -1,40 +1,55 @@
 {
   "_comment": "Golden hour sliding to dusk. Sun comes from the west-southwest, low. Used by Phase 6. from_compass_deg = direction the sun is IN (clockwise from north, WSW=247.5); the script converts it to a UE yaw using north=-Y, east=+X. yaw_deg is ignored.",
   "sun": {
-    "pitch_deg": -9.0,
+    "pitch_deg": -24.0,
     "yaw_deg": 250.0,
-    "intensity_lux": 6.0,
+    "intensity_lux": 28.0,
     "color_rgb": [
       1.0,
-      0.62,
-      0.32
+      0.58,
+      0.28
     ],
     "source_angle_deg": 1.5,
     "from_compass_deg": 247.5
   },
   "sky_light": {
-    "intensity": 1.0,
-    "real_time_capture": true
+    "intensity": 2.0,
+    "real_time_capture": true,
+    "color_rgb": [
+      1.0,
+      0.82,
+      0.62
+    ]
   },
   "fog": {
-    "density": 0.035,
+    "density": 0.01,
     "falloff": 0.18,
-    "start_distance_cm": 800,
+    "start_distance_cm": 2000,
     "color_rgb": [
-      0.55,
-      0.5,
-      0.5
+      0.8,
+      0.66,
+      0.48
     ],
     "volumetric": true,
     "volumetric_distribution": 0.9
   },
   "post_process": {
     "unbound": true,
-    "exposure_method": "manual",
-    "exposure_compensation": 0.5,
-    "bloom_intensity": 0.6,
+    "exposure_method": "auto",
+    "exposure_compensation": 1.4,
+    "bloom_intensity": 0.4,
     "lumen_gi": true,
-    "lumen_reflections": true
+    "lumen_reflections": true,
+    "auto_min_brightness": 1.0,
+    "auto_max_brightness": 8.0,
+    "color_gain": [
+      1.08,
+      1.0,
+      0.85,
+      1.0
+    ],
+    "saturation": 1.12,
+    "contrast": 1.05
   },
   "interior_lights": {
     "amber_rgb": [
@@ -47,8 +62,9 @@
       0.5,
       1.0
     ],
-    "amber_intensity_cd": 800,
-    "blue_intensity_cd": 300,
-    "attenuation_cm": 900
+    "amber_intensity_cd": 1800,
+    "blue_intensity_cd": 700,
+    "attenuation_cm": 800,
+    "all_cast_shadows": true
   }
 }

@@ -39,12 +39,6 @@ void AAct2EscalationDirector::BuildDefaultBeats()
 		4.0f, 0.8f,
 		FName("GullsVanish")));
 
-	Beats.Add(FDialogueLine(
-		EDialogueSpeaker::None,
-		FText::FromString(TEXT("A K9 shepherd flattens itself against a wall and will not move. Its handler can't coax it forward.")),
-		4.5f, 0.8f,
-		FName("K9Refusal")));
-
 	// --- The glow-veins. ---
 
 	Beats.Add(FDialogueLine(

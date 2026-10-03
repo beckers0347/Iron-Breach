@@ -2,6 +2,7 @@
 
 #include "IBCampaignDebugLibrary.h"
 #include "HAL/IConsoleManager.h"
+#include "IBCampaignEditorSettings.h"
 
 static TAutoConsoleVariable<bool> CVarIBDisableCampaign(
 	TEXT("IronBreach.DisableCampaign"),
@@ -14,7 +15,19 @@ static TAutoConsoleVariable<bool> CVarIBDisableCampaign(
 
 bool UIBCampaignDebugLibrary::IsCampaignDisabled()
 {
-	return CVarIBDisableCampaign.GetValueOnGameThread();
+	if (CVarIBDisableCampaign.GetValueOnGameThread())
+	{
+		return true;
+	}
+#if WITH_EDITOR
+	// Editor Preferences > Iron Breach > Campaign > "Run Campaign In PIE". GIsEditor is only true in the
+	// editor process, so this covers PIE/Simulate and never a packaged or standalone game.
+	if (GIsEditor && !GetDefault<UIBCampaignEditorSettings>()->bRunCampaignInPIE)
+	{
+		return true;
+	}
+#endif
+	return false;
 }
 
 void UIBCampaignDebugLibrary::SetCampaignDisabled(bool bDisabled)

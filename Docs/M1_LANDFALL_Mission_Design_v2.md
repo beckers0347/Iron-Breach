@@ -103,7 +103,7 @@ No combat. Already placed and wired in `CarrowGateGarrison` (`AAct1BarracksDirec
 
 *(= original DREAD beat, "The Birds Are Gone")*
 
-Auto-chains off Act I. The fireteam moves into the district to marshal a pre-dawn evacuation (buses loading, wardens with paddles, civilians in coats over pajamas) — door-knocking and escort, no combat, onboarding the extraction verb before it has stakes. Escalation ladder, in order: birdless sky, a K9 refusing to work, glow-veins surfacing through the asphalt (a child evacuee reaches for one, pulled back — "the flowers," planted a decade early). No music — the mix removing things *is* the score. Ends when the road swells like an inhale, sirens change tone, and Rhodes calls contact directly beneath them.
+Auto-chains off Act I. The fireteam moves into the district to marshal a pre-dawn evacuation (buses loading, wardens with paddles, civilians in coats over pajamas) — door-knocking and escort, no combat, onboarding the extraction verb before it has stakes. Escalation ladder, in order: birdless sky, glow-veins surfacing through the asphalt (a child evacuee reaches for one, pulled back — "the flowers," planted a decade early). No music — the mix removing things *is* the score. Ends when the road swells like an inhale, sirens change tone, and Rhodes calls contact directly beneath them.
 
 No combat. Already placed and wired in `CarrowGateGarrison` (`AAct2EscalationDirector`), chained off Act I.
 

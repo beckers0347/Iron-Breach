@@ -299,7 +299,7 @@
     {
       "name": "MainLoop",
       "surface": "dirt",
-      "width_cm": 600,
+      "width_cm": 1000,
       "points": [
         [
           16750,

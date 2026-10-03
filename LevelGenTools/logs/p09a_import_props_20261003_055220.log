@@ -1,0 +1,16 @@
+[Thornfield] === p09a_import_props start ===
+[Thornfield] PerimeterWall: bounds 430x44x332, 1 collision primitives, 5 slots
+[Thornfield] JerseyBarrier: bounds 300x59x80, 1 collision primitives, 1 slots
+[Thornfield] TankTrap: bounds 140x108x140, 1 collision primitives, 1 slots
+[Thornfield] CargoContainer: bounds 612x251x259, 1 collision primitives, 4 slots
+[Thornfield] Crate: bounds 104x104x95, 1 collision primitives, 3 slots
+[Thornfield] Pallet: bounds 122x102x12, 1 collision primitives, 1 slots
+[Thornfield] FuelTank: bounds 405x174x230, 1 collision primitives, 5 slots
+[Thornfield] Generator: bounds 220x100x180, 1 collision primitives, 4 slots
+[Thornfield] LightPole: bounds 205x50x730, 1 collision primitives, 4 slots
+[Thornfield] Sign: bounds 120x9x230, 1 collision primitives, 4 slots
+[Thornfield] VERIFY: props_imported PASS (10 of 10)
+[Thornfield] VERIFY: props_collision PASS (all have UCX collision)
+[Thornfield] VERIFY: props_materials PASS (all slots mapped)
+[Thornfield] SUMMARY: 3 checks, 3 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p09a_import_props_20261003_055220.log

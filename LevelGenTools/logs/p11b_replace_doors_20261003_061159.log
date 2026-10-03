@@ -1,0 +1,10 @@
+[Thornfield] === p11b_replace_doors start ===
+[Thornfield] Cleanup: removed 0 previous GEN_Phase11 actors
+[Thornfield] Removed 52 static door actors
+[Thornfield] Sensor doors spawned: 52 of 52
+[Thornfield] VERIFY: doors_spawned PASS (52 sensor doors)
+[Thornfield] VERIFY: doors_configured PASS (52 configured)
+[Thornfield] VERIFY: static_doors_removed PASS (no static door actors left)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 4 checks, 4 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p11b_replace_doors_20261003_061159.log

@@ -1,0 +1,12 @@
+[Thornfield] === p16_dirt_roads start ===
+[Thornfield] Cleanup: removed 659 previous GEN_Phase16 actors
+[Thornfield] Removed 0 old MainLoop strips
+[Thornfield] VERIFY: road_curve PASS (175 segments, 1000 cm wide, 404 m long)
+[Thornfield] VERIFY: road_detail PASS (305 ruts, 174 ragged-edge splotches)
+[Thornfield] VERIFY: spurs PASS (6 spur roads to building entrances)
+[Thornfield] VERIFY: pads PASS (13 entrance pads)
+[Thornfield] Removed 0 trees/rocks that stood on the new roads
+[Thornfield] VERIFY: roads_clear PASS (0 trees/rocks cleared from the roads)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 6 checks, 6 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p16_dirt_roads_20261003_064614.log

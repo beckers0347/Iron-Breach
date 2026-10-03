@@ -294,7 +294,7 @@ Class A, 151 m, first logged 2041. Eleven engagements, zero kills taken, zero ci
 
 **M1 — "LANDFALL."** Carrowgate, 04:12, a Class C (PALAWAN) gestation surfacing mid-evacuation.
 - *Quiet:* pre-dawn garrison routine — coffee, sensor watch, Static's podcast on the Green Tomb "hum recordings" (seed: the Nine, minute one of the game — L27).
-- *Dread:* birdless sky; dogs gone silent; the birthquake's glow-veins crawling up through asphalt (seed: arteries).
+- *Dread:* birdless sky; the birthquake's glow-veins crawling up through asphalt (seed: arteries).
 - *Burst:* eruption; district collapse; the player's fireteam runs *toward* the sirens. Objective grammar established: extraction counts on-screen, kills don't.
 - *Aftermath:* the player carries **Ms. Idris**, a stranger, 400 meters through dust — she talks to keep them both calm, then stops. The squad names the player Ferryman over her stretcher. PALAWAN, un-engaged, folds down two blocks short of the hospital and begins to calcify — *it stops on its own* (seed: function, not rampage — the campaign's first quiet wrongness).
 - *Lore payload:* Emergence 101; tide-mark culture (a frame is glimpsed once, kneeling at the sea-wall, painting a ring).

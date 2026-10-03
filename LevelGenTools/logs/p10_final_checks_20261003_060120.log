@@ -1,0 +1,18 @@
+[Thornfield] === p10_final_checks start ===
+[Thornfield] Total actors in level: 1294
+[Thornfield] ERROR: VERIFY: phases_present FAIL (no actors for phases [7])
+[Thornfield] VERIFY: structures PASS (13 of 13)
+[Thornfield] VERIFY: doors PASS (52 door actors (expected 52))
+[Thornfield] VERIFY: player_start PASS (1 PlayerStart(s), inside the Barracks zone)
+[Thornfield] VERIFY: above_kill_z PASS (all actors above -5000)
+[Thornfield] VERIFY: props_in_bounds PASS (all Phase 9 props inside bounds)
+[Thornfield] ERROR: VERIFY: materials_ok FAIL (4 actors, e.g. ['BoundWall_West[0]', 'BoundWall_East[0]', 'BoundWall_South[0]', 'BoundWall_North[0]'])
+[Thornfield] VERIFY: lighting_actors PASS ({'DirectionalLight': 1, 'SkyAtmosphere': 1, 'SkyLight': 1, 'ExponentialHeightFog': 1, 'PostProcessVolume': 1})
+[Thornfield] Point lights: 167
+[Thornfield] VERIFY: kill_z_set PASS (KillZ=-5000)
+[Thornfield] VERIFY: all_saved PASS (nothing unsaved)
+[Thornfield] Report written: X:\IronBreach\LevelGenTools\logs\final_report.json
+[Thornfield] SUMMARY: 10 checks, 8 PASS, 2 FAIL
+[Thornfield] ERROR:   FAILED: phases_present no actors for phases [7]
+[Thornfield] ERROR:   FAILED: materials_ok 4 actors, e.g. ['BoundWall_West[0]', 'BoundWall_East[0]', 'BoundWall_South[0]', 'BoundWall_North[0]']
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p10_final_checks_20261003_060120.log

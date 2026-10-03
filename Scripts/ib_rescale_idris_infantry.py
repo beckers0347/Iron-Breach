@@ -26,7 +26,7 @@ Paste back the full output, then look at them in the viewport again.
 import os
 import unreal
 
-SOURCE_FBX = r"X:\Downloads\Ms_Idris_wSkeleton.fbx"
+SOURCE_FBX = "X:/Downloads/NPCs/MsIdris_Source/Ms_Idris_wSkeleton.fbx"
 DEST_PATH = "/Game/Characters/NPCs/MsIdris"
 DEST_NAME = "Ms_Idris_Infantry"
 INFANTRY_SKELETON_PATH = "/Game/Characters/Infantry/Meshes/JumpSuit/Base_Character_Mesh_Skeleton"
@@ -66,6 +66,8 @@ def main():
     options.create_physics_asset = False
     options.skeleton = infantry_skeleton
     options.skeletal_mesh_import_data.set_editor_property("import_uniform_scale", IMPORT_SCALE)
+    # the Tripo/Mixamo source is Y-up: bake the 90-degree turn into the mesh so it is Z-up like the Infantry skeleton
+    options.skeletal_mesh_import_data.set_editor_property("import_rotation", unreal.Rotator(roll=-90, pitch=0, yaw=0))
     task.options = options
 
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])

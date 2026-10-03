@@ -70,7 +70,7 @@ def main():
         sun = G.spawn_by_class(unreal.DirectionalLight, (cx, cy, 20000.0), (s["pitch_deg"], sun_yaw, 0), "Sun_GoldenHour", PHASE)
         sc = sun.get_component_by_class(unreal.DirectionalLightComponent)
         sc.set_editor_property("intensity", float(s["intensity_lux"]))
-        sc.set_editor_property("light_color", unreal.Color(int(s["color_rgb"][0] * 255), int(s["color_rgb"][1] * 255), int(s["color_rgb"][2] * 255), 255))
+        sc.set_editor_property("light_color", unreal.Color(r=int(s["color_rgb"][0] * 255), g=int(s["color_rgb"][1] * 255), b=int(s["color_rgb"][2] * 255), a=255))
         _set(sc, "light_source_angle", float(s["source_angle_deg"]), "sun")
         _set(sc, "atmosphere_sun_light", True, "sun")
         G.log("Sun: pitch %.1f, yaw %.1f (sun in the %.1f compass direction), %.1f lux" % (s["pitch_deg"], sun_yaw, s["from_compass_deg"], s["intensity_lux"]))
@@ -81,6 +81,9 @@ def main():
         sk = G.spawn_by_class(unreal.SkyLight, (cx, cy, zt + 5000.0), (0, 0, 0), "SkyLight", PHASE)
         skc = sk.get_component_by_class(unreal.SkyLightComponent)
         _set(skc, "intensity", float(cfg["sky_light"]["intensity"]), "skylight")
+        sc_col = cfg["sky_light"].get("color_rgb")
+        if sc_col:
+            _set(skc, "light_color", unreal.Color(r=int(sc_col[0] * 255), g=int(sc_col[1] * 255), b=int(sc_col[2] * 255), a=255), "skylight")
         _set(skc, "real_time_capture", bool(cfg["sky_light"]["real_time_capture"]), "skylight")
         G.verify("atmosphere", atm is not None and sk is not None, "SkyAtmosphere + SkyLight (real-time capture)")
 
@@ -91,9 +94,16 @@ def main():
         _set(fc, "fog_density", float(f["density"]), "fog")
         _set(fc, "fog_height_falloff", float(f["falloff"]), "fog")
         _set(fc, "start_distance", float(f["start_distance_cm"]), "fog")
-        _set(fc, "fog_inscattering_color", _color(f["color_rgb"]), "fog")
-        _set(fc, "volumetric_fog", bool(f["volumetric"]), "fog")
-        _set(fc, "volumetric_fog_distribution_contribution", float(f.get("volumetric_distribution", 0.9)), "fog")
+        names = [n for n in dir(fc) if not n.startswith("_")]
+        G.log("Fog properties available: %s" % [n for n in names if any(k in n for k in ("volumetric", "inscatter"))])
+        for cands, val in ((["fog_inscattering_luminance", "fog_inscattering_color"], _color(f["color_rgb"])),
+                           (["volumetric_fog", "enable_volumetric_fog"], bool(f["volumetric"])),
+                           (["volumetric_fog_scattering_distribution", "volumetric_fog_distribution_contribution"], float(f.get("volumetric_distribution", 0.9)))):
+            hit = next((n for n in cands if n in names), None)
+            if hit:
+                _set(fc, hit, val, "fog")
+            else:
+                G.warn("No fog property found among %s" % cands)
         G.verify("fog", abs(fc.get_editor_property("fog_density") - f["density"]) < 1e-6,
                  "density %.3f falloff %.2f volumetric %s" % (f["density"], f["falloff"], f["volumetric"]))
 
@@ -105,10 +115,29 @@ def main():
         if pp["exposure_method"] == "manual":
             _set(st, "override_auto_exposure_method", True, "pp")
             _set(st, "auto_exposure_method", unreal.AutoExposureMethod.AEM_MANUAL, "pp")
+        else:
+            _set(st, "override_auto_exposure_method", True, "pp")
+            _set(st, "auto_exposure_method", unreal.AutoExposureMethod.AEM_HISTOGRAM, "pp")
+            _set(st, "override_auto_exposure_min_brightness", True, "pp")
+            _set(st, "auto_exposure_min_brightness", float(pp.get("auto_min_brightness", 0.5)), "pp")
+            _set(st, "override_auto_exposure_max_brightness", True, "pp")
+            _set(st, "auto_exposure_max_brightness", float(pp.get("auto_max_brightness", 6.0)), "pp")
         _set(st, "override_auto_exposure_bias", True, "pp")
         _set(st, "auto_exposure_bias", float(pp["exposure_compensation"]), "pp")
         _set(st, "override_bloom_intensity", True, "pp")
         _set(st, "bloom_intensity", float(pp["bloom_intensity"]), "pp")
+        if pp.get("color_gain"):
+            g = pp["color_gain"]
+            _set(st, "override_color_gain", True, "pp")
+            _set(st, "color_gain", unreal.Vector4(g[0], g[1], g[2], g[3]), "pp")
+        if pp.get("saturation"):
+            v = float(pp["saturation"])
+            _set(st, "override_color_saturation", True, "pp")
+            _set(st, "color_saturation", unreal.Vector4(v, v, v, 1.0), "pp")
+        if pp.get("contrast"):
+            v = float(pp["contrast"])
+            _set(st, "override_color_contrast", True, "pp")
+            _set(st, "color_contrast", unreal.Vector4(v, v, v, 1.0), "pp")
         if pp.get("lumen_gi"):
             _set(st, "override_dynamic_global_illumination_method", True, "pp")
             _set(st, "dynamic_global_illumination_method", unreal.DynamicGlobalIlluminationMethod.LUMEN, "pp")
@@ -147,9 +176,9 @@ def main():
                 c = a.get_component_by_class(unreal.PointLightComponent)
                 _set(c, "intensity_units", unreal.LightUnits.CANDELAS, "light")
                 _set(c, "intensity", float(cd), "light")
-                _set(c, "light_color", unreal.Color(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255), 255), "light")
+                _set(c, "light_color", unreal.Color(r=int(rgb[0] * 255), g=int(rgb[1] * 255), b=int(rgb[2] * 255), a=255), "light")
                 _set(c, "attenuation_radius", float(il["attenuation_cm"]), "light")
-                _set(c, "cast_shadows", kind in ("amber", "red"), "light")   # only a few key lights cast shadows (cost)
+                _set(c, "cast_shadows", bool(il.get("all_cast_shadows", False)) or kind in ("amber", "red"), "light")   # shadows stop interior light leaking through walls
                 placed += 1
                 counts[kind] = counts.get(kind, 0) + 1
         G.log("Interior lights by colour: %s" % counts)

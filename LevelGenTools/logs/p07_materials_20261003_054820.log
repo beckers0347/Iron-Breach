@@ -1,0 +1,27 @@
+[Thornfield] === p07_materials start ===
+[Thornfield] Built M_Concrete
+[Thornfield] Built M_ConcreteDark
+[Thornfield] Built M_Steel
+[Thornfield] Built M_Hazard
+[Thornfield] Built M_MossEarth
+[Thornfield] Built M_FloorConcrete
+[Thornfield] Built M_Banner
+[Thornfield] Built M_SteelOlive
+[Thornfield] Built M_SteelDark
+[Thornfield] Built M_LightBlue
+[Thornfield] Built M_LightAmber
+[Thornfield] Built M_LightWhite
+[Thornfield] Built M_LightRed
+[Thornfield] Built M_Screen
+[Thornfield] Built M_Glass
+[Thornfield] Built M_GlassAmber
+[Thornfield] Built M_Solar
+[Thornfield] Built M_RoadLine
+[Thornfield] Built M_SafetyYellow
+[Thornfield] Built M_Fabric
+[Thornfield] Built M_Wood
+[Thornfield] VERIFY: textures_found PASS (all texture sets present)
+[Thornfield] VERIFY: materials_built PASS (21 materials)
+[Thornfield] VERIFY: slots_assigned PASS (169 slots on 46 meshes)
+[Thornfield] SUMMARY: 3 checks, 3 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p07_materials_20261003_054820.log

@@ -1,0 +1,158 @@
+{
+  "_comment": "Phase 8. All distances in cm. density_scale multiplies the per-hectare densities in props.json (Nanite meshes are ~140k tris each, so the full 120/ha would be ~2,000+ trees). Ground texture tiles are in cm per repeat.",
+  "ground": {
+    "tile_cm": 600,
+    "outer_margin_cm": 40000,
+    "outer_z": -5
+  },
+  "road_dirt_tint": [
+    1.25,
+    0.95,
+    0.7
+  ],
+  "apron_tile_cm": 400,
+  "scatter": {
+    "density_scale": 0.35,
+    "ring_width_cm": 6000,
+    "tree_height_cm": [
+      1800,
+      2800
+    ],
+    "rock_height_cm": {
+      "Rock_MossBoulder_A": [
+        150,
+        350
+      ],
+      "Rock_MossCluster_B": [
+        200,
+        400
+      ],
+      "Rock_GranitePillar_C": [
+        400,
+        900
+      ],
+      "Rock_RiverBoulder_D": [
+        120,
+        300
+      ]
+    },
+    "cliff_height_cm": [
+      900,
+      1500
+    ],
+    "cliff_spacing_cm": 2800,
+    "cliff_offset_cm": 900,
+    "mountain_height_cm": [
+      6500,
+      10500
+    ],
+    "mountain_count": 52,
+    "sink_cm": 20,
+    "max_trees_total": 1400,
+    "keep_clear_roads_cm": 500,
+    "keep_clear_buildings_cm": 600,
+    "managed_by_p12": true,
+    "mountain_edge_factor": 0.92,
+    "mountain_gap_cm": 0,
+    "seam_rock_spacing_cm": 1400,
+    "gate_gap_width_cm": 1600,
+    "gate_road_length_cm": 16000,
+    "gate_hw_factor": 0.6,
+    "gate_tree_clear_cm": 1800,
+    "slope_trees_total": 900,
+    "slope_tree_height_cm": [
+      2200,
+      3400
+    ],
+    "slope_min_z_cm": 250,
+    "pole_light_cd": 1800,
+    "pole_light_radius_cm": 1800,
+    "rock_tint": [
+      1.25,
+      1.0,
+      0.7
+    ],
+    "rock_desaturate": 0.65,
+    "ground_tint": [
+      1.2,
+      0.98,
+      0.72
+    ],
+    "integration": {
+      "fill_trees_max": 700,
+      "fill_step_cm": 500,
+      "keep_clear_building_cm": 650,
+      "keep_clear_road_extra_cm": 450,
+      "keep_clear_entry_cm": 2400,
+      "edge_forest_cm": 3500,
+      "mound_height_cm": [
+        1300,
+        1800
+      ],
+      "mound_width_factor": 1.5,
+      "wall_flank_cm": 7000,
+      "wall_east_half_cm": 6000,
+      "corridor_trees": 260,
+      "corridor_flank_cm": 6000
+    },
+    "mountain_edge_jitter": 0.14,
+    "dirt_roads": {
+      "step_cm": 220,
+      "spur_width_cm": 600,
+      "shoulder_extra_cm": 260,
+      "pad_cm": 1800,
+      "tree_clear_extra_cm": 250,
+      "dirt_tile_cm": 300,
+      "mud_rgb": [
+        0.22,
+        0.16,
+        0.1
+      ],
+      "concrete_pad_assets": [],
+      "dirt_light": [
+        0.62,
+        0.5,
+        0.36
+      ],
+      "dirt_dark": [
+        0.3,
+        0.22,
+        0.14
+      ],
+      "dirt_detail_gain": 2.2,
+      "noise_scale": 0.0012,
+      "rut_offset_cm": 210,
+      "rut_width_cm": 110,
+      "splotch_every": 2
+    },
+    "grass": {
+      "cell_cm": 400,
+      "skip_prob": 0.08,
+      "keep_clear_building_cm": 250,
+      "keep_clear_main_cm": 950,
+      "keep_clear_spur_cm": 750,
+      "keep_clear_pad_cm": 1500,
+      "max_patches": 3200,
+      "scale_range": [
+        0.9,
+        1.35
+      ],
+      "root_rgb": [
+        0.03,
+        0.06,
+        0.015
+      ],
+      "tip_green_rgb": [
+        0.26,
+        0.34,
+        0.08
+      ],
+      "tip_dry_rgb": [
+        0.42,
+        0.36,
+        0.15
+      ],
+      "noise_scale": 0.0009
+    }
+  }
+}

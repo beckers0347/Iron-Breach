@@ -1,0 +1,16 @@
+[Thornfield] === p10_final_checks start ===
+[Thornfield] Total actors in level: 1294
+[Thornfield] VERIFY: phases_present PASS ({2: 27, 3: 26, 4: 4, 5: 39, 6: 165, 8: 588, 9: 393})
+[Thornfield] VERIFY: structures PASS (13 of 13)
+[Thornfield] VERIFY: doors PASS (52 door actors (expected 52))
+[Thornfield] VERIFY: player_start PASS (1 PlayerStart(s), inside the Barracks zone)
+[Thornfield] VERIFY: above_kill_z PASS (all actors above -5000)
+[Thornfield] VERIFY: props_in_bounds PASS (all Phase 9 props inside bounds)
+[Thornfield] VERIFY: materials_ok PASS (no mesh on a missing/default material)
+[Thornfield] VERIFY: lighting_actors PASS ({'DirectionalLight': 1, 'SkyAtmosphere': 1, 'SkyLight': 1, 'ExponentialHeightFog': 1, 'PostProcessVolume': 1})
+[Thornfield] Point lights: 167
+[Thornfield] VERIFY: kill_z_set PASS (KillZ=-5000)
+[Thornfield] VERIFY: all_saved PASS (nothing unsaved)
+[Thornfield] Report written: X:\IronBreach\LevelGenTools\logs\final_report.json
+[Thornfield] SUMMARY: 10 checks, 10 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p10_final_checks_20261003_061208.log

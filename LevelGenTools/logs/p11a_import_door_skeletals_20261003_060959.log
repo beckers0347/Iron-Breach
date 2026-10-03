@@ -1,0 +1,9 @@
+[Thornfield] === p11a_import_door_skeletals start ===
+[Thornfield] ... 10 doors processed
+[Thornfield] ... 20 doors processed
+[Thornfield] ... 30 doors processed
+[Thornfield] VERIFY: doors_imported PASS (38 of 38)
+[Thornfield] VERIFY: door_animations PASS (38 of 38 have an open animation)
+[Thornfield] VERIFY: door_materials PASS (all slots mapped)
+[Thornfield] SUMMARY: 3 checks, 3 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p11a_import_door_skeletals_20261003_060959.log

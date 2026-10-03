@@ -1,0 +1,19 @@
+[Thornfield] === p12_scenery_polish start ===
+[Thornfield] Cleanup: removed 6 previous GEN_Phase12 actors
+[Thornfield] Removed 0 wall segments, 0 cliff pieces, 121 old mountains
+[Thornfield] VERIFY: wall_removed PASS (no WALL_/CLIFF_ actors remain (removed 0 + 0))
+[Thornfield] VERIFY: cliffs_removed PASS (cliff ring gone)
+[Thornfield] VERIFY: gate_road PASS (road 16000 cm long, gap 1600 cm wide at x=16750)
+[Thornfield] Cleared 0 trees/rocks from the gate corridor
+[Thornfield] VERIFY: boundwalls_invisible PASS (8 bound walls hidden (collision kept))
+[Thornfield] Mountain 0: height 8940 cm, half-width 7019 cm, centre 6145 cm outside the edge
+[Thornfield] Mountain 1: height 8029 cm, half-width 6304 cm, centre 6336 cm outside the edge
+[Thornfield] Mountain 2: height 8519 cm, half-width 6688 cm, centre 6325 cm outside the edge
+[Thornfield] Skipped 4 mountains to open the gate valley
+[Thornfield] VERIFY: mountains_placed PASS (48 mountains hugging the base)
+[Thornfield] VERIFY: gate_corridor_clear PASS (4 mountains removed from the gate valley)
+[Thornfield] VERIFY: mountains_outside_bounds PASS (all mountain centres outside the base bounds)
+[Thornfield] VERIFY: seam_rocks PASS (76 boulders along the base edge)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 9 checks, 9 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p12_scenery_polish_20261003_065223.log

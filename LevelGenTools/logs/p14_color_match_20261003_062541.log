@@ -1,0 +1,17 @@
+[Thornfield] === p14_color_match start ===
+[Thornfield]   candidate textures: ['tripo_image_a4735d09_0', 'tripo_image_a4735d09_2', 'tripo_image_a4735d09-53ac-4b26-98df-78a626b30e67_0_Roughness', 'DefaultNormal', 'DefaultTexture', 'BaseFlattenLinearColor']
+[Thornfield] M_Warm_Rock_MossBoulder_A from texture BaseFlattenLinearColor
+[Thornfield]   candidate textures: ['tripo_image_3859588d_0', 'tripo_image_3859588d_2', 'tripo_image_3859588d-585a-4043-a835-11f3ea867c14_0_Roughness', 'DefaultNormal', 'DefaultTexture', 'BaseFlattenLinearColor']
+[Thornfield] M_Warm_Rock_MossCluster_B from texture BaseFlattenLinearColor
+[Thornfield]   candidate textures: ['tripo_image_d21c426c_0', 'tripo_image_d21c426c_2', 'tripo_image_d21c426c-b221-49e6-af17-55d3c1d6e4d8_0_Roughness', 'DefaultNormal', 'DefaultTexture', 'BaseFlattenLinearColor']
+[Thornfield] M_Warm_Rock_GranitePillar_C from texture BaseFlattenLinearColor
+[Thornfield]   candidate textures: ['tripo_image_e87b2b60_0', 'tripo_image_e87b2b60_2', 'tripo_image_e87b2b60-b8f4-4e04-8644-272f2632815e_0_Roughness', 'DefaultNormal', 'DefaultTexture', 'BaseFlattenLinearColor']
+[Thornfield] M_Warm_Rock_RiverBoulder_D from texture BaseFlattenLinearColor
+[Thornfield]   candidate textures: ['tripo_image_e697d545_0', 'tripo_image_e697d545_2', 'tripo_image_e697d545-d36d-4b9a-854e-da2dc580b674_0_Roughness', 'DefaultNormal', 'DefaultTexture', 'BaseFlattenLinearColor']
+[Thornfield] M_Warm_Mountain_Forested_A from texture BaseFlattenLinearColor
+[Thornfield] Warm material applied to 204 actors
+[Thornfield] VERIFY: warm_materials PASS (5 materials, 204 actors)
+[Thornfield] VERIFY: ground_tinted PASS (M_Ground tint [1.2, 0.98, 0.72])
+[Thornfield] VERIFY: level_saved PASS (saved)
+[Thornfield] SUMMARY: 3 checks, 3 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p14_color_match_20261003_062541.log

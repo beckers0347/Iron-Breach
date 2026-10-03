@@ -3,6 +3,7 @@
 #include "IBGuideRoute.h"
 #include "Act1BarracksDirector.h"
 #include "IBDialogueVoice.h"
+#include "IBCampaignDebugLibrary.h"
 #include "IronBreach.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -10,10 +11,13 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
 #include "Components/SceneComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimSequenceBase.h"
 #include "CollisionQueryParams.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
 #include "DrawDebugHelpers.h"
+#include "EngineUtils.h"
 
 AIBGuideRoute::AIBGuideRoute()
 {
@@ -40,6 +44,12 @@ AIBGuideRoute::AIBGuideRoute()
 void AIBGuideRoute::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (UIBCampaignDebugLibrary::IsCampaignDisabled())
+	{
+		UE_LOG(LogIronBreach, Log, TEXT("[GuideRoute] Campaign disabled -- route stays dormant, NPCs stay where they are placed."));
+		return;
+	}
 
 	if (AAct1BarracksDirector* Act1 = StartAfterAct1.Get())
 	{
@@ -509,9 +519,21 @@ float AIBGuideRoute::GetGroundZ(const FVector& Pos, float FallbackZ, const AActo
 	FHitResult Hit;
 	const FVector TraceStart = Pos + FVector(0.0f, 0.0f, 150.0f);
 	const FVector TraceEnd = Pos - FVector(0.0f, 0.0f, 300.0f);
+	TArray<AActor*> IgnoreDoors;
+	for (TActorIterator<AActor> It(World); It; ++It)
+	{
+		if (It->GetClass()->GetName().Contains(TEXT("SensorDoor")))
+		{
+			Params.AddIgnoredActor(*It);
+		}
+	}
 	if (World->LineTraceSingleByObjectType(Hit, TraceStart, TraceEnd, FCollisionObjectQueryParams(ECC_WorldStatic), Params))
 	{
-		return Hit.ImpactPoint.Z;
+		// Walkable surfaces only, and never hop more than a step up (stops NPCs riding up onto door frames/kerbs).
+		if (Hit.ImpactNormal.Z > 0.6f && Hit.ImpactPoint.Z <= FallbackZ + 45.0f)
+		{
+			return Hit.ImpactPoint.Z;
+		}
 	}
 	return FallbackZ;
 }
@@ -522,6 +544,30 @@ void AIBGuideRoute::SetActorWalkVelocity(AActor* Actor, const FVector& Velocity)
 	if (Actor && Actor->GetRootComponent())
 	{
 		Actor->GetRootComponent()->ComponentVelocity = Velocity;
+	}
+
+	// Animation-asset NPCs (no AnimBP): swap idle <-> walk when movement starts/stops.
+	if (Actor)
+	{
+		for (const FIBGuideNPCAnims& E : NPCAnimations)
+		{
+			if (E.Actor.Get() != Actor || !E.Idle || !E.Walk)
+			{
+				continue;
+			}
+			if (USkeletalMeshComponent* Skel = Actor->FindComponentByClass<USkeletalMeshComponent>())
+			{
+				const bool bMoving = Velocity.SizeSquared() > 25.0f;
+				bool* Last = AnimWalkState.Find(Actor);
+				if (!Last || *Last != bMoving)
+				{
+					AnimWalkState.Add(Actor, bMoving);
+					Skel->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+					Skel->PlayAnimation(bMoving ? E.Walk.Get() : E.Idle.Get(), true);
+				}
+			}
+			break;
+		}
 	}
 }
 

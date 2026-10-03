@@ -1,0 +1,9 @@
+[Thornfield] === p17b_scatter_grass start ===
+[Thornfield] Cleanup: removed 0 previous GEN_Phase17 actors
+[Thornfield] Obstacles: 13 buildings, 247 main-road pieces, 148 spur pieces, 13 pads
+[Thornfield] Grass patches: 2627 placed from 4928 cells
+[Thornfield] VERIFY: grass_placed PASS (2627 patches of real grass)
+[Thornfield] VERIFY: grass_clear_of_roads PASS (no patch centred on a road)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 3 checks, 3 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p17b_scatter_grass_20261003_071510.log

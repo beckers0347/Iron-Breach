@@ -1,0 +1,18 @@
+[Thornfield] === p14_color_match start ===
+[Thornfield] WARN: get_used_textures failed: TypeError("MaterialEditingLibrary: Failed to convert parameter 'material' when calling function 'MaterialEditingLibrary.GetUsedTextures' on 'Default__MaterialEditingLibrary'\n  TypeError: NativizeProperty: Cannot nativize 'MaterialInstanceConstant' as 'Material' (ObjectProperty)\n    TypeError: NativizeObject: Cannot nativize 'MaterialInstanceConstant' as 'Object' (allowed Class type: 'Material')")
+[Thornfield] WARN: Rock_MossBoulder_A: no texture found in tripo_mat_a4735d09
+[Thornfield] WARN: get_used_textures failed: TypeError("MaterialEditingLibrary: Failed to convert parameter 'material' when calling function 'MaterialEditingLibrary.GetUsedTextures' on 'Default__MaterialEditingLibrary'\n  TypeError: NativizeProperty: Cannot nativize 'MaterialInstanceConstant' as 'Material' (ObjectProperty)\n    TypeError: NativizeObject: Cannot nativize 'MaterialInstanceConstant' as 'Object' (allowed Class type: 'Material')")
+[Thornfield] WARN: Rock_MossCluster_B: no texture found in tripo_mat_3859588d
+[Thornfield] WARN: get_used_textures failed: TypeError("MaterialEditingLibrary: Failed to convert parameter 'material' when calling function 'MaterialEditingLibrary.GetUsedTextures' on 'Default__MaterialEditingLibrary'\n  TypeError: NativizeProperty: Cannot nativize 'MaterialInstanceConstant' as 'Material' (ObjectProperty)\n    TypeError: NativizeObject: Cannot nativize 'MaterialInstanceConstant' as 'Object' (allowed Class type: 'Material')")
+[Thornfield] WARN: Rock_GranitePillar_C: no texture found in tripo_mat_d21c426c
+[Thornfield] WARN: get_used_textures failed: TypeError("MaterialEditingLibrary: Failed to convert parameter 'material' when calling function 'MaterialEditingLibrary.GetUsedTextures' on 'Default__MaterialEditingLibrary'\n  TypeError: NativizeProperty: Cannot nativize 'MaterialInstanceConstant' as 'Material' (ObjectProperty)\n    TypeError: NativizeObject: Cannot nativize 'MaterialInstanceConstant' as 'Object' (allowed Class type: 'Material')")
+[Thornfield] WARN: Rock_RiverBoulder_D: no texture found in tripo_mat_e87b2b60
+[Thornfield] WARN: get_used_textures failed: TypeError("MaterialEditingLibrary: Failed to convert parameter 'material' when calling function 'MaterialEditingLibrary.GetUsedTextures' on 'Default__MaterialEditingLibrary'\n  TypeError: NativizeProperty: Cannot nativize 'MaterialInstanceConstant' as 'Material' (ObjectProperty)\n    TypeError: NativizeObject: Cannot nativize 'MaterialInstanceConstant' as 'Object' (allowed Class type: 'Material')")
+[Thornfield] WARN: Mountain_Forested_A: no texture found in tripo_mat_e697d545
+[Thornfield] Warm material applied to 0 actors
+[Thornfield] ERROR: VERIFY: warm_materials FAIL (0 materials, 0 actors)
+[Thornfield] VERIFY: ground_tinted PASS (M_Ground tint [1.2, 0.98, 0.72])
+[Thornfield] VERIFY: level_saved PASS (saved)
+[Thornfield] SUMMARY: 3 checks, 2 PASS, 1 FAIL
+[Thornfield] ERROR:   FAILED: warm_materials 0 materials, 0 actors
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p14_color_match_20261003_062315.log

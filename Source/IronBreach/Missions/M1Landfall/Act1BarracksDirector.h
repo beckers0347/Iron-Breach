@@ -33,6 +33,21 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAct1Complete);
 // to specific moments in the scene without hardcoding them into this class.
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAct1ScriptedEvent, FName, EventTag);
 
+// Stages one squad NPC into the scene: hidden at the start of Act I and shown when a beat
+// with the matching ScriptedEventTag plays (e.g. Rhodes on "RhodesEnters", Bricks on "StandToOrder").
+// RevealOnEvent = None means the NPC is in the room from the first line (Static).
+USTRUCT(BlueprintType)
+struct FAct1NPCCue
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cue")
+	TSoftObjectPtr<AActor> Actor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cue")
+	FName RevealOnEvent = NAME_None;
+};
+
 UCLASS(Blueprintable, BlueprintType)
 class IRONBREACH_API AAct1BarracksDirector : public AActor, public IActBeatProviderInterface
 {
@@ -69,6 +84,11 @@ public:
 	// Left empty by default -- the dialogue timeline runs fine without them.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Act I|Optional Refs")
 	TArray<TSoftObjectPtr<AActor>> SquadNPCs;
+
+	// Who is in the room when, so the squad is introduced one at a time instead of all
+	// standing there from the start. Anyone still hidden when Act I finishes is shown then.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Act I|Staging")
+	TArray<FAct1NPCCue> NPCCues;
 
 	// -------------------------------------------------------------------------
 	// Delegates
@@ -113,6 +133,8 @@ protected:
 	void AdvanceToNextLine();
 	void HandleScriptedEvent(FName EventTag);
 	void FinishAct1();
+
+	void SetCueVisible(const FAct1NPCCue& Cue, bool bVisible) const;
 
 	UPROPERTY(Transient)
 	int32 CurrentLineIndex = -1;

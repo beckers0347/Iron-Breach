@@ -2,14 +2,14 @@
 //
 // Drives M1 "Landfall" Act II: "An Eerie Escalation." The squad moves into the
 // civilian evac district. Escalation here is environmental/psychological, not
-// combat -- gulls vanish, the K9 balks, glow-veins surface through the asphalt, a
+// combat -- gulls vanish, glow-veins surface through the asphalt, a
 // child reaches for one, the street swells like the earth inhaling, and Rhodes
 // confirms the contact is directly beneath them. Ends on that line, handing off
 // to Act III (the eruption).
 //
 // Same design intent as Act I: pure logic/timeline actor, no new level geometry,
 // no Blueprint graph work required to compile or run. Existing evac-district
-// actors (civilians, buses, the K9 unit) are optional references you can wire
+// actors (civilians, buses) are optional references you can wire
 // up later purely to trigger reactions on cue -- the dialogue/subtitle timeline
 // runs fine without them.
 
@@ -65,7 +65,7 @@ public:
 
 	// Optional existing actors already placed in the evac district you want this
 	// beat to be aware of, purely for triggering reactions on scripted-event cues
-	// (e.g. the K9 unit balking on "K9Refusal", a bus door closing on "BusesClear").
+	// (e.g. a bus door closing on "BusesClear").
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Act II|Optional Refs")
 	TArray<TSoftObjectPtr<AActor>> DistrictNPCs;
 

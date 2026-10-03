@@ -10,7 +10,6 @@ Imports the two NPC source assets that actually exist on disk right now:
      export_idris_for_anim.py / import_idris_anims.py scripts already expect,
      so if you still have her Idle/Walk/Alert anim FBXs lying around,
      import_idris_anims.py should work again without changes.
-  2. Dog -- X:\\Downloads\\Dog\\Dog.fbx, imported to /Game/Characters/NPCs/Dog/Dog.
 
 Then places ONE instance of each as a plain SkeletalMeshActor in the
 currently open level (near the Act1 barracks director, at the world origin
@@ -43,12 +42,6 @@ NPCS = [
         "source_fbx": r"X:\Downloads\MsIdris_Source\Ms_Idris.fbx",
         "dest_path": "/Game/Characters/NPCs/MsIdris",
         "dest_name": "Ms_Idris",
-    },
-    {
-        "name": "Dog",
-        "source_fbx": r"X:\Downloads\Dog\Dog.fbx",
-        "dest_path": "/Game/Characters/NPCs/Dog",
-        "dest_name": "Dog",
     },
 ]
 
@@ -120,7 +113,7 @@ def main():
             place_in_level(npc, mesh, unreal.Vector(x=spawn_x, y=0.0, z=0.0))
         spawn_x += 300.0  # keep them from overlapping if more than one imports
     log("==== DONE. Both NPCs (where source existed) are now real actors in this "
-        "level -- find them in the World Outliner as NPC_Ms_Idris / NPC_Dog, move "
+        "level -- find them in the World Outliner as NPC_Ms_Idris, move "
         "them where they belong, and let me know. Still need source art for "
         "Rhodes / Okafor (\"Bricks\") / Yun (\"Static\") before those can be done "
         "the same way. ====")

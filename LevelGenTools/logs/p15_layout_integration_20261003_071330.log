@@ -1,0 +1,10 @@
+[Thornfield] === p15_layout_integration start ===
+[Thornfield] Cleanup: removed 1023 previous GEN_Phase15 actors
+[Thornfield] Forest candidates: 1015 (cap 700)
+[Thornfield] VERIFY: fill_forest PASS (960 trees packed between the buildings)
+[Thornfield] VERIFY: nothing_on_roads PASS (no fill trees within 150 cm of a road edge)
+[Thornfield] VERIFY: berm_mounds PASS (3 earth berms behind the bunkers)
+[Thornfield] VERIFY: wall_runs PASS (60 wall segments (gate flanks + hangar side only))
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 5 checks, 5 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p15_layout_integration_20261003_071330.log

@@ -1,0 +1,13 @@
+[Thornfield] === p13_forest_slopes start ===
+[Thornfield] Cleanup: removed 0 previous GEN_Phase13 actors
+[Thornfield] VERIFY: pole_lights PASS (7 pole lights re-tuned)
+[Thornfield] Found 48 mountains
+[Thornfield] Mountain collision enabled on 1 mesh(es)
+[Thornfield] trace result type HitResult: <Struct 'HitResult' (0x0000017A439F4880) {}>
+[Thornfield] trace result type HitResult: <Struct 'HitResult' (0x0000017A439F4C40) {}>
+[Thornfield] Slope trees planted: 0 (10800 traces)
+[Thornfield] ERROR: VERIFY: slope_trees FAIL (0 of 900 requested)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 3 checks, 2 PASS, 1 FAIL
+[Thornfield] ERROR:   FAILED: slope_trees 0 of 900 requested
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p13_forest_slopes_20261003_065433.log

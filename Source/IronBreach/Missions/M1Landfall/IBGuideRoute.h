@@ -35,6 +35,7 @@
 
 class AAct1BarracksDirector;
 class APawn;
+class UAnimSequenceBase;
 
 // One stop on the route.
 USTRUCT(BlueprintType)
@@ -61,6 +62,22 @@ struct FIBGuideWaypoint
 	// Optional line shown (and voiced) on arrival. Empty Text = no line.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Waypoint")
 	FDialogueLine ArrivalLine;
+};
+
+// Idle/walk pair for one NPC that has no AnimBP.
+USTRUCT(BlueprintType)
+struct FIBGuideNPCAnims
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
+	TSoftObjectPtr<AActor> Actor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
+	TObjectPtr<UAnimSequenceBase> Idle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anim")
+	TObjectPtr<UAnimSequenceBase> Walk;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGuideWaypointReached, int32, WaypointIndex, FName, EventTag);
@@ -111,11 +128,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guide|Movement")
 	float WalkSpeed = 180.0f;
 
+	// Optional: NPCs whose skeletal mesh is in "Use Animation Asset" mode (no AnimBP) switch between their
+	// own looping idle and walk animations as they stop and start. Each character has its own skeleton, so
+	// the animations are listed per actor.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guide|Movement")
+	TArray<FIBGuideNPCAnims> NPCAnimations;
+
 	// Degrees/second the NPCs turn toward their walking direction.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guide|Movement")
 	float TurnRateDegPerSec = 300.0f;
 
-	// Added to the walking direction yaw. Use if the mesh's "forward" isn't +X.
+	// Added to the walking direction yaw. The NPC meshes (Infantry skeleton) face +Y, so the actor has
+	// to be turned -90 for the body to face the way it walks. Use 0 for a mesh whose forward is +X.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guide|Movement")
 	float FacingYawOffset = 0.0f;
 
@@ -258,6 +282,8 @@ protected:
 	FDialogueLine DisplayedLine;
 	bool bLineShowing = false;
 	double LineEndTime = 0.0;
+
+	mutable TMap<TWeakObjectPtr<const AActor>, bool> AnimWalkState;
 
 	TMap<TWeakObjectPtr<const APawn>, float> PullTimers;
 	TMap<TWeakObjectPtr<const APawn>, float> PullBlockedTimers;

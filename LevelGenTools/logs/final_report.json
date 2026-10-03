@@ -1,0 +1,23 @@
+{
+  "total_actors": 1294,
+  "actors_per_phase": {
+    "2": 27,
+    "3": 26,
+    "4": 4,
+    "5": 39,
+    "6": 165,
+    "8": 588,
+    "9": 393
+  },
+  "structures": 13,
+  "doors": 52,
+  "missing_materials": [],
+  "lighting": {
+    "DirectionalLight": 1,
+    "SkyAtmosphere": 1,
+    "SkyLight": 1,
+    "ExponentialHeightFog": 1,
+    "PostProcessVolume": 1
+  },
+  "point_lights": 167
+}

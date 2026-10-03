@@ -1,0 +1,83 @@
+{
+  "_comment": "Phase 9 dressing rules. Counts are per zone id (layout.json). radius_cm = clearance used when sampling positions. stack_chance = chance a container gets a second one on top.",
+  "radius_cm": {
+    "CargoContainer": 340,
+    "Crate": 80,
+    "Pallet": 80,
+    "FuelTank": 260,
+    "Generator": 130
+  },
+  "keep_clear_roads_cm": 150,
+  "keep_clear_buildings_cm": 300,
+  "min_gap_cm": 120,
+  "random": {
+    "7": {
+      "CargoContainer": 6,
+      "Pallet": 5,
+      "Crate": 6
+    },
+    "9": {
+      "CargoContainer": 4,
+      "FuelTank": 2,
+      "Generator": 2,
+      "Crate": 3
+    },
+    "4": {
+      "FuelTank": 2,
+      "Generator": 3,
+      "Crate": 4,
+      "Pallet": 3
+    },
+    "6": {
+      "Generator": 2,
+      "Crate": 4,
+      "Pallet": 2
+    },
+    "5": {
+      "Crate": 4,
+      "Pallet": 3
+    },
+    "2": {
+      "Crate": 3,
+      "Pallet": 2
+    },
+    "3": {
+      "Crate": 5,
+      "Pallet": 4
+    },
+    "1": {
+      "Crate": 2,
+      "Generator": 1
+    },
+    "8": {
+      "Generator": 2,
+      "Crate": 2
+    }
+  },
+  "stack_chance": 0.4,
+  "perimeter": {
+    "inset_cm": 150,
+    "segment_cm": 400,
+    "road_gap_cm": 900,
+    "enabled": false
+  },
+  "light_poles": {
+    "spacing_cm": 2500,
+    "side_offset_cm": 500,
+    "max": 100,
+    "light_cd": 6000,
+    "attenuation_cm": 2200
+  },
+  "gate_chicane": {
+    "barrier_rows": 2,
+    "first_distance_cm": 2600,
+    "row_gap_cm": 1200,
+    "stagger_cm": 250
+  },
+  "tank_traps_outside_gate": {
+    "count": 6,
+    "distance_cm": 6500,
+    "spacing_cm": 700
+  },
+  "zone_margin_cm": 3000
+}

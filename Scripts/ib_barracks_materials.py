@@ -39,6 +39,16 @@ SPECS = {
     "Black_Opening": {"kind": "flat", "color": (0.005, 0.005, 0.005), "rough": 0.9},
     "Bolt_Steel": {"kind": "flat", "color": (0.20, 0.205, 0.21), "rough": 0.55, "metal": 0.5},
     "Pipe_Steel": {"kind": "flat", "color": (0.09, 0.092, 0.096), "rough": 0.6, "metal": 0.4},
+    "Red_Paint": {"kind": "flat", "color": (0.42, 0.025, 0.02), "rough": 0.55},
+    "White_Paint": {"kind": "flat", "color": (0.50, 0.50, 0.48), "rough": 0.6},
+    "Wood": {"kind": "painted", "dark": (0.075, 0.045, 0.022), "light": (0.11, 0.07, 0.035), "rough": 0.85, "metal": 0.0},
+    "Fabric_Olive": {"kind": "painted", "dark": (0.018, 0.024, 0.011), "light": (0.028, 0.035, 0.016), "rough": 0.95, "metal": 0.0},
+    "Mattress": {"kind": "painted", "dark": (0.08, 0.09, 0.075), "light": (0.12, 0.13, 0.11), "rough": 0.95, "metal": 0.0},
+    "Screen_Glow": {"kind": "emissive", "color": (0.2, 0.85, 0.65), "strength": 4.0},
+    "Blue_Paint": {"kind": "flat", "color": (0.02, 0.06, 0.26), "rough": 0.55},
+    "Steel_Bright": {"kind": "flat", "color": (0.32, 0.33, 0.35), "rough": 0.35, "metal": 0.8},
+    "Rubber": {"kind": "flat", "color": (0.012, 0.012, 0.012), "rough": 0.9},
+    "Paper": {"kind": "flat", "color": (0.42, 0.40, 0.33), "rough": 0.9},
 }
 
 

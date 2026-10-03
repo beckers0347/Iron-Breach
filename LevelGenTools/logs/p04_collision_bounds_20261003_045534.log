@@ -1,0 +1,19 @@
+[Thornfield] === p04_collision_bounds start ===
+[Thornfield] Cleanup: removed 4 previous GEN_Phase4 actors
+[Thornfield] Collision BermBunker: 28 primitives (expected ~28)
+[Thornfield] Collision HangarBlock: 31 primitives (expected ~31)
+[Thornfield] Collision CentralBunker: 46 primitives (expected ~46)
+[Thornfield] Collision GateCheckpoint: 271 primitives (expected ~271)
+[Thornfield] Collision WatchTower: 144 primitives (expected ~144)
+[Thornfield] Collision CommsTower: 20 primitives (expected ~20)
+[Thornfield] Collision RearShed: 15 primitives (expected ~15)
+[Thornfield] Collision MessHall: 15 primitives (expected ~15)
+[Thornfield] VERIFY: building_collision PASS (all 8 have simple collision)
+[Thornfield] VERIFY: door_collision PASS (38 unique door meshes set to complex-as-simple)
+[Thornfield] VERIFY: boundary_walls PASS (4 of 4 BlockAll walls, hidden in game)
+[Thornfield] VERIFY: kill_z PASS (KillZ=-5000, bounds checks on)
+[Thornfield] PlayerStart at (6000, 7762, 100): ceiling hit 0.07109846919775009 cm up, floor hit 0.24996966123580933 cm down
+[Thornfield] VERIFY: player_start_inside PASS (ceiling 0.07109846919775009 cm above)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 6 checks, 6 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p04_collision_bounds_20261003_045534.log

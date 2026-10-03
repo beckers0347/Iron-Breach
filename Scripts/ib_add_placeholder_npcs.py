@@ -2,8 +2,7 @@
 IBPY: ib_add_placeholder_npcs.py
 
 Shane's call: Ms. Idris is in the game now, and her mesh stands in as a
-placeholder body for ALL the human NPCs until each gets real art. Skipping
-the Dog for now.
+placeholder body for ALL the human NPCs until each gets real art.
 
 What this does:
   1. Loads the Ms_Idris skeletal mesh from /Game/Characters/NPCs/MsIdris/Ms_Idris
@@ -24,7 +23,7 @@ What this does:
      barracks into the district escort. Easy to change later once real
      models exist and you want different folks in each array.)
 
-Does NOT touch Ms. Idris herself, does NOT import the Dog, does NOT save
+Does NOT touch Ms. Idris herself, does NOT save
 the level for you -- check the World Outliner, move the three placeholders
 to sensible spots, then save the level yourself (File > Save Current Level)
 once it looks right.

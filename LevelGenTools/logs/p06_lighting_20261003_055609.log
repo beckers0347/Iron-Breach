@@ -1,0 +1,13 @@
+[Thornfield] === p06_lighting start ===
+[Thornfield] Cleanup: removed 165 previous GEN_Phase6 actors
+[Thornfield] Sun: pitch -16.0, yaw -22.5 (sun in the 247.5 compass direction), 10.0 lux
+[Thornfield] VERIFY: sun PASS (10.0 lux, yaw -22.5)
+[Thornfield] VERIFY: atmosphere PASS (SkyAtmosphere + SkyLight (real-time capture))
+[Thornfield] Fog properties available: ['directional_inscattering_exponent', 'directional_inscattering_luminance', 'directional_inscattering_start_distance', 'enable_volumetric_fog', 'fog_inscattering_luminance', 'fully_directional_inscattering_color_distance', 'inscattering_color_cubemap', 'inscattering_color_cubemap_angle', 'inscattering_texture_tint', 'non_directional_inscattering_color_distance', 'override_light_colors_with_fog_inscattering_colors', 'set_directional_inscattering_color', 'set_directional_inscattering_exponent', 'set_directional_inscattering_start_distance', 'set_fog_inscattering_color', 'set_fully_directional_inscattering_color_distance', 'set_inscattering_color_cubemap', 'set_inscattering_color_cubemap_angle', 'set_inscattering_texture_tint', 'set_non_directional_inscattering_color_distance', 'set_volumetric_fog', 'set_volumetric_fog_albedo', 'set_volumetric_fog_distance', 'set_volumetric_fog_emissive', 'set_volumetric_fog_extinction_scale', 'set_volumetric_fog_near_fade_in_distance', 'set_volumetric_fog_scattering_distribution', 'set_volumetric_fog_start_distance', 'volumetric_fog_albedo', 'volumetric_fog_distance', 'volumetric_fog_emissive', 'volumetric_fog_extinction_scale', 'volumetric_fog_near_fade_in_distance', 'volumetric_fog_scattering_distribution', 'volumetric_fog_start_distance', 'volumetric_fog_static_lighting_scattering_intensity']
+[Thornfield] VERIFY: fog PASS (density 0.012 falloff 0.18 volumetric True)
+[Thornfield] VERIFY: post_process PASS (unbound=True, auto exposure, bloom 0.6, Lumen GI/reflections)
+[Thornfield] Interior lights by colour: {'blue': 19, 'white': 93, 'amber': 46, 'red': 2}
+[Thornfield] VERIFY: interior_lights PASS (160 lights (expected 160), 0 outside bounds)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 6 checks, 6 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p06_lighting_20261003_055609.log

@@ -1,0 +1,24 @@
+[Thornfield] === p08b_scatter_environment start ===
+[Thornfield] Cleanup: removed 0 previous scatter actors
+[Thornfield] Tree_Spruce_A native bounds 60x57x100 origin z=50.0
+[Thornfield] Tree_PonderosaPine_A native bounds 39x40x100 origin z=50.0
+[Thornfield] Tree_DeadSnag_A native bounds 48x45x100 origin z=50.0
+[Thornfield] Rock_MossBoulder_A native bounds 85x100x68 origin z=34.0
+[Thornfield] Rock_MossCluster_B native bounds 100x85x43 origin z=21.5
+[Thornfield] Rock_GranitePillar_C native bounds 65x64x100 origin z=50.0
+[Thornfield] Rock_RiverBoulder_D native bounds 100x95x70 origin z=35.0
+[Thornfield] Cliff_GraniteWall_A native bounds 100x99x88 origin z=44.2
+[Thornfield] Mountain_Forested_A native bounds 100x100x64 origin z=31.8
+[Thornfield] VERIFY: scatter_assets PASS (9 nature meshes)
+[Thornfield] Trees planned: 312 in the ring (7.4 ha), 52 inside the base (6.6 ha)
+[Thornfield] VERIFY: trees_placed PASS (312 ring + 52 inside)
+[Thornfield] VERIFY: tree_heights PASS (1805-2798 cm)
+[Thornfield] VERIFY: clearance PASS (52 inside-trees checked, none within road/building margins)
+[Thornfield] Rocks placed: 88
+[Thornfield] VERIFY: rocks_placed PASS (88 rocks)
+[Thornfield] VERIFY: cliffs_placed PASS (55 cliff segments)
+[Thornfield] VERIFY: mountains_placed PASS (14 mountains)
+[Thornfield] Box collision added to 5 rock/cliff meshes
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 8 checks, 8 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p08b_scatter_environment_20261003_053521.log

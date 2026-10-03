@@ -1,0 +1,14 @@
+[Thornfield] === p09b_dress_props start ===
+[Thornfield] Cleanup: removed 325 previous GEN_Phase9 actors
+[Thornfield] Removed 0 greybox perimeter markers
+[Thornfield] Perimeter wall: 262 segments, 6 skipped for road gaps
+[Thornfield] VERIFY: wall_placed PASS (262 segments, 6 road gaps)
+[Thornfield] VERIFY: poles_placed PASS (7 light poles (cap 100))
+[Thornfield] VERIFY: gate_dressing PASS (2 barriers, 6 tank traps)
+[Thornfield] Zone props: 73 of 76 placed
+[Thornfield] VERIFY: zone_props PASS (73 of 76 placed)
+[Thornfield] VERIFY: entrance_props PASS (13 signs for 13 entrances)
+[Thornfield] VERIFY: prop_clearance PASS (large props clear of buildings)
+[Thornfield] VERIFY: level_saved PASS (/Game/IronBreach/Thornfield/Levels/L_ThornfieldGarrison)
+[Thornfield] SUMMARY: 7 checks, 7 PASS, 0 FAIL
+[Thornfield] Log file: X:\IronBreach\LevelGenTools\logs\p09b_dress_props_20261003_055732.log
